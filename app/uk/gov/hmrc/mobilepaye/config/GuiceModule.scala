@@ -16,14 +16,17 @@
 
 package uk.gov.hmrc.mobilepaye.config
 
+import com.google.inject.name.Named
 import com.google.inject.name.Names.named
-import com.google.inject.{AbstractModule, TypeLiteral}
+import com.google.inject.{AbstractModule, Provides, TypeLiteral}
 import play.api.Mode.Mode
 import play.api.{Configuration, Environment}
-import uk.gov.hmrc.api.connector.ServiceLocatorConnector
+import uk.gov.hmrc.api.connector.{ApiServiceLocatorConnector, ServiceLocatorConnector}
+import uk.gov.hmrc.http.{CoreGet, CorePost}
 import uk.gov.hmrc.mobilepaye.controllers.api.ApiAccess
 import uk.gov.hmrc.mobilepaye.tasks.ServiceLocatorRegistrationTask
-import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import uk.gov.hmrc.play.config.{AppName, ServicesConfig}
 
 import scala.collection.JavaConverters._
 
@@ -35,6 +38,9 @@ class GuiceModule(environment: Environment, configuration: Configuration) extend
   override def configure(): Unit = {
 
     bind(classOf[ServiceLocatorConnector]).to(classOf[ApiServiceLocatorConnector])
+    bind(classOf[CoreGet]).to(classOf[WSHttpImpl])
+    bind(classOf[CorePost]).to(classOf[WSHttpImpl])
+    bind(classOf[HttpClient]).to(classOf[WSHttpImpl])
     bind(classOf[ServiceLocatorRegistrationTask]).asEagerSingleton()
 
     bind(classOf[ApiAccess]).toInstance(
@@ -42,6 +48,10 @@ class GuiceModule(environment: Environment, configuration: Configuration) extend
 
     bindConfigStringSeq("scopes")
   }
+
+  @Provides
+  @Named("appName")
+  def appName: String = AppName(configuration).appName
 
   private def bindConfigStringSeq(path: String): Unit = {
     val configValue: Seq[String] = configuration.getStringSeq(path).getOrElse(throw new RuntimeException(s"""Config property "$path" missing"""))

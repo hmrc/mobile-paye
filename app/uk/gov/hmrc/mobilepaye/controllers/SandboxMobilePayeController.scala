@@ -16,21 +16,21 @@
 
 package uk.gov.hmrc.mobilepaye.controllers
 
-import javax.inject.Singleton
+import com.google.inject._
 import play.api.mvc._
 import uk.gov.hmrc.domain.Nino
 
 import scala.concurrent.Future
 
-@Singleton()
-class SandboxMobilePayeController extends MobilePayeController {
+@Singleton
+class SandboxMobilePayeController @Inject()() extends MobilePayeController {
 
   override val app: String = "Sandbox-Paye-Controller"
 
   override def getPayeData(reqNino: Nino, journeyId: Option[String] = None): Action[AnyContent] = validateAccept(acceptHeaderValidationRules).async {
     implicit request =>
       errorWrapper {
-        Future.successful(Ok("Hello world"))
+        Future.successful(Ok("Hello world sandbox"))
       }
   }
 

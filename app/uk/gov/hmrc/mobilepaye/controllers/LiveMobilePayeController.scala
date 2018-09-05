@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.mobilepaye.controllers
 
-import javax.inject.Singleton
+import com.google.inject._
 import play.api.mvc._
 import uk.gov.hmrc.api.controllers.HeaderValidator
 import uk.gov.hmrc.domain.Nino
@@ -28,8 +28,8 @@ trait MobilePayeController extends BaseController with HeaderValidator with Erro
   def getPayeData(reqNino: Nino, journeyId: Option[String] = None): Action[AnyContent]
 }
 
-@Singleton()
-class LiveMobilePayeController extends MobilePayeController {
+@Singleton
+class LiveMobilePayeController @Inject()() extends MobilePayeController {
 
   override val app: String = "Live-Paye-Controller"
 

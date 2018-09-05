@@ -16,36 +16,22 @@
 
 package uk.gov.hmrc.mobilepaye.config
 
-import com.google.inject.{Inject, Singleton}
-import play.api.Mode.Mode
-import play.api.{Configuration, Environment, Logger}
-import uk.gov.hmrc.api.config.ServiceLocatorConfig
-import uk.gov.hmrc.api.connector.ServiceLocatorConnector
-import uk.gov.hmrc.http.{CorePost, HttpGet, HttpPost}
-import uk.gov.hmrc.play.bootstrap.config.AppName
-import uk.gov.hmrc.play.config.RunMode
-import uk.gov.hmrc.play.http.ws.{WSGet, WSPost}
+import com.google.inject.Inject
+import javax.inject.Named
+import uk.gov.hmrc.http.hooks.HttpHooks
+import uk.gov.hmrc.play.audit.http.HttpAuditing
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import uk.gov.hmrc.play.http.ws._
 
 
-@Singleton
-class WSHttp @Inject()(override val runModeConfiguration: Configuration, environment: Environment) extends HttpGet with HttpPost with WSGet with WSPost with RunMode {
-  override val hooks = NoneRequired
-
-  override protected def mode: Mode = environment.mode
+trait Hooks extends HttpHooks with HttpAuditing {
+  val hooks = Seq(AuditingHook)
 }
 
-@Singleton
-class ApiServiceLocatorConnector @Inject()(override val runModeConfiguration: Configuration, environment: Environment, wsHttp: WSHttp)
-  extends ServiceLocatorConnector with ServiceLocatorConfig with AppName {
-  override val appUrl: String = runModeConfiguration.getString("appUrl").getOrElse(throw new RuntimeException("appUrl is not configured"))
-  override val serviceUrl: String = serviceLocatorUrl
-  override val handlerOK: () => Unit = () => Logger.info("Service is registered on the service locator")
-  override val handlerError: Throwable => Unit = e => Logger.error("Service could not register on the service locator", e)
-  override val metadata: Option[Map[String, String]] = Some(Map("third-party-api" → "true"))
-  override val http: CorePost = wsHttp
-
-  override def configuration: Configuration = runModeConfiguration
-
-  override protected def mode: Mode = environment.mode
-}
-
+class WSHttpImpl @Inject()(@Named("appName") val appName: String, val auditConnector: AuditConnector) extends HttpClient with WSGet
+  with WSPut
+  with WSPost
+  with WSDelete
+  with WSPatch
+  with Hooks
