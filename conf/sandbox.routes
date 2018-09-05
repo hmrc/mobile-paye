@@ -1,0 +1,1 @@
+GET        /:nino/paye-data             @uk.gov.hmrc.mobilepaye.controllers.SandboxMobilePayeController.getPayeData(nino: uk.gov.hmrc.domain.Nino, journeyId: Option[String])

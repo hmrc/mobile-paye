@@ -1,0 +1,26 @@
+@import uk.gov.hmrc.mobilepaye.controllers.api.ApiAccess
+@import play.api.libs.json.Json
+
+@(apiAccess: ApiAccess)
+{
+  "scopes":[
+    {
+      "key":"read:mobile-paye",
+      "name":"Execute mobile-paye call",
+      "description":"Mobile PAYE"
+    }
+  ],
+  "api":{
+    "name":"Mobile PAYE",
+    "description":"Expose PAYE data in a pre-agreed format for HMRC Mobile App developers.",
+    "context":"mobile-paye",
+    "versions":[
+      {
+        "version":"1.0",
+        "status":"STABLE",
+        "endpointsEnabled": true,
+        "access": @Json.toJson(apiAccess)
+      }
+    ]
+  }
+}
