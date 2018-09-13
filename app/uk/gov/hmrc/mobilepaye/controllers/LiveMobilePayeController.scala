@@ -32,7 +32,7 @@ class LiveMobilePayeController @Inject()() extends MobilePayeController {
 
   override val app: String = "Live-Paye-Controller"
 
-  override def getPayeData(ourneyId: Option[String] = None): Action[AnyContent] = Action.async {
+  override def getPayeData(journeyId: Option[String] = None): Action[AnyContent] = Action.async {
     implicit request =>
       errorWrapper {
         Future.successful(Ok("Hello world"))
