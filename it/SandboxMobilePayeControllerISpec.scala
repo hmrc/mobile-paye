@@ -1,18 +1,63 @@
 import play.api.libs.ws.WSRequest
-import uk.gov.hmrc.domain.Nino
 import utils.BaseISpec
 
 class SandboxMobilePayeControllerISpec extends BaseISpec {
 
   private val mobileHeader = "X-MOBILE-USER-ID" -> "208606423740"
 
-  "GET /sandbox/:nino/paye-data" should {
-    def request(nino: Nino): WSRequest = wsUrl(s"/${nino.value}/paye-data").withHeaders(acceptJsonHeader)
+  "GET /sandbox/summary" should {
+    val request: WSRequest = wsUrl(s"/summary").withHeaders(acceptJsonHeader)
 
-    "return OK and 'Hello world sandbox'" in {
-      val response = await(request(nino).withHeaders(mobileHeader).get())
+    "return OK and default paye data with no SANDBOX-CONTROL" in {
+      val response = await(request.withHeaders(mobileHeader).get())
       response.status shouldBe 200
-      response.body should include("Hello world sandbox")
+      (response.json \\ "employments") should not be empty
+      (response.json \\ "pensions") should not be empty
+      (response.json \\ "otherIncomes") should not be empty
+      (response.json \ "taxFreeAmount").as[Int] shouldBe 11850
+      (response.json \ "estimatedTaxAmount").as[Int] shouldBe 618
+    }
+
+    "return OK and a single employment with no pension or otherIncome data when SANDBOX-CONTROL is SINGLE-EMPLOYMENT" in {
+      val response = await(request.withHeaders(mobileHeader, "SANDBOX-CONTROL" -> "SINGLE-EMPLOYMENT").get())
+      response.status shouldBe 200
+      (response.json \\ "employments") should not be empty
+      (response.json \ "employments" \ 0 \ "name").as[String] shouldBe "SAINSBURY'S PLC"
+      (response.json \\ "pensions") shouldBe empty
+      (response.json \\ "otherIncomes") shouldBe empty
+      (response.json \ "taxFreeAmount").as[Int] shouldBe 11850
+      (response.json \ "estimatedTaxAmount").as[Int] shouldBe 618
+    }
+
+    "return OK and a single pension with no employment or otherIncome data when SANDBOX-CONTROL is SINGLE-PENSION" in {
+      val response = await(request.withHeaders(mobileHeader, "SANDBOX-CONTROL" -> "SINGLE-PENSION").get())
+      response.status shouldBe 200
+      (response.json \\ "employments") shouldBe empty
+      (response.json \\ "pensions") should not be empty
+      (response.json \ "pensions" \ 0 \ "name").as[String] shouldBe "HIGHWIRE RETURNS LTD"
+      (response.json \\ "otherIncomes") shouldBe empty
+      (response.json \ "taxFreeAmount").as[Int] shouldBe 11850
+      (response.json \ "estimatedTaxAmount").as[Int] shouldBe 618
+    }
+
+    "return 404 where SANDBOX-CONTROL is NOT-FOUND" in {
+      val response = await(request.withHeaders(mobileHeader, "SANDBOX-CONTROL" -> "NOT-FOUND").get())
+      response.status shouldBe 404
+    }
+
+    "return 401 if unauthenticated where SANDBOX-CONTROL is ERROR-401" in {
+      val response = await(request.withHeaders(mobileHeader, "SANDBOX-CONTROL" -> "ERROR-401").get())
+      response.status shouldBe 401
+    }
+
+    "return 403 if forbidden where SANDBOX-CONTROL is ERROR-403" in {
+      val response = await(request.withHeaders(mobileHeader, "SANDBOX-CONTROL" -> "ERROR-403").get())
+      response.status shouldBe 403
+    }
+
+    "return 500 if there is an error where SANDBOX-CONTROL is ERROR-500" in {
+      val response = await(request.withHeaders(mobileHeader, "SANDBOX-CONTROL" -> "ERROR-500").get())
+      response.status shouldBe 500
     }
   }
 

@@ -1,8 +1,48 @@
-# mobile-paye
+mobile-paye
+=============================================
 
 [![Build Status](https://travis-ci.org/hmrc/mobile-paye.svg)](https://travis-ci.org/hmrc/mobile-paye) [ ![Download](https://api.bintray.com/packages/hmrc/releases/mobile-paye/images/download.svg) ](https://bintray.com/hmrc/releases/mobile-paye/_latestVersion)
 
-This is a placeholder README.md for a new repository
+Return the PAYE information for a given user, including employments, pensions, other incomes, tax free amount and estimated tax amount.
+
+Requirements
+------------
+
+The following services are exposed from the micro-service.
+
+Please note it is mandatory to supply an Accept HTTP header to all below services with the value ```application/vnd.hmrc.1.0+json```.
+
+API
+---
+
+| *Task* | *Supported Methods* | *Description* |
+|--------|----|----|
+| ```/summary``` | GET | Fetch the Tax Credits Summary object for a given NINO. [More...](docs/summary.md)|
+
+# Sandbox
+All the above endpoints are accessible on sandbox with `/sandbox` prefix on each endpoint,e.g.
+```
+    GET /sandbox/summary
+```
+
+To trigger the sandbox endpoints locally, use the "X-MOBILE-USER-ID" header with one of the following values:
+208606423740 or 167927702220
+
+To test different scenarios, add a header "SANDBOX-CONTROL" with one of the following values:
+
+| *Value* | *Description* |
+|--------|----|
+| "SINGLE-EMPLOYMENT" | Happy path, return a single employment with no pensions or other income |
+| "SINGLE-PENSION" | Happy path, return a single pension with no employments or other income |
+| "NOT-FOUND" | Happy path, no records found for the user | 
+| "ERROR-401" | Unhappy path, trigger a 401 Unauthorized response |
+| "ERROR-403" | Unhappy path, trigger a 403 Forbidden response |
+| "ERROR-500" | Unhappy path, trigger a 500 Internal Server Error response |
+| Not set or any other value | Happy path, default user with employments, pensions and other income |
+
+# Definition
+API definition for the service will be available under `/api/definition` endpoint.
+See definition in `/conf/api-definition.json` for the format.
 
 ### License
 

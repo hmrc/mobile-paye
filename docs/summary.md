@@ -1,3 +1,21 @@
+The Mobile Paye response
+----
+  Fetch the MobilePayeResponse object.
+  
+* **URL**
+
+  `/summary`
+
+* **Method:**
+  
+  `GET`
+  
+* **Success Responses:**
+
+  * **Code:** 200 <br />
+    **Content:**
+
+```json
 {
   "employments": [
     {
@@ -53,3 +71,22 @@
   "addMissingPension": "https://www.tax.service.gov.uk/check-income-tax/add-pension-provider/name",
   "addMissingIncome": "https://www.tax.service.gov.uk/forms/form/tell-us-about-other-income/guide"
 }
+```
+
+  * **Code:** 404 <br />
+    **Note:** No record found <br />
+    
+* **Error Responses:**
+
+  * **Code:** 401 UNAUTHORIZED <br/>
+    **Content:** `{"code":"UNAUTHORIZED","message":"Bearer token is missing or not authorized for access"}`
+
+  * **Code:** 403 FORBIDDEN <br/>
+    **Content:** `{"code":"FORBIDDEN","message":Authenticated user is not authorised for this resource"}`
+
+  OR when a user does not exist or server failure
+
+  * **Code:** 500 INTERNAL_SERVER_ERROR <br/>
+
+
+

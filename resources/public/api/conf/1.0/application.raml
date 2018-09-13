@@ -23,13 +23,13 @@ uses:
   types: https://developer.service.hmrc.gov.uk/api-documentation/assets/common/modules/types.raml
 
 /mobile-paye:
-  /paye-data:
+  /summary:
       get:
         displayName: Get PAYE Data
-        description: This endpoint retrieves the PAYE data associated with a given NINO.
+        description: This endpoint retrieves the PAYE data associated with a user.
         is: [headers.acceptHeader]
-        (annotations.scope): "read:mobile-paye"
-        securedBy: [ sec.oauth_2_0: { scopes: [ "read:mobile-paye" ] } ]
+        (annotations.scope): "read:native-apps-api-orchestration"
+        securedBy: [ sec.oauth_2_0: { scopes: [ "read:native-apps-api-orchestration" ] } ]
         queryParameters:
           journeyId:
             type: string

@@ -10,7 +10,6 @@ lazy val microservice = Project(appName, file("."))
   .configs(IntegrationTest)
   .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
   .settings(publishingSettings: _*)
-  .settings(routesImport ++= Seq("uk.gov.hmrc.mobilepaye.binders.Binders._"))
   .settings(routesGenerator := StaticRoutesGenerator)
   .settings(
     majorVersion := 0,
