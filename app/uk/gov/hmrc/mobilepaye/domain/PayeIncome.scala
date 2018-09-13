@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.mobilepaye.binders
+package uk.gov.hmrc.mobilepaye.domain
 
-import uk.gov.hmrc.domain.Nino
+import play.api.libs.json.{Json, OFormat}
 
-object NinoBinder extends SimpleObjectBinder[Nino](Nino.apply, _.value)
+case class PayeIncome(name: String, taxCode: String, amount: Int, link: String)
 
-object Binders {
-  implicit val ninoBinder = NinoBinder
+object PayeIncome {
+  implicit val format: OFormat[PayeIncome] = Json.format[PayeIncome]
 }

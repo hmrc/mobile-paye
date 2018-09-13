@@ -1,0 +1,16 @@
+{
+  "pensions": [
+    {
+      "name": "HIGHWIRE RETURNS LTD",
+      "taxCode": "BR",
+      "amount": 4200,
+      "link": "https://www.tax.service.gov.uk/check-income-tax/income-details/<data.employmentId>"
+    }
+  ],
+  "taxFreeAmount": 11850,
+  "estimatedTaxAmount": 618,
+  "understandYourTaxCode": "https://www.tax.service.gov.uk/check-income-tax/tax-codes",
+  "addMissingEmployer": "https://www.tax.service.gov.uk/check-income-tax/add-employment/employment-name",
+  "addMissingPension": "https://www.tax.service.gov.uk/check-income-tax/add-pension-provider/name",
+  "addMissingIncome": "https://www.tax.service.gov.uk/forms/form/tell-us-about-other-income/guide"
+}

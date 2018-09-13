@@ -1,1 +1,1 @@
-GET        /:nino/paye-data             @uk.gov.hmrc.mobilepaye.controllers.LiveMobilePayeController.getPayeData(nino: uk.gov.hmrc.domain.Nino, journeyId: Option[String])
+GET        /summary             @uk.gov.hmrc.mobilepaye.controllers.LiveMobilePayeController.getPayeData(journeyId: Option[String])

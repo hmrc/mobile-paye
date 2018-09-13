@@ -5,7 +5,7 @@
 {
   "scopes":[
     {
-      "key":"read:mobile-paye",
+      "key":"read:native-apps-api-orchestration",
       "name":"Execute mobile-paye call",
       "description":"Mobile PAYE"
     }

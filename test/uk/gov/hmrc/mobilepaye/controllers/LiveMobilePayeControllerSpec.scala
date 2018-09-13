@@ -18,7 +18,6 @@ package uk.gov.hmrc.mobilepaye.controllers
 
 import play.api.http.Status
 import play.api.test.FakeRequest
-import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 
@@ -29,7 +28,7 @@ class LiveMobilePayeControllerSpec extends UnitSpec with WithFakeApplication {
   "GET /" should {
     "return 200" in {
       val controller = new LiveMobilePayeController()
-      val result = controller.getPayeData(Nino("CS700100A"))(fakeRequest)
+      val result = controller.getPayeData()(fakeRequest)
       status(result) shouldBe Status.OK
     }
   }
