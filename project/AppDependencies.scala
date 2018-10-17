@@ -9,7 +9,7 @@ object AppDependencies {
   private val playHmrcApiVersion = "3.2.0"
   private val domainVersion = "5.2.0"
 
-  private val hmrcTestVersion = "3.1.0"
+  private val hmrcTestVersion = "3.2.0"
   private val pegdownVersion = "1.6.0"
   private val scalaTestVersion = "3.0.4"
   private val wireMockVersion = "2.9.0"
