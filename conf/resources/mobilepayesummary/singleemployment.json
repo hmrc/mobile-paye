@@ -8,9 +8,11 @@
     }
   ],
   "taxFreeAmount": 11850,
+  "taxFreeAmountLink": "https://www.tax.service.gov.uk/please-change-me",
   "estimatedTaxAmount": 618,
-  "understandYourTaxCode": "https://www.tax.service.gov.uk/check-income-tax/tax-codes",
-  "addMissingEmployer": "https://www.tax.service.gov.uk/check-income-tax/add-employment/employment-name",
-  "addMissingPension": "https://www.tax.service.gov.uk/check-income-tax/add-pension-provider/name",
-  "addMissingIncome": "https://www.tax.service.gov.uk/forms/form/tell-us-about-other-income/guide"
+  "estimatedTaxAmountLink": "https://www.tax.service.gov.uk/please-change-me",
+  "understandYourTaxCodeLink": "https://www.tax.service.gov.uk/check-income-tax/tax-codes",
+  "addMissingEmployerLink": "https://www.tax.service.gov.uk/check-income-tax/add-employment/employment-name",
+  "addMissingPensionLink": "https://www.tax.service.gov.uk/check-income-tax/add-pension-provider/name",
+  "addMissingIncomeLink": "https://www.tax.service.gov.uk/forms/form/tell-us-about-other-income/guide"
 }

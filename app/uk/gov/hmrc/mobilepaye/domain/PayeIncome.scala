@@ -18,7 +18,7 @@ package uk.gov.hmrc.mobilepaye.domain
 
 import play.api.libs.json.{Json, OFormat}
 
-case class PayeIncome(name: String, taxCode: String, amount: Int, link: String)
+case class PayeIncome(name: String, payrollNumber: Option[String] = None, taxCode: String, amount: Int, link: String)
 
 object PayeIncome {
   implicit val format: OFormat[PayeIncome] = Json.format[PayeIncome]
