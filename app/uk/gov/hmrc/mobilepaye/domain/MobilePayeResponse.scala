@@ -22,11 +22,13 @@ case class MobilePayeResponse(employments: Option[Seq[PayeIncome]],
                               pensions: Option[Seq[PayeIncome]],
                               otherIncomes: Option[Seq[OtherIncome]],
                               taxFreeAmount: Int,
+                              taxFreeAmountLink: String = "https://www.tax.service.gov.uk/check-income-tax/tax-free-allowance",
                               estimatedTaxAmount: Int,
-                              understandYourTaxCode: String = "https://www.tax.service.gov.uk/check-income-tax/tax-codes",
-                              addMissingEmployer: String = "https://www.tax.service.gov.uk/check-income-tax/add-employment/employment-name",
-                              addMissingPension: String = "https://www.tax.service.gov.uk/check-income-tax/add-pension-provider/name",
-                              addMissingIncome: String = "https://www.tax.service.gov.uk/forms/form/tell-us-about-other-income/guide")
+                              estimatedTaxAmountLink: String = "https://www.tax.service.gov.uk/check-income-tax/paye-income-tax-estimate",
+                              understandYourTaxCodeLink: String = "https://www.tax.service.gov.uk/check-income-tax/tax-codes",
+                              addMissingEmployerLink: String = "https://www.tax.service.gov.uk/check-income-tax/add-employment/employment-name",
+                              addMissingPensionLink: String = "https://www.tax.service.gov.uk/check-income-tax/add-pension-provider/name",
+                              addMissingIncomeLink: String = "https://www.tax.service.gov.uk/forms/form/tell-us-about-other-income/guide")
 
 object MobilePayeResponse {
   implicit val format: OFormat[MobilePayeResponse] = Json.format[MobilePayeResponse]

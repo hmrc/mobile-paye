@@ -13,7 +13,7 @@ The Mobile Paye response
 * **Success Responses:**
 
   * **Code:** 200 <br />
-    **Content:**
+    **Content:** Full Response
 
 ```json
 {
@@ -65,11 +65,61 @@ The Mobile Paye response
     }
   ],
   "taxFreeAmount": 11850,
+  "taxFreeAmountLink": "https://www.tax.service.gov.uk/check-income-tax/tax-free-allowance",
   "estimatedTaxAmount": 618,
-  "understandYourTaxCode": "https://www.tax.service.gov.uk/check-income-tax/tax-codes",
-  "addMissingEmployer": "https://www.tax.service.gov.uk/check-income-tax/add-employment/employment-name",
-  "addMissingPension": "https://www.tax.service.gov.uk/check-income-tax/add-pension-provider/name",
-  "addMissingIncome": "https://www.tax.service.gov.uk/forms/form/tell-us-about-other-income/guide"
+  "estimatedTaxAmountLink":  "https://www.tax.service.gov.uk/check-income-tax/paye-income-tax-estimate",
+  "understandYourTaxCodeLink": "https://www.tax.service.gov.uk/check-income-tax/tax-codes",
+  "addMissingEmployerLink": "https://www.tax.service.gov.uk/check-income-tax/add-employment/employment-name",
+  "addMissingPensionLink": "https://www.tax.service.gov.uk/check-income-tax/add-pension-provider/name",
+  "addMissingIncomeLink": "https://www.tax.service.gov.uk/forms/form/tell-us-about-other-income/guide"
+}
+```
+
+ * **Code:** 200 <br />
+    **Content:** Single Employment
+
+```json
+{
+  "employments": [
+    {
+      "name": "SAINSBURY'S PLC",
+      "taxCode": "1185L",
+      "amount": 4143,
+      "link": "https://www.tax.service.gov.uk/check-income-tax/income-details/<data.employmentId>"
+    }
+  ],
+  "taxFreeAmount": 11850,
+  "taxFreeAmountLink": "https://www.tax.service.gov.uk/check-income-tax/tax-free-allowance",
+  "estimatedTaxAmount": 618,
+  "estimatedTaxAmountLink":  "https://www.tax.service.gov.uk/check-income-tax/paye-income-tax-estimate",
+  "understandYourTaxCodeLink": "https://www.tax.service.gov.uk/check-income-tax/tax-codes",
+  "addMissingEmployerLink": "https://www.tax.service.gov.uk/check-income-tax/add-employment/employment-name",
+  "addMissingPensionLink": "https://www.tax.service.gov.uk/check-income-tax/add-pension-provider/name",
+  "addMissingIncomeLink": "https://www.tax.service.gov.uk/forms/form/tell-us-about-other-income/guide"
+}
+```
+
+ * **Code:** 200 <br />
+    **Content:** Single Pension
+
+```json
+{
+  "pensions": [
+    {
+      "name": "HIGHWIRE RETURNS LTD",
+      "taxCode": "BR",
+      "amount": 4200,
+      "link": "https://www.tax.service.gov.uk/check-income-tax/income-details/<data.employmentId>"
+    }
+  ],
+  "taxFreeAmount": 11850,
+  "taxFreeAmountLink": "https://www.tax.service.gov.uk/check-income-tax/tax-free-allowance",
+  "estimatedTaxAmount": 618,
+  "estimatedTaxAmountLink":  "https://www.tax.service.gov.uk/check-income-tax/paye-income-tax-estimate",
+  "understandYourTaxCodeLink": "https://www.tax.service.gov.uk/check-income-tax/tax-codes",
+  "addMissingEmployerLink": "https://www.tax.service.gov.uk/check-income-tax/add-employment/employment-name",
+  "addMissingPensionLink": "https://www.tax.service.gov.uk/check-income-tax/add-pension-provider/name",
+  "addMissingIncomeLink": "https://www.tax.service.gov.uk/forms/form/tell-us-about-other-income/guide"
 }
 ```
 
