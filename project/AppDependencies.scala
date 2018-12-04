@@ -8,6 +8,7 @@ object AppDependencies {
   private val play25Bootstrap = "3.10.0"
   private val playHmrcApiVersion = "3.2.0"
   private val domainVersion = "5.2.0"
+  private val taxYearVersion = "0.4.0"
 
   private val hmrcTestVersion = "3.2.0"
   private val pegdownVersion = "1.6.0"
@@ -20,7 +21,8 @@ object AppDependencies {
     ws,
     "uk.gov.hmrc" %% "bootstrap-play-25" % play25Bootstrap,
     "uk.gov.hmrc" %% "domain" % domainVersion,
-    "uk.gov.hmrc" %% "play-hmrc-api" % playHmrcApiVersion
+    "uk.gov.hmrc" %% "play-hmrc-api" % playHmrcApiVersion,
+    "uk.gov.hmrc" %% "tax-year" % taxYearVersion
   )
 
   trait TestDependencies {

@@ -19,12 +19,13 @@ package uk.gov.hmrc.mobilepaye.controllers
 import com.google.inject._
 import play.api.mvc._
 import uk.gov.hmrc.api.controllers.HeaderValidator
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
 
 import scala.concurrent.Future
 
 trait MobilePayeController extends BaseController with HeaderValidator with ErrorHandling {
-  def getPayeData(journeyId: Option[String] = None): Action[AnyContent]
+  def getPayeSummary(nino: Nino, journeyId: Option[String] = None): Action[AnyContent]
 }
 
 @Singleton
@@ -32,7 +33,7 @@ class LiveMobilePayeController @Inject()() extends MobilePayeController {
 
   override val app: String = "Live-Paye-Controller"
 
-  override def getPayeData(journeyId: Option[String] = None): Action[AnyContent] = Action.async {
+  override def getPayeSummary(nino: Nino, journeyId: Option[String] = None): Action[AnyContent] = Action.async {
     implicit request =>
       errorWrapper {
         Future.successful(Ok("Hello world"))

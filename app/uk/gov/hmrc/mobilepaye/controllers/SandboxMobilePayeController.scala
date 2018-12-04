@@ -21,6 +21,7 @@ import play.api.libs.json.Json
 import play.api.libs.json.Json.toJson
 import play.api.mvc._
 import uk.gov.hmrc.api.sandbox.FileResource
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mobilepaye.domain._
 
 import scala.concurrent.Future
@@ -30,7 +31,7 @@ class SandboxMobilePayeController @Inject()() extends MobilePayeController with 
 
   override val app: String = "Sandbox-Paye-Controller"
 
-  override def getPayeData(journeyId: Option[String] = None): Action[AnyContent] =
+  override def getPayeSummary(nino: Nino, journeyId: Option[String] = None): Action[AnyContent] =
     validateAccept(acceptHeaderValidationRules).async {
       implicit request =>
         Future successful (request.headers.get("SANDBOX-CONTROL") match {

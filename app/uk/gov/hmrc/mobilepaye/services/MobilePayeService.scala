@@ -14,22 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.mobilepaye.connectors
+package uk.gov.hmrc.mobilepaye.services
 
-import com.google.inject.name.Named
 import com.google.inject.{Inject, Singleton}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.mobilepaye.connectors.TaiConnector
+import uk.gov.hmrc.mobilepaye.domain.MobilePayeResponse
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class PayeConnector @Inject()(http: CoreGet,
-                              @Named("paye") serviceUrl: String) {
-
-  def url(nino: Nino, route: String) = s"$serviceUrl/paye/${nino.value}/$route"
-
-  def getPersonalDetails(nino: Nino)(implicit headerCarrier: HeaderCarrier, ex: ExecutionContext): Future[HttpResponse] =
-    http.GET[HttpResponse](url(nino, "paye"))
-
+class MobilePayeService @Inject()(taiConnector: TaiConnector) {
+  def getMobilePayeResponse(nino: Nino)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[MobilePayeResponse] = ???
 }

@@ -16,21 +16,63 @@
 
 package uk.gov.hmrc.mobilepaye.controllers
 
-import play.api.http.Status
 import play.api.test.FakeRequest
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 
 class LiveMobilePayeControllerSpec extends UnitSpec with WithFakeApplication {
 
+  private val nino = Nino("CS700100A")
   val fakeRequest = FakeRequest("GET", "/")
 
-  "GET /" should {
-    "return 200" in {
-      val controller = new LiveMobilePayeController()
-      val result = controller.getPayeData()(fakeRequest)
-      status(result) shouldBe Status.OK
+  s"GET /$nino/summary/current-income" should {
+    "return 200 and full paye summary data for valid authorised nino" in {
+      pending
     }
+
+    "return 200 and paye summary data with no employment data for valid authorised nino" in {
+      pending
+    }
+
+    "return 200 and paye summary data with no pensions data for valid authorised nino" in {
+      pending
+    }
+
+    "return 200 and paye summary data with no other income data for valid authorised nino" in {
+      pending
+    }
+
+    "return 200 and paye summary data with no employment, pensions or other income data for valid authorised nino" in {
+      pending
+    }
+
+    "return 401 for valid nino but unauthorized user" in {
+      pending
+    }
+
+    "return 403 for valid nino for authorised user but for a different nino" in {
+      pending
+    }
+
+    "return 500 when MobilePayeService throws an InternalServerErrorException" in {
+      pending
+    }
+
+    "return 404 when no user data is found for an authorised user with a valid nino" in {
+      pending
+    }
+
+    "return 423 for a valid nino and authorised user but corrupt/mcierror user" in {
+      //TODO verify no data calls made other than person details
+      pending
+    }
+
+    "return 410 for a valid nino and authorised user but deceased user" in {
+      //TODO verify no data calls made other than person details
+      pending
+    }
+
   }
 
 }

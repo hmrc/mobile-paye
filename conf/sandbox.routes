@@ -1,1 +1,1 @@
-GET        /summary             @uk.gov.hmrc.mobilepaye.controllers.SandboxMobilePayeController.getPayeData(journeyId: Option[String])
+GET        /:nino/summary/current-income        @uk.gov.hmrc.mobilepaye.controllers.SandboxMobilePayeController.getPayeSummary(nino: uk.gov.hmrc.domain.Nino, journeyId: Option[String])
