@@ -16,88 +16,202 @@
 
 package uk.gov.hmrc.mobilepaye.connectors
 
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import uk.gov.hmrc.http._
+import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ExecutionContext, Future}
 
-class TaiConnectorSpec extends UnitSpec with WithFakeApplication {
+class TaiConnectorSpec extends BaseSpec {
 
-  "Tax Code Incomes - GET /tai/:nino/tax-account/:year/income/tax-code-incomes" should {
-    "return a valid Seq[TaxCodeIncome] when receiving a valid 200 response for an authorised user" in {
-      pending
-    }
+  implicit lazy val hc: HeaderCarrier = HeaderCarrier()
 
-    "return an empty Seq[TaxCodeIncome] when receiving a valid 404 response for an authorised user" in {
-      pending
+  val mockCoreGet: CoreGet = mock[CoreGet]
+  val serviceUrl: String = "tst-url"
+  val connector: TaiConnector = new TaiConnector(mockCoreGet, serviceUrl)
+
+  def mockTaiGet[T](url: String, f: Future[T]): Unit = {
+    (mockCoreGet.GET(_: String, _: Seq[(String, String)])
+    (_: HttpReads[T], _: HeaderCarrier, _: ExecutionContext)).expects(
+      s"$serviceUrl/tai/${nino.value}/$url", *, *, *, *).returning(f)
+  }
+
+  "Person - GET /tai/:nino/person" should {
+    "return a valid Person when receiving a valid 200 response for an authorised user" in {
+      mockTaiGet("person", Future.successful(person))
+
+      val result = await(connector.getPerson(nino))
+      result shouldBe person
     }
 
     "throw UnauthorisedException for valid nino but unauthorized user" in {
-      pending
+      mockTaiGet("person", Future.failed(new UnauthorizedException("Unauthorized")))
+
+      intercept[UnauthorizedException] {
+        await(connector.getPerson(nino))
+      }
     }
 
     "throw ForbiddenException for valid nino for authorised user but for a different nino" in {
-      pending
+      mockTaiGet("person", Future.failed(new ForbiddenException("Forbidden")))
+
+      intercept[ForbiddenException] {
+        await(connector.getPerson(nino))
+      }
+    }
+
+    "throw InternalServerException for valid nino for authorised user when receiving a 500 response from tai" in {
+      mockTaiGet("person", Future.failed(new InternalServerException("Internal Server Error")))
+
+      intercept[InternalServerException] {
+        await(connector.getPerson(nino))
+      }
+    }
+  }
+
+  "Tax Code Incomes - GET /tai/:nino/tax-account/:year/income/tax-code-incomes" should {
+    "return a valid Seq[TaxCodeIncome] when receiving a valid 200 response for an authorised user" in {
+      mockTaiGet(s"tax-account/$currentTaxYear/income/tax-code-incomes", Future.successful(taxCodeIncomes))
+
+      val result = await(connector.getTaxCodeIncomes(nino))
+      result shouldBe taxCodeIncomes
+    }
+
+    "return an empty Seq[TaxCodeIncome] when a NotFoundException is thrown for an authorised user" in {
+      mockTaiGet(s"tax-account/$currentTaxYear/income/tax-code-incomes", Future.failed(new NotFoundException("Not Found")))
+
+      val result = await(connector.getTaxCodeIncomes(nino))
+      result shouldBe emptyTaxCodeIncomes
+    }
+
+    "throw UnauthorisedException for valid nino but unauthorized user" in {
+      mockTaiGet(s"tax-account/$currentTaxYear/income/tax-code-incomes", Future.failed(new UnauthorizedException("Unauthorized")))
+
+      intercept[UnauthorizedException] {
+        await(connector.getTaxCodeIncomes(nino))
+      }
+    }
+
+    "throw ForbiddenException for valid nino for authorised user but for a different nino" in {
+      mockTaiGet(s"tax-account/$currentTaxYear/income/tax-code-incomes", Future.failed(new ForbiddenException("Forbidden")))
+
+      intercept[ForbiddenException] {
+        await(connector.getTaxCodeIncomes(nino))
+      }
     }
 
     "throw InternalServerErrorException for valid nino for authorised user when receiving a 500 response from tai" in {
-      pending
+      mockTaiGet(s"tax-account/$currentTaxYear/income/tax-code-incomes", Future.failed(new InternalServerException("Internal Server Error")))
+
+      intercept[InternalServerException] {
+        await(connector.getTaxCodeIncomes(nino))
+      }
     }
   }
 
   "Non Tax Code Incomes - GET /tai/:nino/tax-account/:year/income" should {
     "return a valid NonTaxCodeIncome when receiving a valid 200 response for an authorised user" in {
-      pending
+      mockTaiGet(s"tax-account/$currentTaxYear/income", Future.successful(nonTaxCodeIncome))
+
+      val result = await(connector.getNonTaxCodeIncome(nino))
+      result shouldBe nonTaxCodeIncome
     }
 
     "throw UnauthorisedException for valid nino but unauthorized user" in {
-      pending
+      mockTaiGet(s"tax-account/$currentTaxYear/income", Future.failed(new UnauthorizedException("Unauthorised")))
+
+      intercept[UnauthorizedException] {
+        await(connector.getNonTaxCodeIncome(nino))
+      }
     }
 
     "throw ForbiddenException for valid nino for authorised user but for a different nino" in {
-      pending
+      mockTaiGet(s"tax-account/$currentTaxYear/income", Future.failed(new ForbiddenException("Forbidden")))
+
+      intercept[ForbiddenException] {
+        await(connector.getNonTaxCodeIncome(nino))
+      }
     }
 
     "throw InternalServerErrorException for valid nino for authorised user when receiving a 500 response from tai" in {
-      pending
+      mockTaiGet(s"tax-account/$currentTaxYear/income", Future.failed(new InternalServerException("Internal Server Error")))
+
+      intercept[InternalServerException] {
+        await(connector.getNonTaxCodeIncome(nino))
+      }
     }
   }
 
   "Employments - GET /tai/:nino/employments/years/:year" should {
     "return a valid Seq[Employment] when receiving a valid 200 response for an authorised user" in {
-      pending
+      mockTaiGet(s"employments/years/$currentTaxYear", Future.successful(taiEmployments))
+
+      val result = await(connector.getEmployments(nino))
+      result shouldBe taiEmployments
     }
 
-    "return an empty Seq[Employment] when receiving a valid 404 response for an authorised user" in {
-      pending
+    "return an empty Seq[Employment] when receiving when a NotFoundException is thrown for an authorised user" in {
+      mockTaiGet(s"employments/years/$currentTaxYear", Future.failed(new NotFoundException("Not Found")))
+
+      val result = await(connector.getEmployments(nino))
+      result shouldBe emptyEmployments
     }
 
     "throw UnauthorisedException for valid nino but unauthorized user" in {
-      pending
+      mockTaiGet(s"employments/years/$currentTaxYear", Future.successful(Future.failed(new UnauthorizedException("Unauthorized"))))
+
+      intercept[UnauthorizedException] {
+        await(connector.getEmployments(nino))
+      }
     }
 
     "throw ForbiddenException for valid nino for authorised user but for a different nino" in {
-      pending
+      mockTaiGet(s"employments/years/$currentTaxYear", Future.successful(Future.failed(new ForbiddenException("Forbidden"))))
+
+      intercept[ForbiddenException] {
+        await(connector.getEmployments(nino))
+      }
     }
 
     "throw InternalServerErrorException for valid nino for authorised user when receiving a 500 response from tai" in {
-      pending
+      mockTaiGet(s"employments/years/$currentTaxYear", Future.successful(Future.failed(new InternalServerException("Internal Server Error"))))
+
+      intercept[InternalServerException] {
+        await(connector.getEmployments(nino))
+      }
     }
   }
 
   "Tax Account Summary - GET /tai/:nino/tax-account/:year/summary" should {
     "return a valid TaxAccountSummary when receiving a valid 200 response for an authorised user" in {
-      pending
+      mockTaiGet(s"tax-account/$currentTaxYear/summary", Future.successful(taxAccountSummary))
+
+      val result = await(connector.getTaxAccountSummary(nino))
+      result shouldBe taxAccountSummary
     }
 
     "throw UnauthorisedException for valid nino but unauthorized user" in {
-      pending
+      mockTaiGet(s"tax-account/$currentTaxYear/summary", Future.failed(new UnauthorizedException("Unauthorized")))
+
+      intercept[UnauthorizedException] {
+        await(connector.getTaxAccountSummary(nino))
+      }
     }
 
     "throw ForbiddenException for valid nino for authorised user but for a different nino" in {
-      pending
+      mockTaiGet(s"tax-account/$currentTaxYear/summary", Future.failed(new ForbiddenException("Forbidden")))
+
+      intercept[ForbiddenException] {
+        await(connector.getTaxAccountSummary(nino))
+      }
     }
 
     "throw InternalServerErrorException for valid nino for authorised user when receiving a 500 response from tai" in {
-      pending
+      mockTaiGet(s"tax-account/$currentTaxYear/summary", Future.failed(new InternalServerException("Internal Server Error")))
+
+      intercept[InternalServerException] {
+        await(connector.getTaxAccountSummary(nino))
+      }
     }
   }
 }

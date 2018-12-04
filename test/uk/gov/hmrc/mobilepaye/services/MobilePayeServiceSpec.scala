@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.mobilepaye.services
 
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 
 
-class MobilePayeServiceSpec extends UnitSpec with WithFakeApplication {
+class MobilePayeServiceSpec extends BaseSpec {
 
   "getMobilePayeResponse" should {
     "return full MobilePayeResponse when all data is available" in {

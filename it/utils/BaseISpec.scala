@@ -4,13 +4,12 @@ import org.scalatestplus.play.{OneServerPerSuite, WsScalaTestClient}
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.ws.WSClient
-import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.mobilepaye.MobilePayeTestData
 import uk.gov.hmrc.play.test.UnitSpec
 
-trait BaseISpec extends UnitSpec with WsScalaTestClient with OneServerPerSuite with WireMockSupport {
+trait BaseISpec extends UnitSpec with WsScalaTestClient with OneServerPerSuite with WireMockSupport with MobilePayeTestData {
   override implicit lazy val app: Application = appBuilder.build()
 
-  protected val nino = Nino("CS700100A")
   protected val acceptJsonHeader: (String, String) = "Accept" -> "application/vnd.hmrc.1.0+json"
 
   def config: Map[String, Any] = Map(

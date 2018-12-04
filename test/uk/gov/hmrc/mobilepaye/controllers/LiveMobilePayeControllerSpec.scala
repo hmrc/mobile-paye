@@ -17,13 +17,11 @@
 package uk.gov.hmrc.mobilepaye.controllers
 
 import play.api.test.FakeRequest
-import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 
 
-class LiveMobilePayeControllerSpec extends UnitSpec with WithFakeApplication {
+class LiveMobilePayeControllerSpec extends BaseSpec {
 
-  private val nino = Nino("CS700100A")
   val fakeRequest = FakeRequest("GET", "/")
 
   s"GET /$nino/summary/current-income" should {

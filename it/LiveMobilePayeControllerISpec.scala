@@ -1,37 +1,12 @@
 import play.api.libs.json.Json
 import play.api.libs.ws.WSRequest
-import uk.gov.hmrc.mobilepaye.domain.{MobilePayeResponse, OtherIncome, PayeIncome}
-import utils.BaseISpec
+import play.api.mvc.Results._
 import stubs.AuthStub._
 import stubs.TaiStub._
 import uk.gov.hmrc.mobilepaye.domain.tai._
-import play.api.mvc.Results._
+import utils.BaseISpec
 
 class LiveMobilePayeControllerISpec extends BaseISpec {
-
-  val taxCodeIncome: TaxCodeIncome = TaxCodeIncome(EmploymentIncome, Some(3), 1000, "S1150L")
-  val otherNonTaxCodeIncome: OtherNonTaxCodeIncome = OtherNonTaxCodeIncome(OtherIncomeEarned, BigDecimal(100.0))
-  val nonTaxCodeIncome: NonTaxCodeIncome = NonTaxCodeIncome(None, Seq(otherNonTaxCodeIncome))
-
-  val taiEmployment: Employment = Employment(Some("payrollNum"), 2)
-
-  val taxAccountSummary: TaxAccountSummary = TaxAccountSummary(BigDecimal(200.0), BigDecimal(123.12))
-
-  val person: Person = Person(nino, "Carrot", "Smith", None)
-
-  val payeIncome: PayeIncome = PayeIncome("Sainsburys", None, "S1150L", 1000, "/some/link")
-
-  val employments: Seq[PayeIncome] = Seq(payeIncome, payeIncome.copy(name = "Tesco", amount = 500))
-  val pensions: Seq[PayeIncome] = Seq(payeIncome.copy(name = "Prestige Pensions"))
-  val otherIncomes: Seq[OtherIncome] = Seq(OtherIncome("SomeOtherIncome", 250))
-
-  val fullResponse = MobilePayeResponse(
-    employments = Some(employments),
-    pensions = Some(pensions),
-    otherIncomes = Some(otherIncomes),
-    taxFreeAmount = 10000,
-    estimatedTaxAmount = 250
-  )
 
   s"GET /$nino/summary/current-income" should {
     val request: WSRequest = wsUrl(s"/$nino/summary/current-income").withHeaders(acceptJsonHeader)
@@ -43,7 +18,6 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
       nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncome)
       employmentsAreFound(nino.toString(), Seq(taiEmployment))
       taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
-
 
       val response = await(request.get())
       response.status shouldBe Ok
