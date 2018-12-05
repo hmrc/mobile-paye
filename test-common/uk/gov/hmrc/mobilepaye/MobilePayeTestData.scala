@@ -23,10 +23,10 @@ import uk.gov.hmrc.time.TaxYear
 
 trait MobilePayeTestData {
 
-  val currentTaxYear = TaxYear.current.currentYear
+  val currentTaxYear: Int = TaxYear.current.currentYear
 
-  val nino = Nino("CS700100A")
-  val taxCodeIncome: TaxCodeIncome = TaxCodeIncome(EmploymentIncome, Some(3), 1000, "S1150L")
+  val nino: Nino = Nino("CS700100A")
+  val taxCodeIncome: TaxCodeIncome = TaxCodeIncome(EmploymentIncome, Some(3), "SomeName", 1000, Live, "S1150L")
   val taxCodeIncomes: Seq[TaxCodeIncome] = Seq(taxCodeIncome, taxCodeIncome.copy(employmentId = Some(4)))
 
   val emptyTaxCodeIncomes: Seq[TaxCodeIncome] = Seq.empty
@@ -44,11 +44,12 @@ trait MobilePayeTestData {
 
   val payeIncome: PayeIncome = PayeIncome("Sainsburys", None, "S1150L", 1000, "/some/link")
 
+  val otherIncome: OtherIncome = OtherIncome("SomeOtherIncome", 250, None)
   val employments: Seq[PayeIncome] = Seq(payeIncome, payeIncome.copy(name = "Tesco", amount = 500))
   val pensions: Seq[PayeIncome] = Seq(payeIncome.copy(name = "Prestige Pensions"))
-  val otherIncomes: Seq[OtherIncome] = Seq(OtherIncome("SomeOtherIncome", 250))
+  val otherIncomes: Seq[OtherIncome] = Seq(otherIncome)
 
-  val fullResponse = MobilePayeResponse(
+  val fullMobilePayeResponse: MobilePayeResponse = MobilePayeResponse(
     employments = Some(employments),
     pensions = Some(pensions),
     otherIncomes = Some(otherIncomes),

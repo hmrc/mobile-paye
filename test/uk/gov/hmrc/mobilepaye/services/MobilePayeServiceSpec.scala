@@ -16,14 +16,23 @@
 
 package uk.gov.hmrc.mobilepaye.services
 
+import uk.gov.hmrc.mobilepaye.connectors.TaiConnector
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
+
+import scala.concurrent.Future
 
 
 class MobilePayeServiceSpec extends BaseSpec {
 
+  val mockTaiConnector = mock[TaiConnector]
+
+  val service = new MobilePayeService(mockTaiConnector)
+
   "getMobilePayeResponse" should {
     "return full MobilePayeResponse when all data is available" in {
-      pending
+      val result = service.getMobilePayeResponse(nino)
+
+      result shouldBe Future.successful(fullMobilePayeResponse)
     }
 
     "return MobilePayeResponse with no employments when employment data is missing" in {

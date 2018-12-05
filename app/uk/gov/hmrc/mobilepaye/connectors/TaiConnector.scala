@@ -49,7 +49,7 @@ class TaiConnector @Inject()(http: CoreGet,
 
   def getNonTaxCodeIncome(nino: Nino)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[NonTaxCodeIncome] = {
     http.GET[JsValue](url(nino, s"tax-account/${TaxYear.current.currentYear}/income")).map {
-      json => (json \ "data").as[NonTaxCodeIncome]
+      json => (json \ "data" \ "nonTaxCodeIncomes").as[NonTaxCodeIncome]
     }
   }
 

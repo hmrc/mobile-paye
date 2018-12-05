@@ -21,7 +21,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
 
       val response = await(request.get())
       response.status shouldBe Ok
-      response.body shouldBe Json.toJson(fullResponse)
+      response.body shouldBe Json.toJson(fullMobilePayeResponse)
     }
 
     "return OK and a valid MobilePayeResponse json without employments" in {
@@ -34,7 +34,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
 
       val response = await(request.get())
       response.status shouldBe Ok
-      response.body shouldBe Json.toJson(fullResponse.copy(employments = None))
+      response.body shouldBe Json.toJson(fullMobilePayeResponse.copy(employments = None))
     }
 
     "return OK and a valid MobilePayeResponse json without pensions" in {
@@ -47,7 +47,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
 
       val response = await(request.get())
       response.status shouldBe Ok
-      response.body shouldBe Json.toJson(fullResponse.copy(pensions = None))
+      response.body shouldBe Json.toJson(fullMobilePayeResponse.copy(pensions = None))
     }
 
     "return OK and a valid MobilePayeResponse json without otherIncomes" in {
@@ -60,7 +60,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
 
       val response = await(request.get())
       response.status shouldBe Ok
-      response.body shouldBe Json.toJson(fullResponse.copy(otherIncomes = None))
+      response.body shouldBe Json.toJson(fullMobilePayeResponse.copy(otherIncomes = None))
     }
 
     "return GONE when person is deceased" in {
