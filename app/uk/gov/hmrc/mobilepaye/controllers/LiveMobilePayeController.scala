@@ -17,26 +17,31 @@
 package uk.gov.hmrc.mobilepaye.controllers
 
 import com.google.inject._
+import play.api.libs.json.Json
 import play.api.mvc._
 import uk.gov.hmrc.api.controllers.HeaderValidator
 import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.mobilepaye.domain.MobilePayeResponse
+import uk.gov.hmrc.mobilepaye.services.MobilePayeService
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
-
-import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 trait MobilePayeController extends BaseController with HeaderValidator with ErrorHandling {
   def getPayeSummary(nino: Nino, journeyId: Option[String] = None): Action[AnyContent]
 }
 
 @Singleton
-class LiveMobilePayeController @Inject()() extends MobilePayeController {
+class LiveMobilePayeController @Inject()(mobilePayeService: MobilePayeService) extends MobilePayeController {
 
   override val app: String = "Live-Paye-Controller"
 
   override def getPayeSummary(nino: Nino, journeyId: Option[String] = None): Action[AnyContent] = Action.async {
     implicit request =>
       errorWrapper {
-        Future.successful(Ok("Hello world"))
+        mobilePayeService.getMobilePayeResponse(nino).map {
+          case MobilePayeResponse(_, None, None, None, _, _, _, _, _, _, _, _) => NotFound
+          case mobilePayeResponse => Ok(Json.toJson(mobilePayeResponse))
+        }
       }
   }
 

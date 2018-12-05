@@ -47,6 +47,7 @@ class GuiceModule(environment: Environment, configuration: Configuration) extend
       ApiAccess("PRIVATE", configuration.underlying.getStringList("api.access.white-list.applicationIds").asScala))
 
     bindConfigStringSeq("scopes")
+    bind(classOf[String]).annotatedWith(named("tai")).toInstance(baseUrl("tai"))
   }
 
   @Provides

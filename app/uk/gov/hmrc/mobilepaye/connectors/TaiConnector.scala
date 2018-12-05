@@ -55,7 +55,7 @@ class TaiConnector @Inject()(http: CoreGet,
 
   def getEmployments(nino: Nino)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Seq[Employment]] = {
     http.GET[JsValue](url(nino, s"employments/years/${TaxYear.current.currentYear}")).map {
-      json => (json \ "data").as[Seq[Employment]]
+      json => (json \ "data" \ "employments").as[Seq[Employment]]
     }.recover {
       case _: NotFoundException => Seq.empty[Employment]
       case e => throw e
