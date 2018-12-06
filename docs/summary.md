@@ -23,20 +23,20 @@ The Mobile Paye response
       "name": "SAINSBURY'S PLC",
       "taxCode": "1185L",
       "amount": 4143,
-      "link": "https://www.tax.service.gov.uk/check-income-tax/income-details/<data.employmentId>"
+      "link": "/check-income-tax/income-details/1"
     },
     {
       "name": "EASTWOOD CHARTER SCHOOL (7601)",
       "payrollNumber": "96245SLJK88",
       "taxCode": "BR",
       "amount": 5690,
-      "link": "https://www.tax.service.gov.uk/check-income-tax/income-details/<data.employmentId>"
+      "link": "/check-income-tax/income-details/2"
     },
     {
       "name": "TESCO",
       "taxCode": "BR",
       "amount": 5101,
-      "link": "https://www.tax.service.gov.uk/check-income-tax/income-details/<data.employmentId>"
+      "link": "/check-income-tax/income-details/3"
     }
   ],
   "pensions": [
@@ -44,14 +44,14 @@ The Mobile Paye response
       "name": "HIGHWIRE RETURNS LTD",
       "taxCode": "BR",
       "amount": 4200,
-      "link": "https://www.tax.service.gov.uk/check-income-tax/income-details/<data.employmentId>"
+      "link": "/check-income-tax/income-details/9"
     },
     {
       "name": "AVIVA (2410)",
       "payrollNumber": "AB752BR",
       "taxCode": "BR",
       "amount": 5690,
-      "link": "https://www.tax.service.gov.uk/check-income-tax/income-details/<data.employmentId>"
+      "link": "/check-income-tax/income-details/7"
     }
   ],
   "otherIncomes": [
@@ -62,17 +62,17 @@ The Mobile Paye response
     {
       "name": "UNTAXED INTEREST",
       "amount": 9301,
-      "link": "https://www.tax.service.gov.uk/check-income-tax/income/bank-building-society-savings"
+      "link": "/check-income-tax/income/bank-building-society-savings"
     }
   ],
   "taxFreeAmount": 11850,
-  "taxFreeAmountLink": "https://www.tax.service.gov.uk/check-income-tax/tax-free-allowance",
+  "taxFreeAmountLink": "/check-income-tax/tax-free-allowance",
   "estimatedTaxAmount": 618,
-  "estimatedTaxAmountLink":  "https://www.tax.service.gov.uk/check-income-tax/paye-income-tax-estimate",
-  "understandYourTaxCodeLink": "https://www.tax.service.gov.uk/check-income-tax/tax-codes",
-  "addMissingEmployerLink": "https://www.tax.service.gov.uk/check-income-tax/add-employment/employment-name",
-  "addMissingPensionLink": "https://www.tax.service.gov.uk/check-income-tax/add-pension-provider/name",
-  "addMissingIncomeLink": "https://www.tax.service.gov.uk/forms/form/tell-us-about-other-income/guide"
+  "estimatedTaxAmountLink": "/check-income-tax/paye-income-tax-estimate",
+  "understandYourTaxCodeLink": "/check-income-tax/tax-codes",
+  "addMissingEmployerLink": "/check-income-tax/add-employment/employment-name",
+  "addMissingPensionLink": "/check-income-tax/add-pension-provider/name",
+  "addMissingIncomeLink": "/forms/form/tell-us-about-other-income/guide"
 }
 ```
 
@@ -87,17 +87,17 @@ The Mobile Paye response
       "name": "SAINSBURY'S PLC",
       "taxCode": "1185L",
       "amount": 4143,
-      "link": "https://www.tax.service.gov.uk/check-income-tax/income-details/<data.employmentId>"
+      "link": "/check-income-tax/income-details/8"
     }
   ],
   "taxFreeAmount": 11850,
-  "taxFreeAmountLink": "https://www.tax.service.gov.uk/check-income-tax/tax-free-allowance",
+  "taxFreeAmountLink": "/check-income-tax/tax-free-allowance",
   "estimatedTaxAmount": 618,
-  "estimatedTaxAmountLink":  "https://www.tax.service.gov.uk/check-income-tax/paye-income-tax-estimate",
-  "understandYourTaxCodeLink": "https://www.tax.service.gov.uk/check-income-tax/tax-codes",
-  "addMissingEmployerLink": "https://www.tax.service.gov.uk/check-income-tax/add-employment/employment-name",
-  "addMissingPensionLink": "https://www.tax.service.gov.uk/check-income-tax/add-pension-provider/name",
-  "addMissingIncomeLink": "https://www.tax.service.gov.uk/forms/form/tell-us-about-other-income/guide"
+  "estimatedTaxAmountLink": "/check-income-tax/paye-income-tax-estimate",
+  "understandYourTaxCodeLink": "/check-income-tax/tax-codes",
+  "addMissingEmployerLink": "/check-income-tax/add-employment/employment-name",
+  "addMissingPensionLink": "/check-income-tax/add-pension-provider/name",
+  "addMissingIncomeLink": "/forms/form/tell-us-about-other-income/guide"
 }
 ```
 
@@ -112,22 +112,51 @@ The Mobile Paye response
       "name": "HIGHWIRE RETURNS LTD",
       "taxCode": "BR",
       "amount": 4200,
-      "link": "https://www.tax.service.gov.uk/check-income-tax/income-details/<data.employmentId>"
+      "link": "/income-details/1"
     }
   ],
   "taxFreeAmount": 11850,
-  "taxFreeAmountLink": "https://www.tax.service.gov.uk/check-income-tax/tax-free-allowance",
+  "taxFreeAmountLink": "/check-income-tax/tax-free-allowance",
   "estimatedTaxAmount": 618,
-  "estimatedTaxAmountLink":  "https://www.tax.service.gov.uk/check-income-tax/paye-income-tax-estimate",
-  "understandYourTaxCodeLink": "https://www.tax.service.gov.uk/check-income-tax/tax-codes",
-  "addMissingEmployerLink": "https://www.tax.service.gov.uk/check-income-tax/add-employment/employment-name",
-  "addMissingPensionLink": "https://www.tax.service.gov.uk/check-income-tax/add-pension-provider/name",
-  "addMissingIncomeLink": "https://www.tax.service.gov.uk/forms/form/tell-us-about-other-income/guide"
+  "estimatedTaxAmountLink": "/check-income-tax/paye-income-tax-estimate",
+  "understandYourTaxCodeLink": "/check-income-tax/tax-codes",
+  "addMissingEmployerLink": "/check-income-tax/add-employment/employment-name",
+  "addMissingPensionLink": "/check-income-tax/add-pension-provider/name",
+  "addMissingIncomeLink": "/forms/form/tell-us-about-other-income/guide"
+}
+```
+
+ * **Code:** 200 <br />
+    **Content:** Single Other Income
+
+```json
+{
+  "taxYear": 2018,
+  "otherIncomes": [
+    {
+      "name": "NON CODED INCOME",
+      "amount": 22500
+    }
+  ],
+  "taxFreeAmount": 11850,
+  "taxFreeAmountLink": "/check-income-tax/tax-free-allowance",
+  "estimatedTaxAmount": 618,
+  "estimatedTaxAmountLink": "/check-income-tax/paye-income-tax-estimate",
+  "understandYourTaxCodeLink": "/check-income-tax/tax-codes",
+  "addMissingEmployerLink": "/check-income-tax/add-employment/employment-name",
+  "addMissingPensionLink": "/check-income-tax/add-pension-provider/name",
+  "addMissingIncomeLink": "/forms/form/tell-us-about-other-income/guide"
 }
 ```
 
   * **Code:** 404 <br />
     **Note:** No record found <br />
+    
+  * **Code:** 410 <br />
+    **Note:** Person is deceased <br />
+        
+  * **Code:** 423 <br />
+    **Note:** Person data is corrupt <br />
     
 * **Error Responses:**
 
@@ -136,6 +165,9 @@ The Mobile Paye response
 
   * **Code:** 403 FORBIDDEN <br/>
     **Content:** `{"code":"FORBIDDEN","message":Authenticated user is not authorised for this resource"}`
+    
+  * **Code:** 406 NOT_ACCEPTABLE <br/>
+    **Content:** `{"code":"NOT_ACCEPTABLE","message":Missing Accept Header"}`
 
   OR when a user does not exist or server failure
 
