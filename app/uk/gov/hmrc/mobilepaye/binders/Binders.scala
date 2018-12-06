@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.mobilepaye.domain
+package uk.gov.hmrc.mobilepaye.binders
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.mvc.PathBindable
+import uk.gov.hmrc.domain.Nino
 
-case class OtherIncome(name: String, amount: BigDecimal, link: Option[String] = None)
+object Binders {
 
-object OtherIncome {
-  implicit val format: OFormat[OtherIncome] = Json.format[OtherIncome]
+  implicit def ninoBinder(implicit stringBinder: PathBindable[String]): PathBindable[Nino] = new PathBindable[Nino] {
 
-  def apply(name: String, amount: Int): OtherIncome = {
-    if (name.equalsIgnoreCase("UNTAXED INTEREST"))
-      OtherIncome(name, amount, Some("/check-income-tax/income/bank-building-society-savings"))
-    else
-      OtherIncome(name, amount)
+    def unbind(key: String, nino: Nino): String = stringBinder.unbind(key, nino.value)
+
+    def bind(key: String, value: String): Either[String, Nino] = {
+      if (Nino.isValid(value)) Right(Nino(value))
+      else Left("ERROR_NINO_INVALID")
+    }
   }
 }

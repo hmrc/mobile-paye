@@ -17,21 +17,21 @@
 package uk.gov.hmrc.mobilepaye.domain
 
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.time.TaxYear
 
-case class MobilePayeResponse(employments: Option[Seq[PayeIncome]],
+case class MobilePayeResponse(taxYear: Int = TaxYear.current.currentYear,
+                              employments: Option[Seq[PayeIncome]],
                               pensions: Option[Seq[PayeIncome]],
                               otherIncomes: Option[Seq[OtherIncome]],
-                              taxFreeAmount: Int,
-                              taxFreeAmountLink: String = "https://www.tax.service.gov.uk/check-income-tax/tax-free-allowance",
-                              estimatedTaxAmount: Int,
-                              estimatedTaxAmountLink: String = "https://www.tax.service.gov.uk/check-income-tax/paye-income-tax-estimate",
-                              understandYourTaxCodeLink: String = "https://www.tax.service.gov.uk/check-income-tax/tax-codes",
-                              addMissingEmployerLink: String = "https://www.tax.service.gov.uk/check-income-tax/add-employment/employment-name",
-                              addMissingPensionLink: String = "https://www.tax.service.gov.uk/check-income-tax/add-pension-provider/name",
-                              addMissingIncomeLink: String = "https://www.tax.service.gov.uk/forms/form/tell-us-about-other-income/guide")
+                              taxFreeAmount: BigDecimal,
+                              taxFreeAmountLink: String = "/check-income-tax/tax-free-allowance",
+                              estimatedTaxAmount: BigDecimal,
+                              estimatedTaxAmountLink: String = "/check-income-tax/paye-income-tax-estimate",
+                              understandYourTaxCodeLink: String = "/check-income-tax/tax-codes",
+                              addMissingEmployerLink: String = "/check-income-tax/add-employment/employment-name",
+                              addMissingPensionLink: String = "/check-income-tax/add-pension-provider/name",
+                              addMissingIncomeLink: String = "/forms/form/tell-us-about-other-income/guide")
 
 object MobilePayeResponse {
   implicit val format: OFormat[MobilePayeResponse] = Json.format[MobilePayeResponse]
 }
-
-

@@ -21,6 +21,7 @@ import play.api.libs.json.Json
 import play.api.libs.json.Json.toJson
 import play.api.mvc._
 import uk.gov.hmrc.api.sandbox.FileResource
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mobilepaye.domain._
 
 import scala.concurrent.Future
@@ -30,7 +31,7 @@ class SandboxMobilePayeController @Inject()() extends MobilePayeController with 
 
   override val app: String = "Sandbox-Paye-Controller"
 
-  override def getPayeData(journeyId: Option[String] = None): Action[AnyContent] =
+  override def getPayeSummary(nino: Nino, journeyId: Option[String] = None): Action[AnyContent] =
     validateAccept(acceptHeaderValidationRules).async {
       implicit request =>
         Future successful (request.headers.get("SANDBOX-CONTROL") match {
@@ -39,11 +40,15 @@ class SandboxMobilePayeController @Inject()() extends MobilePayeController with 
           case Some("ERROR-500") => InternalServerError
           case Some("NOT-FOUND") => NotFound
           case Some("SINGLE-EMPLOYMENT") =>
-            val resource: String = findResource(s"/resources/mobilepayesummary/singleemployment.json")
+            val resource: String = findResource(s"/resources/mobilepayesummary/single-employment.json")
               .getOrElse(throw new IllegalArgumentException("Resource not found!"))
             Ok(toJson(Json.parse(resource).as[MobilePayeResponse]))
           case Some("SINGLE-PENSION") =>
-            val resource: String = findResource(s"/resources/mobilepayesummary/singlepension.json")
+            val resource: String = findResource(s"/resources/mobilepayesummary/single-pension.json")
+              .getOrElse(throw new IllegalArgumentException("Resource not found!"))
+            Ok(toJson(Json.parse(resource).as[MobilePayeResponse]))
+          case Some("SINGLE-OTHERINCOME") =>
+            val resource: String = findResource(s"/resources/mobilepayesummary/single-otherincome.json")
               .getOrElse(throw new IllegalArgumentException("Resource not found!"))
             Ok(toJson(Json.parse(resource).as[MobilePayeResponse]))
           case _ =>

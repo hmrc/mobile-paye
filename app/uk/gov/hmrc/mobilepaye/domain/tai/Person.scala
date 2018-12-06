@@ -14,22 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.mobilepaye.connectors
+package uk.gov.hmrc.mobilepaye.domain.tai
 
-import com.google.inject.name.Named
-import com.google.inject.{Inject, Singleton}
+import org.joda.time.LocalDate
+import play.api.libs.json._
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, HttpResponse}
 
-import scala.concurrent.{ExecutionContext, Future}
+case class Person(nino: Nino,
+                  firstName: String,
+                  surname: String,
+                  dateOfBirth: Option[LocalDate],
+                  isDeceased: Boolean = false,
+                  hasCorruptData: Boolean = false)
 
-@Singleton
-class PayeConnector @Inject()(http: CoreGet,
-                              @Named("paye") serviceUrl: String) {
-
-  def url(nino: Nino, route: String) = s"$serviceUrl/paye/${nino.value}/$route"
-
-  def getPersonalDetails(nino: Nino)(implicit headerCarrier: HeaderCarrier, ex: ExecutionContext): Future[HttpResponse] =
-    http.GET[HttpResponse](url(nino, "paye"))
-
+object Person {
+  implicit val personFormat: Format[Person] = Json.format[Person]
 }

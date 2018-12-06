@@ -17,26 +17,51 @@
 package uk.gov.hmrc.mobilepaye.controllers
 
 import com.google.inject._
+import com.google.inject.name.Named
+import play.api.libs.json.Json
 import play.api.mvc._
 import uk.gov.hmrc.api.controllers.HeaderValidator
+import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.mobilepaye.controllers.action.AccessControl
+import uk.gov.hmrc.mobilepaye.domain.MobilePayeResponse
+import uk.gov.hmrc.mobilepaye.services.MobilePayeService
+import uk.gov.hmrc.play.HeaderCarrierConverter.fromHeadersAndSession
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 trait MobilePayeController extends BaseController with HeaderValidator with ErrorHandling {
-  def getPayeData(journeyId: Option[String] = None): Action[AnyContent]
+  def getPayeSummary(nino: Nino, journeyId: Option[String] = None): Action[AnyContent]
 }
 
 @Singleton
-class LiveMobilePayeController @Inject()() extends MobilePayeController {
+class LiveMobilePayeController @Inject()(override val authConnector: AuthConnector,
+                                         @Named("controllers.confidenceLevel") override val confLevel: Int,
+                                         mobilePayeService: MobilePayeService) extends MobilePayeController with AccessControl {
 
   override val app: String = "Live-Paye-Controller"
 
-  override def getPayeData(journeyId: Option[String] = None): Action[AnyContent] = Action.async {
-    implicit request =>
-      errorWrapper {
-        Future.successful(Ok("Hello world"))
-      }
-  }
+  override def getPayeSummary(nino: Nino, journeyId: Option[String] = None): Action[AnyContent] =
+    validateAcceptWithAuth(acceptHeaderValidationRules, Option(nino)).async {
+      implicit request =>
+        implicit val hc: HeaderCarrier = fromHeadersAndSession(request.headers, None)
+        errorWrapper {
+          mobilePayeService.getPerson(nino).flatMap {
+            person =>
+              (person.isDeceased, person.hasCorruptData) match {
+                case (true, _) => Future.successful(Gone)
+                case (_, true) => Future.successful(Locked)
+                case _ => mobilePayeService.getMobilePayeResponse(nino).map {
+                  case MobilePayeResponse(_, None, None, None, _, _, _, _, _, _, _, _) => NotFound
+                  case mobilePayeResponse => Ok(Json.toJson(mobilePayeResponse))
+                }
+              }
+          }
+
+        }
+    }
 
 }

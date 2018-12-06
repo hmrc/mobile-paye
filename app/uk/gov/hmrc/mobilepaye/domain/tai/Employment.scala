@@ -14,19 +14,13 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.mobilepaye.domain
+package uk.gov.hmrc.mobilepaye.domain.tai
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{Format, Json}
 
-case class OtherIncome(name: String, amount: BigDecimal, link: Option[String] = None)
+case class Employment(payrollNumber: Option[String],
+                      sequenceNumber: Int)
 
-object OtherIncome {
-  implicit val format: OFormat[OtherIncome] = Json.format[OtherIncome]
-
-  def apply(name: String, amount: Int): OtherIncome = {
-    if (name.equalsIgnoreCase("UNTAXED INTEREST"))
-      OtherIncome(name, amount, Some("/check-income-tax/income/bank-building-society-savings"))
-    else
-      OtherIncome(name, amount)
-  }
+object Employment {
+  implicit val employmentFormats: Format[Employment] = Json.format[Employment]
 }
