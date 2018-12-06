@@ -27,7 +27,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class MobilePayeServiceSpec extends BaseSpec {
 
-  val mockTaiConnector = mock[TaiConnector]
+  val mockTaiConnector: TaiConnector = mock[TaiConnector]
 
   val service = new MobilePayeService(mockTaiConnector)
 

@@ -22,9 +22,11 @@ import com.google.inject.{AbstractModule, Provides, TypeLiteral}
 import play.api.Mode.Mode
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.api.connector.{ApiServiceLocatorConnector, ServiceLocatorConnector}
+import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{CoreGet, CorePost}
 import uk.gov.hmrc.mobilepaye.controllers.api.ApiAccess
 import uk.gov.hmrc.mobilepaye.tasks.ServiceLocatorRegistrationTask
+import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.config.{AppName, ServicesConfig}
 
@@ -38,11 +40,13 @@ class GuiceModule(environment: Environment, configuration: Configuration) extend
   override def configure(): Unit = {
 
     bind(classOf[ServiceLocatorConnector]).to(classOf[ApiServiceLocatorConnector])
+    bind(classOf[AuthConnector]).to(classOf[DefaultAuthConnector])
     bind(classOf[CoreGet]).to(classOf[WSHttpImpl])
     bind(classOf[CorePost]).to(classOf[WSHttpImpl])
     bind(classOf[HttpClient]).to(classOf[WSHttpImpl])
     bind(classOf[ServiceLocatorRegistrationTask]).asEagerSingleton()
 
+    bindConfigInt("controllers.confidenceLevel")
     bind(classOf[ApiAccess]).toInstance(
       ApiAccess("PRIVATE", configuration.underlying.getStringList("api.access.white-list.applicationIds").asScala))
 
@@ -59,5 +63,10 @@ class GuiceModule(environment: Environment, configuration: Configuration) extend
     bind(new TypeLiteral[Seq[String]] {})
       .annotatedWith(named(path))
       .toInstance(configValue)
+  }
+
+  private def bindConfigInt(path: String): Unit = {
+    bindConstant().annotatedWith(named(path))
+      .to(configuration.underlying.getInt(path))
   }
 }

@@ -9,6 +9,7 @@ object AppDependencies {
   private val playHmrcApiVersion = "3.2.0"
   private val domainVersion = "5.2.0"
   private val taxYearVersion = "0.4.0"
+  private val authVersion = "2.16.0-play-25"
 
   private val hmrcTestVersion = "3.2.0"
   private val pegdownVersion = "1.6.0"
@@ -17,12 +18,13 @@ object AppDependencies {
   private val scalaMockVersion = "4.0.0"
   private val scalaTestPlusVersion = "2.0.1"
 
-  val compile = Seq(
+  val compile: Seq[ModuleID] = Seq(
     ws,
     "uk.gov.hmrc" %% "bootstrap-play-25" % play25Bootstrap,
     "uk.gov.hmrc" %% "domain" % domainVersion,
     "uk.gov.hmrc" %% "play-hmrc-api" % playHmrcApiVersion,
-    "uk.gov.hmrc" %% "tax-year" % taxYearVersion
+    "uk.gov.hmrc" %% "tax-year" % taxYearVersion,
+    "uk.gov.hmrc" %% "auth-client" % authVersion
   )
 
   trait TestDependencies {

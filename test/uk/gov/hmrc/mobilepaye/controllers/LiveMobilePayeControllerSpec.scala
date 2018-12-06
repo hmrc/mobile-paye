@@ -17,7 +17,11 @@
 package uk.gov.hmrc.mobilepaye.controllers
 
 import play.api.libs.json.Json
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
+import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.auth.core.ConfidenceLevel.{L100, L200}
+import uk.gov.hmrc.auth.core.syntax.retrieved._
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
 import uk.gov.hmrc.mobilepaye.domain.MobilePayeResponse
@@ -30,11 +34,12 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class LiveMobilePayeControllerSpec extends BaseSpec {
 
-  val fakeRequest = FakeRequest("GET", "/")
+  val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withHeaders(acceptHeader)
 
-  val mockMobilePayeService = mock[MobilePayeService]
+  val mockMobilePayeService: MobilePayeService = mock[MobilePayeService]
 
-  val controller = new LiveMobilePayeController(mockMobilePayeService)
+  implicit val mockAuthConnector: AuthConnector = mock[AuthConnector]
+  val controller = new LiveMobilePayeController(mockAuthConnector, 200, mockMobilePayeService)
 
   def mockGetMobilePayeResponse(f: Future[MobilePayeResponse]): Unit = {
     (mockMobilePayeService.getMobilePayeResponse(_: Nino)
@@ -51,6 +56,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
     "return 200 and full paye summary data for valid authorised nino" in {
       mockGetPerson(Future.successful(person))
       mockGetMobilePayeResponse(Future.successful(fullMobilePayeResponse))
+      mockAuthorisationGrantAccess(Some(nino.toString) and L200)
 
       val result = await(controller.getPayeSummary(nino)(fakeRequest))
 
@@ -61,6 +67,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
     "return 200 and paye summary data with no employment data for valid authorised nino" in {
       mockGetPerson(Future.successful(person))
       mockGetMobilePayeResponse(Future.successful(fullMobilePayeResponse.copy(employments = None)))
+      mockAuthorisationGrantAccess(Some(nino.toString) and L200)
 
       val result = await(controller.getPayeSummary(nino)(fakeRequest))
 
@@ -71,6 +78,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
     "return 200 and paye summary data with no pensions data for valid authorised nino" in {
       mockGetPerson(Future.successful(person))
       mockGetMobilePayeResponse(Future.successful(fullMobilePayeResponse.copy(pensions = None)))
+      mockAuthorisationGrantAccess(Some(nino.toString) and L200)
 
       val result = await(controller.getPayeSummary(nino)(fakeRequest))
 
@@ -81,6 +89,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
     "return 200 and paye summary data with no other income data for valid authorised nino" in {
       mockGetPerson(Future.successful(person))
       mockGetMobilePayeResponse(Future.successful(fullMobilePayeResponse.copy(otherIncomes = None)))
+      mockAuthorisationGrantAccess(Some(nino.toString) and L200)
 
       val result = await(controller.getPayeSummary(nino)(fakeRequest))
 
@@ -91,6 +100,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
     "return 404 when there is no employment, pension or otherIncome data found for valid authorised nino" in {
       mockGetPerson(Future.successful(person))
       mockGetMobilePayeResponse(Future.successful(fullMobilePayeResponse.copy(employments = None, pensions = None, otherIncomes = None)))
+      mockAuthorisationGrantAccess(Some(nino.toString) and L200)
 
       val result = await(controller.getPayeSummary(nino)(fakeRequest))
 
@@ -98,6 +108,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
     }
 
     "return 423 for a valid nino and authorised user but corrupt/mcierror user" in {
+      mockAuthorisationGrantAccess(Some(nino.toString) and L200)
       mockGetPerson(Future.successful(person.copy(hasCorruptData = true)))
 
       val result = await(controller.getPayeSummary(nino)(fakeRequest))
@@ -106,6 +117,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
     }
 
     "return 410 for a valid nino and authorised user but deceased user" in {
+      mockAuthorisationGrantAccess(Some(nino.toString) and L200)
       mockGetPerson(Future.successful(person.copy(isDeceased = true)))
 
       val result = await(controller.getPayeSummary(nino)(fakeRequest))
@@ -114,6 +126,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
     }
 
     "return 500 when MobilePayeService throws an InternalServerException" in {
+      mockAuthorisationGrantAccess(Some(nino.toString) and L200)
       mockGetPerson(Future.successful(person))
       mockGetMobilePayeResponse(Future.failed(new InternalServerException("Internal Server Error")))
 
@@ -122,12 +135,26 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       status(result) shouldBe 500
     }
 
-    "return 401 for valid nino but unauthorized user" in {
-      pending
+    "return 401 for valid nino and user but low CL" in {
+      mockAuthorisationGrantAccess(Some(nino.toString) and L100)
+
+      val result = await(controller.getPayeSummary(nino)(fakeRequest))
+
+      status(result) shouldBe 401
+    }
+
+    "return 406 for missing accept header" in {
+      val result = await(controller.getPayeSummary(nino)(FakeRequest("GET", "/")))
+
+      status(result) shouldBe 406
     }
 
     "return 403 for valid nino for authorised user but for a different nino" in {
-      pending
+      mockAuthorisationGrantAccess(Some(nino.toString) and L200)
+
+      val result = await(controller.getPayeSummary(Nino("CS100700A"))(fakeRequest))
+
+      status(result) shouldBe 403
     }
 
   }
