@@ -8,14 +8,19 @@ import uk.gov.hmrc.time.TaxYear
 object TaiStub {
 
   def personalDetailsAreFound(nino: String, person: Person): Unit = {
-    stubFor(post(urlEqualTo(s"/tai/$nino/person"))
+    stubFor(get(urlEqualTo(s"/tai/$nino/person"))
       .willReturn(aResponse()
         .withStatus(200)
-        .withBody(Json.toJson(person).toString())))
+        .withBody(
+          s"""
+             |{
+             |  "data": ${Json.toJson(person)}
+             |}
+          """.stripMargin)))
   }
 
   def taxCodeIncomesAreFound(nino: String, taxCodeIncomes: Seq[TaxCodeIncome]): Unit = {
-    stubFor(post(urlEqualTo(s"/tai/$nino/tax-account/${TaxYear.current.currentYear}/income/tax-code-incomes"))
+    stubFor(get(urlEqualTo(s"/tai/$nino/tax-account/${TaxYear.current.currentYear}/income/tax-code-incomes"))
       .willReturn(aResponse()
         .withStatus(200)
         .withBody(Json.toJson(taxCodeIncomes).toString())))
@@ -25,7 +30,7 @@ object TaiStub {
     getRequestedFor(urlEqualTo(s"/tai/$nino/tax-account/${TaxYear.current.currentYear}/income/tax-code-incomes")))
 
   def nonTaxCodeIncomeIsFound(nino: String, nonTaxCodeIncome: NonTaxCodeIncome): Unit = {
-    stubFor(post(urlEqualTo(s"/tai/$nino/tax-account/${TaxYear.current.currentYear}/income"))
+    stubFor(get(urlEqualTo(s"/tai/$nino/tax-account/${TaxYear.current.currentYear}/income"))
       .willReturn(aResponse()
         .withStatus(200)
         .withBody(Json.toJson(nonTaxCodeIncome).toString())))
@@ -35,7 +40,7 @@ object TaiStub {
     getRequestedFor(urlEqualTo(s"/tai/$nino/tax-account/${TaxYear.current.currentYear}/income")))
 
   def employmentsAreFound(nino: String, employments: Seq[Employment]): Unit = {
-    stubFor(post(urlEqualTo(s"/tai/$nino/employments/years/${TaxYear.current.currentYear}"))
+    stubFor(get(urlEqualTo(s"/tai/$nino/employments/years/${TaxYear.current.currentYear}"))
       .willReturn(aResponse()
         .withStatus(200)
         .withBody(Json.toJson(employments).toString())))
@@ -45,7 +50,7 @@ object TaiStub {
     getRequestedFor(urlEqualTo(s"/tai/$nino/employments/years/${TaxYear.current.currentYear}")))
 
   def taxAccountSummaryIsFound(nino: String, taxAccountSummary: TaxAccountSummary): Unit = {
-    stubFor(post(urlEqualTo(s"/tai/$nino/tax-account/${TaxYear.current.currentYear}/summary"))
+    stubFor(get(urlEqualTo(s"/tai/$nino/tax-account/${TaxYear.current.currentYear}/summary"))
       .willReturn(aResponse()
         .withStatus(200)
         .withBody(Json.toJson(taxAccountSummary).toString())))

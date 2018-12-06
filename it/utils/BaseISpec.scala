@@ -17,6 +17,8 @@ trait BaseISpec extends UnitSpec with WsScalaTestClient with OneServerPerSuite w
     "auditing.enabled"                                        -> false,
     "microservice.services.service-locator.host"              -> wireMockHost,
     "microservice.services.service-locator.port"              -> wireMockPort,
+    "microservice.services.tai.host"                          -> wireMockHost,
+    "microservice.services.tai.port"                          -> wireMockPort,
     "auditing.consumer.baseUri.host"                          -> wireMockHost,
     "auditing.consumer.baseUri.port"                          -> wireMockPort
   )

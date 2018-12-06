@@ -56,17 +56,6 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
       (response.json \ "estimatedTaxAmount").as[Int] shouldBe 618
     }
 
-    "return OK and a no incomes SANDBOX-CONTROL is NO-INCOMES" in {
-      val response = await(request.withHeaders(mobileHeader, "SANDBOX-CONTROL" -> "NO-INCOMES").get())
-      response.status shouldBe 200
-      (response.json \ "taxYear").as[Int] shouldBe TaxYear.current.currentYear
-      (response.json \\ "employments") shouldBe empty
-      (response.json \\ "pensions") shouldBe empty
-      (response.json \\ "otherIncomes") shouldBe empty
-      (response.json \ "taxFreeAmount").as[Int] shouldBe 11850
-      (response.json \ "estimatedTaxAmount").as[Int] shouldBe 618
-    }
-
     "return 404 where SANDBOX-CONTROL is NOT-FOUND" in {
       val response = await(request.withHeaders(mobileHeader, "SANDBOX-CONTROL" -> "NOT-FOUND").get())
       response.status shouldBe 404

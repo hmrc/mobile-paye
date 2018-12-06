@@ -24,7 +24,9 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mobilepaye.domain.MobilePayeResponse
 import uk.gov.hmrc.mobilepaye.services.MobilePayeService
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
+
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 trait MobilePayeController extends BaseController with HeaderValidator with ErrorHandling {
   def getPayeSummary(nino: Nino, journeyId: Option[String] = None): Action[AnyContent]
@@ -38,10 +40,18 @@ class LiveMobilePayeController @Inject()(mobilePayeService: MobilePayeService) e
   override def getPayeSummary(nino: Nino, journeyId: Option[String] = None): Action[AnyContent] = Action.async {
     implicit request =>
       errorWrapper {
-        mobilePayeService.getMobilePayeResponse(nino).map {
-          case MobilePayeResponse(_, None, None, None, _, _, _, _, _, _, _, _) => NotFound
-          case mobilePayeResponse => Ok(Json.toJson(mobilePayeResponse))
+        mobilePayeService.getPerson(nino).flatMap {
+          person =>
+            (person.isDeceased, person.hasCorruptData) match {
+              case (true, _) => Future.successful(Gone)
+              case (_, true) => Future.successful(Locked)
+              case _ => mobilePayeService.getMobilePayeResponse(nino).map {
+                case MobilePayeResponse(_, None, None, None, _, _, _, _, _, _, _, _) => NotFound
+                case mobilePayeResponse => Ok(Json.toJson(mobilePayeResponse))
+              }
+            }
         }
+
       }
   }
 

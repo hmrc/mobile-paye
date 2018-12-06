@@ -20,12 +20,9 @@ import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
 class TaiConnectorSpec extends BaseSpec {
-
-  implicit lazy val hc: HeaderCarrier = HeaderCarrier()
 
   val mockCoreGet: CoreGet = mock[CoreGet]
   val serviceUrl: String = "tst-url"
@@ -175,7 +172,9 @@ class TaiConnectorSpec extends BaseSpec {
         Json.parse(
           s"""
              |{
-             |  "data": ${Json.toJson(taiEmployments)}
+             |  "data": {
+             |    "employments": ${Json.toJson(taiEmployments)}
+             |  }
              |}
           """.stripMargin)
 

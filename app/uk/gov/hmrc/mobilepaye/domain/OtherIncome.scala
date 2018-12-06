@@ -25,7 +25,7 @@ object OtherIncome {
 
   def apply(name: String, amount: Int): OtherIncome = {
     if (name.equalsIgnoreCase("UNTAXED INTEREST"))
-      OtherIncome(name, amount, Some("https://www.tax.service.gov.uk/check-income-tax/income/bank-building-society-savings"))
+      OtherIncome(name, amount, Some("/check-income-tax/income/bank-building-society-savings"))
     else
       OtherIncome(name, amount)
   }

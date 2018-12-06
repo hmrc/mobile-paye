@@ -1,6 +1,5 @@
 import play.api.libs.json.Json
 import play.api.libs.ws.WSRequest
-import play.api.mvc.Results._
 import stubs.AuthStub._
 import stubs.TaiStub._
 import uk.gov.hmrc.mobilepaye.domain.tai._
@@ -20,7 +19,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
       taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
 
       val response = await(request.get())
-      response.status shouldBe Ok
+      response.status shouldBe 200
       response.body shouldBe Json.toJson(fullMobilePayeResponse)
     }
 
@@ -33,7 +32,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
       taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
 
       val response = await(request.get())
-      response.status shouldBe Ok
+      response.status shouldBe 200
       response.body shouldBe Json.toJson(fullMobilePayeResponse.copy(employments = None))
     }
 
@@ -46,7 +45,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
       taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
 
       val response = await(request.get())
-      response.status shouldBe Ok
+      response.status shouldBe 200
       response.body shouldBe Json.toJson(fullMobilePayeResponse.copy(pensions = None))
     }
 
@@ -59,7 +58,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
       taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
 
       val response = await(request.get())
-      response.status shouldBe Ok
+      response.status shouldBe 200
       response.body shouldBe Json.toJson(fullMobilePayeResponse.copy(otherIncomes = None))
     }
 
@@ -68,7 +67,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
       personalDetailsAreFound(nino.toString, person.copy(isDeceased = true))
 
       val response = await(request.get())
-      response.status shouldBe Gone
+      response.status shouldBe 410
 
       taxCodeIncomeNotCalled(nino.toString)
       nonTaxCodeIncomeNotCalled(nino.toString)
@@ -81,7 +80,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
       personalDetailsAreFound(nino.toString, person.copy(hasCorruptData = true))
 
       val response = await(request.get())
-      response.status shouldBe Locked
+      response.status shouldBe 423
 
       taxCodeIncomeNotCalled(nino.toString)
       nonTaxCodeIncomeNotCalled(nino.toString)

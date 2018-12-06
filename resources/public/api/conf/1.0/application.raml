@@ -23,21 +23,28 @@ uses:
   types: https://developer.service.hmrc.gov.uk/api-documentation/assets/common/modules/types.raml
 
 /mobile-paye:
-  /summary:
-      get:
-        displayName: Get PAYE Data
-        description: This endpoint retrieves the PAYE data associated with a user.
-        is: [headers.acceptHeader]
-        (annotations.scope): "read:native-apps-api-orchestration"
-        securedBy: [ sec.oauth_2_0: { scopes: [ "read:native-apps-api-orchestration" ] } ]
-        queryParameters:
-          journeyId:
+  /{nino}:
+    /summary:
+      /current-income:
+        uriParameters:
+          nino:
+            description: The NINO for the individual.
             type: string
-            required: false
-        responses:
-          200:
-            body:
-              application/json:
-                examples:
-                  example-1:
-                    value: !include examples/get-paye-data-example-1.json
+            example: NS123456B
+        get:
+          displayName: Get current PAYE income summary
+          description: This endpoint retrieves the current PAYE income summary associated with a user for the current tax year.
+          is: [headers.acceptHeader]
+          (annotations.scope): "read:native-apps-api-orchestration"
+          securedBy: [ sec.oauth_2_0: { scopes: [ "read:native-apps-api-orchestration" ] } ]
+          queryParameters:
+            journeyId:
+              type: string
+              required: false
+          responses:
+            200:
+              body:
+                application/json:
+                  examples:
+                    example-1:
+                      value: !include examples/get-paye-data-example-1.json

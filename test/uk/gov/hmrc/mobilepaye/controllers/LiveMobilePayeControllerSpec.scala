@@ -16,33 +16,110 @@
 
 package uk.gov.hmrc.mobilepaye.controllers
 
+import play.api.libs.json.Json
 import play.api.test.FakeRequest
+import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
+import uk.gov.hmrc.mobilepaye.domain.MobilePayeResponse
+import uk.gov.hmrc.mobilepaye.domain.tai.Person
+import uk.gov.hmrc.mobilepaye.services.MobilePayeService
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
+
+import scala.concurrent.{ExecutionContext, Future}
 
 
 class LiveMobilePayeControllerSpec extends BaseSpec {
 
   val fakeRequest = FakeRequest("GET", "/")
 
+  val mockMobilePayeService = mock[MobilePayeService]
+
+  val controller = new LiveMobilePayeController(mockMobilePayeService)
+
+  def mockGetMobilePayeResponse(f: Future[MobilePayeResponse]): Unit = {
+    (mockMobilePayeService.getMobilePayeResponse(_: Nino)
+    (_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(f)
+  }
+
+  def mockGetPerson(f: Future[Person]): Unit = {
+    (mockMobilePayeService.getPerson(_: Nino)
+    (_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(f)
+  }
+
+
   s"GET /$nino/summary/current-income" should {
     "return 200 and full paye summary data for valid authorised nino" in {
-      pending
+      mockGetPerson(Future.successful(person))
+      mockGetMobilePayeResponse(Future.successful(fullMobilePayeResponse))
+
+      val result = await(controller.getPayeSummary(nino)(fakeRequest))
+
+      status(result) shouldBe 200
+      jsonBodyOf(result) shouldBe Json.toJson(fullMobilePayeResponse)
     }
 
     "return 200 and paye summary data with no employment data for valid authorised nino" in {
-      pending
+      mockGetPerson(Future.successful(person))
+      mockGetMobilePayeResponse(Future.successful(fullMobilePayeResponse.copy(employments = None)))
+
+      val result = await(controller.getPayeSummary(nino)(fakeRequest))
+
+      status(result) shouldBe 200
+      jsonBodyOf(result) shouldBe Json.toJson(fullMobilePayeResponse.copy(employments = None))
     }
 
     "return 200 and paye summary data with no pensions data for valid authorised nino" in {
-      pending
+      mockGetPerson(Future.successful(person))
+      mockGetMobilePayeResponse(Future.successful(fullMobilePayeResponse.copy(pensions = None)))
+
+      val result = await(controller.getPayeSummary(nino)(fakeRequest))
+
+      status(result) shouldBe 200
+      jsonBodyOf(result) shouldBe Json.toJson(fullMobilePayeResponse.copy(pensions = None))
     }
 
     "return 200 and paye summary data with no other income data for valid authorised nino" in {
-      pending
+      mockGetPerson(Future.successful(person))
+      mockGetMobilePayeResponse(Future.successful(fullMobilePayeResponse.copy(otherIncomes = None)))
+
+      val result = await(controller.getPayeSummary(nino)(fakeRequest))
+
+      status(result) shouldBe 200
+      jsonBodyOf(result) shouldBe Json.toJson(fullMobilePayeResponse.copy(otherIncomes = None))
     }
 
-    "return 200 and paye summary data with no employment, pensions or other income data for valid authorised nino" in {
-      pending
+    "return 404 when there is no employment, pension or otherIncome data found for valid authorised nino" in {
+      mockGetPerson(Future.successful(person))
+      mockGetMobilePayeResponse(Future.successful(fullMobilePayeResponse.copy(employments = None, pensions = None, otherIncomes = None)))
+
+      val result = await(controller.getPayeSummary(nino)(fakeRequest))
+
+      status(result) shouldBe 404
+    }
+
+    "return 423 for a valid nino and authorised user but corrupt/mcierror user" in {
+      mockGetPerson(Future.successful(person.copy(hasCorruptData = true)))
+
+      val result = await(controller.getPayeSummary(nino)(fakeRequest))
+
+      status(result) shouldBe 423
+    }
+
+    "return 410 for a valid nino and authorised user but deceased user" in {
+      mockGetPerson(Future.successful(person.copy(isDeceased = true)))
+
+      val result = await(controller.getPayeSummary(nino)(fakeRequest))
+
+      status(result) shouldBe 410
+    }
+
+    "return 500 when MobilePayeService throws an InternalServerException" in {
+      mockGetPerson(Future.successful(person))
+      mockGetMobilePayeResponse(Future.failed(new InternalServerException("Internal Server Error")))
+
+      val result = await(controller.getPayeSummary(nino)(fakeRequest))
+
+      status(result) shouldBe 500
     }
 
     "return 401 for valid nino but unauthorized user" in {
@@ -50,24 +127,6 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
     }
 
     "return 403 for valid nino for authorised user but for a different nino" in {
-      pending
-    }
-
-    "return 500 when MobilePayeService throws an InternalServerErrorException" in {
-      pending
-    }
-
-    "return 404 when no user data is found for an authorised user with a valid nino" in {
-      pending
-    }
-
-    "return 423 for a valid nino and authorised user but corrupt/mcierror user" in {
-      //TODO verify no data calls made other than person details
-      pending
-    }
-
-    "return 410 for a valid nino and authorised user but deceased user" in {
-      //TODO verify no data calls made other than person details
       pending
     }
 

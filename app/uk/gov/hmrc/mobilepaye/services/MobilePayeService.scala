@@ -44,7 +44,7 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector) {
               payrollNumber = emp.payrollNumber,
               taxCode = tci.taxCode,
               amount = tci.amount,
-              link = "TODO")) //TODO Implement these links
+              link = s"/check-income-tax/income-details/${tci.employmentId.getOrElse(throw new Exception("Employment ID not found"))}"))
         } match {
           case Nil => None
           case epi => Some(epi)
@@ -81,6 +81,10 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector) {
       taxAccountSummary <- taiConnector.getTaxAccountSummary(nino)
       mobilePayeResponse: MobilePayeResponse = buildMobilePayeResponse(taxCodeIncomes, nonTaxCodeIncomes, employments, taxAccountSummary)
     } yield mobilePayeResponse
+  }
+
+  def getPerson(nino: Nino)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Person] = {
+    taiConnector.getPerson(nino)
   }
 
 }

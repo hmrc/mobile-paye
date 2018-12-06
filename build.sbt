@@ -1,5 +1,6 @@
 import play.sbt.PlayImport.PlayKeys.playDefaultPort
 import sbt.Tests.{Group, SubProcess}
+import scoverage.ScoverageKeys
 import uk.gov.hmrc.SbtArtifactory
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 
@@ -14,6 +15,10 @@ lazy val microservice = Project(appName, file("."))
   .settings(routesGenerator := StaticRoutesGenerator)
   .settings(
     majorVersion := 0,
+    ScoverageKeys.coverageExcludedFiles := "<empty>;com.kenshoo.play.metrics.*;.*definition.*;prod.*;testOnlyDoNotUseInAppConf.*;app.*;uk.gov.hmrc.BuildInfo;.*Routes.*",
+    ScoverageKeys.coverageMinimum := 90,
+    ScoverageKeys.coverageFailOnMinimum := false,
+    ScoverageKeys.coverageHighlighting := true,
     playDefaultPort := 8247,
     libraryDependencies ++= AppDependencies(),
     evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
