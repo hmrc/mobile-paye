@@ -1,7 +1,7 @@
 package stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.mobilepaye.domain.tai._
 import uk.gov.hmrc.time.TaxYear
 
@@ -23,7 +23,12 @@ object TaiStub {
     stubFor(get(urlEqualTo(s"/tai/$nino/tax-account/${TaxYear.current.currentYear}/income/tax-code-incomes"))
       .willReturn(aResponse()
         .withStatus(200)
-        .withBody(Json.toJson(taxCodeIncomes).toString())))
+        .withBody(
+          s"""
+             |{
+             |  "data": ${Json.toJson(taxCodeIncomes)}
+             |}
+          """.stripMargin)))
   }
 
   def taxCodeIncomeNotCalled(nino: String): Unit = verify(0,
@@ -33,7 +38,14 @@ object TaiStub {
     stubFor(get(urlEqualTo(s"/tai/$nino/tax-account/${TaxYear.current.currentYear}/income"))
       .willReturn(aResponse()
         .withStatus(200)
-        .withBody(Json.toJson(nonTaxCodeIncome).toString())))
+        .withBody(
+          s"""
+             |{
+             |  "data": {
+             |    "nonTaxCodeIncomes": ${Json.toJson(nonTaxCodeIncome)}
+             |  }
+             |}
+          """.stripMargin)))
   }
 
   def nonTaxCodeIncomeNotCalled(nino: String): Unit = verify(0,
@@ -43,7 +55,14 @@ object TaiStub {
     stubFor(get(urlEqualTo(s"/tai/$nino/employments/years/${TaxYear.current.currentYear}"))
       .willReturn(aResponse()
         .withStatus(200)
-        .withBody(Json.toJson(employments).toString())))
+        .withBody(
+          s"""
+             |{
+             |  "data": {
+             |    "employments": ${Json.toJson(employments)}
+             |  }
+             |}
+          """.stripMargin)))
   }
 
   def employmentsNotCalled(nino: String): Unit = verify(0,
@@ -53,7 +72,12 @@ object TaiStub {
     stubFor(get(urlEqualTo(s"/tai/$nino/tax-account/${TaxYear.current.currentYear}/summary"))
       .willReturn(aResponse()
         .withStatus(200)
-        .withBody(Json.toJson(taxAccountSummary).toString())))
+        .withBody(
+          s"""
+             |{
+             |  "data": ${Json.toJson(taxAccountSummary)}
+             |}
+          """.stripMargin)))
   }
 
   def taxAccountSummaryNotCalled(nino: String): Unit = verify(0,
