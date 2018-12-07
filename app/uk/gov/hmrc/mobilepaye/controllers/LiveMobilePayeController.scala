@@ -23,7 +23,7 @@ import play.api.mvc._
 import uk.gov.hmrc.api.controllers.HeaderValidator
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, HeaderNames}
 import uk.gov.hmrc.mobilepaye.controllers.action.AccessControl
 import uk.gov.hmrc.mobilepaye.domain.MobilePayeResponse
 import uk.gov.hmrc.mobilepaye.services.MobilePayeService
@@ -34,7 +34,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 trait MobilePayeController extends BaseController with HeaderValidator with ErrorHandling {
-  def getPayeSummary(nino: Nino, journeyId: Option[String] = None): Action[AnyContent]
+  def getPayeSummary(nino: Nino, journeyId: String): Action[AnyContent]
 }
 
 @Singleton
@@ -44,10 +44,10 @@ class LiveMobilePayeController @Inject()(override val authConnector: AuthConnect
 
   override val app: String = "Live-Paye-Controller"
 
-  override def getPayeSummary(nino: Nino, journeyId: Option[String] = None): Action[AnyContent] =
+  override def getPayeSummary(nino: Nino, journeyId: String): Action[AnyContent] =
     validateAcceptWithAuth(acceptHeaderValidationRules, Option(nino)).async {
       implicit request =>
-        implicit val hc: HeaderCarrier = fromHeadersAndSession(request.headers, None)
+        implicit val hc: HeaderCarrier = fromHeadersAndSession(request.headers, None).withExtraHeaders(HeaderNames.xSessionId -> journeyId)
         errorWrapper {
           mobilePayeService.getPerson(nino).flatMap {
             person =>

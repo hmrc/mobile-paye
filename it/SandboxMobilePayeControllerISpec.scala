@@ -7,7 +7,7 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
   private val mobileHeader = "X-MOBILE-USER-ID" -> "208606423740"
 
   s"GET sandbox/$nino/summary/current-income" should {
-    val request: WSRequest = wsUrl(s"/$nino/summary/current-income").withHeaders(acceptJsonHeader)
+    val request: WSRequest = wsUrl(s"/$nino/summary/current-income?journeyId=12345").withHeaders(acceptJsonHeader)
 
     "return OK and default paye data with no SANDBOX-CONTROL" in {
       val response = await(request.withHeaders(mobileHeader).get())

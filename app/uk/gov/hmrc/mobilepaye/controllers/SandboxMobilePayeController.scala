@@ -31,7 +31,7 @@ class SandboxMobilePayeController @Inject()() extends MobilePayeController with 
 
   override val app: String = "Sandbox-Paye-Controller"
 
-  override def getPayeSummary(nino: Nino, journeyId: Option[String] = None): Action[AnyContent] =
+  override def getPayeSummary(nino: Nino, journeyId: String): Action[AnyContent] =
     validateAccept(acceptHeaderValidationRules).async {
       implicit request =>
         Future successful (request.headers.get("SANDBOX-CONTROL") match {
