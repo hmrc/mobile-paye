@@ -66,18 +66,6 @@ trait ErrorHandling {
         log("BadRequest!")
         Status(ErrorBadRequest.httpStatusCode)(toJson(ErrorBadRequest))
 
-      case ex: NinoNotFoundOnAccount =>
-        Logger.info(ex.message)
-        Unauthorized(toJson(ErrorUnauthorizedNoNino))
-
-      case ex: FailToMatchTaxIdOnAuth =>
-        Logger.info(ex.message)
-        Status(ErrorUnauthorized.httpStatusCode)(toJson(ErrorUnauthorized))
-
-      case ex: AccountWithLowCL =>
-        Logger.info(ex.message)
-        Unauthorized(toJson(ErrorUnauthorizedLowCL))
-
       case ex: Upstream4xxResponse if ex.upstreamResponseCode == 401 =>
         log("Upstream service returned 401")
         Status(ErrorUnauthorizedUpstream.httpStatusCode)(toJson(ErrorUnauthorizedUpstream))

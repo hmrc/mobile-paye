@@ -98,6 +98,9 @@ class MobilePayeServiceSpec extends BaseSpec {
 
     "throw UnauthorizedException when receiving UnauthorizedException from taiConnector" in {
       mockTaxCodeIncomes(Future.failed(new UnauthorizedException("Unauthorized")))
+      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncome.copy(otherNonTaxCodeIncomes = Nil)))
+      mockEmployments(Future.successful(taiEmployments))
+      mockTaxAccountSummary(Future.successful(taxAccountSummary))
 
       intercept[UnauthorizedException] {
         await(service.getMobilePayeResponse(nino))
@@ -106,6 +109,9 @@ class MobilePayeServiceSpec extends BaseSpec {
 
     "throw ForbiddenException when receiving ForbiddenException from taiConnector" in {
       mockTaxCodeIncomes(Future.failed(new ForbiddenException("Forbidden")))
+      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncome.copy(otherNonTaxCodeIncomes = Nil)))
+      mockEmployments(Future.successful(taiEmployments))
+      mockTaxAccountSummary(Future.successful(taxAccountSummary))
 
       intercept[ForbiddenException] {
         await(service.getMobilePayeResponse(nino))
@@ -114,6 +120,9 @@ class MobilePayeServiceSpec extends BaseSpec {
 
     "throw InternalServerError when receiving InternalServerError from taiConnector" in {
       mockTaxCodeIncomes(Future.failed(new InternalServerException("Internal Server Error")))
+      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncome.copy(otherNonTaxCodeIncomes = Nil)))
+      mockEmployments(Future.successful(taiEmployments))
+      mockTaxAccountSummary(Future.successful(taxAccountSummary))
 
       intercept[InternalServerException] {
         await(service.getMobilePayeResponse(nino))

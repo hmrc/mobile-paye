@@ -16,17 +16,20 @@
 
 package uk.gov.hmrc.mobilepaye.domain
 
-import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 
-case class OtherIncome(name: String, amount: BigDecimal, link: Option[String] = None)
+class OtherIncomeSpec extends BaseSpec {
+  "OtherIncome.apply" should {
+    "Build the link when given an UNTAXED INTEREST name" in {
+      val result = OtherIncome.withMaybeLink("UNTAXED INTEREST", BigDecimal(200.0))
 
-object OtherIncome {
-  implicit val format: OFormat[OtherIncome] = Json.format[OtherIncome]
+      result.link.get shouldBe "/check-income-tax/income/bank-building-society-savings"
+    }
 
-  def withMaybeLink(name: String, amount: BigDecimal, link: Option[String] = None): OtherIncome = {
-    if (name == "UNTAXED INTEREST")
-      OtherIncome(name, amount, Some("/check-income-tax/income/bank-building-society-savings"))
-    else
-      OtherIncome(name, amount)
+    "Don't build a link when given anything other than UNTAXED INTEREST name" in {
+      val result = OtherIncome.withMaybeLink("MAXIMUM INTEREST", BigDecimal(200.0))
+
+      result.link.isDefined shouldBe false
+    }
   }
 }

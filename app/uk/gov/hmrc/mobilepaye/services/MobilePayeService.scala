@@ -51,8 +51,8 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector) {
         }
       }
 
-      val otherIncomes: Option[Seq[OtherIncome]] = nonTaxCodeIncomes.otherNonTaxCodeIncomes.map(income => OtherIncome(
-        name = income.incomeComponentType.toString.replaceAll("(\\p{Ll})(\\p{Lu})", "$1 $2").toUpperCase,
+      val otherIncomes: Option[Seq[OtherIncome]] = nonTaxCodeIncomes.otherNonTaxCodeIncomes.map(income => OtherIncome.withMaybeLink(
+        name = income.getFormattedIncomeComponentType,
         amount = income.amount
       )) match {
         case Nil => None
@@ -74,17 +74,20 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector) {
         estimatedTaxAmount = taxAccountSummary.totalEstimatedTax)
     }
 
+    val taxCodeIncomesF = taiConnector.getTaxCodeIncomes(nino)
+    val nonTaxCodeIncomesF = taiConnector.getNonTaxCodeIncome(nino)
+    val employmentsF = taiConnector.getEmployments(nino)
+    val taxAccountSummaryF = taiConnector.getTaxAccountSummary(nino)
+
     for {
-      taxCodeIncomes <- taiConnector.getTaxCodeIncomes(nino)
-      nonTaxCodeIncomes <- taiConnector.getNonTaxCodeIncome(nino)
-      employments <- taiConnector.getEmployments(nino)
-      taxAccountSummary <- taiConnector.getTaxAccountSummary(nino)
+      taxCodeIncomes <- taxCodeIncomesF
+      nonTaxCodeIncomes <- nonTaxCodeIncomesF
+      employments <- employmentsF
+      taxAccountSummary <- taxAccountSummaryF
       mobilePayeResponse: MobilePayeResponse = buildMobilePayeResponse(taxCodeIncomes, nonTaxCodeIncomes, employments, taxAccountSummary)
     } yield mobilePayeResponse
   }
 
-  def getPerson(nino: Nino)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Person] = {
-    taiConnector.getPerson(nino)
-  }
+  def getPerson(nino: Nino)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Person] = taiConnector.getPerson(nino)
 
 }

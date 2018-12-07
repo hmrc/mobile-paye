@@ -26,7 +26,9 @@ object UntaxedInterest {
 }
 
 case class OtherNonTaxCodeIncome(incomeComponentType: NonTaxCodeIncomeComponentType,
-                                 amount: BigDecimal)
+                                 amount: BigDecimal) {
+  def getFormattedIncomeComponentType : String = incomeComponentType.toString.replaceAll("(\\p{Ll})(\\p{Lu})", "$1 $2").toUpperCase
+}
 
 object OtherNonTaxCodeIncome {
   implicit val format: Format[OtherNonTaxCodeIncome] = Json.format[OtherNonTaxCodeIncome]

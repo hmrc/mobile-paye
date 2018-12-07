@@ -25,7 +25,7 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
       response.status shouldBe 200
       (response.json \ "taxYear").as[Int] shouldBe TaxYear.current.currentYear
       (response.json \\ "employments") should not be empty
-      (response.json \ "employments" \ 0 \ "name").as[String] shouldBe "SAINSBURY'S PLC"
+      (response.json \ "employments" \ 0 \ "name").as[String] shouldBe "CÔMPÂNY WÎTH ÂCCENTS ÌN THÉ NÂMÉ"
       (response.json \\ "pensions") shouldBe empty
       (response.json \\ "otherIncomes") shouldBe empty
       (response.json \ "taxFreeAmount").as[Int] shouldBe 11850
@@ -59,6 +59,16 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
     "return 404 where SANDBOX-CONTROL is NOT-FOUND" in {
       val response = await(request.withHeaders(mobileHeader, "SANDBOX-CONTROL" -> "NOT-FOUND").get())
       response.status shouldBe 404
+    }
+
+    "return 410 if the person is deceased where SANDBOX-CONTROL is DECEASED" in {
+      val response = await(request.withHeaders(mobileHeader, "SANDBOX-CONTROL" -> "DECEASED").get())
+      response.status shouldBe 410
+    }
+
+    "return 423 if manual correspondence is required where SANDBOX-CONTROL is MCI" in {
+      val response = await(request.withHeaders(mobileHeader, "SANDBOX-CONTROL" -> "MCI").get())
+      response.status shouldBe 423
     }
 
     "return 401 if unauthenticated where SANDBOX-CONTROL is ERROR-401" in {

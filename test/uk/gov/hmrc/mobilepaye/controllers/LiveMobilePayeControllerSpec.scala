@@ -19,11 +19,11 @@ package uk.gov.hmrc.mobilepaye.controllers
 import play.api.libs.json.Json
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
-import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException, MissingBearerToken}
 import uk.gov.hmrc.auth.core.ConfidenceLevel.{L100, L200}
 import uk.gov.hmrc.auth.core.syntax.retrieved._
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
+import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException, NotFoundException, Upstream4xxResponse}
 import uk.gov.hmrc.mobilepaye.domain.MobilePayeResponse
 import uk.gov.hmrc.mobilepaye.domain.tai.Person
 import uk.gov.hmrc.mobilepaye.services.MobilePayeService
@@ -144,6 +144,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
     }
 
     "return 406 for missing accept header" in {
+
       val result = await(controller.getPayeSummary(nino, "12345")(FakeRequest("GET", "/")))
 
       status(result) shouldBe 406
@@ -157,6 +158,40 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       status(result) shouldBe 403
     }
 
-  }
+    "return 404 when handling NotFoundException" in {
+      mockAuthorisationGrantAccess(Some(nino.toString) and L200)
+      mockGetPerson(Future.failed(new NotFoundException("Not Found Exception")))
 
+      val result = await(controller.getPayeSummary(nino, "12345")(fakeRequest))
+
+      status(result) shouldBe 404
+    }
+
+    "return 400 when handling BadRequestException" in {
+      mockAuthorisationGrantAccess(Some(nino.toString) and L200)
+      mockGetPerson(Future.failed(new BadRequestException("Bad Request Exception")))
+
+      val result = await(controller.getPayeSummary(nino, "12345")(fakeRequest))
+
+      status(result) shouldBe 400
+    }
+
+    "return 401 when handling 401 Upstream4xxResponse" in {
+      mockAuthorisationGrantAccess(Some(nino.toString) and L200)
+      mockGetPerson(Future.failed(Upstream4xxResponse("Upstream Exception", 401, 401)))
+
+      val result = await(controller.getPayeSummary(nino, "12345")(fakeRequest))
+
+      status(result) shouldBe 401
+    }
+
+    "return 401 when handling AuthorisationException" in {
+      mockAuthorisationGrantAccess(Some(nino.toString) and L200)
+      mockGetPerson(Future.failed(new MissingBearerToken))
+
+      val result = await(controller.getPayeSummary(nino, "12345")(fakeRequest))
+
+      status(result) shouldBe 401
+    }
+  }
 }

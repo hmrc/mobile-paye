@@ -16,17 +16,12 @@
 
 package uk.gov.hmrc.mobilepaye.domain
 
-import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 
-case class OtherIncome(name: String, amount: BigDecimal, link: Option[String] = None)
-
-object OtherIncome {
-  implicit val format: OFormat[OtherIncome] = Json.format[OtherIncome]
-
-  def withMaybeLink(name: String, amount: BigDecimal, link: Option[String] = None): OtherIncome = {
-    if (name == "UNTAXED INTEREST")
-      OtherIncome(name, amount, Some("/check-income-tax/income/bank-building-society-savings"))
-    else
-      OtherIncome(name, amount)
+class OtherNonTaxCodeIncomeSpec extends BaseSpec {
+  "getFormattedIncomeComponentType" should {
+    "Split upper camel case into spaced words, and capitalise each letter" in {
+      otherNonTaxCodeIncome.getFormattedIncomeComponentType shouldBe "STATE PENSION"
+    }
   }
 }
