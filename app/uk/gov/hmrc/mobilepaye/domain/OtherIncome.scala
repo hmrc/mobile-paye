@@ -23,7 +23,7 @@ case class OtherIncome(name: String, amount: BigDecimal, link: Option[String] = 
 object OtherIncome {
   implicit val format: OFormat[OtherIncome] = Json.format[OtherIncome]
 
-  def create(name: String, amount: BigDecimal, link: Option[String] = None): OtherIncome = {
+  def withMaybeLink(name: String, amount: BigDecimal, link: Option[String] = None): OtherIncome = {
     if (name == "UNTAXED INTEREST")
       OtherIncome(name, amount, Some("/check-income-tax/income/bank-building-society-savings"))
     else

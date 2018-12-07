@@ -39,6 +39,8 @@ class SandboxMobilePayeController @Inject()() extends MobilePayeController with 
           case Some("ERROR-403") => Forbidden
           case Some("ERROR-500") => InternalServerError
           case Some("NOT-FOUND") => NotFound
+          case Some("DECEASED") => Gone
+          case Some("MCI") => Locked
           case Some("SINGLE-EMPLOYMENT") =>
             val resource: String = findResource(s"/resources/mobilepayesummary/single-employment.json")
               .getOrElse(throw new IllegalArgumentException("Resource not found!"))
