@@ -54,10 +54,7 @@ class LiveMobilePayeController @Inject()(override val authConnector: AuthConnect
               (person.isDeceased, person.hasCorruptData) match {
                 case (true, _) => Future.successful(Gone)
                 case (_, true) => Future.successful(Locked)
-                case _ => mobilePayeService.getMobilePayeResponse(nino).map {
-                  case MobilePayeResponse(_, None, None, None, _, _, _, _, _, _, _, _) => NotFound
-                  case mobilePayeResponse => Ok(Json.toJson(mobilePayeResponse))
-                }
+                case _ => mobilePayeService.getMobilePayeResponse(nino).map { mpr => Ok(Json.toJson(mpr)) }
               }
           }
 
