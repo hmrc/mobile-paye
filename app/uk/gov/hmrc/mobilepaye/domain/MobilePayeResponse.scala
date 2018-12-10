@@ -30,10 +30,7 @@ case class MobilePayeResponse(taxYear: Int = TaxYear.current.currentYear,
                               understandYourTaxCodeLink: Option[String] = Some("/check-income-tax/tax-codes"),
                               addMissingEmployerLink: String = "/check-income-tax/add-employment/employment-name",
                               addMissingPensionLink: String = "/check-income-tax/add-pension-provider/name",
-                              addMissingIncomeLink: String = "/forms/form/tell-us-about-other-income/guide") {
-
-
-}
+                              addMissingIncomeLink: String = "/forms/form/tell-us-about-other-income/guide")
 
 object MobilePayeResponse {
   def empty: MobilePayeResponse = {
