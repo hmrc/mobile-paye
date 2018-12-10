@@ -97,16 +97,6 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       jsonBodyOf(result) shouldBe Json.toJson(fullMobilePayeResponse.copy(otherIncomes = None))
     }
 
-    "return 404 when there is no employment, pension or otherIncome data found for valid authorised nino" in {
-      mockGetPerson(Future.successful(person))
-      mockGetMobilePayeResponse(Future.successful(fullMobilePayeResponse.copy(employments = None, pensions = None, otherIncomes = None)))
-      mockAuthorisationGrantAccess(Some(nino.toString) and L200)
-
-      val result = await(controller.getPayeSummary(nino, "12345")(fakeRequest))
-
-      status(result) shouldBe 404
-    }
-
     "return 423 for a valid nino and authorised user but corrupt/mcierror user" in {
       mockAuthorisationGrantAccess(Some(nino.toString) and L200)
       mockGetPerson(Future.successful(person.copy(hasCorruptData = true)))

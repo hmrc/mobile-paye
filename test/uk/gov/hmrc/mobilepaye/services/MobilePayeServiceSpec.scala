@@ -19,6 +19,7 @@ package uk.gov.hmrc.mobilepaye.services
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, InternalServerException, UnauthorizedException}
 import uk.gov.hmrc.mobilepaye.connectors.TaiConnector
+import uk.gov.hmrc.mobilepaye.domain.MobilePayeResponse
 import uk.gov.hmrc.mobilepaye.domain.tai._
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 
@@ -127,6 +128,28 @@ class MobilePayeServiceSpec extends BaseSpec {
       intercept[InternalServerException] {
         await(service.getMobilePayeResponse(nino))
       }
+    }
+
+    "return an empty MobilePayeResponse when an exception is thrown that contains 'no employments recorded for current tax year'" in {
+      mockTaxCodeIncomes(Future.failed(new Exception("no employments recorded for current tax year")))
+      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncome.copy(otherNonTaxCodeIncomes = Nil)))
+      mockEmployments(Future.successful(taiEmployments))
+      mockTaxAccountSummary(Future.successful(taxAccountSummary))
+
+      val result = await(service.getMobilePayeResponse(nino))
+
+      result shouldBe MobilePayeResponse.empty
+    }
+
+    "return an empty MobilePayeResponse when an exception is thrown from NPS that contains 'cannot complete a coding calculation without a primary employment'" in {
+      mockTaxCodeIncomes(Future.failed(new Exception("cannot complete a coding calculation without a primary employment")))
+      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncome.copy(otherNonTaxCodeIncomes = Nil)))
+      mockEmployments(Future.successful(taiEmployments))
+      mockTaxAccountSummary(Future.successful(taxAccountSummary))
+
+      val result = await(service.getMobilePayeResponse(nino))
+
+      result shouldBe MobilePayeResponse.empty
     }
   }
 }

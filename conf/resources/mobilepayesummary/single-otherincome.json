@@ -7,11 +7,11 @@
     }
   ],
   "taxFreeAmount": 11850,
-  "taxFreeAmountLink": "/check-income-tax/tax-free-allowance",
+  "taxFreeAmountLink": "/",
   "estimatedTaxAmount": 618,
-  "estimatedTaxAmountLink": "/check-income-tax/paye-income-tax-estimate",
-  "understandYourTaxCodeLink": "/check-income-tax/tax-codes",
-  "addMissingEmployerLink": "/check-income-tax/add-employment/employment-name",
-  "addMissingPensionLink": "/check-income-tax/add-pension-provider/name",
-  "addMissingIncomeLink": "/forms/form/tell-us-about-other-income/guide"
+  "estimatedTaxAmountLink": "/",
+  "understandYourTaxCodeLink": "/",
+  "addMissingEmployerLink": "/",
+  "addMissingPensionLink": "/",
+  "addMissingIncomeLink": "/"
 }

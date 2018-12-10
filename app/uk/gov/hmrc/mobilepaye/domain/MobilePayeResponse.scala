@@ -23,15 +23,26 @@ case class MobilePayeResponse(taxYear: Int = TaxYear.current.currentYear,
                               employments: Option[Seq[PayeIncome]],
                               pensions: Option[Seq[PayeIncome]],
                               otherIncomes: Option[Seq[OtherIncome]],
-                              taxFreeAmount: BigDecimal,
-                              taxFreeAmountLink: String = "/check-income-tax/tax-free-allowance",
-                              estimatedTaxAmount: BigDecimal,
-                              estimatedTaxAmountLink: String = "/check-income-tax/paye-income-tax-estimate",
-                              understandYourTaxCodeLink: String = "/check-income-tax/tax-codes",
+                              taxFreeAmount: Option[BigDecimal],
+                              taxFreeAmountLink: Option[String] = Some("/check-income-tax/tax-free-allowance"),
+                              estimatedTaxAmount: Option[BigDecimal],
+                              estimatedTaxAmountLink: Option[String] = Some("/check-income-tax/paye-income-tax-estimate"),
+                              understandYourTaxCodeLink: Option[String] = Some("/check-income-tax/tax-codes"),
                               addMissingEmployerLink: String = "/check-income-tax/add-employment/employment-name",
                               addMissingPensionLink: String = "/check-income-tax/add-pension-provider/name",
                               addMissingIncomeLink: String = "/forms/form/tell-us-about-other-income/guide")
 
 object MobilePayeResponse {
+  def empty: MobilePayeResponse = {
+    MobilePayeResponse(employments = None,
+      pensions = None,
+      otherIncomes = None,
+      taxFreeAmount = None,
+      taxFreeAmountLink = None,
+      estimatedTaxAmount = None,
+      estimatedTaxAmountLink = None,
+      understandYourTaxCodeLink = None)
+  }
+
   implicit val format: OFormat[MobilePayeResponse] = Json.format[MobilePayeResponse]
 }

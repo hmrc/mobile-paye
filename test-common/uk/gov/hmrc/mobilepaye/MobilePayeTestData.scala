@@ -58,8 +58,8 @@ trait MobilePayeTestData {
     employments = Some(employments),
     pensions = Some(pensions),
     otherIncomes = Some(otherIncomes),
-    taxFreeAmount = 10000,
-    estimatedTaxAmount = 250
+    taxFreeAmount = Some(10000),
+    estimatedTaxAmount = Some(250)
   )
 
 }
