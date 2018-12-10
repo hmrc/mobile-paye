@@ -149,9 +149,18 @@ The Mobile Paye response
 }
 ```
 
-  * **Code:** 404 <br />
-    **Note:** No record found <br />
-    
+ * **Code:** 200 <br />
+    **Content:** No Live Incomes
+
+```json
+{
+  "taxYear": 2018,
+  "addMissingEmployerLink": "/check-income-tax/add-employment/employment-name",
+  "addMissingPensionLink": "/check-income-tax/add-pension-provider/name",
+  "addMissingIncomeLink": "/forms/form/tell-us-about-other-income/guide"
+}
+```
+
   * **Code:** 410 <br />
     **Note:** Person is deceased <br />
         
