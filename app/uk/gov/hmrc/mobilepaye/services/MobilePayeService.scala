@@ -87,7 +87,8 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector) {
       taxAccountSummary <- taxAccountSummaryF
       mobilePayeResponse: MobilePayeResponse = buildMobilePayeResponse(taxCodeIncomes, nonTaxCodeIncomes, employments, taxAccountSummary)
     } yield mobilePayeResponse) recover {
-      case ex if ex.getMessage().toLowerCase().contains(NpsNoEmploymentsCy) => MobilePayeResponse.empty
+      case ex if ex.getMessage.toLowerCase().contains(NpsNoEmploymentsCy) => MobilePayeResponse.empty
+      case ex => throw ex
     }
   }
 
