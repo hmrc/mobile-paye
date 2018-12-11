@@ -24,6 +24,7 @@ import uk.gov.hmrc.mobilepaye.domain.tai._
 import uk.gov.hmrc.mobilepaye.domain.{MobilePayeResponse, OtherIncome, PayeIncome}
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.math.BigDecimal.RoundingMode
 
 @Singleton
 class MobilePayeService @Inject()(taiConnector: TaiConnector) {
@@ -45,7 +46,7 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector) {
             PayeIncome(name = tci.name,
               payrollNumber = emp.payrollNumber,
               taxCode = tci.taxCode,
-              amount = tci.amount,
+              amount = tci.amount.setScale(0, RoundingMode.FLOOR),
               link = s"/check-income-tax/income-details/${tci.employmentId.getOrElse(throw new Exception("Employment ID not found"))}"))
         } match {
           case Nil => None
@@ -55,7 +56,7 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector) {
 
       val otherIncomes: Option[Seq[OtherIncome]] = nonTaxCodeIncomes.otherNonTaxCodeIncomes.map(income => OtherIncome.withMaybeLink(
         name = income.getFormattedIncomeComponentType,
-        amount = income.amount
+        amount = income.amount.setScale(0, RoundingMode.FLOOR)
       )) match {
         case Nil => None
         case oi => Some(oi)
@@ -72,8 +73,8 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector) {
       MobilePayeResponse(employments = employmentPayeIncomes,
         pensions = pensionPayeIncomes,
         otherIncomes = otherIncomes,
-        taxFreeAmount = Some(taxAccountSummary.taxFreeAmount),
-        estimatedTaxAmount = Some(taxAccountSummary.totalEstimatedTax))
+        taxFreeAmount = Some(taxAccountSummary.taxFreeAmount.setScale(0, RoundingMode.FLOOR)),
+        estimatedTaxAmount = Some(taxAccountSummary.totalEstimatedTax.setScale(0, RoundingMode.FLOOR)))
     }
 
     val taxCodeIncomesF = taiConnector.getTaxCodeIncomes(nino)
