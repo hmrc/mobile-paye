@@ -31,6 +31,7 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector) {
 
   private val NpsTaxAccountNoEmploymentsCy = "no employments recorded for current tax year"
   private val NpsTaxAccountDataAbsentMsg = "cannot complete a coding calculation without a primary employment"
+  private val NpsTaxAccountNoEmploymentsRecorded = "no employments recorded for this individual"
 
   def getMobilePayeResponse(nino: Nino)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[MobilePayeResponse] = {
 
@@ -89,7 +90,9 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector) {
       taxAccountSummary <- taxAccountSummaryF
       mobilePayeResponse: MobilePayeResponse = buildMobilePayeResponse(taxCodeIncomes, nonTaxCodeIncomes, employments, taxAccountSummary)
     } yield mobilePayeResponse) recover {
-      case ex if ex.getMessage.toLowerCase().contains(NpsTaxAccountNoEmploymentsCy) || ex.getMessage.toLowerCase().contains(NpsTaxAccountDataAbsentMsg) => MobilePayeResponse.empty
+      case ex if ex.getMessage.toLowerCase().contains(NpsTaxAccountNoEmploymentsCy) => MobilePayeResponse.empty
+      case ex if ex.getMessage.toLowerCase().contains(NpsTaxAccountDataAbsentMsg) => MobilePayeResponse.empty
+      case ex if ex.getMessage.toLowerCase().contains(NpsTaxAccountNoEmploymentsRecorded) => MobilePayeResponse.empty
       case ex => throw ex
     }
   }
