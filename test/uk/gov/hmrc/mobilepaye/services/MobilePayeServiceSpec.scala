@@ -151,5 +151,17 @@ class MobilePayeServiceSpec extends BaseSpec {
 
       result shouldBe MobilePayeResponse.empty
     }
+
+    "return an empty MobilePayeResponse when an exception is thrown from NPS that contains 'no employments recorded for this individual'" in {
+      mockTaxCodeIncomes(Future.failed(new Exception("no employments recorded for this individual")))
+      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncome.copy(otherNonTaxCodeIncomes = Nil)))
+      mockEmployments(Future.successful(taiEmployments))
+      mockTaxAccountSummary(Future.successful(taxAccountSummary))
+
+      val result = await(service.getMobilePayeResponse(nino))
+
+      result shouldBe MobilePayeResponse.empty
+    }
   }
+
 }
