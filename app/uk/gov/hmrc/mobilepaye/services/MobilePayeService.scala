@@ -31,10 +31,15 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector) {
 
   private val NpsTaxAccountNoEmploymentsCy = "no employments recorded for current tax year"
   private val NpsTaxAccountDataAbsentMsg = "cannot complete a coding calculation without a primary employment"
+  private val NpsTaxAccountNoEmploymentsRecorded = "no employments recorded for this individual"
 
   def getMobilePayeResponse(nino: Nino)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[MobilePayeResponse] = {
 
-    def knownException(ex: Throwable): Boolean = ex.getMessage.toLowerCase().contains(NpsTaxAccountNoEmploymentsCy) || ex.getMessage.toLowerCase().contains(NpsTaxAccountDataAbsentMsg)
+    def knownException(ex: Throwable): Boolean =
+      ex.getMessage.toLowerCase().contains(NpsTaxAccountNoEmploymentsCy) ||
+      ex.getMessage.toLowerCase().contains(NpsTaxAccountDataAbsentMsg) ||
+      ex.getMessage.toLowerCase().contains(NpsTaxAccountNoEmploymentsRecorded)
+
 
     def filterLiveIncomes(emp: TaxCodeIncome, incomeType: TaxCodeIncomeComponentType): Boolean = emp.componentType == incomeType && emp.status == Live
 
