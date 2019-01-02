@@ -23,20 +23,20 @@ The Mobile Paye response
       "name": "SAINSBURY'S PLC",
       "taxCode": "1185L",
       "amount": 4143,
-      "link": "/check-income-tax/income-details/1"
+      "link": "/"
     },
     {
       "name": "EASTWOOD CHARTER SCHOOL (7601)",
       "payrollNumber": "96245SLJK88",
       "taxCode": "BR",
       "amount": 5690,
-      "link": "/check-income-tax/income-details/2"
+      "link": "/"
     },
     {
       "name": "TESCO",
       "taxCode": "BR",
       "amount": 5101,
-      "link": "/check-income-tax/income-details/3"
+      "link": "/"
     }
   ],
   "pensions": [
@@ -44,14 +44,14 @@ The Mobile Paye response
       "name": "HIGHWIRE RETURNS LTD",
       "taxCode": "BR",
       "amount": 4200,
-      "link": "/check-income-tax/income-details/9"
+      "link": "/"
     },
     {
       "name": "AVIVA (2410)",
       "payrollNumber": "AB752BR",
       "taxCode": "BR",
       "amount": 5690,
-      "link": "/check-income-tax/income-details/7"
+      "link": "/"
     }
   ],
   "otherIncomes": [
@@ -62,17 +62,17 @@ The Mobile Paye response
     {
       "name": "UNTAXED INTEREST",
       "amount": 9301,
-      "link": "/check-income-tax/income/bank-building-society-savings"
+      "link": "/"
     }
   ],
   "taxFreeAmount": 11850,
-  "taxFreeAmountLink": "/check-income-tax/tax-free-allowance",
+  "taxFreeAmountLink": "/",
   "estimatedTaxAmount": 618,
-  "estimatedTaxAmountLink": "/check-income-tax/paye-income-tax-estimate",
-  "understandYourTaxCodeLink": "/check-income-tax/tax-codes",
-  "addMissingEmployerLink": "/check-income-tax/add-employment/employment-name",
-  "addMissingPensionLink": "/check-income-tax/add-pension-provider/name",
-  "addMissingIncomeLink": "/forms/form/tell-us-about-other-income/guide"
+  "estimatedTaxAmountLink": "/",
+  "understandYourTaxCodeLink": "/",
+  "addMissingEmployerLink": "/",
+  "addMissingPensionLink": "/",
+  "addMissingIncomeLink": "/"
 }
 ```
 
@@ -87,17 +87,17 @@ The Mobile Paye response
       "name": "SAINSBURY'S PLC",
       "taxCode": "1185L",
       "amount": 4143,
-      "link": "/check-income-tax/income-details/8"
+      "link": "/"
     }
   ],
   "taxFreeAmount": 11850,
-  "taxFreeAmountLink": "/check-income-tax/tax-free-allowance",
+  "taxFreeAmountLink": "/",
   "estimatedTaxAmount": 618,
-  "estimatedTaxAmountLink": "/check-income-tax/paye-income-tax-estimate",
-  "understandYourTaxCodeLink": "/check-income-tax/tax-codes",
-  "addMissingEmployerLink": "/check-income-tax/add-employment/employment-name",
-  "addMissingPensionLink": "/check-income-tax/add-pension-provider/name",
-  "addMissingIncomeLink": "/forms/form/tell-us-about-other-income/guide"
+  "estimatedTaxAmountLink": "/",
+  "understandYourTaxCodeLink": "/",
+  "addMissingEmployerLink": "/",
+  "addMissingPensionLink": "/",
+  "addMissingIncomeLink": "/"
 }
 ```
 
@@ -112,17 +112,17 @@ The Mobile Paye response
       "name": "HIGHWIRE RETURNS LTD",
       "taxCode": "BR",
       "amount": 4200,
-      "link": "/income-details/1"
+      "link": "/"
     }
   ],
   "taxFreeAmount": 11850,
-  "taxFreeAmountLink": "/check-income-tax/tax-free-allowance",
+  "taxFreeAmountLink": "/",
   "estimatedTaxAmount": 618,
-  "estimatedTaxAmountLink": "/check-income-tax/paye-income-tax-estimate",
-  "understandYourTaxCodeLink": "/check-income-tax/tax-codes",
-  "addMissingEmployerLink": "/check-income-tax/add-employment/employment-name",
-  "addMissingPensionLink": "/check-income-tax/add-pension-provider/name",
-  "addMissingIncomeLink": "/forms/form/tell-us-about-other-income/guide"
+  "estimatedTaxAmountLink": "/",
+  "understandYourTaxCodeLink": "/",
+  "addMissingEmployerLink": "/",
+  "addMissingPensionLink": "/",
+  "addMissingIncomeLink": "/"
 }
 ```
 
@@ -139,13 +139,13 @@ The Mobile Paye response
     }
   ],
   "taxFreeAmount": 11850,
-  "taxFreeAmountLink": "/check-income-tax/tax-free-allowance",
+  "taxFreeAmountLink": "/",
   "estimatedTaxAmount": 618,
-  "estimatedTaxAmountLink": "/check-income-tax/paye-income-tax-estimate",
-  "understandYourTaxCodeLink": "/check-income-tax/tax-codes",
-  "addMissingEmployerLink": "/check-income-tax/add-employment/employment-name",
-  "addMissingPensionLink": "/check-income-tax/add-pension-provider/name",
-  "addMissingIncomeLink": "/forms/form/tell-us-about-other-income/guide"
+  "estimatedTaxAmountLink": "/",
+  "understandYourTaxCodeLink": "/",
+  "addMissingEmployerLink": "/",
+  "addMissingPensionLink": "/",
+  "addMissingIncomeLink": "/"
 }
 ```
 
@@ -155,9 +155,9 @@ The Mobile Paye response
 ```json
 {
   "taxYear": 2018,
-  "addMissingEmployerLink": "/check-income-tax/add-employment/employment-name",
-  "addMissingPensionLink": "/check-income-tax/add-pension-provider/name",
-  "addMissingIncomeLink": "/forms/form/tell-us-about-other-income/guide"
+  "addMissingEmployerLink": "/",
+  "addMissingPensionLink": "/",
+  "addMissingIncomeLink": "/"
 }
 ```
 
@@ -174,6 +174,8 @@ The Mobile Paye response
 
   * **Code:** 403 FORBIDDEN <br/>
     **Content:** `{"code":"FORBIDDEN","message":Authenticated user is not authorised for this resource"}`
+    
+  * **Code:** 404 NOT_FOUND <br/>
     
   * **Code:** 406 NOT_ACCEPTABLE <br/>
     **Content:** `{"code":"NOT_ACCEPTABLE","message":Missing Accept Header"}`

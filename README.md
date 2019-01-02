@@ -34,9 +34,11 @@ To test different scenarios, add a header "SANDBOX-CONTROL" with one of the foll
 |--------|----|
 | "SINGLE-EMPLOYMENT" | Happy path, return a single employment with no pensions or other income |
 | "SINGLE-PENSION" | Happy path, return a single pension with no employments or other income |
-| "NOT-FOUND" | Happy path, no records found for the user | 
+| "SINGLE-OTHERINCOME" | Happy path, return a single other income with no employments or pensions |
+| "NO-LIVE-INCOMES" | Happy path, return only tax year and 'add missing' links | 
 | "DECEASED"  | Happy path, trigger a 410 Gone response when the person is deceased |
 | "MCI"       | Happy path, trigger a 423 Locked response when manual correspondence is required |
+| "NOT-FOUND" | Unhappy path, URL not found |
 | "ERROR-401" | Unhappy path, trigger a 401 Unauthorized response |
 | "ERROR-403" | Unhappy path, trigger a 403 Forbidden response |
 | "ERROR-500" | Unhappy path, trigger a 500 Internal Server Error response |
