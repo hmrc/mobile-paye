@@ -175,6 +175,8 @@ The Mobile Paye response
   * **Code:** 403 FORBIDDEN <br/>
     **Content:** `{"code":"FORBIDDEN","message":Authenticated user is not authorised for this resource"}`
     
+  * **Code:** 404 NOT_FOUND <br/>
+    
   * **Code:** 406 NOT_ACCEPTABLE <br/>
     **Content:** `{"code":"NOT_ACCEPTABLE","message":Missing Accept Header"}`
 
