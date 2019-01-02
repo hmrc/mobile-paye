@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,9 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector) {
 
   def getMobilePayeResponse(nino: Nino)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[MobilePayeResponse] = {
 
+    def knownException(ex: Throwable): Boolean = ex.getMessage.toLowerCase().contains(NpsTaxAccountNoEmploymentsCy) || ex.getMessage.toLowerCase().contains(NpsTaxAccountDataAbsentMsg)
+
+    def filterLiveIncomes(emp: TaxCodeIncome, incomeType: TaxCodeIncomeComponentType): Boolean = emp.componentType == incomeType && emp.status == Live
 
     def buildMobilePayeResponse(taxCodeIncomes: Seq[TaxCodeIncome],
                                 nonTaxCodeIncomes: NonTaxCodeIncome,
@@ -62,19 +65,20 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector) {
         case oi => Some(oi)
       }
 
-      val liveEmployments: Seq[TaxCodeIncome] = taxCodeIncomes.filter(emp => emp.componentType == EmploymentIncome && emp.status == Live)
+      val liveEmployments: Seq[TaxCodeIncome] = taxCodeIncomes.filter(filterLiveIncomes(_, EmploymentIncome))
+      val livePensions: Seq[TaxCodeIncome] = taxCodeIncomes.filter(filterLiveIncomes(_, PensionIncome))
 
       val employmentPayeIncomes: Option[Seq[PayeIncome]] = buildPayeIncomes(employments, liveEmployments)
-
-      val livePensions: Seq[TaxCodeIncome] = taxCodeIncomes.filter(emp => emp.componentType == PensionIncome && emp.status == Live)
-
       val pensionPayeIncomes: Option[Seq[PayeIncome]] = buildPayeIncomes(employments, livePensions)
+
+      val taxFreeAmount: Option[BigDecimal] = Some(taxAccountSummary.taxFreeAmount.setScale(0, RoundingMode.FLOOR))
+      val estimatedTaxAmount: Option[BigDecimal] = Some(taxAccountSummary.totalEstimatedTax.setScale(0, RoundingMode.FLOOR))
 
       MobilePayeResponse(employments = employmentPayeIncomes,
         pensions = pensionPayeIncomes,
         otherIncomes = otherIncomes,
-        taxFreeAmount = Some(taxAccountSummary.taxFreeAmount.setScale(0, RoundingMode.FLOOR)),
-        estimatedTaxAmount = Some(taxAccountSummary.totalEstimatedTax.setScale(0, RoundingMode.FLOOR)))
+        taxFreeAmount = taxFreeAmount,
+        estimatedTaxAmount = estimatedTaxAmount)
     }
 
     val taxCodeIncomesF = taiConnector.getTaxCodeIncomes(nino)
@@ -89,7 +93,7 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector) {
       taxAccountSummary <- taxAccountSummaryF
       mobilePayeResponse: MobilePayeResponse = buildMobilePayeResponse(taxCodeIncomes, nonTaxCodeIncomes, employments, taxAccountSummary)
     } yield mobilePayeResponse) recover {
-      case ex if ex.getMessage.toLowerCase().contains(NpsTaxAccountNoEmploymentsCy) || ex.getMessage.toLowerCase().contains(NpsTaxAccountDataAbsentMsg) => MobilePayeResponse.empty
+      case ex if knownException(ex) => MobilePayeResponse.empty
       case ex => throw ex
     }
   }

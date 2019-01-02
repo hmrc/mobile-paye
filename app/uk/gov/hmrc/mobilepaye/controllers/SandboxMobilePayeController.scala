@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,10 @@ class SandboxMobilePayeController @Inject()() extends MobilePayeController with 
           case Some("NOT-FOUND") => NotFound
           case Some("DECEASED") => Gone
           case Some("MCI") => Locked
+          case Some("NO-LIVE-INCOMES") =>
+            val resource: String = findResource(s"/resources/mobilepayesummary/no-live-incomes.json")
+              .getOrElse(throw new IllegalArgumentException("Resource not found!"))
+            Ok(toJson(Json.parse(resource).as[MobilePayeResponse]))
           case Some("SINGLE-EMPLOYMENT") =>
             val resource: String = findResource(s"/resources/mobilepayesummary/single-employment.json")
               .getOrElse(throw new IllegalArgumentException("Resource not found!"))
