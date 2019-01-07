@@ -15,6 +15,7 @@ lazy val microservice = Project(appName, file("."))
   .settings(routesGenerator := StaticRoutesGenerator)
   .settings(
     majorVersion := 0,
+    scalaVersion := "2.11.12",
     ScoverageKeys.coverageExcludedFiles := "<empty>;com.kenshoo.play.metrics.*;.*definition.*;prod.*;testOnlyDoNotUseInAppConf.*;app.*;.*BuildInfo.*;.*Routes.*",
     ScoverageKeys.coverageMinimum := 90,
     ScoverageKeys.coverageFailOnMinimum := true,
