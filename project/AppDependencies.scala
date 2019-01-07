@@ -5,17 +5,17 @@ object AppDependencies {
   import play.core.PlayVersion
   import play.sbt.PlayImport._
 
-  private val play25Bootstrap = "3.10.0"
+  private val play25Bootstrap = "4.6.0"
   private val playHmrcApiVersion = "3.2.0"
-  private val domainVersion = "5.2.0"
+  private val domainVersion = "5.3.0"
   private val taxYearVersion = "0.4.0"
-  private val authVersion = "2.16.0-play-25"
+  private val authVersion = "2.18.0-play-25"
 
-  private val hmrcTestVersion = "3.2.0"
+  private val hmrcTestVersion = "3.3.0"
   private val pegdownVersion = "1.6.0"
-  private val scalaTestVersion = "3.0.4"
-  private val wireMockVersion = "2.9.0"
-  private val scalaMockVersion = "4.0.0"
+  private val scalaTestVersion = "3.0.5"
+  private val wireMockVersion = "2.20.0"
+  private val scalaMockVersion = "4.1.0"
   private val scalaTestPlusVersion = "2.0.1"
 
   val compile: Seq[ModuleID] = Seq(

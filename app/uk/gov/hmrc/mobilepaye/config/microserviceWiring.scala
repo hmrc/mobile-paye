@@ -16,8 +16,11 @@
 
 package uk.gov.hmrc.mobilepaye.config
 
+import akka.actor.ActorSystem
 import com.google.inject.Inject
+import com.typesafe.config.Config
 import javax.inject.Named
+import play.api.Configuration
 import uk.gov.hmrc.http.hooks.HttpHooks
 import uk.gov.hmrc.play.audit.http.HttpAuditing
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
@@ -29,9 +32,16 @@ trait Hooks extends HttpHooks with HttpAuditing {
   val hooks = Seq(AuditingHook)
 }
 
-class WSHttpImpl @Inject()(@Named("appName") val appName: String, val auditConnector: AuditConnector) extends HttpClient with WSGet
+class WSHttpImpl @Inject()(
+  @Named("appName") val appName: String,
+  val auditConnector: AuditConnector,
+  override val actorSystem: ActorSystem,
+  config: Configuration
+) extends HttpClient with WSGet
   with WSPut
   with WSPost
   with WSDelete
   with WSPatch
-  with Hooks
+  with Hooks {
+  override lazy val configuration: Option[Config] = Option(config.underlying)
+}
