@@ -44,18 +44,6 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
       (response.json \ "estimatedTaxAmount").as[Int] shouldBe 618
     }
 
-    "return OK and a single otherIncome with no employment or pension data when SANDBOX-CONTROL is SINGLE-OTHERINCOME" in {
-      val response = await(request.withHeaders(mobileHeader, "SANDBOX-CONTROL" -> "SINGLE-OTHERINCOME").get())
-      response.status shouldBe 200
-      (response.json \ "taxYear").as[Int] shouldBe TaxYear.current.currentYear
-      (response.json \\ "employments") shouldBe empty
-      (response.json \\ "pensions") shouldBe empty
-      (response.json \\ "otherIncomes") should not be empty
-      (response.json \ "otherIncomes" \ 0 \ "name").as[String] shouldBe "NON CODED INCOME"
-      (response.json \ "taxFreeAmount").as[Int] shouldBe 11850
-      (response.json \ "estimatedTaxAmount").as[Int] shouldBe 618
-    }
-
     "return OK and only TaxYear with 'missing' links when SANDBOX-CONTROL is NO-LIVE-INCOMES" in {
       val response = await(request.withHeaders(mobileHeader, "SANDBOX-CONTROL" -> "NO-LIVE-INCOMES").get())
       response.status shouldBe 200
