@@ -4,7 +4,7 @@ The Mobile Paye response
   
 * **URL**
 
-  `/summary`
+  `/mobile-paye/:nino/summary/current-income`
 
 * **Method:**
   

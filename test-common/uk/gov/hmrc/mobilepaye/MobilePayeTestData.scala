@@ -41,7 +41,7 @@ trait MobilePayeTestData {
   val taiEmployment: Employment = Employment(Some("ABC123"), 3)
   val taiEmployments: Seq[Employment] = Seq(taiEmployment,
     taiEmployment.copy(payrollNumber = Some("DEF456"), sequenceNumber = 4),
-    taiEmployment.copy(payrollNumber = Some("PP-123"), sequenceNumber = 5))
+    taiEmployment.copy(payrollNumber = None, sequenceNumber = 5))
 
   val taxAccountSummary: TaxAccountSummary = TaxAccountSummary(BigDecimal(250), BigDecimal(10000))
 
@@ -51,7 +51,7 @@ trait MobilePayeTestData {
 
   val otherIncome: OtherIncome = OtherIncome("STATE PENSION", 250.0, None)
   val employments: Seq[PayeIncome] = Seq(payeIncome, payeIncome.copy(name = "The Worst Shop Ltd", link = "/check-income-tax/income-details/4", payrollNumber = Some("DEF456")))
-  val pensions: Seq[PayeIncome] = Seq(payeIncome.copy(name = "Prestige Pensions", link = "/check-income-tax/income-details/5", payrollNumber = Some("PP-123")))
+  val pensions: Seq[PayeIncome] = Seq(payeIncome.copy(name = "Prestige Pensions", link = "/check-income-tax/income-details/5", payrollNumber = None))
   val otherIncomes: Seq[OtherIncome] = Seq(otherIncome)
 
   val fullMobilePayeResponse: MobilePayeResponse = MobilePayeResponse(
