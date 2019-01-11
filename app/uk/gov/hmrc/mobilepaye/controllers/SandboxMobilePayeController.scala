@@ -17,7 +17,7 @@
 package uk.gov.hmrc.mobilepaye.controllers
 
 import com.google.inject._
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import play.api.libs.json.Json.toJson
 import play.api.mvc._
 import uk.gov.hmrc.api.sandbox.FileResource
@@ -35,28 +35,22 @@ class SandboxMobilePayeController @Inject()() extends MobilePayeController with 
     validateAccept(acceptHeaderValidationRules).async {
       implicit request =>
         Future successful (request.headers.get("SANDBOX-CONTROL") match {
-          case Some("ERROR-401") => Unauthorized
-          case Some("ERROR-403") => Forbidden
-          case Some("ERROR-500") => InternalServerError
-          case Some("NOT-FOUND") => NotFound
-          case Some("DECEASED") => Gone
-          case Some("MCI") => Locked
-          case Some("PREVIOUS-INCOME-ONLY") =>
-            Ok(toJson(Json.parse(grabSandboxData(s"/resources/mobilepayesummary/previous-income-only.json")).as[MobilePayeResponse]))
-          case Some("NO-TAX-YEAR-INCOME") =>
-            Ok(toJson(Json.parse(grabSandboxData(s"/resources/mobilepayesummary/no-tax-year-income.json")).as[MobilePayeResponse]))
-          case Some("SINGLE-EMPLOYMENT") =>
-            Ok(toJson(Json.parse(grabSandboxData(s"/resources/mobilepayesummary/single-employment.json")).as[MobilePayeResponse]))
-          case Some("SINGLE-PENSION") =>
-            Ok(toJson(Json.parse(grabSandboxData(s"/resources/mobilepayesummary/single-pension.json")).as[MobilePayeResponse]))
-          case Some("OTHER-INCOME-ONLY") =>
-            Ok(toJson(Json.parse(grabSandboxData(s"/resources/mobilepayesummary/other-income-only.json")).as[MobilePayeResponse]))
-          case _ =>
-            Ok(toJson(Json.parse(grabSandboxData(s"/resources/mobilepayesummary/default.json")).as[MobilePayeResponse]))
+          case Some("ERROR-401")            => Unauthorized
+          case Some("ERROR-403")            => Forbidden
+          case Some("ERROR-500")            => InternalServerError
+          case Some("NOT-FOUND")            => NotFound
+          case Some("DECEASED")             => Gone
+          case Some("MCI")                  => Locked
+          case Some("PREVIOUS-INCOME-ONLY") => Ok(readData("previous-income-only.json"))
+          case Some("NO-TAX-YEAR-INCOME")   => Ok(readData("no-tax-year-income.json"))
+          case Some("SINGLE-EMPLOYMENT")    => Ok(readData("single-employment.json"))
+          case Some("SINGLE-PENSION")       => Ok(readData("single-pension.json"))
+          case Some("OTHER-INCOME-ONLY")    => Ok(readData("other-income-only.json"))
+          case _                            => Ok(readData("default.json"))
         })
     }
 
-  private def grabSandboxData(resource: String): String =
-    findResource(resource)
-      .getOrElse(throw new IllegalArgumentException("Resource not found!"))
+  private def readData(resource: String): JsValue =
+    toJson(Json.parse(findResource(s"/resources/mobilepayesummary/$resource")
+      .getOrElse(throw new IllegalArgumentException("Resource not found!"))).as[MobilePayeResponse])
 }
