@@ -41,8 +41,12 @@ class SandboxMobilePayeController @Inject()() extends MobilePayeController with 
           case Some("NOT-FOUND") => NotFound
           case Some("DECEASED") => Gone
           case Some("MCI") => Locked
-          case Some("NO-LIVE-INCOMES") =>
-            val resource: String = findResource(s"/resources/mobilepayesummary/no-live-incomes.json")
+          case Some("PREVIOUS-INCOME-ONLY") =>
+            val resource: String = findResource(s"/resources/mobilepayesummary/previous-income-only.json")
+              .getOrElse(throw new IllegalArgumentException("Resource not found!"))
+            Ok(toJson(Json.parse(resource).as[MobilePayeResponse]))
+          case Some("NO-TAX-YEAR-INCOME") =>
+            val resource: String = findResource(s"/resources/mobilepayesummary/no-tax-year-income.json")
               .getOrElse(throw new IllegalArgumentException("Resource not found!"))
             Ok(toJson(Json.parse(resource).as[MobilePayeResponse]))
           case Some("SINGLE-EMPLOYMENT") =>
