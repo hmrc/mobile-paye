@@ -36,6 +36,7 @@ To test different scenarios, add a header "SANDBOX-CONTROL" with one of the foll
 | "SINGLE-PENSION" | Happy path, return a single pension with no employments or other income |
 | "NO-TAX-YEAR-INCOME" | Happy path, return only tax year and 'add missing' links when no live or previous incomes | 
 | "PREVIOUS-INCOME-ONLY" | Happy path, return all data except employments, pension, other income when previous income but no live incomes | 
+| "OTHER-INCOME-ONLY" | Happy path, return other income when there are previous incomes but no live income | 
 | "DECEASED"  | Happy path, trigger a 410 Gone response when the person is deceased |
 | "MCI"       | Happy path, trigger a 423 Locked response when manual correspondence is required |
 | "NOT-FOUND" | Unhappy path, URL not found |
