@@ -127,6 +127,51 @@ The Mobile Paye response
 ```
 
  * **Code:** 200 <br />
+    **Content:** Other Income Only
+
+```json
+{
+  "taxYear": 2018,
+  "otherIncomes": [
+    {
+      "name": "NON CODED INCOME",
+      "amount": 22500
+    },
+    {
+      "name": "UNTAXED INTEREST",
+      "amount": 9301,
+      "link": "/"
+    }
+  ],
+  "taxFreeAmount": 11850,
+  "taxFreeAmountLink": "/",
+  "estimatedTaxAmount": 618,
+  "estimatedTaxAmountLink": "/",
+  "understandYourTaxCodeLink": "/",
+  "addMissingEmployerLink": "/",
+  "addMissingPensionLink": "/",
+  "addMissingIncomeLink": "/"
+}
+```
+
+ * **Code:** 200 <br />
+    **Content:** Previous Income Only
+
+```json
+{
+  "taxYear": 2018,
+  "taxFreeAmount": 11850,
+  "taxFreeAmountLink": "/",
+  "estimatedTaxAmount": 618,
+  "estimatedTaxAmountLink": "/",
+  "understandYourTaxCodeLink": "/",
+  "addMissingEmployerLink": "/",
+  "addMissingPensionLink": "/",
+  "addMissingIncomeLink": "/"
+}
+```
+
+ * **Code:** 200 <br />
     **Content:** No Live Incomes
 
 ```json

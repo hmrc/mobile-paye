@@ -1,0 +1,11 @@
+{
+  "taxYear": 2018,
+  "taxFreeAmount": 11850,
+  "taxFreeAmountLink": "/",
+  "estimatedTaxAmount": 618,
+  "estimatedTaxAmountLink": "/",
+  "understandYourTaxCodeLink": "/",
+  "addMissingEmployerLink": "/",
+  "addMissingPensionLink": "/",
+  "addMissingIncomeLink": "/"
+}

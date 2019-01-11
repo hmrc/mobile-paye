@@ -41,22 +41,22 @@ class SandboxMobilePayeController @Inject()() extends MobilePayeController with 
           case Some("NOT-FOUND") => NotFound
           case Some("DECEASED") => Gone
           case Some("MCI") => Locked
-          case Some("NO-LIVE-INCOMES") =>
-            val resource: String = findResource(s"/resources/mobilepayesummary/no-live-incomes.json")
-              .getOrElse(throw new IllegalArgumentException("Resource not found!"))
-            Ok(toJson(Json.parse(resource).as[MobilePayeResponse]))
+          case Some("PREVIOUS-INCOME-ONLY") =>
+            Ok(toJson(Json.parse(grabSandboxData(s"/resources/mobilepayesummary/previous-income-only.json")).as[MobilePayeResponse]))
+          case Some("NO-TAX-YEAR-INCOME") =>
+            Ok(toJson(Json.parse(grabSandboxData(s"/resources/mobilepayesummary/no-tax-year-income.json")).as[MobilePayeResponse]))
           case Some("SINGLE-EMPLOYMENT") =>
-            val resource: String = findResource(s"/resources/mobilepayesummary/single-employment.json")
-              .getOrElse(throw new IllegalArgumentException("Resource not found!"))
-            Ok(toJson(Json.parse(resource).as[MobilePayeResponse]))
+            Ok(toJson(Json.parse(grabSandboxData(s"/resources/mobilepayesummary/single-employment.json")).as[MobilePayeResponse]))
           case Some("SINGLE-PENSION") =>
-            val resource: String = findResource(s"/resources/mobilepayesummary/single-pension.json")
-              .getOrElse(throw new IllegalArgumentException("Resource not found!"))
-            Ok(toJson(Json.parse(resource).as[MobilePayeResponse]))
+            Ok(toJson(Json.parse(grabSandboxData(s"/resources/mobilepayesummary/single-pension.json")).as[MobilePayeResponse]))
+          case Some("OTHER-INCOME-ONLY") =>
+            Ok(toJson(Json.parse(grabSandboxData(s"/resources/mobilepayesummary/other-income-only.json")).as[MobilePayeResponse]))
           case _ =>
-            val resource: String = findResource(s"/resources/mobilepayesummary/default.json")
-              .getOrElse(throw new IllegalArgumentException("Resource not found!"))
-            Ok(toJson(Json.parse(resource).as[MobilePayeResponse]))
+            Ok(toJson(Json.parse(grabSandboxData(s"/resources/mobilepayesummary/default.json")).as[MobilePayeResponse]))
         })
     }
+
+  private def grabSandboxData(resource: String): String =
+    findResource(resource)
+      .getOrElse(throw new IllegalArgumentException("Resource not found!"))
 }
