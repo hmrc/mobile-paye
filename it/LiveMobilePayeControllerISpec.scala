@@ -14,7 +14,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
       grantAccess(nino.toString)
       personalDetailsAreFound(nino.toString, person)
       taxCodeIncomesAreFound(nino.toString, taxCodeIncomes)
-      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncome)
+      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncomeWithUntaxedInterest)
       employmentsAreFound(nino.toString(), taiEmployments)
       taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
 
@@ -23,11 +23,24 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
       response.body shouldBe Json.toJson(fullMobilePayeResponse).toString()
     }
 
+    "return OK and a valid MobilePayeResponse json without untaxed income but other income" in {
+      grantAccess(nino.toString)
+      personalDetailsAreFound(nino.toString, person)
+      taxCodeIncomesAreFound(nino.toString, taxCodeIncomes)
+      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncomeWithoutUntaxedInterest)
+      employmentsAreFound(nino.toString(), taiEmployments)
+      taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
+
+      val response = await(request.get())
+      response.status shouldBe 200
+      response.body shouldBe Json.toJson(fullMobilePayeResponse.copy(otherIncomes = Some(Seq(otherIncome)))).toString()
+    }
+
     "return OK and a valid MobilePayeResponse json without employments" in {
       grantAccess(nino.toString)
       personalDetailsAreFound(nino.toString, person)
       taxCodeIncomesAreFound(nino.toString, taxCodeIncomes.filter(_.componentType == PensionIncome))
-      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncome)
+      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncomeWithUntaxedInterest)
       employmentsAreFound(nino.toString(), taiEmployments)
       taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
 
@@ -40,7 +53,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
       grantAccess(nino.toString)
       personalDetailsAreFound(nino.toString, person)
       taxCodeIncomesAreFound(nino.toString, taxCodeIncomes.filter(_.componentType == EmploymentIncome))
-      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncome)
+      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncomeWithUntaxedInterest)
       employmentsAreFound(nino.toString(), taiEmployments)
       taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
 
@@ -53,7 +66,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
       grantAccess(nino.toString)
       personalDetailsAreFound(nino.toString, person)
       taxCodeIncomesAreFound(nino.toString, taxCodeIncomes)
-      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncome.copy(otherNonTaxCodeIncomes = Nil))
+      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncomeWithoutUntaxedInterest.copy(otherNonTaxCodeIncomes = Nil))
       employmentsAreFound(nino.toString(), taiEmployments)
       taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
 

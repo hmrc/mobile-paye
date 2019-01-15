@@ -19,7 +19,9 @@ package uk.gov.hmrc.mobilepaye.domain.tai
 import play.api.libs.json.{Format, Json}
 
 case class UntaxedInterest(incomeComponentType: NonTaxCodeIncomeComponentType,
-                           amount: BigDecimal)
+                           amount: BigDecimal) {
+  def getFormattedIncomeComponentType : String = incomeComponentType.toString.replaceAll("(\\p{Ll})(\\p{Lu})", "$1 $2").toUpperCase
+}
 
 object UntaxedInterest {
   implicit val format: Format[UntaxedInterest] = Json.format[UntaxedInterest]
