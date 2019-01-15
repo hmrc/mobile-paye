@@ -62,12 +62,27 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector) {
         }
       }
 
-      val otherIncomes: Option[Seq[OtherIncome]] = nonTaxCodeIncomes.otherNonTaxCodeIncomes.map(income => OtherIncome.withMaybeLink(
+      val otherNonTaxCodeIncomes: Option[Seq[OtherIncome]] = nonTaxCodeIncomes.otherNonTaxCodeIncomes.map(income => OtherIncome.withMaybeLink(
         name = income.getFormattedIncomeComponentType,
         amount = income.amount.setScale(0, RoundingMode.FLOOR)
       )) match {
         case Nil => None
         case oi => Some(oi)
+      }
+
+      val untaxedInterest: Option[OtherIncome] = nonTaxCodeIncomes.untaxedInterest match {
+        case Some(income) => Some(OtherIncome.withMaybeLink(
+          name = income.getFormattedIncomeComponentType,
+          amount = income.amount.setScale(0, RoundingMode.FLOOR)
+        ))
+        case None => None
+      }
+
+      val otherIncomes: Option[Seq[OtherIncome]] = (otherNonTaxCodeIncomes, untaxedInterest) match {
+        case (Some(x), Some(y)) => Some(Seq(y) ++ x)
+        case (Some(x), _) => Some(x)
+        case (_, Some(y)) => Some(Seq(y))
+        case _ => None
       }
 
       val liveEmployments: Seq[TaxCodeIncome] = taxCodeIncomes.filter(filterLiveIncomes(_, EmploymentIncome))

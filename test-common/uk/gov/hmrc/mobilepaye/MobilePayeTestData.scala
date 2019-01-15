@@ -36,7 +36,9 @@ trait MobilePayeTestData {
   val emptyEmployments: Seq[Employment] = Seq.empty
 
   val otherNonTaxCodeIncome: OtherNonTaxCodeIncome = OtherNonTaxCodeIncome(StatePension, BigDecimal(250.0))
-  val nonTaxCodeIncome: NonTaxCodeIncome = NonTaxCodeIncome(None, Seq(otherNonTaxCodeIncome))
+  val untaxedIncome = Some(UntaxedInterest(UntaxedInterestIncome, BigDecimal(250.0)))
+  val nonTaxCodeIncomeWithUntaxedInterest: NonTaxCodeIncome = NonTaxCodeIncome(untaxedIncome, Seq(otherNonTaxCodeIncome))
+  val nonTaxCodeIncomeWithoutUntaxedInterest: NonTaxCodeIncome = NonTaxCodeIncome(None, Seq(otherNonTaxCodeIncome))
 
   val taiEmployment: Employment = Employment(Some("ABC123"), 3)
   val taiEmployments: Seq[Employment] = Seq(taiEmployment,
@@ -50,9 +52,11 @@ trait MobilePayeTestData {
   val payeIncome: PayeIncome = PayeIncome("The Best Shop Ltd", Some("ABC123"), "S1150L", 1000, "/check-income-tax/income-details/3")
 
   val otherIncome: OtherIncome = OtherIncome("STATE PENSION", 250.0, None)
+  val otherIncomeUntaxedInterest = OtherIncome("UNTAXED INTEREST INCOME", 250.0, None)
+
   val employments: Seq[PayeIncome] = Seq(payeIncome, payeIncome.copy(name = "The Worst Shop Ltd", link = "/check-income-tax/income-details/4", payrollNumber = Some("DEF456")))
   val pensions: Seq[PayeIncome] = Seq(payeIncome.copy(name = "Prestige Pensions", link = "/check-income-tax/income-details/5", payrollNumber = None))
-  val otherIncomes: Seq[OtherIncome] = Seq(otherIncome)
+  val otherIncomes: Seq[OtherIncome] = Seq(otherIncomeUntaxedInterest,otherIncome)
 
   val fullMobilePayeResponse: MobilePayeResponse = MobilePayeResponse(
     employments = Some(employments),
@@ -61,5 +65,4 @@ trait MobilePayeTestData {
     taxFreeAmount = Some(10000),
     estimatedTaxAmount = Some(250)
   )
-
 }
