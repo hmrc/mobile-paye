@@ -33,23 +33,23 @@ class MobilePayeServiceSpec extends BaseSpec {
   val service = new MobilePayeService(mockTaiConnector)
 
   def mockTaxCodeIncomes(f: Future[Seq[TaxCodeIncome]]): Unit = {
-    (mockTaiConnector.getTaxCodeIncomes(_: Nino)
-    (_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(f)
+    (mockTaiConnector.getTaxCodeIncomes(_: Nino, _: Int)
+    (_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *, *).returning(f)
   }
 
   def mockNonTaxCodeIncomes(f: Future[NonTaxCodeIncome]): Unit = {
-    (mockTaiConnector.getNonTaxCodeIncome(_: Nino)
-    (_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(f)
+    (mockTaiConnector.getNonTaxCodeIncome(_: Nino, _: Int)
+    (_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *, *).returning(f)
   }
 
   def mockEmployments(f: Future[Seq[Employment]]): Unit = {
-    (mockTaiConnector.getEmployments(_: Nino)
-    (_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(f)
+    (mockTaiConnector.getEmployments(_: Nino, _: Int)
+    (_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *, *).returning(f)
   }
 
   def mockTaxAccountSummary(f: Future[TaxAccountSummary]): Unit = {
-    (mockTaiConnector.getTaxAccountSummary(_: Nino)
-    (_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(f)
+    (mockTaiConnector.getTaxAccountSummary(_: Nino, _: Int)
+    (_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *, *).returning(f)
   }
 
   "getMobilePayeResponse" should {
@@ -59,7 +59,7 @@ class MobilePayeServiceSpec extends BaseSpec {
       mockEmployments(Future.successful(taiEmployments))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
 
-      val result = await(service.getMobilePayeResponse(nino))
+      val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
 
       result shouldBe fullMobilePayeResponse
     }
@@ -70,7 +70,7 @@ class MobilePayeServiceSpec extends BaseSpec {
       mockEmployments(Future.successful(taiEmployments))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
 
-      val result = await(service.getMobilePayeResponse(nino))
+      val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
 
       result shouldBe fullMobilePayeResponse.copy(otherIncomes = Some(Seq(otherIncome)))
     }
@@ -81,7 +81,7 @@ class MobilePayeServiceSpec extends BaseSpec {
       mockEmployments(Future.successful(taiEmployments))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
 
-      val result = await(service.getMobilePayeResponse(nino))
+      val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
 
       result shouldBe fullMobilePayeResponse.copy(employments = None)
     }
@@ -92,7 +92,7 @@ class MobilePayeServiceSpec extends BaseSpec {
       mockEmployments(Future.successful(taiEmployments))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
 
-      val result = await(service.getMobilePayeResponse(nino))
+      val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
 
       result shouldBe fullMobilePayeResponse.copy(pensions = None)
     }
@@ -103,7 +103,7 @@ class MobilePayeServiceSpec extends BaseSpec {
       mockEmployments(Future.successful(taiEmployments))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
 
-      val result = await(service.getMobilePayeResponse(nino))
+      val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
 
       result shouldBe fullMobilePayeResponse.copy(otherIncomes = None)
     }
@@ -115,7 +115,7 @@ class MobilePayeServiceSpec extends BaseSpec {
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
 
       intercept[UnauthorizedException] {
-        await(service.getMobilePayeResponse(nino))
+        await(service.getMobilePayeResponse(nino, currentTaxYear))
       }
     }
 
@@ -126,7 +126,7 @@ class MobilePayeServiceSpec extends BaseSpec {
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
 
       intercept[ForbiddenException] {
-        await(service.getMobilePayeResponse(nino))
+        await(service.getMobilePayeResponse(nino, currentTaxYear))
       }
     }
 
@@ -137,7 +137,7 @@ class MobilePayeServiceSpec extends BaseSpec {
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
 
       intercept[InternalServerException] {
-        await(service.getMobilePayeResponse(nino))
+        await(service.getMobilePayeResponse(nino, currentTaxYear))
       }
     }
 
@@ -147,7 +147,7 @@ class MobilePayeServiceSpec extends BaseSpec {
       mockEmployments(Future.successful(taiEmployments))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
 
-      val result = await(service.getMobilePayeResponse(nino))
+      val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
 
       result shouldBe MobilePayeResponse.empty
     }
@@ -158,7 +158,7 @@ class MobilePayeServiceSpec extends BaseSpec {
       mockEmployments(Future.successful(taiEmployments))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
 
-      val result = await(service.getMobilePayeResponse(nino))
+      val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
 
       result shouldBe MobilePayeResponse.empty
     }
@@ -169,7 +169,7 @@ class MobilePayeServiceSpec extends BaseSpec {
       mockEmployments(Future.successful(taiEmployments))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
 
-      val result = await(service.getMobilePayeResponse(nino))
+      val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
 
       result shouldBe MobilePayeResponse.empty
     }

@@ -33,12 +33,12 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector) {
   private val NpsTaxAccountDataAbsentMsg = "cannot complete a coding calculation without a primary employment"
   private val NpsTaxAccountNoEmploymentsRecorded = "no employments recorded for this individual"
 
-  def getMobilePayeResponse(nino: Nino)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[MobilePayeResponse] = {
+  def getMobilePayeResponse(nino: Nino, taxYear: Int)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[MobilePayeResponse] = {
 
     def knownException(ex: Throwable): Boolean =
       ex.getMessage.toLowerCase().contains(NpsTaxAccountNoEmploymentsCy) ||
-      ex.getMessage.toLowerCase().contains(NpsTaxAccountDataAbsentMsg) ||
-      ex.getMessage.toLowerCase().contains(NpsTaxAccountNoEmploymentsRecorded)
+        ex.getMessage.toLowerCase().contains(NpsTaxAccountDataAbsentMsg) ||
+        ex.getMessage.toLowerCase().contains(NpsTaxAccountNoEmploymentsRecorded)
 
 
     def filterLiveIncomes(emp: TaxCodeIncome, incomeType: TaxCodeIncomeComponentType): Boolean = emp.componentType == incomeType && emp.status == Live
@@ -101,10 +101,10 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector) {
         estimatedTaxAmount = estimatedTaxAmount)
     }
 
-    val taxCodeIncomesF = taiConnector.getTaxCodeIncomes(nino)
-    val nonTaxCodeIncomesF = taiConnector.getNonTaxCodeIncome(nino)
-    val employmentsF = taiConnector.getEmployments(nino)
-    val taxAccountSummaryF = taiConnector.getTaxAccountSummary(nino)
+    val taxCodeIncomesF = taiConnector.getTaxCodeIncomes(nino, taxYear)
+    val nonTaxCodeIncomesF = taiConnector.getNonTaxCodeIncome(nino, taxYear)
+    val employmentsF = taiConnector.getEmployments(nino, taxYear)
+    val taxAccountSummaryF = taiConnector.getTaxAccountSummary(nino, taxYear)
 
     (for {
       taxCodeIncomes <- taxCodeIncomesF

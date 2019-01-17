@@ -30,4 +30,5 @@ object Binders {
       else Left("ERROR_NINO_INVALID")
     }
   }
+
 }

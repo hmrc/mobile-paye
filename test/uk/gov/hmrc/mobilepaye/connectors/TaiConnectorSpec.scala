@@ -87,14 +87,14 @@ class TaiConnectorSpec extends BaseSpec {
 
       mockTaiGet(s"tax-account/$currentTaxYear/income/tax-code-incomes", Future.successful(taiTaxCodeIncomesJson))
 
-      val result = await(connector.getTaxCodeIncomes(nino))
+      val result = await(connector.getTaxCodeIncomes(nino, currentTaxYear))
       result shouldBe taxCodeIncomes
     }
 
     "return an empty Seq[TaxCodeIncome] when a NotFoundException is thrown for an authorised user" in {
       mockTaiGet(s"tax-account/$currentTaxYear/income/tax-code-incomes", Future.failed(new NotFoundException("Not Found")))
 
-      val result = await(connector.getTaxCodeIncomes(nino))
+      val result = await(connector.getTaxCodeIncomes(nino, currentTaxYear))
       result shouldBe emptyTaxCodeIncomes
     }
 
@@ -102,7 +102,7 @@ class TaiConnectorSpec extends BaseSpec {
       mockTaiGet(s"tax-account/$currentTaxYear/income/tax-code-incomes", Future.failed(new UnauthorizedException("Unauthorized")))
 
       intercept[UnauthorizedException] {
-        await(connector.getTaxCodeIncomes(nino))
+        await(connector.getTaxCodeIncomes(nino, currentTaxYear))
       }
     }
 
@@ -110,7 +110,7 @@ class TaiConnectorSpec extends BaseSpec {
       mockTaiGet(s"tax-account/$currentTaxYear/income/tax-code-incomes", Future.failed(new ForbiddenException("Forbidden")))
 
       intercept[ForbiddenException] {
-        await(connector.getTaxCodeIncomes(nino))
+        await(connector.getTaxCodeIncomes(nino, currentTaxYear))
       }
     }
 
@@ -118,7 +118,7 @@ class TaiConnectorSpec extends BaseSpec {
       mockTaiGet(s"tax-account/$currentTaxYear/income/tax-code-incomes", Future.failed(new InternalServerException("Internal Server Error")))
 
       intercept[InternalServerException] {
-        await(connector.getTaxCodeIncomes(nino))
+        await(connector.getTaxCodeIncomes(nino, currentTaxYear))
       }
     }
   }
@@ -137,7 +137,7 @@ class TaiConnectorSpec extends BaseSpec {
 
       mockTaiGet(s"tax-account/$currentTaxYear/income", Future.successful(taiNonTaxCodeIncomeJson))
 
-      val result = await(connector.getNonTaxCodeIncome(nino))
+      val result = await(connector.getNonTaxCodeIncome(nino, currentTaxYear))
       result shouldBe nonTaxCodeIncomeWithoutUntaxedInterest
     }
 
@@ -145,7 +145,7 @@ class TaiConnectorSpec extends BaseSpec {
       mockTaiGet(s"tax-account/$currentTaxYear/income", Future.failed(new UnauthorizedException("Unauthorised")))
 
       intercept[UnauthorizedException] {
-        await(connector.getNonTaxCodeIncome(nino))
+        await(connector.getNonTaxCodeIncome(nino, currentTaxYear))
       }
     }
 
@@ -153,7 +153,7 @@ class TaiConnectorSpec extends BaseSpec {
       mockTaiGet(s"tax-account/$currentTaxYear/income", Future.failed(new ForbiddenException("Forbidden")))
 
       intercept[ForbiddenException] {
-        await(connector.getNonTaxCodeIncome(nino))
+        await(connector.getNonTaxCodeIncome(nino, currentTaxYear))
       }
     }
 
@@ -161,7 +161,7 @@ class TaiConnectorSpec extends BaseSpec {
       mockTaiGet(s"tax-account/$currentTaxYear/income", Future.failed(new InternalServerException("Internal Server Error")))
 
       intercept[InternalServerException] {
-        await(connector.getNonTaxCodeIncome(nino))
+        await(connector.getNonTaxCodeIncome(nino, currentTaxYear))
       }
     }
   }
@@ -180,14 +180,14 @@ class TaiConnectorSpec extends BaseSpec {
 
       mockTaiGet(s"employments/years/$currentTaxYear", Future.successful(taiEmploymentsJson))
 
-      val result = await(connector.getEmployments(nino))
+      val result = await(connector.getEmployments(nino, currentTaxYear))
       result shouldBe taiEmployments
     }
 
     "return an empty Seq[Employment] when receiving when a NotFoundException is thrown for an authorised user" in {
       mockTaiGet(s"employments/years/$currentTaxYear", Future.failed(new NotFoundException("Not Found")))
 
-      val result = await(connector.getEmployments(nino))
+      val result = await(connector.getEmployments(nino, currentTaxYear))
       result shouldBe emptyEmployments
     }
 
@@ -195,7 +195,7 @@ class TaiConnectorSpec extends BaseSpec {
       mockTaiGet(s"employments/years/$currentTaxYear", Future.failed(new UnauthorizedException("Unauthorized")))
 
       intercept[UnauthorizedException] {
-        await(connector.getEmployments(nino))
+        await(connector.getEmployments(nino, currentTaxYear))
       }
     }
 
@@ -203,7 +203,7 @@ class TaiConnectorSpec extends BaseSpec {
       mockTaiGet(s"employments/years/$currentTaxYear", Future.failed(new ForbiddenException("Forbidden")))
 
       intercept[ForbiddenException] {
-        await(connector.getEmployments(nino))
+        await(connector.getEmployments(nino, currentTaxYear))
       }
     }
 
@@ -211,7 +211,7 @@ class TaiConnectorSpec extends BaseSpec {
       mockTaiGet(s"employments/years/$currentTaxYear", Future.failed(new InternalServerException("Internal Server Error")))
 
       intercept[InternalServerException] {
-        await(connector.getEmployments(nino))
+        await(connector.getEmployments(nino, currentTaxYear))
       }
     }
   }
@@ -228,7 +228,7 @@ class TaiConnectorSpec extends BaseSpec {
 
       mockTaiGet(s"tax-account/$currentTaxYear/summary", Future.successful(taiTaxAccountSummaryJson))
 
-      val result = await(connector.getTaxAccountSummary(nino))
+      val result = await(connector.getTaxAccountSummary(nino, currentTaxYear))
       result shouldBe taxAccountSummary
     }
 
@@ -236,7 +236,7 @@ class TaiConnectorSpec extends BaseSpec {
       mockTaiGet(s"tax-account/$currentTaxYear/summary", Future.failed(new UnauthorizedException("Unauthorized")))
 
       intercept[UnauthorizedException] {
-        await(connector.getTaxAccountSummary(nino))
+        await(connector.getTaxAccountSummary(nino, currentTaxYear))
       }
     }
 
@@ -244,7 +244,7 @@ class TaiConnectorSpec extends BaseSpec {
       mockTaiGet(s"tax-account/$currentTaxYear/summary", Future.failed(new ForbiddenException("Forbidden")))
 
       intercept[ForbiddenException] {
-        await(connector.getTaxAccountSummary(nino))
+        await(connector.getTaxAccountSummary(nino, currentTaxYear))
       }
     }
 
@@ -252,7 +252,7 @@ class TaiConnectorSpec extends BaseSpec {
       mockTaiGet(s"tax-account/$currentTaxYear/summary", Future.failed(new InternalServerException("Internal Server Error")))
 
       intercept[InternalServerException] {
-        await(connector.getTaxAccountSummary(nino))
+        await(connector.getTaxAccountSummary(nino, currentTaxYear))
       }
     }
   }

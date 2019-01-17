@@ -17,10 +17,8 @@
 package uk.gov.hmrc.mobilepaye.domain
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.time.TaxYear
 
-case class MobilePayeResponse(taxYear: Int = TaxYear.current.currentYear,
-                              employments: Option[Seq[PayeIncome]],
+case class MobilePayeResponse(employments: Option[Seq[PayeIncome]],
                               pensions: Option[Seq[PayeIncome]],
                               otherIncomes: Option[Seq[OtherIncome]],
                               taxFreeAmount: Option[BigDecimal],

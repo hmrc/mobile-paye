@@ -17,7 +17,7 @@ API
 
 | *Task* | *Supported Methods* | *Description* |
 |--------|----|----|
-| ```/mobile-paye/:nino/summary/current-income``` | GET | Fetch the Tax Credits Summary object for a given NINO. [More...](docs/summary.md)|
+| ```/mobile-paye/nino/:nino/tax-year/:taxYear/summary``` | GET | Fetch the Tax Credits Summary object for a given NINO for a given Tax Year. [More...](docs/summary.md)|
 
 # Sandbox
 All the above endpoints are accessible on sandbox with `/sandbox` prefix on each endpoint,e.g.
