@@ -4,7 +4,7 @@ The Mobile Paye response
   
 * **URL**
 
-  `/mobile-paye/nino/:nino/tax-year/:taxYear/summary`
+  `/mobile-paye/nino/:nino/taxYear/:taxYear/summary`
 
 * **Method:**
   
