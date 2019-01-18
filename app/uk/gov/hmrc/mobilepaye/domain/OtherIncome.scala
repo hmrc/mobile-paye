@@ -24,7 +24,7 @@ object OtherIncome {
   implicit val format: OFormat[OtherIncome] = Json.format[OtherIncome]
 
   def withMaybeLink(name: String, amount: BigDecimal, link: Option[String] = None): OtherIncome = {
-    if (name == "UNTAXED INTEREST")
+    if (name == "UNTAXED INTEREST INCOME")
       OtherIncome(name, amount, Some("/check-income-tax/income/bank-building-society-savings"))
     else
       OtherIncome(name, amount)
