@@ -18,18 +18,18 @@ package uk.gov.hmrc.mobilepaye.utils
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
+import org.scalatest.{Matchers, WordSpecLike}
+import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mobilepaye.MobilePayeTestData
 import uk.gov.hmrc.mobilepaye.mocks.AuthorisationMock
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.ExecutionContext
 
-
-trait BaseSpec extends UnitSpec with WithFakeApplication with MobilePayeTestData with AuthorisationMock {
-  implicit lazy val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-  implicit lazy val hc: HeaderCarrier = HeaderCarrier()
-  implicit lazy val system = ActorSystem()
+trait BaseSpec extends WordSpecLike with Matchers with FutureAwaits with DefaultAwaitTimeout with MobilePayeTestData with AuthorisationMock {
+  implicit lazy val ec:           ExecutionContext  = scala.concurrent.ExecutionContext.Implicits.global
+  implicit lazy val hc:           HeaderCarrier     = HeaderCarrier()
+  implicit lazy val system:       ActorSystem       = ActorSystem()
   implicit lazy val materializer: ActorMaterializer = ActorMaterializer()
 
   val acceptHeader: (String, String) = "Accept" -> "application/vnd.hmrc.1.0+json"

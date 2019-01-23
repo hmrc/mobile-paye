@@ -5,26 +5,24 @@ object AppDependencies {
   import play.core.PlayVersion
   import play.sbt.PlayImport._
 
-  private val play25Bootstrap = "4.6.0"
-  private val playHmrcApiVersion = "3.2.0"
+  private val play26Bootstrap = "0.36.0"
+  private val playHmrcApiVersion = "3.4.0-play-26"
   private val domainVersion = "5.3.0"
   private val taxYearVersion = "0.4.0"
-  private val authVersion = "2.18.0-play-25"
 
   private val hmrcTestVersion = "3.3.0"
   private val pegdownVersion = "1.6.0"
   private val scalaTestVersion = "3.0.5"
   private val wireMockVersion = "2.20.0"
   private val scalaMockVersion = "4.1.0"
-  private val scalaTestPlusVersion = "2.0.1"
+  private val scalaTestPlusVersion = "3.1.2"
 
   val compile: Seq[ModuleID] = Seq(
     ws,
-    "uk.gov.hmrc" %% "bootstrap-play-25" % play25Bootstrap,
+    "uk.gov.hmrc" %% "bootstrap-play-26" % play26Bootstrap,
     "uk.gov.hmrc" %% "domain" % domainVersion,
     "uk.gov.hmrc" %% "play-hmrc-api" % playHmrcApiVersion,
-    "uk.gov.hmrc" %% "tax-year" % taxYearVersion,
-    "uk.gov.hmrc" %% "auth-client" % authVersion
+    "uk.gov.hmrc" %% "tax-year" % taxYearVersion
   )
 
   trait TestDependencies {
@@ -33,30 +31,31 @@ object AppDependencies {
   }
 
   object Test {
-    def apply(): Seq[ModuleID] = new TestDependencies {
-      override lazy val test: Seq[ModuleID] = testCommon(scope) ++ Seq(
-        "org.scalamock" %% "scalamock" % scalaMockVersion % scope
-
-      )
-    }.test
+    def apply(): Seq[ModuleID] =
+      new TestDependencies {
+        override lazy val test: Seq[ModuleID] = testCommon(scope) ++ Seq(
+          "org.scalamock" %% "scalamock" % scalaMockVersion % scope,
+          "org.scalatestplus.play" %% "scalatestplus-play" % scalaTestPlusVersion % scope
+        )
+      }.test
   }
 
   object IntegrationTest {
-    def apply(): Seq[ModuleID] = new TestDependencies {
+    def apply(): Seq[ModuleID] =
+      new TestDependencies {
 
-      override lazy val scope: String = "it"
+        override lazy val scope: String = "it"
 
-      override lazy val test: Seq[ModuleID] = testCommon(scope) ++ Seq(
-        "com.github.tomakehurst" % "wiremock" % wireMockVersion % scope
-      )
-    }.test
+        override lazy val test: Seq[ModuleID] = testCommon(scope) ++ Seq(
+          "com.github.tomakehurst" % "wiremock" % wireMockVersion % scope,
+          "org.scalatestplus.play" %% "scalatestplus-play" % scalaTestPlusVersion % scope
+        )
+      }.test
   }
 
   private def testCommon(scope: String) = Seq(
-    "uk.gov.hmrc" %% "hmrctest" % hmrcTestVersion % scope,
     "org.pegdown" % "pegdown" % pegdownVersion % scope,
     "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
-    "org.scalatest" %% "scalatest" % scalaTestVersion % scope,
     "org.scalatestplus.play" %% "scalatestplus-play" % scalaTestPlusVersion % scope
   )
 

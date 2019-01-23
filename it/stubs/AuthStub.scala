@@ -17,10 +17,11 @@
 package stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.stubbing.StubMapping
 
 object AuthStub {
 
-  def grantAccess(nino: String, confidenceLevel: Int = 200): Unit = {
+  def grantAccess(nino: String, confidenceLevel: Int = 200): StubMapping = {
     stubFor(post(urlEqualTo("/auth/authorise"))
       .atPriority(0)
       .withRequestBody(equalToJson(

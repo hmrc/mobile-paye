@@ -21,27 +21,29 @@ import com.google.inject.Inject
 import com.typesafe.config.Config
 import javax.inject.Named
 import play.api.Configuration
-import uk.gov.hmrc.http.hooks.HttpHooks
+import play.api.libs.ws.WSClient
+import uk.gov.hmrc.http.hooks.{HttpHook, HttpHooks}
 import uk.gov.hmrc.play.audit.http.HttpAuditing
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.play.http.ws._
 
-
 trait Hooks extends HttpHooks with HttpAuditing {
-  val hooks = Seq(AuditingHook)
+  val hooks: Seq[HttpHook] = Seq(AuditingHook)
 }
 
 class WSHttpImpl @Inject()(
+  val wsClient:                  WSClient,
   @Named("appName") val appName: String,
-  val auditConnector: AuditConnector,
-  override val actorSystem: ActorSystem,
-  config: Configuration
-) extends HttpClient with WSGet
-  with WSPut
-  with WSPost
-  with WSDelete
-  with WSPatch
-  with Hooks {
+  val auditConnector:            AuditConnector,
+  override val actorSystem:      ActorSystem,
+  config:                        Configuration
+) extends HttpClient
+    with WSGet
+    with WSPut
+    with WSPost
+    with WSDelete
+    with WSPatch
+    with Hooks {
   override lazy val configuration: Option[Config] = Option(config.underlying)
 }

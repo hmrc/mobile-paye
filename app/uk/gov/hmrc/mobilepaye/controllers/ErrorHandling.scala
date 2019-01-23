@@ -22,7 +22,7 @@ import play.api.{Logger, mvc}
 import uk.gov.hmrc.api.controllers._
 import uk.gov.hmrc.auth.core.AuthorisationException
 import uk.gov.hmrc.http.{HeaderCarrier, HttpException, NotFoundException, Upstream4xxResponse}
-import uk.gov.hmrc.play.bootstrap.controller.BaseController
+import uk.gov.hmrc.play.bootstrap.controller.BackendBaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -50,13 +50,12 @@ class NinoNotFoundOnAccount extends GrantAccessException("Unauthorised! NINO not
 class AccountWithLowCL extends GrantAccessException("Unauthorised! Account with low CL!")
 
 trait ErrorHandling {
-  self: BaseController =>
+  self: BackendBaseController =>
   val app: String
 
   def log(message: String): Unit = Logger.info(s"$app $message")
 
-  def errorWrapper(func: => Future[mvc.Result])(implicit hc: HeaderCarrier): Future[Result] = {
-
+  def errorWrapper(func: => Future[mvc.Result])(implicit hc: HeaderCarrier): Future[Result] =
     func.recover {
       case _: NotFoundException =>
         log("Resource not found!")
@@ -79,5 +78,4 @@ trait ErrorHandling {
         Status(ErrorInternalServerError.httpStatusCode)(toJson(ErrorInternalServerError))
     }
 
-  }
 }

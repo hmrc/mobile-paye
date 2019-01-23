@@ -59,7 +59,7 @@ The Mobile Paye response
       "amount": 22500
     },
     {
-      "name": "UNTAXED INTEREST",
+      "name": "UNTAXED INTEREST INCOME",
       "amount": 9301,
       "link": "/"
     }
@@ -134,7 +134,7 @@ The Mobile Paye response
       "amount": 22500
     },
     {
-      "name": "UNTAXED INTEREST",
+      "name": "UNTAXED INTEREST INCOME",
       "amount": 9301,
       "link": "/"
     }

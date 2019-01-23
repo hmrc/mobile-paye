@@ -52,7 +52,7 @@ trait MobilePayeTestData {
   val payeIncome: PayeIncome = PayeIncome("The Best Shop Ltd", Some("ABC123"), "S1150L", 1000, "/check-income-tax/income-details/3")
 
   val otherIncome: OtherIncome = OtherIncome("STATE PENSION", 250.0, None)
-  val otherIncomeUntaxedInterest = OtherIncome("UNTAXED INTEREST INCOME", 250.0, None)
+  val otherIncomeUntaxedInterest = OtherIncome("UNTAXED INTEREST INCOME", 250.0, Some("/check-income-tax/income/bank-building-society-savings"))
 
   val employments: Seq[PayeIncome] = Seq(payeIncome, payeIncome.copy(name = "The Worst Shop Ltd", link = "/check-income-tax/income-details/4", payrollNumber = Some("DEF456")))
   val pensions: Seq[PayeIncome] = Seq(payeIncome.copy(name = "Prestige Pensions", link = "/check-income-tax/income-details/5", payrollNumber = None))

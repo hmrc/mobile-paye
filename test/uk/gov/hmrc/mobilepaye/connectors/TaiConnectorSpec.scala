@@ -28,7 +28,7 @@ class TaiConnectorSpec extends BaseSpec {
   val serviceUrl: String = "tst-url"
   val connector: TaiConnector = new TaiConnector(mockCoreGet, serviceUrl)
 
-  def mockTaiGet[T](url: String, f: Future[T]): Unit = {
+  def mockTaiGet[T](url: String, f: Future[T]) = {
     (mockCoreGet.GET(_: String)
     (_: HttpReads[T], _: HeaderCarrier, _: ExecutionContext)).expects(
       s"$serviceUrl/tai/${nino.value}/$url", *, *, *).returning(f)

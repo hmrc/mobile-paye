@@ -24,33 +24,39 @@ import uk.gov.hmrc.api.sandbox.FileResource
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mobilepaye.domain._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class SandboxMobilePayeController @Inject()() extends MobilePayeController with FileResource {
+class SandboxMobilePayeController @Inject()(val controllerComponents: ControllerComponents)(implicit val executionContext: ExecutionContext)
+    extends MobilePayeController
+    with FileResource {
 
   override val app: String = "Sandbox-Paye-Controller"
 
   override def getPayeSummary(nino: Nino, taxYear: Int, journeyId: String): Action[AnyContent] =
-    validateAccept(acceptHeaderValidationRules).async {
-      implicit request =>
-        Future successful (request.headers.get("SANDBOX-CONTROL") match {
-          case Some("ERROR-401")            => Unauthorized
-          case Some("ERROR-403")            => Forbidden
-          case Some("ERROR-500")            => InternalServerError
-          case Some("NOT-FOUND")            => NotFound
-          case Some("DECEASED")             => Gone
-          case Some("MCI")                  => Locked
-          case Some("PREVIOUS-INCOME-ONLY") => Ok(readData("previous-income-only.json"))
-          case Some("NO-TAX-YEAR-INCOME")   => Ok(readData("no-tax-year-income.json"))
-          case Some("SINGLE-EMPLOYMENT")    => Ok(readData("single-employment.json"))
-          case Some("SINGLE-PENSION")       => Ok(readData("single-pension.json"))
-          case Some("OTHER-INCOME-ONLY")    => Ok(readData("other-income-only.json"))
-          case _                            => Ok(readData("default.json"))
-        })
+    validateAccept(acceptHeaderValidationRules).async { implicit request =>
+      Future successful (request.headers.get("SANDBOX-CONTROL") match {
+        case Some("ERROR-401")            => Unauthorized
+        case Some("ERROR-403")            => Forbidden
+        case Some("ERROR-500")            => InternalServerError
+        case Some("NOT-FOUND")            => NotFound
+        case Some("DECEASED")             => Gone
+        case Some("MCI")                  => Locked
+        case Some("PREVIOUS-INCOME-ONLY") => Ok(readData("previous-income-only.json"))
+        case Some("NO-TAX-YEAR-INCOME")   => Ok(readData("no-tax-year-income.json"))
+        case Some("SINGLE-EMPLOYMENT")    => Ok(readData("single-employment.json"))
+        case Some("SINGLE-PENSION")       => Ok(readData("single-pension.json"))
+        case Some("OTHER-INCOME-ONLY")    => Ok(readData("other-income-only.json"))
+        case _                            => Ok(readData("default.json"))
+      })
     }
 
   private def readData(resource: String): JsValue =
-    toJson(Json.parse(findResource(s"/resources/mobilepayesummary/$resource")
-      .getOrElse(throw new IllegalArgumentException("Resource not found!"))).as[MobilePayeResponse])
+    toJson(
+      Json
+        .parse(findResource(s"/resources/mobilepayesummary/$resource")
+          .getOrElse(throw new IllegalArgumentException("Resource not found!")))
+        .as[MobilePayeResponse])
+
+  override def parser: BodyParser[AnyContent] = controllerComponents.parsers.anyContent
 }
