@@ -18,7 +18,7 @@ package uk.gov.hmrc.mobilepaye.controllers.action
 
 import play.api.Logger
 import play.api.libs.json.Json
-import play.api.mvc.{ActionBuilder, Request, Result, Results}
+import play.api.mvc._
 import uk.gov.hmrc.api.controllers._
 import uk.gov.hmrc.auth.core.retrieve.Retrievals._
 import uk.gov.hmrc.auth.core.retrieve.~
@@ -29,7 +29,7 @@ import uk.gov.hmrc.mobilepaye.controllers._
 import uk.gov.hmrc.play.HeaderCarrierConverter
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 case class Authority(nino: Nino)
 
@@ -39,10 +39,10 @@ trait Authorisation extends Results with AuthorisedFunctions {
 
   lazy val requiresAuth: Boolean = true
   lazy val ninoNotFoundOnAccount = new NinoNotFoundOnAccount
-  lazy val failedToMatchNino = new FailToMatchTaxIdOnAuth
-  lazy val lowConfidenceLevel = new AccountWithLowCL
+  lazy val failedToMatchNino     = new FailToMatchTaxIdOnAuth
+  lazy val lowConfidenceLevel    = new AccountWithLowCL
 
-  def grantAccess(requestedNino: Nino)(implicit hc: HeaderCarrier): Future[Authority] = {
+  def grantAccess(requestedNino: Nino)(implicit hc: HeaderCarrier): Future[Authority] =
     authorised(Enrolment("HMRC-NI", Seq(EnrolmentIdentifier("NINO", requestedNino.value)), "Activated", None))
       .retrieve(nino and confidenceLevel) {
         case Some(foundNino) ~ foundConfidenceLevel =>
@@ -53,43 +53,48 @@ trait Authorisation extends Results with AuthorisedFunctions {
         case None ~ _ =>
           throw ninoNotFoundOnAccount
       }
-  }
 
   def invokeAuthBlock[A](request: Request[A], block: Request[A] => Future[Result], taxId: Option[Nino]): Future[Result] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, None)
 
-    grantAccess(taxId.getOrElse(Nino(""))).flatMap { _ =>
-      block(request)
-    }.recover {
-      case _: uk.gov.hmrc.http.Upstream4xxResponse =>
-        Logger.info("Unauthorized! Failed to grant access since 4xx response!")
-        Unauthorized(Json.toJson(ErrorUnauthorizedUpstream))
+    grantAccess(taxId.getOrElse(Nino("")))
+      .flatMap { _ =>
+        block(request)
+      }
+      .recover {
+        case _: uk.gov.hmrc.http.Upstream4xxResponse =>
+          Logger.info("Unauthorized! Failed to grant access since 4xx response!")
+          Unauthorized(Json.toJson(ErrorUnauthorizedUpstream))
 
-      case _: NinoNotFoundOnAccount =>
-        Logger.info("Unauthorized! NINO not found on account!")
-        Unauthorized(Json.toJson(ErrorUnauthorizedNoNino))
+        case _: NinoNotFoundOnAccount =>
+          Logger.info("Unauthorized! NINO not found on account!")
+          Unauthorized(Json.toJson(ErrorUnauthorizedNoNino))
 
-      case _: FailToMatchTaxIdOnAuth =>
-        Logger.info("Forbidden! Failure to match URL NINO against Auth NINO")
-        Forbidden(Json.toJson(ForbiddenAccess))
+        case _: FailToMatchTaxIdOnAuth =>
+          Logger.info("Forbidden! Failure to match URL NINO against Auth NINO")
+          Forbidden(Json.toJson(ForbiddenAccess))
 
-      case _: AccountWithLowCL =>
-        Logger.info("Unauthorized! Account with low CL!")
-        Unauthorized(Json.toJson(ErrorUnauthorizedLowCL))
-    }
+        case _: AccountWithLowCL =>
+          Logger.info("Unauthorized! Account with low CL!")
+          Unauthorized(Json.toJson(ErrorUnauthorizedLowCL))
+      }
   }
 }
 
 trait AccessControl extends HeaderValidator with Authorisation {
+  outer =>
+  def parser: BodyParser[AnyContent]
 
-  def validateAcceptWithAuth(rules: Option[String] => Boolean, taxId: Option[Nino]): ActionBuilder[Request] = new ActionBuilder[Request] {
+  def validateAcceptWithAuth(rules: Option[String] => Boolean, taxId: Option[Nino]): ActionBuilder[Request, AnyContent] =
+    new ActionBuilder[Request, AnyContent] {
 
-    def invokeBlock[A](request: Request[A], block: Request[A] => Future[Result]): Future[Result] = {
-      if (rules(request.headers.get("Accept"))) {
-        if (requiresAuth) invokeAuthBlock(request, block, taxId)
-        else block(request)
-      }
-      else Future.successful(Status(ErrorAcceptHeaderInvalid.httpStatusCode)(Json.toJson(ErrorAcceptHeaderInvalid)))
+      override def parser:                     BodyParser[AnyContent] = outer.parser
+      override protected def executionContext: ExecutionContext       = outer.executionContext
+
+      def invokeBlock[A](request: Request[A], block: Request[A] => Future[Result]): Future[Result] =
+        if (rules(request.headers.get("Accept"))) {
+          if (requiresAuth) invokeAuthBlock(request, block, taxId)
+          else block(request)
+        } else Future.successful(Status(ErrorAcceptHeaderInvalid.httpStatusCode)(Json.toJson(ErrorAcceptHeaderInvalid)))
     }
-  }
 }

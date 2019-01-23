@@ -16,10 +16,8 @@
 
 package uk.gov.hmrc.mobilepaye.config
 
-import com.google.inject.name.Named
 import com.google.inject.name.Names.named
-import com.google.inject.{AbstractModule, Provides, TypeLiteral}
-import play.api.Mode.Mode
+import com.google.inject.{AbstractModule, TypeLiteral}
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.api.connector.{ApiServiceLocatorConnector, ServiceLocatorConnector}
 import uk.gov.hmrc.auth.core.AuthConnector
@@ -27,19 +25,22 @@ import uk.gov.hmrc.http.{CoreGet, CorePost}
 import uk.gov.hmrc.mobilepaye.controllers.api.ApiAccess
 import uk.gov.hmrc.mobilepaye.tasks.ServiceLocatorRegistrationTask
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
+import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
-import uk.gov.hmrc.play.config.{AppName, ServicesConfig}
 
 import scala.collection.JavaConverters._
 
-class GuiceModule(environment: Environment, configuration: Configuration) extends AbstractModule with ServicesConfig {
+class GuiceModule(environment: Environment, configuration: Configuration) extends AbstractModule {
 
-  override protected lazy val mode: Mode = environment.mode
-  override protected lazy val runModeConfiguration: Configuration = configuration
+  val servicesConfig = new ServicesConfig(
+    configuration,
+    new RunMode(configuration, environment.mode)
+  )
 
   override def configure(): Unit = {
 
-    bind(classOf[ServiceLocatorConnector]).to(classOf[ApiServiceLocatorConnector])
+    bind(classOf[ServiceLocatorConnector])
+      .to(classOf[ApiServiceLocatorConnector])
     bind(classOf[AuthConnector]).to(classOf[DefaultAuthConnector])
     bind(classOf[CoreGet]).to(classOf[WSHttpImpl])
     bind(classOf[CorePost]).to(classOf[WSHttpImpl])
@@ -48,25 +49,31 @@ class GuiceModule(environment: Environment, configuration: Configuration) extend
 
     bindConfigInt("controllers.confidenceLevel")
     bind(classOf[ApiAccess]).toInstance(
-      ApiAccess("PRIVATE", configuration.underlying.getStringList("api.access.white-list.applicationIds").asScala))
+      ApiAccess(
+        "PRIVATE",
+        configuration.underlying
+          .getStringList("api.access.white-list.applicationIds")
+          .asScala
+      )
+    )
 
     bindConfigStringSeq("scopes")
-    bind(classOf[String]).annotatedWith(named("tai")).toInstance(baseUrl("tai"))
+    bind(classOf[String]).annotatedWith(named("tai")).toInstance(servicesConfig.baseUrl("tai"))
   }
 
-  @Provides
-  @Named("appName")
-  def appName: String = AppName(configuration).appName
-
   private def bindConfigStringSeq(path: String): Unit = {
-    val configValue: Seq[String] = configuration.getStringSeq(path).getOrElse(throw new RuntimeException(s"""Config property "$path" missing"""))
+    val configValue: Seq[String] = configuration
+      .getOptional[Seq[String]](path)
+      .getOrElse(
+        throw new RuntimeException(s"""Config property "$path" missing""")
+      )
     bind(new TypeLiteral[Seq[String]] {})
       .annotatedWith(named(path))
       .toInstance(configValue)
   }
 
-  private def bindConfigInt(path: String): Unit = {
-    bindConstant().annotatedWith(named(path))
+  private def bindConfigInt(path: String): Unit =
+    bindConstant()
+      .annotatedWith(named(path))
       .to(configuration.underlying.getInt(path))
-  }
 }

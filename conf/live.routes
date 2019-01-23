@@ -1,1 +1,1 @@
-GET        /:nino/summary/current-income        @uk.gov.hmrc.mobilepaye.controllers.LiveMobilePayeController.getPayeSummary(nino: uk.gov.hmrc.domain.Nino, journeyId: String)
+GET        /:nino/summary/current-income        uk.gov.hmrc.mobilepaye.controllers.LiveMobilePayeController.getPayeSummary(nino: uk.gov.hmrc.domain.Nino, journeyId: String)

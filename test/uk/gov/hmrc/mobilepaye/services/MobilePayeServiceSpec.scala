@@ -25,32 +25,23 @@ import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 
 import scala.concurrent.{ExecutionContext, Future}
 
-
 class MobilePayeServiceSpec extends BaseSpec {
 
   val mockTaiConnector: TaiConnector = mock[TaiConnector]
 
   val service = new MobilePayeService(mockTaiConnector)
 
-  def mockTaxCodeIncomes(f: Future[Seq[TaxCodeIncome]]): Unit = {
-    (mockTaiConnector.getTaxCodeIncomes(_: Nino)
-    (_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(f)
-  }
+  def mockTaxCodeIncomes(f: Future[Seq[TaxCodeIncome]]) =
+    (mockTaiConnector.getTaxCodeIncomes(_: Nino)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(f)
 
-  def mockNonTaxCodeIncomes(f: Future[NonTaxCodeIncome]): Unit = {
-    (mockTaiConnector.getNonTaxCodeIncome(_: Nino)
-    (_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(f)
-  }
+  def mockNonTaxCodeIncomes(f: Future[NonTaxCodeIncome]) =
+    (mockTaiConnector.getNonTaxCodeIncome(_: Nino)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(f)
 
-  def mockEmployments(f: Future[Seq[Employment]]): Unit = {
-    (mockTaiConnector.getEmployments(_: Nino)
-    (_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(f)
-  }
+  def mockEmployments(f: Future[Seq[Employment]]) =
+    (mockTaiConnector.getEmployments(_: Nino)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(f)
 
-  def mockTaxAccountSummary(f: Future[TaxAccountSummary]): Unit = {
-    (mockTaiConnector.getTaxAccountSummary(_: Nino)
-    (_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(f)
-  }
+  def mockTaxAccountSummary(f: Future[TaxAccountSummary]) =
+    (mockTaiConnector.getTaxAccountSummary(_: Nino)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(f)
 
   "getMobilePayeResponse" should {
     "return full MobilePayeResponse when all data is available" in {
