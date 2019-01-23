@@ -33,7 +33,7 @@ class SandboxMobilePayeController @Inject()(val controllerComponents: Controller
 
   override val app: String = "Sandbox-Paye-Controller"
 
-  override def getPayeSummary(nino: Nino, journeyId: String): Action[AnyContent] =
+  override def getPayeSummary(nino: Nino, taxYear: Int, journeyId: String): Action[AnyContent] =
     validateAccept(acceptHeaderValidationRules).async { implicit request =>
       Future successful (request.headers.get("SANDBOX-CONTROL") match {
         case Some("ERROR-401")            => Unauthorized

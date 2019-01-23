@@ -23,28 +23,34 @@ uses:
   types: https://developer.service.hmrc.gov.uk/api-documentation/assets/common/modules/types.raml
 
 /mobile-paye:
-  /{nino}:
-    /summary:
-      /current-income:
-        uriParameters:
-          nino:
-            description: The NINO for the individual.
-            type: string
-            example: NS123456B
-        get:
-          displayName: Get current PAYE income summary
-          description: This endpoint retrieves the current PAYE income summary associated with a user for the current tax year.
-          is: [headers.acceptHeader]
-          (annotations.scope): "read:native-apps-api-orchestration"
-          securedBy: [ sec.oauth_2_0: { scopes: [ "read:native-apps-api-orchestration" ] } ]
-          queryParameters:
-            journeyId:
-              type: string
-              required: true
-          responses:
-            200:
-              body:
-                application/json:
-                  examples:
-                    example-1:
-                      value: !include examples/get-paye-data-example-1.json
+  /nino:
+    /{nino}:
+      /tax-year:
+        /{taxYear}:
+          /summary:
+            uriParameters:
+              nino:
+                description: The NINO for the individual.
+                type: string
+                example: NS123456B
+              taxYear:
+                description: The Tax Year you want information for.
+                type: integer
+                example: 2018
+            get:
+              displayName: Get current PAYE income summary
+              description: This endpoint retrieves the current PAYE income summary associated with a user for the current tax year.
+              is: [headers.acceptHeader]
+              (annotations.scope): "read:native-apps-api-orchestration"
+              securedBy: [ sec.oauth_2_0: { scopes: [ "read:native-apps-api-orchestration" ] } ]
+              queryParameters:
+                journeyId:
+                  type: string
+                  required: true
+              responses:
+                200:
+                  body:
+                    application/json:
+                      examples:
+                        example-1:
+                          value: !include examples/get-paye-data-example-1.json

@@ -33,7 +33,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
 trait MobilePayeController extends BackendBaseController with HeaderValidator with ErrorHandling {
-  def getPayeSummary(nino: Nino, journeyId: String): Action[AnyContent]
+  def getPayeSummary(nino: Nino, taxYear: Int, journeyId: String): Action[AnyContent]
 }
 
 @Singleton
@@ -50,7 +50,7 @@ class LiveMobilePayeController @Inject()(
   override def parser: BodyParser[AnyContent] = controllerComponents.parsers.anyContent
   override val app:    String                 = "Live-Paye-Controller"
 
-  override def getPayeSummary(nino: Nino, journeyId: String): Action[AnyContent] =
+  override def getPayeSummary(nino: Nino, taxYear: Int, journeyId: String): Action[AnyContent] =
     validateAcceptWithAuth(acceptHeaderValidationRules, Option(nino)).async { implicit request =>
       implicit val hc: HeaderCarrier = fromHeadersAndSession(request.headers, None).withExtraHeaders(HeaderNames.xSessionId -> journeyId)
       errorWrapper {
@@ -59,7 +59,7 @@ class LiveMobilePayeController @Inject()(
             case (true, _) => Future.successful(Gone)
             case (_, true) => Future.successful(Locked)
             case _ =>
-              mobilePayeService.getMobilePayeResponse(nino).map { mpr =>
+              mobilePayeService.getMobilePayeResponse(nino, taxYear).map { mpr =>
                 Ok(Json.toJson(mpr))
               }
           }

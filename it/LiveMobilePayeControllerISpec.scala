@@ -7,8 +7,8 @@ import utils.BaseISpec
 
 class LiveMobilePayeControllerISpec extends BaseISpec {
 
-  s"GET /$nino/summary/current-income" should {
-    val request: WSRequest = wsUrl(s"/$nino/summary/current-income?journeyId=12345").addHttpHeaders(acceptJsonHeader)
+  s"GET /nino/$nino/tax-year/$currentTaxYear/summary" should {
+    val request: WSRequest = wsUrl(s"/nino/$nino/tax-year/$currentTaxYear/summary?journeyId=12345").addHttpHeaders(acceptJsonHeader)
 
     "return OK and a full valid MobilePayeResponse json" in {
       grantAccess(nino.toString)

@@ -22,7 +22,6 @@ import play.api.libs.json.JsValue
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.mobilepaye.domain.tai._
-import uk.gov.hmrc.time.TaxYear
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -38,8 +37,8 @@ class TaiConnector @Inject()(http: CoreGet,
     }
   }
 
-  def getTaxCodeIncomes(nino: Nino)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Seq[TaxCodeIncome]] = {
-    http.GET[JsValue](url(nino, s"tax-account/${TaxYear.current.currentYear}/income/tax-code-incomes")).map {
+  def getTaxCodeIncomes(nino: Nino, taxYear: Int)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Seq[TaxCodeIncome]] = {
+    http.GET[JsValue](url(nino, s"tax-account/$taxYear/income/tax-code-incomes")).map {
       json => (json \ "data").as[Seq[TaxCodeIncome]]
     }.recover {
       case _: NotFoundException => Seq.empty[TaxCodeIncome]
@@ -47,14 +46,14 @@ class TaiConnector @Inject()(http: CoreGet,
     }
   }
 
-  def getNonTaxCodeIncome(nino: Nino)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[NonTaxCodeIncome] = {
-    http.GET[JsValue](url(nino, s"tax-account/${TaxYear.current.currentYear}/income")).map {
+  def getNonTaxCodeIncome(nino: Nino, taxYear: Int)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[NonTaxCodeIncome] = {
+    http.GET[JsValue](url(nino, s"tax-account/$taxYear/income")).map {
       json => (json \ "data" \ "nonTaxCodeIncomes").as[NonTaxCodeIncome]
     }
   }
 
-  def getEmployments(nino: Nino)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Seq[Employment]] = {
-    http.GET[JsValue](url(nino, s"employments/years/${TaxYear.current.currentYear}")).map {
+  def getEmployments(nino: Nino, taxYear: Int)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Seq[Employment]] = {
+    http.GET[JsValue](url(nino, s"employments/years/$taxYear")).map {
       json => (json \ "data" \ "employments").as[Seq[Employment]]
     }.recover {
       case _: NotFoundException => Seq.empty[Employment]
@@ -62,8 +61,8 @@ class TaiConnector @Inject()(http: CoreGet,
     }
   }
 
-  def getTaxAccountSummary(nino: Nino)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[TaxAccountSummary] = {
-    http.GET[JsValue](url(nino, s"tax-account/${TaxYear.current.currentYear}/summary")).map {
+  def getTaxAccountSummary(nino: Nino, taxYear: Int)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[TaxAccountSummary] = {
+    http.GET[JsValue](url(nino, s"tax-account/$taxYear/summary")).map {
       json => (json \ "data").as[TaxAccountSummary]
     }
   }
