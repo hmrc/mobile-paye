@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.mobilepaye.mocks
 
+import org.scalamock.handlers.CallHandler
 import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.{Retrieval, ~}
@@ -28,7 +29,9 @@ trait AuthorisationMock extends MockFactory {
 
   type GrantAccess = Option[String] ~ ConfidenceLevel
 
-  def mockAuthorisationGrantAccess(response: GrantAccess)(implicit authConnector: AuthConnector): Unit =
-    (authConnector.authorise(_: Predicate, _: Retrieval[GrantAccess])(_: HeaderCarrier, _: ExecutionContext))
-      .expects(*, *, *, *).returning(Future successful response)
+  def mockAuthorisationGrantAccess(response: GrantAccess)(implicit authConnector: AuthConnector): CallHandler[Future[GrantAccess]] =
+    (authConnector
+      .authorise(_: Predicate, _: Retrieval[GrantAccess])(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *, *, *)
+      .returning(Future successful response)
 }

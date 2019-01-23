@@ -16,16 +16,18 @@
 
 package uk.gov.hmrc.mobilepaye.domain.tai
 
-import org.joda.time.LocalDate
+import java.time.LocalDate
+
 import play.api.libs.json._
 import uk.gov.hmrc.domain.Nino
 
-case class Person(nino: Nino,
-                  firstName: String,
-                  surname: String,
-                  dateOfBirth: Option[LocalDate],
-                  isDeceased: Boolean = false,
-                  hasCorruptData: Boolean = false)
+case class Person(
+  nino:           Nino,
+  firstName:      String,
+  surname:        String,
+  dateOfBirth:    Option[LocalDate],
+  isDeceased:     Boolean = false,
+  hasCorruptData: Boolean = false)
 
 object Person {
   implicit val personFormat: Format[Person] = Json.format[Person]

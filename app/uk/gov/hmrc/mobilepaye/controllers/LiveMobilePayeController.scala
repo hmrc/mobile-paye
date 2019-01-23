@@ -25,39 +25,46 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, HeaderNames}
 import uk.gov.hmrc.mobilepaye.controllers.action.AccessControl
-import uk.gov.hmrc.mobilepaye.domain.MobilePayeResponse
 import uk.gov.hmrc.mobilepaye.services.MobilePayeService
 import uk.gov.hmrc.play.HeaderCarrierConverter.fromHeadersAndSession
-import uk.gov.hmrc.play.bootstrap.controller.BaseController
+import uk.gov.hmrc.play.bootstrap.controller.BackendBaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-trait MobilePayeController extends BaseController with HeaderValidator with ErrorHandling {
+trait MobilePayeController extends BackendBaseController with HeaderValidator with ErrorHandling {
   def getPayeSummary(nino: Nino, journeyId: String): Action[AnyContent]
 }
 
 @Singleton
-class LiveMobilePayeController @Inject()(override val authConnector: AuthConnector,
-                                         @Named("controllers.confidenceLevel") override val confLevel: Int,
-                                         mobilePayeService: MobilePayeService) extends MobilePayeController with AccessControl {
+class LiveMobilePayeController @Inject()(
+  override val authConnector:                                   AuthConnector,
+  @Named("controllers.confidenceLevel") override val confLevel: Int,
+  mobilePayeService:                                            MobilePayeService,
+  val controllerComponents:                                     ControllerComponents
+)(
+  implicit val executionContext: ExecutionContext
+) extends MobilePayeController
+    with AccessControl {
 
-  override val app: String = "Live-Paye-Controller"
+  override def parser: BodyParser[AnyContent] = controllerComponents.parsers.anyContent
+  override val app:    String                 = "Live-Paye-Controller"
 
   override def getPayeSummary(nino: Nino, journeyId: String): Action[AnyContent] =
-    validateAcceptWithAuth(acceptHeaderValidationRules, Option(nino)).async {
-      implicit request =>
-        implicit val hc: HeaderCarrier = fromHeadersAndSession(request.headers, None).withExtraHeaders(HeaderNames.xSessionId -> journeyId)
-        errorWrapper {
-          mobilePayeService.getPerson(nino).flatMap {
-            person =>
-              (person.isDeceased, person.hasCorruptData) match {
-                case (true, _) => Future.successful(Gone)
-                case (_, true) => Future.successful(Locked)
-                case _ => mobilePayeService.getMobilePayeResponse(nino).map { mpr => Ok(Json.toJson(mpr)) }
+    validateAcceptWithAuth(acceptHeaderValidationRules, Option(nino)).async { implicit request =>
+      implicit val hc: HeaderCarrier = fromHeadersAndSession(request.headers, None).withExtraHeaders(HeaderNames.xSessionId -> journeyId)
+      errorWrapper {
+        mobilePayeService.getPerson(nino).flatMap { person =>
+          (person.isDeceased, person.hasCorruptData) match {
+            case (true, _) => Future.successful(Gone)
+            case (_, true) => Future.successful(Locked)
+            case _ =>
+              mobilePayeService.getMobilePayeResponse(nino).map { mpr =>
+                Ok(Json.toJson(mpr))
               }
           }
-
         }
+
+      }
     }
 }

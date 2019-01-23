@@ -30,6 +30,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class ServiceLocatorRegistrationTask @Inject()(actorSystem: ActorSystem, connector: ServiceLocatorConnector)(implicit executionContext: ExecutionContext) {
   actorSystem.scheduler.scheduleOnce(delay = FiniteDuration(10, SECONDS)) {
     register
+    ()
   }
 
   def register: Future[Boolean] = {
