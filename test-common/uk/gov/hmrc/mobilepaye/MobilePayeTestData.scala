@@ -18,7 +18,7 @@ package uk.gov.hmrc.mobilepaye
 
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mobilepaye.domain.tai._
-import uk.gov.hmrc.mobilepaye.domain.{MobilePayeResponse, OtherIncome, PayeIncome}
+import uk.gov.hmrc.mobilepaye.domain.{IncomeSource, MobilePayeResponse, OtherIncome, PayeIncome}
 import uk.gov.hmrc.time.TaxYear
 
 trait MobilePayeTestData {
@@ -27,10 +27,13 @@ trait MobilePayeTestData {
 
   val nino: Nino = Nino("CS700100A")
   val taxCodeIncome: TaxCodeIncome = TaxCodeIncome(EmploymentIncome, Some(3), "The Best Shop Ltd", 1000, Live, "S1150L")
+  val taxCodeIncome2: TaxCodeIncome = taxCodeIncome.copy(name = "The Worst Shop Ltd", employmentId = Some(4))
+  val taxCodeIncome3: TaxCodeIncome = taxCodeIncome.copy(componentType = PensionIncome, name = "Prestige Pensions", employmentId = Some(5))
 
   val taxCodeIncomes: Seq[TaxCodeIncome] = Seq(taxCodeIncome,
-    taxCodeIncome.copy(name = "The Worst Shop Ltd", employmentId = Some(4)),
-    taxCodeIncome.copy(componentType = PensionIncome, name = "Prestige Pensions", employmentId = Some(5)))
+    taxCodeIncome2,
+    taxCodeIncome3
+    )
 
   val emptyTaxCodeIncomes: Seq[TaxCodeIncome] = Seq.empty
   val emptyEmployments: Seq[Employment] = Seq.empty
@@ -41,9 +44,15 @@ trait MobilePayeTestData {
   val nonTaxCodeIncomeWithoutUntaxedInterest: NonTaxCodeIncome = NonTaxCodeIncome(None, Seq(otherNonTaxCodeIncome))
 
   val taiEmployment: Employment = Employment(Some("ABC123"), 3)
+  val taiEmployment2: Employment = taiEmployment.copy(payrollNumber = Some("DEF456"), sequenceNumber = 4)
+  val taiEmployment3: Employment = taiEmployment.copy(payrollNumber = None, sequenceNumber = 5)
+
   val taiEmployments: Seq[Employment] = Seq(taiEmployment,
-    taiEmployment.copy(payrollNumber = Some("DEF456"), sequenceNumber = 4),
-    taiEmployment.copy(payrollNumber = None, sequenceNumber = 5))
+    taiEmployment2,
+    taiEmployment3)
+
+  val employmentIncomeSource: Seq[IncomeSource] = Seq(IncomeSource(taxCodeIncome, taiEmployment), IncomeSource(taxCodeIncome2, taiEmployment2))
+  val pensionIncomeSource: Seq[IncomeSource] = Seq(IncomeSource(taxCodeIncome3, taiEmployment3))
 
   val taxAccountSummary: TaxAccountSummary = TaxAccountSummary(BigDecimal(250), BigDecimal(10000))
 

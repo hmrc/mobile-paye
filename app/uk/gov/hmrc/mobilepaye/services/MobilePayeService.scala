@@ -21,7 +21,7 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mobilepaye.connectors.TaiConnector
 import uk.gov.hmrc.mobilepaye.domain.tai._
-import uk.gov.hmrc.mobilepaye.domain.{MobilePayeResponse, OtherIncome, PayeIncome}
+import uk.gov.hmrc.mobilepaye.domain.{IncomeSource, MobilePayeResponse, OtherIncome, PayeIncome}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.math.BigDecimal.RoundingMode
@@ -29,33 +29,30 @@ import scala.math.BigDecimal.RoundingMode
 @Singleton
 class MobilePayeService @Inject()(taiConnector: TaiConnector) {
 
-  private val NpsTaxAccountNoEmploymentsCy = "no employments recorded for current tax year"
+  private val NpsTaxAccountNoEmploymentsCurrentYear = "no employments recorded for current tax year"
   private val NpsTaxAccountDataAbsentMsg = "cannot complete a coding calculation without a primary employment"
   private val NpsTaxAccountNoEmploymentsRecorded = "no employments recorded for this individual"
 
   def getMobilePayeResponse(nino: Nino, taxYear: Int)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[MobilePayeResponse] = {
 
     def knownException(ex: Throwable): Boolean =
-      ex.getMessage.toLowerCase().contains(NpsTaxAccountNoEmploymentsCy) ||
+      ex.getMessage.toLowerCase().contains(NpsTaxAccountNoEmploymentsCurrentYear) ||
         ex.getMessage.toLowerCase().contains(NpsTaxAccountDataAbsentMsg) ||
         ex.getMessage.toLowerCase().contains(NpsTaxAccountNoEmploymentsRecorded)
 
 
-    def filterLiveIncomes(emp: TaxCodeIncome, incomeType: TaxCodeIncomeComponentType): Boolean = emp.componentType == incomeType && emp.status == Live
-
-    def buildMobilePayeResponse(taxCodeIncomes: Seq[TaxCodeIncome],
+    def buildMobilePayeResponse(incomeSourceEmployment: Seq[IncomeSource],
+                                incomeSourcePension: Seq[IncomeSource],
                                 nonTaxCodeIncomes: NonTaxCodeIncome,
-                                employments: Seq[Employment],
                                 taxAccountSummary: TaxAccountSummary): MobilePayeResponse = {
 
-      def buildPayeIncomes(employments: Seq[Employment], taxCodeIncomes: Seq[TaxCodeIncome]): Option[Seq[PayeIncome]] = {
-        employments.flatMap { emp =>
-          taxCodeIncomes.filter(income => income.employmentId.fold(false) { id => id == emp.sequenceNumber }).map(tci =>
-            PayeIncome(name = tci.name,
-              payrollNumber = emp.payrollNumber,
-              taxCode = tci.taxCode,
-              amount = tci.amount.setScale(0, RoundingMode.FLOOR),
-              link = s"/check-income-tax/income-details/${tci.employmentId.getOrElse(throw new Exception("Employment ID not found"))}"))
+      def buildPayeIncomes(incomes: Seq[IncomeSource]): Option[Seq[PayeIncome]] = {
+        incomes.map { inc =>
+            PayeIncome(name = inc.taxCodeIncome.name,
+              payrollNumber = inc.employment.payrollNumber,
+              taxCode = inc.taxCodeIncome.taxCode,
+              amount = inc.taxCodeIncome.amount.setScale(0, RoundingMode.FLOOR),
+              link = s"/check-income-tax/income-details/${inc.taxCodeIncome.employmentId.getOrElse(throw new Exception("Employment ID not found"))}")
         } match {
           case Nil => None
           case epi => Some(epi)
@@ -85,11 +82,8 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector) {
         case _ => None
       }
 
-      val liveEmployments: Seq[TaxCodeIncome] = taxCodeIncomes.filter(filterLiveIncomes(_, EmploymentIncome))
-      val livePensions: Seq[TaxCodeIncome] = taxCodeIncomes.filter(filterLiveIncomes(_, PensionIncome))
-
-      val employmentPayeIncomes: Option[Seq[PayeIncome]] = buildPayeIncomes(employments, liveEmployments)
-      val pensionPayeIncomes: Option[Seq[PayeIncome]] = buildPayeIncomes(employments, livePensions)
+      val employmentPayeIncomes: Option[Seq[PayeIncome]] = buildPayeIncomes(incomeSourceEmployment)
+      val pensionPayeIncomes: Option[Seq[PayeIncome]] = buildPayeIncomes(incomeSourcePension)
 
       val taxFreeAmount: Option[BigDecimal] = Some(taxAccountSummary.taxFreeAmount.setScale(0, RoundingMode.FLOOR))
       val estimatedTaxAmount: Option[BigDecimal] = Some(taxAccountSummary.totalEstimatedTax.setScale(0, RoundingMode.FLOOR))
@@ -101,17 +95,18 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector) {
         estimatedTaxAmount = estimatedTaxAmount)
     }
 
-    val taxCodeIncomesF = taiConnector.getTaxCodeIncomes(nino, taxYear)
+    val taxCodeIncomesEmploymentF = taiConnector.getMatchingTaxCodeIncomes(nino, taxYear, EmploymentIncome.toString, Live.toString)
+    val taxCodeIncomesPensionF = taiConnector.getMatchingTaxCodeIncomes(nino, taxYear, PensionIncome.toString, Live.toString)
+
     val nonTaxCodeIncomesF = taiConnector.getNonTaxCodeIncome(nino, taxYear)
-    val employmentsF = taiConnector.getEmployments(nino, taxYear)
     val taxAccountSummaryF = taiConnector.getTaxAccountSummary(nino, taxYear)
 
     (for {
-      taxCodeIncomes <- taxCodeIncomesF
+      taxCodeIncomesEmployment <- taxCodeIncomesEmploymentF
+      taxCodeIncomesPension <- taxCodeIncomesPensionF
       nonTaxCodeIncomes <- nonTaxCodeIncomesF
-      employments <- employmentsF
       taxAccountSummary <- taxAccountSummaryF
-      mobilePayeResponse: MobilePayeResponse = buildMobilePayeResponse(taxCodeIncomes, nonTaxCodeIncomes, employments, taxAccountSummary)
+      mobilePayeResponse: MobilePayeResponse = buildMobilePayeResponse(taxCodeIncomesEmployment, taxCodeIncomesPension, nonTaxCodeIncomes, taxAccountSummary)
     } yield mobilePayeResponse) recover {
       case ex if knownException(ex) => MobilePayeResponse.empty
       case ex => throw ex
