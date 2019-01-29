@@ -19,15 +19,21 @@ package uk.gov.hmrc.mobilepaye.controllers
 import com.google.inject._
 import com.google.inject.name.Named
 import play.api.libs.json.Json
+import play.api.libs.json.Json.obj
 import play.api.mvc._
 import uk.gov.hmrc.api.controllers.HeaderValidator
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, HeaderNames}
 import uk.gov.hmrc.mobilepaye.controllers.action.AccessControl
+import uk.gov.hmrc.mobilepaye.domain.MobilePayeResponse
 import uk.gov.hmrc.mobilepaye.services.MobilePayeService
 import uk.gov.hmrc.play.HeaderCarrierConverter.fromHeadersAndSession
+import uk.gov.hmrc.play.audit.AuditExtensions.auditHeaderCarrier
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 import uk.gov.hmrc.play.bootstrap.controller.BackendBaseController
+import uk.gov.hmrc.service.Auditor
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
@@ -41,11 +47,14 @@ class LiveMobilePayeController @Inject()(
   override val authConnector:                                   AuthConnector,
   @Named("controllers.confidenceLevel") override val confLevel: Int,
   mobilePayeService:                                            MobilePayeService,
-  val controllerComponents:                                     ControllerComponents
+  val controllerComponents:                                     ControllerComponents,
+  val auditConnector:                                           AuditConnector,
+  @Named("appName") override val appName:                       String
 )(
   implicit val executionContext: ExecutionContext
 ) extends MobilePayeController
-    with AccessControl {
+    with AccessControl
+    with Auditor {
 
   override def parser: BodyParser[AnyContent] = controllerComponents.parsers.anyContent
   override val app:    String                 = "Live-Paye-Controller"
@@ -60,6 +69,7 @@ class LiveMobilePayeController @Inject()(
             case (_, true) => Future.successful(Locked)
             case _ =>
               mobilePayeService.getMobilePayeResponse(nino, taxYear).map { mpr =>
+                sendAuditEvent(nino, mpr, request.path, journeyId)
                 Ok(Json.toJson(mpr))
               }
           }
@@ -67,4 +77,18 @@ class LiveMobilePayeController @Inject()(
 
       }
     }
+
+  private def sendAuditEvent(nino: Nino, response: MobilePayeResponse, path: String, journeyId: String)(implicit hc: HeaderCarrier): Unit = {
+    auditConnector.sendExtendedEvent(
+      ExtendedDataEvent(
+        appName,
+        "viewPayeSummary",
+        tags = hc.toAuditTags("view-paye-summary", path),
+        detail = obj(
+          "nino"      -> nino.value,
+          "journeyId" -> journeyId,
+          "data"      -> response
+        )))
+    ()
+  }
 }
