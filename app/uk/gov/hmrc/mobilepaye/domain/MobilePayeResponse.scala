@@ -26,9 +26,9 @@ case class MobilePayeResponse(employments: Option[Seq[PayeIncome]],
                               estimatedTaxAmount: Option[BigDecimal],
                               estimatedTaxAmountLink: Option[String] = Some("/check-income-tax/paye-income-tax-estimate"),
                               understandYourTaxCodeLink: Option[String] = Some("/check-income-tax/tax-codes"),
-                              addMissingEmployerLink: String = "/check-income-tax/add-employment/employment-name",
-                              addMissingPensionLink: String = "/check-income-tax/add-pension-provider/name",
-                              addMissingIncomeLink: String = "/forms/form/tell-us-about-other-income/guide")
+                              addMissingEmployerLink: Option[String] = Some("/check-income-tax/add-employment/employment-name"),
+                              addMissingPensionLink: Option[String] = Some("/check-income-tax/add-pension-provider/name"),
+                              addMissingIncomeLink: Option[String] = Some("/forms/form/tell-us-about-other-income/guide"))
 
 object MobilePayeResponse {
   def empty: MobilePayeResponse = {
