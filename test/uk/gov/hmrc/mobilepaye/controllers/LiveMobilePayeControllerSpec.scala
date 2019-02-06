@@ -55,7 +55,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       mockGetPerson(Future.successful(person))
       mockGetMobilePayeResponse(Future.successful(fullMobilePayeResponse))
       mockAuthorisationGrantAccess(Some(nino.toString) and L200)
-      mockAudit(nino, fullMobilePayeResponse, journeyId)
+      mockAudit(nino, fullMobilePayeAudit, journeyId)
 
       val result = controller.getPayeSummary(nino, currentTaxYear, journeyId)(fakeRequest)
 
@@ -67,7 +67,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       mockGetPerson(Future.successful(person))
       mockGetMobilePayeResponse(Future.successful(fullMobilePayeResponse.copy(employments = None)))
       mockAuthorisationGrantAccess(Some(nino.toString) and L200)
-      mockAudit(nino, fullMobilePayeResponse.copy(employments = None), journeyId)
+      mockAudit(nino, fullMobilePayeAudit.copy(employments = None), journeyId)
 
       val result = controller.getPayeSummary(nino, currentTaxYear, journeyId)(fakeRequest)
 
@@ -79,7 +79,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       mockGetPerson(Future.successful(person))
       mockGetMobilePayeResponse(Future.successful(fullMobilePayeResponse.copy(pensions = None)))
       mockAuthorisationGrantAccess(Some(nino.toString) and L200)
-      mockAudit(nino, fullMobilePayeResponse.copy(pensions = None), journeyId)
+      mockAudit(nino, fullMobilePayeAudit.copy(pensions = None), journeyId)
 
       val result = controller.getPayeSummary(nino, currentTaxYear, journeyId)(fakeRequest)
 
@@ -91,7 +91,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       mockGetPerson(Future.successful(person))
       mockGetMobilePayeResponse(Future.successful(fullMobilePayeResponse.copy(otherIncomes = None)))
       mockAuthorisationGrantAccess(Some(nino.toString) and L200)
-      mockAudit(nino, fullMobilePayeResponse.copy(otherIncomes = None), journeyId)
+      mockAudit(nino, fullMobilePayeAudit.copy(otherIncomes = None), journeyId)
 
       val result = controller.getPayeSummary(nino, currentTaxYear, journeyId)(fakeRequest)
 

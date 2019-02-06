@@ -69,7 +69,19 @@ class LiveMobilePayeController @Inject()(
             case (_, true) => Future.successful(Locked)
             case _ =>
               mobilePayeService.getMobilePayeResponse(nino, taxYear).map { mpr =>
-                sendAuditEvent(nino, mpr, request.path, journeyId)
+                sendAuditEvent(
+                  nino,
+                  mpr.copy(
+                    taxFreeAmountLink         = None,
+                    estimatedTaxAmountLink    = None,
+                    understandYourTaxCodeLink = None,
+                    addMissingEmployerLink    = None,
+                    addMissingPensionLink     = None,
+                    addMissingIncomeLink      = None
+                  ),
+                  request.path,
+                  journeyId
+                )
                 Ok(Json.toJson(mpr))
               }
           }

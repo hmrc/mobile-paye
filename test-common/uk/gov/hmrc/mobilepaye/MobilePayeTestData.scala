@@ -65,4 +65,11 @@ trait MobilePayeTestData {
     taxFreeAmount = Some(10000),
     estimatedTaxAmount = Some(250)
   )
+
+  val fullMobilePayeAudit: MobilePayeResponse = fullMobilePayeResponse.copy(taxFreeAmountLink         = None,
+    estimatedTaxAmountLink    = None,
+    understandYourTaxCodeLink = None,
+    addMissingEmployerLink    = None,
+    addMissingPensionLink     = None,
+    addMissingIncomeLink      = None)
 }
