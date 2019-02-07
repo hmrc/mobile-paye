@@ -18,7 +18,8 @@ package uk.gov.hmrc.mobilepaye.domain
 
 import play.api.libs.json.{Json, OFormat}
 
-case class PayeIncome(name: String, payrollNumber: Option[String] = None, taxCode: String, amount: BigDecimal, link: String)
+// Link is only optional to remove it for auditing purposes, it's a mandatory data field, we could consider different classes for auditing instead
+case class PayeIncome(name: String, payrollNumber: Option[String] = None, taxCode: String, amount: BigDecimal, link: Option[String])
 
 object PayeIncome {
   implicit val format: OFormat[PayeIncome] = Json.format[PayeIncome]

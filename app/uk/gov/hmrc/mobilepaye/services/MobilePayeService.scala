@@ -55,7 +55,7 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector) {
               payrollNumber = emp.payrollNumber,
               taxCode = tci.taxCode,
               amount = tci.amount.setScale(0, RoundingMode.FLOOR),
-              link = s"/check-income-tax/income-details/${tci.employmentId.getOrElse(throw new Exception("Employment ID not found"))}"))
+              link = Some(s"/check-income-tax/income-details/${tci.employmentId.getOrElse(throw new Exception("Employment ID not found"))}")))
         } match {
           case Nil => None
           case epi => Some(epi)
