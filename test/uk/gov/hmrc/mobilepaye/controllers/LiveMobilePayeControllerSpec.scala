@@ -41,8 +41,9 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
   val mockMobilePayeService: MobilePayeService = mock[MobilePayeService]
 
   implicit val mockAuditConnector: AuditConnector = mock[AuditConnector]
-  implicit val mockAuthConnector: AuthConnector = mock[AuthConnector]
-  val controller = new LiveMobilePayeController(mockAuthConnector, 200, mockMobilePayeService, stubControllerComponents(), mockAuditConnector, "mobile-paye")
+  implicit val mockAuthConnector:  AuthConnector  = mock[AuthConnector]
+  val controller =
+    new LiveMobilePayeController(mockAuthConnector, 200, mockMobilePayeService, stubControllerComponents(), mockAuditConnector, "mobile-paye")
 
   def mockGetMobilePayeResponse(f: Future[MobilePayeResponse]) =
     (mockMobilePayeService.getMobilePayeResponse(_: Nino, _: Int)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *, *).returning(f)
@@ -50,7 +51,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
   def mockGetPerson(f: Future[Person]) =
     (mockMobilePayeService.getPerson(_: Nino)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(f)
 
-  s"GET /$nino/summary/current-income" should {
+  "getPayeSummary" should {
     "return 200 and full paye summary data for valid authorised nino" in {
       mockGetPerson(Future.successful(person))
       mockGetMobilePayeResponse(Future.successful(fullMobilePayeResponse))

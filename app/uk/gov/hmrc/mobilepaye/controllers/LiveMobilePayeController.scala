@@ -26,7 +26,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, HeaderNames}
 import uk.gov.hmrc.mobilepaye.controllers.action.AccessControl
-import uk.gov.hmrc.mobilepaye.domain.MobilePayeResponse
+import uk.gov.hmrc.mobilepaye.domain.{MobilePayeResponse, OtherIncome, PayeIncome}
 import uk.gov.hmrc.mobilepaye.services.MobilePayeService
 import uk.gov.hmrc.play.HeaderCarrierConverter.fromHeadersAndSession
 import uk.gov.hmrc.play.audit.AuditExtensions.auditHeaderCarrier
@@ -71,14 +71,7 @@ class LiveMobilePayeController @Inject()(
               mobilePayeService.getMobilePayeResponse(nino, taxYear).map { mpr =>
                 sendAuditEvent(
                   nino,
-                  mpr.copy(
-                    taxFreeAmountLink         = None,
-                    estimatedTaxAmountLink    = None,
-                    understandYourTaxCodeLink = None,
-                    addMissingEmployerLink    = None,
-                    addMissingPensionLink     = None,
-                    addMissingIncomeLink      = None
-                  ),
+                  mpr,
                   request.path,
                   journeyId
                 )
@@ -91,6 +84,30 @@ class LiveMobilePayeController @Inject()(
     }
 
   private def sendAuditEvent(nino: Nino, response: MobilePayeResponse, path: String, journeyId: String)(implicit hc: HeaderCarrier): Unit = {
+    def removeLinks(data: Option[Seq[PayeIncome]]): Option[Seq[PayeIncome]] = data match {
+      case Some(d) if d.nonEmpty => Some(d.map(_.copy(link = None)))
+      case None                  => None
+    }
+
+    val emps: Option[Seq[PayeIncome]] = removeLinks(response.employments)
+    val pens: Option[Seq[PayeIncome]] = removeLinks(response.pensions)
+    val otIncs: Option[Seq[OtherIncome]] = response.otherIncomes match {
+      case Some(data) if data.nonEmpty => Some(data.map(_.copy(link = None)))
+      case None                        => None
+    }
+
+    val auditPayload = response.copy(
+      employments               = emps,
+      pensions                  = pens,
+      otherIncomes              = otIncs,
+      taxFreeAmountLink         = None,
+      estimatedTaxAmountLink    = None,
+      understandYourTaxCodeLink = None,
+      addMissingEmployerLink    = None,
+      addMissingPensionLink     = None,
+      addMissingIncomeLink      = None
+    )
+
     auditConnector.sendExtendedEvent(
       ExtendedDataEvent(
         appName,
@@ -99,7 +116,7 @@ class LiveMobilePayeController @Inject()(
         detail = obj(
           "nino"      -> nino.value,
           "journeyId" -> journeyId,
-          "data"      -> response
+          "data"      -> auditPayload
         )))
     ()
   }
