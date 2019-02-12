@@ -1,4 +1,6 @@
+import play.api.libs.json.Json
 import play.api.libs.ws.WSRequest
+import uk.gov.hmrc.mobilepaye.domain.Shuttering
 import utils.BaseISpec
 
 class SandboxMobilePayeControllerISpec extends BaseISpec {
@@ -96,6 +98,17 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
     "return 500 if there is an error where SANDBOX-CONTROL is ERROR-500" in {
       val response = await(request.addHttpHeaders(mobileHeader, "SANDBOX-CONTROL" -> "ERROR-500").get())
       response.status shouldBe 500
+    }
+
+    "return 521 if there is an error where SANDBOX-CONTROL is SHUTTERD" in {
+      val response = await(request.addHttpHeaders(mobileHeader, "SANDBOX-CONTROL" -> "SHUTTERED").get())
+      response.status shouldBe 521
+
+      val shuttering = Json.parse(response.body).as[Shuttering]
+      shuttering.shuttered shouldBe true
+      shuttering.title shouldBe "Shuttered"
+      shuttering.message shouldBe "PAYE is currently shuttered"
+
     }
   }
 }
