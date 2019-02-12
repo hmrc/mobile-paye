@@ -10,6 +10,8 @@ import uk.gov.hmrc.mobilepaye.tasks.ServiceLocatorRegistrationTask
 import utils.BaseISpec
 
 class ServiceLocatorRegistrationTaskISpec extends BaseISpec with Eventually with ScalaFutures with PlayRunners {
+  override def shuttered: Boolean = false
+
   def regPayloadStringFor(serviceName: String, serviceUrl: String): String =
     toJson(Registration(serviceName, serviceUrl, Some(Map("third-party-api" -> "true")))).toString
 

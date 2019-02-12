@@ -1,10 +1,12 @@
+import play.api.libs.json.Json
 import play.api.libs.ws.WSRequest
-import uk.gov.hmrc.time.TaxYear
+import uk.gov.hmrc.mobilepaye.domain.Shuttering
 import utils.BaseISpec
 
 class SandboxMobilePayeControllerISpec extends BaseISpec {
 
   private val mobileHeader = "X-MOBILE-USER-ID" -> "208606423740"
+  override def shuttered: Boolean = false
 
   s"GET sandbox/nino/$nino/tax-year/$currentTaxYear/summary" should {
     val request: WSRequest = wsUrl(s"/nino/$nino/tax-year/$currentTaxYear/summary?journeyId=12345").addHttpHeaders(acceptJsonHeader)
@@ -97,6 +99,16 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
       val response = await(request.addHttpHeaders(mobileHeader, "SANDBOX-CONTROL" -> "ERROR-500").get())
       response.status shouldBe 500
     }
-  }
 
+    "return 521 if there is an error where SANDBOX-CONTROL is SHUTTERD" in {
+      val response = await(request.addHttpHeaders(mobileHeader, "SANDBOX-CONTROL" -> "SHUTTERED").get())
+      response.status shouldBe 521
+
+      val shuttering = Json.parse(response.body).as[Shuttering]
+      shuttering.shuttered shouldBe true
+      shuttering.title shouldBe "Shuttered"
+      shuttering.message shouldBe "PAYE is currently shuttered"
+
+    }
+  }
 }

@@ -32,16 +32,18 @@ class SandboxMobilePayeController @Inject()(val controllerComponents: Controller
     with FileResource {
 
   override val app: String = "Sandbox-Paye-Controller"
-
+  private final val WebServerIsDown = new Status(521)
+private val shuttered = Json.toJson(Shuttering(shuttered = true, title = "Shuttered", message="PAYE is currently shuttered"))
   override def getPayeSummary(nino: Nino, taxYear: Int, journeyId: String): Action[AnyContent] =
     validateAccept(acceptHeaderValidationRules).async { implicit request =>
-      Future successful (request.headers.get("SANDBOX-CONTROL") match {
+      Future.successful(request.headers.get("SANDBOX-CONTROL") match {
         case Some("ERROR-401")            => Unauthorized
         case Some("ERROR-403")            => Forbidden
         case Some("ERROR-500")            => InternalServerError
         case Some("NOT-FOUND")            => NotFound
         case Some("DECEASED")             => Gone
         case Some("MCI")                  => Locked
+        case Some("SHUTTERED")            => WebServerIsDown(shuttered)
         case Some("PREVIOUS-INCOME-ONLY") => Ok(readData("previous-income-only.json"))
         case Some("NO-TAX-YEAR-INCOME")   => Ok(readData("no-tax-year-income.json"))
         case Some("SINGLE-EMPLOYMENT")    => Ok(readData("single-employment.json"))

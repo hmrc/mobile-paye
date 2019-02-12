@@ -25,8 +25,8 @@ lazy val microservice = Project(appName, file("."))
     evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
     resolvers += Resolver.jcenterRepo,
     unmanagedResourceDirectories in Compile += baseDirectory.value / "resources",
-    unmanagedSourceDirectories in IntegrationTest := (baseDirectory in IntegrationTest) (base => Seq(base / "it", base / "test-common")).value,
-    unmanagedSourceDirectories in Test := (baseDirectory in Test) (base => Seq(base / "test", base / "test-common")).value,
+    unmanagedSourceDirectories in IntegrationTest := (baseDirectory in IntegrationTest)(base => Seq(base / "it", base / "test-common")).value,
+    unmanagedSourceDirectories in Test := (baseDirectory in Test)(base => Seq(base / "test", base / "test-common")).value,
     testGrouping in IntegrationTest := oneForkedJvmPerTest((definedTests in IntegrationTest).value),
     scalacOptions ++= Seq(
       "-deprecation",
@@ -44,33 +44,33 @@ lazy val microservice = Project(appName, file("."))
       "-Ywarn-nullary-unit",
       "-Ywarn-numeric-widen",
       //"-Ywarn-unused-import", - does not work well with fatal-warnings because of play-generated sources
-      "-Xfatal-warnings",
+      //"-Xfatal-warnings",
       "-Xlint"
     )
   )
 
 def oneForkedJvmPerTest(tests: Seq[TestDefinition]): Seq[Group] =
-  tests map {
-    test => Group(test.name, Seq(test), SubProcess(ForkOptions(runJVMOptions = Seq("-Dtest.name=" + test.name))))
+  tests map { test =>
+    Group(test.name, Seq(test), SubProcess(ForkOptions(runJVMOptions = Seq("-Dtest.name=" + test.name))))
   }
 
 // Transitive dependencies in scalatest/scalatestplusplay drag in a newer version of jetty that is not
 // compatible with wiremock, so we need to pin the jetty stuff to the older version.
 // see https://groups.google.com/forum/#!topic/play-framework/HAIM1ukUCnI
 val jettyVersion = "9.2.13.v20150730"
-val overrides: Set[ModuleID] =  Set(
-  "org.eclipse.jetty" % "jetty-server" % jettyVersion,
-  "org.eclipse.jetty" % "jetty-servlet" % jettyVersion,
-  "org.eclipse.jetty" % "jetty-security" % jettyVersion,
-  "org.eclipse.jetty" % "jetty-servlets" % jettyVersion,
-  "org.eclipse.jetty" % "jetty-continuation" % jettyVersion,
-  "org.eclipse.jetty" % "jetty-webapp" % jettyVersion,
-  "org.eclipse.jetty" % "jetty-xml" % jettyVersion,
-  "org.eclipse.jetty" % "jetty-client" % jettyVersion,
-  "org.eclipse.jetty" % "jetty-http" % jettyVersion,
-  "org.eclipse.jetty" % "jetty-io" % jettyVersion,
-  "org.eclipse.jetty" % "jetty-util" % jettyVersion,
-  "org.eclipse.jetty.websocket" % "websocket-api" % jettyVersion,
-  "org.eclipse.jetty.websocket" % "websocket-common" % jettyVersion,
-  "org.eclipse.jetty.websocket" % "websocket-client" % jettyVersion
+val overrides: Set[ModuleID] = Set(
+  "org.eclipse.jetty"           % "jetty-server"       % jettyVersion,
+  "org.eclipse.jetty"           % "jetty-servlet"      % jettyVersion,
+  "org.eclipse.jetty"           % "jetty-security"     % jettyVersion,
+  "org.eclipse.jetty"           % "jetty-servlets"     % jettyVersion,
+  "org.eclipse.jetty"           % "jetty-continuation" % jettyVersion,
+  "org.eclipse.jetty"           % "jetty-webapp"       % jettyVersion,
+  "org.eclipse.jetty"           % "jetty-xml"          % jettyVersion,
+  "org.eclipse.jetty"           % "jetty-client"       % jettyVersion,
+  "org.eclipse.jetty"           % "jetty-http"         % jettyVersion,
+  "org.eclipse.jetty"           % "jetty-io"           % jettyVersion,
+  "org.eclipse.jetty"           % "jetty-util"         % jettyVersion,
+  "org.eclipse.jetty.websocket" % "websocket-api"      % jettyVersion,
+  "org.eclipse.jetty.websocket" % "websocket-common"   % jettyVersion,
+  "org.eclipse.jetty.websocket" % "websocket-client"   % jettyVersion
 )
