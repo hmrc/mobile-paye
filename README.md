@@ -61,7 +61,7 @@ To test different scenarios, add a header "SANDBOX-CONTROL" with one of the foll
 | "OTHER-INCOME-ONLY" | Happy path, return other income when there are previous incomes but no live income | 
 | "DECEASED"  | Happy path, trigger a 410 Gone response when the person is deceased |
 | "MCI"       | Happy path, trigger a 423 Locked response when manual correspondence is required |
-| "SHUTTERED" | Unhappy path, will return a 521 with the shuttered payload
+| "SHUTTERED" | Unhappy path, trigger a 521 with the shuttered payload
 | "NOT-FOUND" | Unhappy path, URL not found |
 | "ERROR-401" | Unhappy path, trigger a 401 Unauthorized response |
 | "ERROR-403" | Unhappy path, trigger a 403 Forbidden response |
