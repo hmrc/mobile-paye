@@ -25,8 +25,9 @@ import uk.gov.hmrc.api.controllers.HeaderValidator
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, HeaderNames}
+import uk.gov.hmrc.mobilepaye.config.{MobilePayeConfig, MobilePayeControllerConfig}
 import uk.gov.hmrc.mobilepaye.controllers.action.AccessControl
-import uk.gov.hmrc.mobilepaye.domain.{MobilePayeResponse, OtherIncome, PayeIncome}
+import uk.gov.hmrc.mobilepaye.domain.{MobilePayeResponse, OtherIncome, PayeIncome, Shuttering}
 import uk.gov.hmrc.mobilepaye.services.MobilePayeService
 import uk.gov.hmrc.play.HeaderCarrierConverter.fromHeadersAndSession
 import uk.gov.hmrc.play.audit.AuditExtensions.auditHeaderCarrier
@@ -49,37 +50,42 @@ class LiveMobilePayeController @Inject()(
   mobilePayeService:                                            MobilePayeService,
   val controllerComponents:                                     ControllerComponents,
   val auditConnector:                                           AuditConnector,
-  @Named("appName") override val appName:                       String
+  @Named("appName") override val appName:                       String,
+  config:                                                       MobilePayeControllerConfig
 )(
   implicit val executionContext: ExecutionContext
 ) extends MobilePayeController
     with AccessControl
-    with Auditor {
+    with Auditor
+    with ControllerChecks {
 
-  override def parser: BodyParser[AnyContent] = controllerComponents.parsers.anyContent
-  override val app:    String                 = "Live-Paye-Controller"
+  override def shuttering: Shuttering             = config.shuttering
+  override def parser:     BodyParser[AnyContent] = controllerComponents.parsers.anyContent
+  override val app:        String                 = "Live-Paye-Controller"
 
   override def getPayeSummary(nino: Nino, taxYear: Int, journeyId: String): Action[AnyContent] =
     validateAcceptWithAuth(acceptHeaderValidationRules, Option(nino)).async { implicit request =>
       implicit val hc: HeaderCarrier = fromHeadersAndSession(request.headers, None).withExtraHeaders(HeaderNames.xSessionId -> journeyId)
-      errorWrapper {
-        mobilePayeService.getPerson(nino).flatMap { person =>
-          (person.isDeceased, person.hasCorruptData) match {
-            case (true, _) => Future.successful(Gone)
-            case (_, true) => Future.successful(Locked)
-            case _ =>
-              mobilePayeService.getMobilePayeResponse(nino, taxYear).map { mpr =>
-                sendAuditEvent(
-                  nino,
-                  mpr,
-                  request.path,
-                  journeyId
-                )
-                Ok(Json.toJson(mpr))
-              }
+      withShuttering(shuttering) {
+        errorWrapper {
+          mobilePayeService.getPerson(nino).flatMap { person =>
+            (person.isDeceased, person.hasCorruptData) match {
+              case (true, _) => Future.successful(Gone)
+              case (_, true) => Future.successful(Locked)
+              case _ =>
+                mobilePayeService.getMobilePayeResponse(nino, taxYear).map { mpr =>
+                  sendAuditEvent(
+                    nino,
+                    mpr,
+                    request.path,
+                    journeyId
+                  )
+                  Ok(Json.toJson(mpr))
+                }
+            }
+
           }
         }
-
       }
     }
 

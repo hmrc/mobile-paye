@@ -47,6 +47,8 @@ class GuiceModule(environment: Environment, configuration: Configuration) extend
     bind(classOf[HttpClient]).to(classOf[WSHttpImpl])
     bind(classOf[ServiceLocatorRegistrationTask]).asEagerSingleton()
 
+    bind(classOf[MobilePayeControllerConfig]).to(classOf[MobilePayeConfig])
+
     bindConfigInt("controllers.confidenceLevel")
     bind(classOf[ApiAccess]).toInstance(
       ApiAccess(

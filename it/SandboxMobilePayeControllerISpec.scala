@@ -1,10 +1,10 @@
 import play.api.libs.ws.WSRequest
-import uk.gov.hmrc.time.TaxYear
 import utils.BaseISpec
 
 class SandboxMobilePayeControllerISpec extends BaseISpec {
 
   private val mobileHeader = "X-MOBILE-USER-ID" -> "208606423740"
+  override def shuttered: Boolean = false
 
   s"GET sandbox/nino/$nino/tax-year/$currentTaxYear/summary" should {
     val request: WSRequest = wsUrl(s"/nino/$nino/tax-year/$currentTaxYear/summary?journeyId=12345").addHttpHeaders(acceptJsonHeader)
@@ -98,5 +98,4 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
       response.status shouldBe 500
     }
   }
-
 }
