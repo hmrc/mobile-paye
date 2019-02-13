@@ -1,4 +1,4 @@
-import play.sbt.PlayImport.PlayKeys.playDefaultPort
+import play.sbt.PlayImport.PlayKeys._
 import sbt.Tests.{Group, SubProcess}
 import scoverage.ScoverageKeys
 import uk.gov.hmrc.SbtArtifactory
@@ -11,12 +11,12 @@ lazy val microservice = Project(appName, file("."))
   .configs(IntegrationTest)
   .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
   .settings(publishingSettings: _*)
-  .settings(routesImport ++= Seq("uk.gov.hmrc.domain._", "uk.gov.hmrc.mobilepaye.binders.Binders._"))
+  .settings(routesImport ++= Seq("uk.gov.hmrc.domain._", "uk.gov.hmrc.mobilepaye.binders.Binders._", "uk.gov.hmrc.time.TaxYear"))
   .settings(
     majorVersion := 0,
     scalaVersion := "2.11.12",
     ScoverageKeys.coverageExcludedFiles := "<empty>;com.kenshoo.play.metrics.*;.*definition.*;prod.*;testOnlyDoNotUseInAppConf.*;app.*;.*BuildInfo.*;.*Routes.*",
-    ScoverageKeys.coverageMinimum := 90,
+    ScoverageKeys.coverageMinimum := 93,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true,
     playDefaultPort := 8247,

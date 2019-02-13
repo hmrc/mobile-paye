@@ -46,7 +46,7 @@ abstract class BaseISpec
     } else {
       val conf = baseConfig + ("mobilePaye.shuttering.shuttered" -> false,
       "mobilePaye.shuttering.title"   -> base64Encode(""),
-      "mobilePaye.shuttering.message" -> base64Encode("2345"))
+      "mobilePaye.shuttering.message" -> base64Encode(""))
       conf
     }
   }
