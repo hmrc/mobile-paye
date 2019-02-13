@@ -25,7 +25,7 @@ import uk.gov.hmrc.api.controllers.HeaderValidator
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, HeaderNames}
-import uk.gov.hmrc.mobilepaye.config.{MobilePayeConfig, MobilePayeControllerConfig}
+import uk.gov.hmrc.mobilepaye.config.MobilePayeControllerConfig
 import uk.gov.hmrc.mobilepaye.controllers.action.AccessControl
 import uk.gov.hmrc.mobilepaye.domain.{MobilePayeResponse, OtherIncome, PayeIncome, Shuttering}
 import uk.gov.hmrc.mobilepaye.services.MobilePayeService
@@ -40,7 +40,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
 trait MobilePayeController extends BackendBaseController with HeaderValidator with ErrorHandling {
-  def getPayeSummary(nino: Nino, taxYear: Int, journeyId: String): Action[AnyContent]
+  def getPayeSummary(nino: Nino, journeyId: String, taxYear: Int): Action[AnyContent]
 }
 
 @Singleton
@@ -63,7 +63,7 @@ class LiveMobilePayeController @Inject()(
   override def parser:     BodyParser[AnyContent] = controllerComponents.parsers.anyContent
   override val app:        String                 = "Live-Paye-Controller"
 
-  override def getPayeSummary(nino: Nino, taxYear: Int, journeyId: String): Action[AnyContent] =
+  override def getPayeSummary(nino: Nino, journeyId: String, taxYear: Int): Action[AnyContent] =
     validateAcceptWithAuth(acceptHeaderValidationRules, Option(nino)).async { implicit request =>
       implicit val hc: HeaderCarrier = fromHeadersAndSession(request.headers, None).withExtraHeaders(HeaderNames.xSessionId -> journeyId)
       withShuttering(shuttering) {
@@ -83,7 +83,6 @@ class LiveMobilePayeController @Inject()(
                   Ok(Json.toJson(mpr))
                 }
             }
-
           }
         }
       }

@@ -94,7 +94,8 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector) {
       val taxFreeAmount: Option[BigDecimal] = Some(taxAccountSummary.taxFreeAmount.setScale(0, RoundingMode.FLOOR))
       val estimatedTaxAmount: Option[BigDecimal] = Some(taxAccountSummary.totalEstimatedTax.setScale(0, RoundingMode.FLOOR))
 
-      MobilePayeResponse(employments = employmentPayeIncomes,
+      MobilePayeResponse(taxYear = Some(taxYear),
+        employments = employmentPayeIncomes,
         pensions = pensionPayeIncomes,
         otherIncomes = otherIncomes,
         taxFreeAmount = taxFreeAmount,

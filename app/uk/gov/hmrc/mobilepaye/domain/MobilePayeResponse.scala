@@ -18,7 +18,8 @@ package uk.gov.hmrc.mobilepaye.domain
 
 import play.api.libs.json.{Json, OFormat}
 
-case class MobilePayeResponse(employments: Option[Seq[PayeIncome]],
+case class MobilePayeResponse(taxYear: Option[Int],
+                              employments: Option[Seq[PayeIncome]],
                               pensions: Option[Seq[PayeIncome]],
                               otherIncomes: Option[Seq[OtherIncome]],
                               taxFreeAmount: Option[BigDecimal],
@@ -32,7 +33,8 @@ case class MobilePayeResponse(employments: Option[Seq[PayeIncome]],
 
 object MobilePayeResponse {
   def empty: MobilePayeResponse = {
-    MobilePayeResponse(employments = None,
+    MobilePayeResponse(taxYear=None,
+      employments = None,
       pensions = None,
       otherIncomes = None,
       taxFreeAmount = None,

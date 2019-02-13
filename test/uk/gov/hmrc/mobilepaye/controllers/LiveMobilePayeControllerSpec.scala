@@ -26,8 +26,8 @@ import uk.gov.hmrc.auth.core.{AuthConnector, MissingBearerToken}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException, NotFoundException, Upstream4xxResponse}
 import uk.gov.hmrc.mobilepaye.config.MobilePayeControllerConfig
-import uk.gov.hmrc.mobilepaye.domain.{MobilePayeResponse, Shuttering}
 import uk.gov.hmrc.mobilepaye.domain.tai.Person
+import uk.gov.hmrc.mobilepaye.domain.{MobilePayeResponse, Shuttering}
 import uk.gov.hmrc.mobilepaye.services.MobilePayeService
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
@@ -74,7 +74,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       mockAuthorisationGrantAccess(Some(nino.toString) and L200)
       mockAudit(nino, fullMobilePayeAudit, journeyId)
 
-      val result = controller(notShuttered).getPayeSummary(nino, currentTaxYear, journeyId)(fakeRequest)
+      val result = controller(notShuttered).getPayeSummary(nino, journeyId, currentTaxYear)(fakeRequest)
 
       status(result)        shouldBe 200
       contentAsJson(result) shouldBe Json.toJson(fullMobilePayeResponse)
@@ -86,7 +86,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       mockAuthorisationGrantAccess(Some(nino.toString) and L200)
       mockAudit(nino, fullMobilePayeAudit.copy(employments = None), journeyId)
 
-      val result = controller(notShuttered).getPayeSummary(nino, currentTaxYear, journeyId)(fakeRequest)
+      val result = controller(notShuttered).getPayeSummary(nino, journeyId, currentTaxYear)(fakeRequest)
 
       status(result)        shouldBe 200
       contentAsJson(result) shouldBe Json.toJson(fullMobilePayeResponse.copy(employments = None))
@@ -98,7 +98,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       mockAuthorisationGrantAccess(Some(nino.toString) and L200)
       mockAudit(nino, fullMobilePayeAudit.copy(pensions = None), journeyId)
 
-      val result = controller(notShuttered).getPayeSummary(nino, currentTaxYear, journeyId)(fakeRequest)
+      val result = controller(notShuttered).getPayeSummary(nino, journeyId, currentTaxYear)(fakeRequest)
 
       status(result)        shouldBe 200
       contentAsJson(result) shouldBe Json.toJson(fullMobilePayeResponse.copy(pensions = None))
@@ -110,7 +110,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       mockAuthorisationGrantAccess(Some(nino.toString) and L200)
       mockAudit(nino, fullMobilePayeAudit.copy(otherIncomes = None), journeyId)
 
-      val result = controller(notShuttered).getPayeSummary(nino, currentTaxYear, journeyId)(fakeRequest)
+      val result = controller(notShuttered).getPayeSummary(nino, journeyId, currentTaxYear)(fakeRequest)
 
       status(result)        shouldBe 200
       contentAsJson(result) shouldBe Json.toJson(fullMobilePayeResponse.copy(otherIncomes = None))
@@ -120,7 +120,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       mockAuthorisationGrantAccess(Some(nino.toString) and L200)
       mockGetPerson(Future.successful(person.copy(hasCorruptData = true)))
 
-      val result = controller(notShuttered).getPayeSummary(nino, currentTaxYear, journeyId)(fakeRequest)
+      val result = controller(notShuttered).getPayeSummary(nino, journeyId, currentTaxYear)(fakeRequest)
 
       status(result) shouldBe 423
     }
@@ -129,7 +129,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       mockAuthorisationGrantAccess(Some(nino.toString) and L200)
       mockGetPerson(Future.successful(person.copy(isDeceased = true)))
 
-      val result = controller(notShuttered).getPayeSummary(nino, currentTaxYear, journeyId)(fakeRequest)
+      val result = controller(notShuttered).getPayeSummary(nino, journeyId, currentTaxYear)(fakeRequest)
 
       status(result) shouldBe 410
     }
@@ -139,7 +139,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       mockGetPerson(Future.successful(person))
       mockGetMobilePayeResponse(Future.failed(new InternalServerException("Internal Server Error")))
 
-      val result = controller(notShuttered).getPayeSummary(nino, currentTaxYear, journeyId)(fakeRequest)
+      val result = controller(notShuttered).getPayeSummary(nino, journeyId, currentTaxYear)(fakeRequest)
 
       status(result) shouldBe 500
     }
@@ -147,14 +147,14 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
     "return 401 for valid nino and user but low CL" in {
       mockAuthorisationGrantAccess(Some(nino.toString) and L100)
 
-      val result = controller(notShuttered).getPayeSummary(nino, currentTaxYear, journeyId)(fakeRequest)
+      val result = controller(notShuttered).getPayeSummary(nino, journeyId, currentTaxYear)(fakeRequest)
 
       status(result) shouldBe 401
     }
 
     "return 406 for missing accept header" in {
 
-      val result = controller(notShuttered).getPayeSummary(nino, currentTaxYear, journeyId)(FakeRequest("GET", "/"))
+      val result = controller(notShuttered).getPayeSummary(nino, journeyId, currentTaxYear)(FakeRequest("GET", "/"))
 
       status(result) shouldBe 406
     }
@@ -162,7 +162,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
     "return 403 for valid nino for authorised user but for a different nino" in {
       mockAuthorisationGrantAccess(Some(nino.toString) and L200)
 
-      val result = controller(notShuttered).getPayeSummary(Nino("CS100700A"), currentTaxYear, journeyId)(fakeRequest)
+      val result = controller(notShuttered).getPayeSummary(Nino("CS100700A"), journeyId, currentTaxYear)(fakeRequest)
 
       status(result) shouldBe 403
     }
@@ -171,7 +171,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       mockAuthorisationGrantAccess(Some(nino.toString) and L200)
       mockGetPerson(Future.failed(new NotFoundException("Not Found Exception")))
 
-      val result = controller(notShuttered).getPayeSummary(nino, currentTaxYear, journeyId)(fakeRequest)
+      val result = controller(notShuttered).getPayeSummary(nino, journeyId, currentTaxYear)(fakeRequest)
 
       status(result) shouldBe 404
     }
@@ -180,7 +180,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       mockAuthorisationGrantAccess(Some(nino.toString) and L200)
       mockGetPerson(Future.failed(new BadRequestException("Bad Request Exception")))
 
-      val result = controller(notShuttered).getPayeSummary(nino, currentTaxYear, journeyId)(fakeRequest)
+      val result = controller(notShuttered).getPayeSummary(nino, journeyId, currentTaxYear)(fakeRequest)
 
       status(result) shouldBe 400
     }
@@ -189,7 +189,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       mockAuthorisationGrantAccess(Some(nino.toString) and L200)
       mockGetPerson(Future.failed(Upstream4xxResponse("Upstream Exception", 401, 401)))
 
-      val result = controller(notShuttered).getPayeSummary(nino, currentTaxYear, journeyId)(fakeRequest)
+      val result = controller(notShuttered).getPayeSummary(nino, journeyId, currentTaxYear)(fakeRequest)
 
       status(result) shouldBe 401
     }
@@ -198,14 +198,14 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       mockAuthorisationGrantAccess(Some(nino.toString) and L200)
       mockGetPerson(Future.failed(new MissingBearerToken))
 
-      val result = controller(notShuttered).getPayeSummary(nino, currentTaxYear, journeyId)(fakeRequest)
+      val result = controller(notShuttered).getPayeSummary(nino, journeyId, currentTaxYear)(fakeRequest)
 
       status(result) shouldBe 401
     }
 
     "return 521 when shuttered" in {
       mockAuthorisationGrantAccess(Some(nino.toString) and L200)
-      val result = controller(shuttered).getPayeSummary(nino, currentTaxYear, journeyId)(fakeRequest)
+      val result = controller(shuttered).getPayeSummary(nino, journeyId, currentTaxYear)(fakeRequest)
 
       status(result) shouldBe 521
       val jsonBody = contentAsJson(result)

@@ -64,6 +64,7 @@ trait MobilePayeTestData {
   val otherIncomes: Seq[OtherIncome] = Seq(otherIncomeUntaxedInterest, otherIncome)
 
   val fullMobilePayeResponse: MobilePayeResponse = MobilePayeResponse(
+    taxYear            = Some(TaxYear.current.currentYear),
     employments        = Some(employments),
     pensions           = Some(pensions),
     otherIncomes       = Some(otherIncomes),

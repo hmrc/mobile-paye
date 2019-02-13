@@ -34,7 +34,7 @@ class SandboxMobilePayeController @Inject()(val controllerComponents: Controller
   override val app: String = "Sandbox-Paye-Controller"
   private final val WebServerIsDown = new Status(521)
 private val shuttered = Json.toJson(Shuttering(shuttered = true, title = "Shuttered", message="PAYE is currently shuttered"))
-  override def getPayeSummary(nino: Nino, taxYear: Int, journeyId: String): Action[AnyContent] =
+  override def getPayeSummary(nino: Nino, journeyId: String, taxYear: Int): Action[AnyContent] =
     validateAccept(acceptHeaderValidationRules).async { implicit request =>
       Future.successful(request.headers.get("SANDBOX-CONTROL") match {
         case Some("ERROR-401")            => Unauthorized
