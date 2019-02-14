@@ -4,7 +4,9 @@ The Mobile Paye response
   
 * **URL**
 
-  `/mobile-paye/nino/:nino/taxYear/:taxYear/summary`
+  `/mobile-paye/nino/:nino/taxYear/:taxYear/summary` 
+  
+  > `taxYear` can be set to 'current' to return data for the current tax year. This will be relative the the UK timezone rather than being reliant on you passing the date as per device time.
 
 * **Method:**
   
@@ -205,6 +207,13 @@ The Mobile Paye response
   OR when a user does not exist or server failure
 
   * **Code:** 500 INTERNAL_SERVER_ERROR <br/>
+  
+  * **Code:** 521 SHUTTERED <br/>
+  **Content:** ```{
+  "shuttered": true,
+  "title": "Service Unavailable",
+  "message": "You’ll be able to use the PAYE service at 9am on Monday 29 May 2017."
+}```
 
 
 
