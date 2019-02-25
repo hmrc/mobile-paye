@@ -1,5 +1,5 @@
 {
-  "taxYear": 2018,
+  "taxYear": <TAX_YEAR>,
   "addMissingEmployerLink": "/",
   "addMissingPensionLink": "/",
   "addMissingIncomeLink": "/"

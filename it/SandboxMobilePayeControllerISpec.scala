@@ -19,8 +19,8 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
       (response.json \\ "employments") should not be empty
       (response.json \\ "pensions") should not be empty
       (response.json \\ "otherIncomes") should not be empty
-      (response.json \ "taxFreeAmount").as[Int] shouldBe 11850
-      (response.json \ "estimatedTaxAmount").as[Int] shouldBe 618
+      (response.json \ "taxFreeAmount").as[Int] shouldBe 12500
+      (response.json \ "estimatedTaxAmount").as[Int] shouldBe 1578
     }
 
     "return OK and a single employment with no pension or otherIncome data when SANDBOX-CONTROL is SINGLE-EMPLOYMENT" in {
@@ -31,8 +31,8 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
       (response.json \ "employments" \ 0 \ "name").as[String] shouldBe "SAINSBURY'S PLC"
       (response.json \\ "pensions") shouldBe empty
       (response.json \\ "otherIncomes") shouldBe empty
-      (response.json \ "taxFreeAmount").as[Int] shouldBe 11850
-      (response.json \ "estimatedTaxAmount").as[Int] shouldBe 618
+      (response.json \ "taxFreeAmount").as[Int] shouldBe 12500
+      (response.json \ "estimatedTaxAmount").as[Int] shouldBe 1578
     }
 
     "return OK and a single pension with no employment or otherIncome data when SANDBOX-CONTROL is SINGLE-PENSION" in {
@@ -43,8 +43,8 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
       (response.json \\ "pensions") should not be empty
       (response.json \ "pensions" \ 0 \ "name").as[String] shouldBe "HIGHWIRE RETURNS LTD"
       (response.json \\ "otherIncomes") shouldBe empty
-      (response.json \ "taxFreeAmount").as[Int] shouldBe 11850
-      (response.json \ "estimatedTaxAmount").as[Int] shouldBe 618
+      (response.json \ "taxFreeAmount").as[Int] shouldBe 12500
+      (response.json \ "estimatedTaxAmount").as[Int] shouldBe 1578
     }
 
     "return OK and only TaxYear with 'missing' links when SANDBOX-CONTROL is NO-TAX-YEAR-INCOME" in {
@@ -128,8 +128,8 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
       (response.json \\ "employments") should not be empty
       (response.json \\ "pensions") should not be empty
       (response.json \\ "otherIncomes") should not be empty
-      (response.json \ "taxFreeAmount").as[Int] shouldBe 11850
-      (response.json \ "estimatedTaxAmount").as[Int] shouldBe 618
+      (response.json \ "taxFreeAmount").as[Int] shouldBe 12500
+      (response.json \ "estimatedTaxAmount").as[Int] shouldBe 1578
     }
 
     "return OK and a single employment with no pension or otherIncome data when SANDBOX-CONTROL is SINGLE-EMPLOYMENT" in {
@@ -140,8 +140,8 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
       (response.json \ "employments" \ 0 \ "name").as[String] shouldBe "SAINSBURY'S PLC"
       (response.json \\ "pensions") shouldBe empty
       (response.json \\ "otherIncomes") shouldBe empty
-      (response.json \ "taxFreeAmount").as[Int] shouldBe 11850
-      (response.json \ "estimatedTaxAmount").as[Int] shouldBe 618
+      (response.json \ "taxFreeAmount").as[Int] shouldBe 12500
+      (response.json \ "estimatedTaxAmount").as[Int] shouldBe 1578
     }
 
     "return OK and a single pension with no employment or otherIncome data when SANDBOX-CONTROL is SINGLE-PENSION" in {
@@ -152,8 +152,8 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
       (response.json \\ "pensions") should not be empty
       (response.json \ "pensions" \ 0 \ "name").as[String] shouldBe "HIGHWIRE RETURNS LTD"
       (response.json \\ "otherIncomes") shouldBe empty
-      (response.json \ "taxFreeAmount").as[Int] shouldBe 11850
-      (response.json \ "estimatedTaxAmount").as[Int] shouldBe 618
+      (response.json \ "taxFreeAmount").as[Int] shouldBe 12500
+      (response.json \ "estimatedTaxAmount").as[Int] shouldBe 1578
     }
 
     "return OK and only TaxYear with 'missing' links when SANDBOX-CONTROL is NO-TAX-YEAR-INCOME" in {

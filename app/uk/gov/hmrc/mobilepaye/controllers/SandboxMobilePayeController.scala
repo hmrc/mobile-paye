@@ -23,6 +23,7 @@ import play.api.mvc._
 import uk.gov.hmrc.api.sandbox.FileResource
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mobilepaye.domain._
+import uk.gov.hmrc.time.TaxYear
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -57,7 +58,7 @@ private val shuttered = Json.toJson(Shuttering(shuttered = true, title = "Shutte
     toJson(
       Json
         .parse(findResource(s"/resources/mobilepayesummary/$resource")
-          .getOrElse(throw new IllegalArgumentException("Resource not found!")))
+          .getOrElse(throw new IllegalArgumentException("Resource not found!")).replace("<TAX_YEAR>", TaxYear.current.currentYear.toString))
         .as[MobilePayeResponse])
 
   override def parser: BodyParser[AnyContent] = controllerComponents.parsers.anyContent
