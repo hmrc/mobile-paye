@@ -42,11 +42,6 @@ mobilePaye {
 ```
 
 # Sandbox
-All the above endpoints are accessible on sandbox with `/sandbox` prefix on each endpoint,e.g.
-```
-    GET /sandbox/summary
-```
-
 To trigger the sandbox endpoints locally, use the "X-MOBILE-USER-ID" header with one of the following values:
 208606423740 or 167927702220
 
