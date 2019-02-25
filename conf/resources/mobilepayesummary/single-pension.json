@@ -1,5 +1,5 @@
 {
-  "taxYear": 2018,
+  "taxYear": <TAX_YEAR>,
   "pensions": [
     {
       "name": "HIGHWIRE RETURNS LTD",
@@ -8,9 +8,9 @@
       "link": "/"
     }
   ],
-  "taxFreeAmount": 11850,
+  "taxFreeAmount": 12500,
   "taxFreeAmountLink": "/",
-  "estimatedTaxAmount": 618,
+  "estimatedTaxAmount": 1578,
   "estimatedTaxAmountLink": "/",
   "understandYourTaxCodeLink": "/",
   "addMissingEmployerLink": "/",

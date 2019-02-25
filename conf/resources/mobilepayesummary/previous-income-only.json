@@ -1,8 +1,8 @@
 {
-  "taxYear": 2018,
-  "taxFreeAmount": 11850,
+  "taxYear": <TAX_YEAR>,
+  "taxFreeAmount": 12500,
   "taxFreeAmountLink": "/",
-  "estimatedTaxAmount": 618,
+  "estimatedTaxAmount": 1578,
   "estimatedTaxAmountLink": "/",
   "understandYourTaxCodeLink": "/",
   "addMissingEmployerLink": "/",

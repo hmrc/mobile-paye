@@ -1,55 +1,33 @@
 {
-  "taxYear": 2018,
+  "taxYear": <TAX_YEAR>,
   "employments": [
     {
       "name": "SAINSBURY'S PLC",
-      "taxCode": "1185L",
-      "amount": 4143,
-      "link": "/"
-    },
-    {
-      "name": "EASTWOOD CHARTER SCHOOL (7601)",
-      "payrollNumber": "96245SLJK88",
-      "taxCode": "BR",
-      "amount": 5690,
-      "link": "/"
-    },
-    {
-      "name": "TESCO",
-      "taxCode": "BR",
-      "amount": 5101,
+      "taxCode": "1250L",
+      "payrollNumber": "EMP0000001",
+      "amount": 18900,
       "link": "/"
     }
   ],
   "pensions": [
     {
-      "name": "HIGHWIRE RETURNS LTD",
-      "taxCode": "BR",
-      "amount": 4200,
-      "link": "/"
-    },
-    {
       "name": "AVIVA (2410)",
-      "payrollNumber": "AB752BR",
+      "payrollNumber": "PEN0000002",
       "taxCode": "BR",
-      "amount": 5690,
+      "amount": 1500,
       "link": "/"
     }
   ],
   "otherIncomes": [
-    {
-      "name": "NON CODED INCOME",
-      "amount": 22500
-    },
     {
       "name": "UNTAXED INTEREST INCOME",
       "amount": 9301,
       "link": "/"
     }
   ],
-  "taxFreeAmount": 11850,
+  "taxFreeAmount": 12500,
   "taxFreeAmountLink": "/",
-  "estimatedTaxAmount": 618,
+  "estimatedTaxAmount": 1578,
   "estimatedTaxAmountLink": "/",
   "understandYourTaxCodeLink": "/",
   "addMissingEmployerLink": "/",
