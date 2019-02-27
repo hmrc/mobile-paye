@@ -87,9 +87,9 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
       response.status shouldBe 410
     }
 
-    "return 423 if manual correspondence is required where SANDBOX-CONTROL is MCI" in {
-      val response = await(request.addHttpHeaders(mobileHeader, "SANDBOX-CONTROL" -> "MCI").get())
-      response.status shouldBe 423
+      "return 423 if manual correspondence is required where SANDBOX-CONTROL is MCI" in {
+        val response = await(request.addHttpHeaders(mobileHeader, "SANDBOX-CONTROL" -> "MCI").get())
+        response.status shouldBe 423
     }
 
     "return 401 if unauthenticated where SANDBOX-CONTROL is ERROR-401" in {

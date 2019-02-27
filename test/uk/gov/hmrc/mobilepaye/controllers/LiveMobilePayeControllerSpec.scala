@@ -24,7 +24,7 @@ import uk.gov.hmrc.auth.core.ConfidenceLevel.{L100, L200}
 import uk.gov.hmrc.auth.core.syntax.retrieved._
 import uk.gov.hmrc.auth.core.{AuthConnector, MissingBearerToken}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException, NotFoundException, Upstream4xxResponse}
+import uk.gov.hmrc.http._
 import uk.gov.hmrc.mobilepaye.config.MobilePayeControllerConfig
 import uk.gov.hmrc.mobilepaye.domain.tai.Person
 import uk.gov.hmrc.mobilepaye.domain.{MobilePayeResponse, Shuttering}
@@ -118,7 +118,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
 
     "return 423 for a valid nino and authorised user but corrupt/mcierror user" in {
       mockAuthorisationGrantAccess(Some(nino.toString) and L200)
-      mockGetPerson(Future.successful(person.copy(hasCorruptData = true)))
+      mockGetPerson(Future.failed(Upstream4xxResponse("locked", 423,423)))
 
       val result = controller(notShuttered).getPayeSummary(nino, journeyId, currentTaxYear)(fakeRequest)
 

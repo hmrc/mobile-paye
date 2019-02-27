@@ -7,8 +7,8 @@ import uk.gov.hmrc.mobilepaye.domain.tai._
 import utils.BaseISpec
 
 class LiveMobilePayeControllerISpec extends BaseISpec {
-  val requestWithCurrentYearAsInt:            WSRequest = wsUrl(s"/nino/$nino/tax-year/$currentTaxYear/summary?journeyId=12345").addHttpHeaders(acceptJsonHeader)
-  val requestWithCurrentYearAsCurrent:            WSRequest = wsUrl(s"/nino/$nino/tax-year/current/summary?journeyId=12345").addHttpHeaders(acceptJsonHeader)
+  lazy val requestWithCurrentYearAsInt:            WSRequest = wsUrl(s"/nino/$nino/tax-year/$currentTaxYear/summary?journeyId=12345").addHttpHeaders(acceptJsonHeader)
+  lazy val requestWithCurrentYearAsCurrent:            WSRequest = wsUrl(s"/nino/$nino/tax-year/current/summary?journeyId=12345").addHttpHeaders(acceptJsonHeader)
 
   override def shuttered: Boolean   = false
 
@@ -92,9 +92,9 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
       taxAccountSummaryNotCalled(nino.toString)
     }
 
-    "return LOCKED when person data is corrupt" in {
+    "return 423 when person is locked in CID" in {
       grantAccess(nino.toString)
-      personalDetailsAreFound(nino.toString, person.copy(hasCorruptData = true))
+      personalLocked(nino.toString)
 
       val response = await(requestWithCurrentYearAsInt.get())
       response.status shouldBe 423
@@ -186,9 +186,9 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
       taxAccountSummaryNotCalled(nino.toString)
     }
 
-    "return LOCKED when person data is corrupt" in {
+    "return 423 when person data locked in CID" in {
       grantAccess(nino.toString)
-      personalDetailsAreFound(nino.toString, person.copy(hasCorruptData = true))
+      personalLocked(nino.toString)
 
       val response = await(requestWithCurrentYearAsCurrent.get())
       response.status shouldBe 423

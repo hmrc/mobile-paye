@@ -69,19 +69,18 @@ class LiveMobilePayeController @Inject()(
       withShuttering(shuttering) {
         errorWrapper {
           mobilePayeService.getPerson(nino).flatMap { person =>
-            (person.isDeceased, person.hasCorruptData) match {
-              case (true, _) => Future.successful(Gone)
-              case (_, true) => Future.successful(Locked)
-              case _ =>
-                mobilePayeService.getMobilePayeResponse(nino, taxYear).map { mpr =>
-                  sendAuditEvent(
-                    nino,
-                    mpr,
-                    request.path,
-                    journeyId
-                  )
-                  Ok(Json.toJson(mpr))
-                }
+            if (person.isDeceased) {
+              Future.successful(Gone)
+            } else {
+              mobilePayeService.getMobilePayeResponse(nino, taxYear).map { mpr =>
+                sendAuditEvent(
+                  nino,
+                  mpr,
+                  request.path,
+                  journeyId
+                )
+                Ok(Json.toJson(mpr))
+              }
             }
           }
         }
