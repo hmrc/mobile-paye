@@ -70,6 +70,8 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector) {
         case oi => Some(oi)
       }
 
+      // $COVERAGE-OFF$
+      //TODO We may need to use this in the future still but as part of HMA-546 to remediate a live issue this is unused until the underlying issue with untaxed interest is resolved.
       val untaxedInterest: Option[OtherIncome] = nonTaxCodeIncomes.untaxedInterest match {
         case Some(income) => Some(OtherIncome.withMaybeLink(
           name = income.getFormattedIncomeComponentType,
@@ -84,6 +86,7 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector) {
         case (_, Some(y)) => Some(Seq(y))
         case _ => None
       }
+      // $COVERAGE-ON$
 
       val liveEmployments: Seq[TaxCodeIncome] = taxCodeIncomes.filter(filterLiveIncomes(_, EmploymentIncome))
       val livePensions: Seq[TaxCodeIncome] = taxCodeIncomes.filter(filterLiveIncomes(_, PensionIncome))
@@ -97,7 +100,7 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector) {
       MobilePayeResponse(taxYear = Some(taxYear),
         employments = employmentPayeIncomes,
         pensions = pensionPayeIncomes,
-        otherIncomes = otherIncomes,
+        otherIncomes = otherNonTaxCodeIncomes,
         taxFreeAmount = taxFreeAmount,
         estimatedTaxAmount = estimatedTaxAmount)
     }
