@@ -130,7 +130,7 @@ class TaiConnectorSpec extends BaseSpec {
           s"""
              |{
              |  "data": {
-             |    "nonTaxCodeIncomes": ${Json.toJson(nonTaxCodeIncomeWithoutUntaxedInterest)}
+             |    "nonTaxCodeIncomes": ${Json.toJson(nonTaxCodeIncome)}
              |  }
              |}
           """.stripMargin)
@@ -138,7 +138,7 @@ class TaiConnectorSpec extends BaseSpec {
       mockTaiGet(s"tax-account/$currentTaxYear/income", Future.successful(taiNonTaxCodeIncomeJson))
 
       val result = await(connector.getNonTaxCodeIncome(nino, currentTaxYear))
-      result shouldBe nonTaxCodeIncomeWithoutUntaxedInterest
+      result shouldBe nonTaxCodeIncome
     }
 
     "throw UnauthorisedException for valid nino but unauthorized user" in {

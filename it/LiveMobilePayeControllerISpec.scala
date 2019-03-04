@@ -18,7 +18,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
       grantAccess(nino.toString)
       personalDetailsAreFound(nino.toString, person)
       taxCodeIncomesAreFound(nino.toString, taxCodeIncomes)
-      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncomeWithUntaxedInterest)
+      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncome)
       employmentsAreFound(nino.toString(), taiEmployments)
       taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
 
@@ -31,7 +31,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
       grantAccess(nino.toString)
       personalDetailsAreFound(nino.toString, person)
       taxCodeIncomesAreFound(nino.toString, taxCodeIncomes)
-      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncomeWithoutUntaxedInterest)
+      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncome)
       employmentsAreFound(nino.toString(), taiEmployments)
       taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
 
@@ -44,7 +44,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
       grantAccess(nino.toString)
       personalDetailsAreFound(nino.toString, person)
       taxCodeIncomesAreFound(nino.toString, taxCodeIncomes.filter(_.componentType == PensionIncome))
-      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncomeWithUntaxedInterest)
+      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncome)
       employmentsAreFound(nino.toString(), taiEmployments)
       taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
 
@@ -57,7 +57,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
       grantAccess(nino.toString)
       personalDetailsAreFound(nino.toString, person)
       taxCodeIncomesAreFound(nino.toString, taxCodeIncomes.filter(_.componentType == EmploymentIncome))
-      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncomeWithUntaxedInterest)
+      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncome)
       employmentsAreFound(nino.toString(), taiEmployments)
       taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
 
@@ -70,7 +70,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
       grantAccess(nino.toString)
       personalDetailsAreFound(nino.toString, person)
       taxCodeIncomesAreFound(nino.toString, taxCodeIncomes)
-      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncomeWithoutUntaxedInterest.copy(otherNonTaxCodeIncomes = Nil))
+      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncome.copy(otherNonTaxCodeIncomes = Nil))
       employmentsAreFound(nino.toString(), taiEmployments)
       taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
 
@@ -112,7 +112,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
       grantAccess(nino.toString)
       personalDetailsAreFound(nino.toString, person)
       taxCodeIncomesAreFound(nino.toString, taxCodeIncomes)
-      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncomeWithUntaxedInterest)
+      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncome)
       employmentsAreFound(nino.toString(), taiEmployments)
       taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
 
@@ -125,7 +125,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
       grantAccess(nino.toString)
       personalDetailsAreFound(nino.toString, person)
       taxCodeIncomesAreFound(nino.toString, taxCodeIncomes)
-      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncomeWithoutUntaxedInterest)
+      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncome)
       employmentsAreFound(nino.toString(), taiEmployments)
       taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
 
@@ -138,7 +138,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
       grantAccess(nino.toString)
       personalDetailsAreFound(nino.toString, person)
       taxCodeIncomesAreFound(nino.toString, taxCodeIncomes.filter(_.componentType == PensionIncome))
-      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncomeWithUntaxedInterest)
+      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncome)
       employmentsAreFound(nino.toString(), taiEmployments)
       taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
 
@@ -151,7 +151,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
       grantAccess(nino.toString)
       personalDetailsAreFound(nino.toString, person)
       taxCodeIncomesAreFound(nino.toString, taxCodeIncomes.filter(_.componentType == EmploymentIncome))
-      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncomeWithUntaxedInterest)
+      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncome)
       employmentsAreFound(nino.toString(), taiEmployments)
       taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
 
@@ -164,7 +164,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
       grantAccess(nino.toString)
       personalDetailsAreFound(nino.toString, person)
       taxCodeIncomesAreFound(nino.toString, taxCodeIncomes)
-      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncomeWithoutUntaxedInterest.copy(otherNonTaxCodeIncomes = Nil))
+      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncome.copy(otherNonTaxCodeIncomes = Nil))
       employmentsAreFound(nino.toString(), taiEmployments)
       taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
 
@@ -204,7 +204,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
     grantAccess(nino.toString)
     personalDetailsAreFound(nino.toString, person)
     taxCodeIncomesAreFound(nino.toString, taxCodeIncomes)
-    nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncomeWithUntaxedInterest)
+    nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncome)
     employmentsAreFound(nino.toString(), taiEmployments)
     taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
 

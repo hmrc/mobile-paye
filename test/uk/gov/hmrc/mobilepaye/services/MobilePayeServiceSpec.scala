@@ -46,7 +46,7 @@ class MobilePayeServiceSpec extends BaseSpec {
   "getMobilePayeResponse" should {
     "return full MobilePayeResponse when all data is available" in {
       mockTaxCodeIncomes(Future.successful(taxCodeIncomes))
-      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
+      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncome))
       mockEmployments(Future.successful(taiEmployments))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
 
@@ -55,20 +55,9 @@ class MobilePayeServiceSpec extends BaseSpec {
       result shouldBe fullMobilePayeResponse
     }
 
-    "return MobilePayeResponse with no untaxed interest" in {
-      mockTaxCodeIncomes(Future.successful(taxCodeIncomes))
-      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithoutUntaxedInterest))
-      mockEmployments(Future.successful(taiEmployments))
-      mockTaxAccountSummary(Future.successful(taxAccountSummary))
-
-      val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
-
-      result shouldBe fullMobilePayeResponse.copy(otherIncomes = Some(Seq(otherIncome)))
-    }
-
     "return MobilePayeResponse with no employments when employment data is missing" in {
       mockTaxCodeIncomes(Future.successful(taxCodeIncomes.filter(_.componentType == PensionIncome)))
-      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
+      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncome))
       mockEmployments(Future.successful(taiEmployments))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
 
@@ -79,7 +68,7 @@ class MobilePayeServiceSpec extends BaseSpec {
 
     "return MobilePayeResponse with no pensions when pension data is missing" in {
       mockTaxCodeIncomes(Future.successful(taxCodeIncomes.filter(_.componentType == EmploymentIncome)))
-      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
+      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncome))
       mockEmployments(Future.successful(taiEmployments))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
 
@@ -90,7 +79,7 @@ class MobilePayeServiceSpec extends BaseSpec {
 
     "return MobilePayeResponse with no otherIncomes when OtherIncome data is missing" in {
       mockTaxCodeIncomes(Future.successful(taxCodeIncomes))
-      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithoutUntaxedInterest.copy(otherNonTaxCodeIncomes = Nil)))
+      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncome.copy(otherNonTaxCodeIncomes = Nil)))
       mockEmployments(Future.successful(taiEmployments))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
 
@@ -101,7 +90,7 @@ class MobilePayeServiceSpec extends BaseSpec {
 
     "throw UnauthorizedException when receiving UnauthorizedException from taiConnector" in {
       mockTaxCodeIncomes(Future.failed(new UnauthorizedException("Unauthorized")))
-      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest.copy(otherNonTaxCodeIncomes = Nil)))
+      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncome.copy(otherNonTaxCodeIncomes = Nil)))
       mockEmployments(Future.successful(taiEmployments))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
 
@@ -112,7 +101,7 @@ class MobilePayeServiceSpec extends BaseSpec {
 
     "throw ForbiddenException when receiving ForbiddenException from taiConnector" in {
       mockTaxCodeIncomes(Future.failed(new ForbiddenException("Forbidden")))
-      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest.copy(otherNonTaxCodeIncomes = Nil)))
+      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncome.copy(otherNonTaxCodeIncomes = Nil)))
       mockEmployments(Future.successful(taiEmployments))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
 
@@ -123,7 +112,7 @@ class MobilePayeServiceSpec extends BaseSpec {
 
     "throw InternalServerError when receiving InternalServerError from taiConnector" in {
       mockTaxCodeIncomes(Future.failed(new InternalServerException("Internal Server Error")))
-      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest.copy(otherNonTaxCodeIncomes = Nil)))
+      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncome.copy(otherNonTaxCodeIncomes = Nil)))
       mockEmployments(Future.successful(taiEmployments))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
 
@@ -134,7 +123,7 @@ class MobilePayeServiceSpec extends BaseSpec {
 
     "return an empty MobilePayeResponse when an exception is thrown that contains 'no employments recorded for current tax year'" in {
       mockTaxCodeIncomes(Future.failed(new Exception("no employments recorded for current tax year")))
-      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest.copy(otherNonTaxCodeIncomes = Nil)))
+      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncome.copy(otherNonTaxCodeIncomes = Nil)))
       mockEmployments(Future.successful(taiEmployments))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
 
@@ -145,7 +134,7 @@ class MobilePayeServiceSpec extends BaseSpec {
 
     "return an empty MobilePayeResponse when an exception is thrown from NPS that contains 'cannot complete a coding calculation without a primary employment'" in {
       mockTaxCodeIncomes(Future.failed(new Exception("cannot complete a coding calculation without a primary employment")))
-      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest.copy(otherNonTaxCodeIncomes = Nil)))
+      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncome.copy(otherNonTaxCodeIncomes = Nil)))
       mockEmployments(Future.successful(taiEmployments))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
 
@@ -156,7 +145,7 @@ class MobilePayeServiceSpec extends BaseSpec {
 
     "return an empty MobilePayeResponse when an exception is thrown from NPS that contains 'no employments recorded for this individual'" in {
       mockTaxCodeIncomes(Future.failed(new Exception("no employments recorded for this individual")))
-      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest.copy(otherNonTaxCodeIncomes = Nil)))
+      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncome.copy(otherNonTaxCodeIncomes = Nil)))
       mockEmployments(Future.successful(taiEmployments))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
 
