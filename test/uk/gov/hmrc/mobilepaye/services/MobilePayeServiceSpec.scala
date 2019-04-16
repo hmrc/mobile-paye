@@ -18,7 +18,7 @@ package uk.gov.hmrc.mobilepaye.services
 
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, InternalServerException, UnauthorizedException}
-import uk.gov.hmrc.mobilepaye.connectors.TaiConnector
+import uk.gov.hmrc.mobilepaye.connectors.{TaiConnector, TaxCalcConnector, TaxCalcConnectorSpec}
 import uk.gov.hmrc.mobilepaye.domain.MobilePayeResponse
 import uk.gov.hmrc.mobilepaye.domain.tai._
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
@@ -27,9 +27,10 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class MobilePayeServiceSpec extends BaseSpec {
 
-  val mockTaiConnector: TaiConnector = mock[TaiConnector]
+  val mockTaiConnector:     TaiConnector     = mock[TaiConnector]
+  val mockTaxCalcConnector: TaxCalcConnector = mock[TaxCalcConnector]
 
-  val service = new MobilePayeService(mockTaiConnector)
+  val service = new MobilePayeService(mockTaiConnector, mockTaxCalcConnector)
 
   def mockTaxCodeIncomes(f: Future[Seq[TaxCodeIncome]]) =
     (mockTaiConnector.getTaxCodeIncomes(_: Nino, _: Int)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *, *).returning(f)
@@ -43,12 +44,16 @@ class MobilePayeServiceSpec extends BaseSpec {
   def mockTaxAccountSummary(f: Future[TaxAccountSummary]) =
     (mockTaiConnector.getTaxAccountSummary(_: Nino, _: Int)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *, *).returning(f)
 
+  def mockP800Summary() =
+    (mockTaxCalcConnector.getP800Summary(_: Nino, _: Int)(_: HeaderCarrier)).expects(*, *, *).returning(Future.successful(None))
+
   "getMobilePayeResponse" should {
     "return full MobilePayeResponse when all data is available" in {
       mockTaxCodeIncomes(Future.successful(taxCodeIncomes))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncome))
       mockEmployments(Future.successful(taiEmployments))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockP800Summary()
 
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
 
@@ -60,6 +65,7 @@ class MobilePayeServiceSpec extends BaseSpec {
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncome))
       mockEmployments(Future.successful(taiEmployments))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockP800Summary()
 
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
 
@@ -71,6 +77,7 @@ class MobilePayeServiceSpec extends BaseSpec {
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncome))
       mockEmployments(Future.successful(taiEmployments))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockP800Summary()
 
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
 
@@ -82,6 +89,7 @@ class MobilePayeServiceSpec extends BaseSpec {
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncome.copy(otherNonTaxCodeIncomes = Nil)))
       mockEmployments(Future.successful(taiEmployments))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockP800Summary()
 
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
 
@@ -93,6 +101,7 @@ class MobilePayeServiceSpec extends BaseSpec {
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncome.copy(otherNonTaxCodeIncomes = Nil)))
       mockEmployments(Future.successful(taiEmployments))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockP800Summary()
 
       intercept[UnauthorizedException] {
         await(service.getMobilePayeResponse(nino, currentTaxYear))
@@ -104,6 +113,7 @@ class MobilePayeServiceSpec extends BaseSpec {
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncome.copy(otherNonTaxCodeIncomes = Nil)))
       mockEmployments(Future.successful(taiEmployments))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockP800Summary()
 
       intercept[ForbiddenException] {
         await(service.getMobilePayeResponse(nino, currentTaxYear))
@@ -115,6 +125,7 @@ class MobilePayeServiceSpec extends BaseSpec {
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncome.copy(otherNonTaxCodeIncomes = Nil)))
       mockEmployments(Future.successful(taiEmployments))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockP800Summary()
 
       intercept[InternalServerException] {
         await(service.getMobilePayeResponse(nino, currentTaxYear))
@@ -126,6 +137,7 @@ class MobilePayeServiceSpec extends BaseSpec {
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncome.copy(otherNonTaxCodeIncomes = Nil)))
       mockEmployments(Future.successful(taiEmployments))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockP800Summary()
 
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
 
@@ -137,6 +149,7 @@ class MobilePayeServiceSpec extends BaseSpec {
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncome.copy(otherNonTaxCodeIncomes = Nil)))
       mockEmployments(Future.successful(taiEmployments))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockP800Summary()
 
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
 
@@ -148,6 +161,7 @@ class MobilePayeServiceSpec extends BaseSpec {
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncome.copy(otherNonTaxCodeIncomes = Nil)))
       mockEmployments(Future.successful(taiEmployments))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockP800Summary()
 
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
 

@@ -30,10 +30,11 @@ abstract class BaseISpec
   def config: Map[String, Any] = {
 
     val baseConfig = Map(
-      "auditing.enabled"                              -> false,
-      "microservice.services.auth.port"               -> wireMockPort,
-      "microservice.services.tai.port"                -> wireMockPort,
-      "auditing.consumer.baseUri.port"                -> wireMockPort
+      "auditing.enabled"                   -> false,
+      "microservice.services.auth.port"    -> wireMockPort,
+      "microservice.services.tai.port"     -> wireMockPort,
+      "microservice.services.taxcalc.port" -> wireMockPort,
+      "auditing.consumer.baseUri.port"     -> wireMockPort
     )
 
     if (shuttered) {
