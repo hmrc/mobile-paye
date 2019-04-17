@@ -1,0 +1,18 @@
+{
+  "taxYear": <TAX_YEAR>,
+  "repayment":
+    {
+      "amount": 854.23,
+      "paymentStatus": "REFUND",
+      "taxYear": 2018,
+      "claimRefundLink": "/tax-you-paid/2018-2019/paid-too-much"
+    },
+  "taxFreeAmount": 12500,
+  "taxFreeAmountLink": "/",
+  "estimatedTaxAmount": 1578,
+  "estimatedTaxAmountLink": "/",
+  "understandYourTaxCodeLink": "/",
+  "addMissingEmployerLink": "/",
+  "addMissingPensionLink": "/",
+  "addMissingIncomeLink": "/"
+}

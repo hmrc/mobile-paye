@@ -16,9 +16,13 @@
 
 package uk.gov.hmrc.mobilepaye
 
+import java.time.Instant
+
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mobilepaye.domain.tai._
-import uk.gov.hmrc.mobilepaye.domain.{MobilePayeResponse, OtherIncome, PayeIncome}
+import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus.{ChequeSent, PaymentPaid}
+import uk.gov.hmrc.mobilepaye.domain.taxcalc.{P800Status, P800Summary, RepaymentStatus}
+import uk.gov.hmrc.mobilepaye.domain.{MobilePayeResponse, OtherIncome, P800Repayment, PayeIncome}
 import uk.gov.hmrc.time.TaxYear
 
 trait MobilePayeTestData {
@@ -56,6 +60,19 @@ trait MobilePayeTestData {
   val otherIncome: OtherIncome = OtherIncome("STATE PENSION", 250.0, None)
   val otherIncomeUntaxedInterest = OtherIncome("UNTAXED INTEREST INCOME", 250.0, Some("/check-income-tax/income/bank-building-society-savings"))
 
+  def repayment(p800Status: P800Status, paymentStatus: RepaymentStatus, taxYear: Int, amount: BigDecimal, time: Instant): Option[P800Repayment] = {
+    def withPaidDate(): Option[String] = {
+      paymentStatus match {
+        case PaymentPaid | ChequeSent => Option(time.toString)
+        case _                        => None
+      }
+    }
+
+    val summary = P800Summary(p800Status, paymentStatus, amount, taxYear, withPaidDate())
+
+    P800Summary.toP800Repayment(summary)
+  }
+
   val employments: Seq[PayeIncome] =
     Seq(payeIncome, payeIncome.copy(name = "The Worst Shop Ltd", link = Some("/check-income-tax/income-details/4"), payrollNumber = Some("DEF456")))
   val pensions: Seq[PayeIncome] =
@@ -65,6 +82,7 @@ trait MobilePayeTestData {
   val fullMobilePayeResponse: MobilePayeResponse = MobilePayeResponse(
     taxYear            = Some(TaxYear.current.currentYear),
     employments        = Some(employments),
+    repayment          = None,
     pensions           = Some(pensions),
     otherIncomes       = Some(otherIncomes),
     taxFreeAmount      = Some(10000),

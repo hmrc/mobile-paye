@@ -49,18 +49,22 @@ To test different scenarios, add a header "SANDBOX-CONTROL" with one of the foll
 
 | *Value* | *Description* |
 |--------|----|
-| "SINGLE-EMPLOYMENT" | Happy path, return a single employment with no pensions or other income |
-| "SINGLE-PENSION" | Happy path, return a single pension with no employments or other income |
-| "NO-TAX-YEAR-INCOME" | Happy path, return only tax year and 'add missing' links when no live or previous incomes | 
-| "PREVIOUS-INCOME-ONLY" | Happy path, return all data except employments, pension, other income when previous income but no live incomes | 
-| "OTHER-INCOME-ONLY" | Happy path, return other income when there are previous incomes but no live income | 
-| "DECEASED"  | Happy path, trigger a 410 Gone response when the person is deceased |
-| "MCI"       | Happy path, trigger a 423 Locked response when manual correspondence is required |
-| "SHUTTERED" | Unhappy path, trigger a 521 with the shuttered payload
-| "NOT-FOUND" | Unhappy path, URL not found |
-| "ERROR-401" | Unhappy path, trigger a 401 Unauthorized response |
-| "ERROR-403" | Unhappy path, trigger a 403 Forbidden response |
-| "ERROR-500" | Unhappy path, trigger a 500 Internal Server Error response |
+| "SINGLE-EMPLOYMENT"        | Happy path, return a single employment with no pensions or other income |
+| "SINGLE-PENSION"           | Happy path, return a single pension with no employments or other income |
+| "NO-TAX-YEAR-INCOME"       | Happy path, return only tax year and 'add missing' links when no live or previous incomes | 
+| "PREVIOUS-INCOME-ONLY"     | Happy path, return all data except employments, pension, other income when previous income but no live incomes | 
+| "OTHER-INCOME-ONLY"        | Happy path, return other income when there are previous incomes but no live income | 
+| "REFUND"                   | Happy path, return the repayment owed to the user, including the link for the claiming the refund
+| "CHEQUE_SENT"              | Happy path, return the fact that the user has been sent a cheque
+| "PAYMENT_PAID"             | Happy path, return the fact that the money owed to the user having been paid
+| "PAYMENT_PROCESSING"       | Happy path, return the fact that the payment is under processing
+| "DECEASED"                 | Happy path, trigger a 410 Gone response when the person is deceased |
+| "MCI"                      | Happy path, trigger a 423 Locked response when manual correspondence is required |
+| "SHUTTERED"                | Unhappy path, trigger a 521 with the shuttered payload
+| "NOT-FOUND"                | Unhappy path, URL not found |
+| "ERROR-401"                | Unhappy path, trigger a 401 Unauthorized response |
+| "ERROR-403"                | Unhappy path, trigger a 403 Forbidden response |
+| "ERROR-500"                | Unhappy path, trigger a 500 Internal Server Error response |
 | Not set or any other value | Happy path, default user with employments, pensions and other income |
 
 # Definition

@@ -56,6 +56,7 @@ class GuiceModule(environment: Environment, configuration: Configuration) extend
 
     bindConfigStringSeq("scopes")
     bind(classOf[String]).annotatedWith(named("tai")).toInstance(servicesConfig.baseUrl("tai"))
+    bind(classOf[String]).annotatedWith(named("taxcalc")).toInstance(servicesConfig.baseUrl("taxcalc"))
   }
 
   private def bindConfigStringSeq(path: String): Unit = {

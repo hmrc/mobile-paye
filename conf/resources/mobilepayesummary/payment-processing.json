@@ -1,0 +1,17 @@
+{
+  "taxYear": <TAX_YEAR>,
+  "repayment":
+    {
+      "amount": 1000,
+      "paymentStatus": "PAYMENT_PROCESSING",
+      "taxYear": 2018
+    },
+  "taxFreeAmount": 12500,
+  "taxFreeAmountLink": "/",
+  "estimatedTaxAmount": 1578,
+  "estimatedTaxAmountLink": "/",
+  "understandYourTaxCodeLink": "/",
+  "addMissingEmployerLink": "/",
+  "addMissingPensionLink": "/",
+  "addMissingIncomeLink": "/"
+}

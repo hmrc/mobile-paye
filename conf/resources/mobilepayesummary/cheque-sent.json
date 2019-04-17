@@ -1,0 +1,18 @@
+{
+  "taxYear": <TAX_YEAR>,
+  "repayment":
+    {
+      "amount": 1000,
+      "paymentStatus": "CHEQUE_SENT",
+      "datePaid": "2018-01-02",
+      "taxYear": 2018
+    },
+  "taxFreeAmount": 12500,
+  "taxFreeAmountLink": "/",
+  "estimatedTaxAmount": 1578,
+  "estimatedTaxAmountLink": "/",
+  "understandYourTaxCodeLink": "/",
+  "addMissingEmployerLink": "/",
+  "addMissingPensionLink": "/",
+  "addMissingIncomeLink": "/"
+}
