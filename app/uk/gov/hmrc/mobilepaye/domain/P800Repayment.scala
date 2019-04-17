@@ -24,7 +24,7 @@ case class P800Repayment(
                           paymentStatus:   RepaymentStatus,
                           datePaid:        Option[String],
                           taxYear:         Int,
-                          claimRefundLink: Option[String] = Option("/tax-you-paid/<TY -1>/paid-too-much") //TODO double check nick
+                          claimRefundLink: Option[String]
                         )
 
 object P800Repayment {
