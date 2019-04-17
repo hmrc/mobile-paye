@@ -60,7 +60,7 @@ trait MobilePayeTestData {
   val otherIncome: OtherIncome = OtherIncome("STATE PENSION", 250.0, None)
   val otherIncomeUntaxedInterest = OtherIncome("UNTAXED INTEREST INCOME", 250.0, Some("/check-income-tax/income/bank-building-society-savings"))
 
-  def repayments(p800Status: P800Status, paymentStatus: RepaymentStatus, taxYear: Int, amount: BigDecimal, time: Instant): Option[P800Repayment] = {
+  def repayment(p800Status: P800Status, paymentStatus: RepaymentStatus, taxYear: Int, amount: BigDecimal, time: Instant): Option[P800Repayment] = {
     def withPaidDate(): Option[String] = {
       paymentStatus match {
         case PaymentPaid | ChequeSent => Option(time.toString)

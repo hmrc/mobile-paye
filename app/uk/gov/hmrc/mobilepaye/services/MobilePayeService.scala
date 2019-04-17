@@ -100,11 +100,11 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector, taxCalcConnector: 
 
       val taxFreeAmount:      Option[BigDecimal]    = Option(taxAccountSummary.taxFreeAmount.setScale(0, RoundingMode.FLOOR))
       val estimatedTaxAmount: Option[BigDecimal]    = Option(taxAccountSummary.totalEstimatedTax.setScale(0, RoundingMode.FLOOR))
-      val repayments:         Option[P800Repayment] = p800Summary.flatMap(summary => P800Summary.toP800Repayment(summary))
+      val repayment:         Option[P800Repayment] = p800Summary.flatMap(summary => P800Summary.toP800Repayment(summary))
 
       MobilePayeResponse(taxYear = Some(taxYear),
         employments        = employmentPayeIncomes,
-        repayment         = repayments,
+        repayment          = repayment,
         pensions           = pensionPayeIncomes,
         otherIncomes       = otherNonTaxCodeIncomes,
         taxFreeAmount      = taxFreeAmount,

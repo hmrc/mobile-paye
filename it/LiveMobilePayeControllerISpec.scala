@@ -206,7 +206,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
             taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
             taxCalcValidResponse(nino.toString, currentTaxYear, amount, Overpaid, repaymentStatus, time)
 
-            val expectedRepayment: Option[P800Repayment] = repayments(P800Status.Overpaid, repaymentStatus, currentTaxYear, amount, time)
+            val expectedRepayment: Option[P800Repayment] = repayment(P800Status.Overpaid, repaymentStatus, currentTaxYear, amount, time)
 
             val response = await(requestWithCurrentYearAsCurrent.get())
             response.status shouldBe 200
