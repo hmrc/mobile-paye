@@ -50,6 +50,10 @@ private val shuttered = Json.toJson(Shuttering(shuttered = true, title = "Shutte
         case Some("SINGLE-EMPLOYMENT")    => Ok(readData("single-employment.json"))
         case Some("SINGLE-PENSION")       => Ok(readData("single-pension.json"))
         case Some("OTHER-INCOME-ONLY")    => Ok(readData("other-income-only.json"))
+        case Some("REFUND")               => Ok(readData("repayment-refund.json"))
+        case Some("CHEQUE_SENT")          => Ok(readData("cheque-sent.json"))
+        case Some("PAYMENT_PAID")         => Ok(readData("payment-paid.json"))
+        case Some("PAYMENT_PROCESSING")   => Ok(readData("payment-processing.json"))
         case _                            => Ok(readData("default.json"))
       })
     }
