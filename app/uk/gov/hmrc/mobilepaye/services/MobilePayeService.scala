@@ -104,7 +104,7 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector, taxCalcConnector: 
 
       MobilePayeResponse(taxYear = Some(taxYear),
         employments        = employmentPayeIncomes,
-        repayments         = repayments,
+        repayment         = repayments,
         pensions           = pensionPayeIncomes,
         otherIncomes       = otherNonTaxCodeIncomes,
         taxFreeAmount      = taxFreeAmount,

@@ -82,7 +82,7 @@ trait MobilePayeTestData {
   val fullMobilePayeResponse: MobilePayeResponse = MobilePayeResponse(
     taxYear            = Some(TaxYear.current.currentYear),
     employments        = Some(employments),
-    repayments         = None,
+    repayment          = None,
     pensions           = Some(pensions),
     otherIncomes       = Some(otherIncomes),
     taxFreeAmount      = Some(10000),

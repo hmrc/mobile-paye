@@ -210,7 +210,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
 
             val response = await(requestWithCurrentYearAsCurrent.get())
             response.status shouldBe 200
-            response.body[JsValue].as[MobilePayeResponse] shouldBe fullMobilePayeResponse.copy(repayments = expectedRepayment)
+            response.body[JsValue].as[MobilePayeResponse] shouldBe fullMobilePayeResponse.copy(repayment = expectedRepayment)
         }
     }
 
