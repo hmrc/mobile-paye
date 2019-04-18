@@ -1,6 +1,7 @@
 import play.api.libs.json.Json
 import play.api.libs.ws.WSRequest
-import uk.gov.hmrc.mobilepaye.domain.Shuttering
+import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus.{ChequeSent, PaymentPaid, PaymentProcessing, Refund}
+import uk.gov.hmrc.mobilepaye.domain.{MobilePayeResponse, Shuttering}
 import uk.gov.hmrc.time.TaxYear
 import utils.BaseISpec
 
@@ -184,6 +185,38 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
       (response.json \\ "pensions") shouldBe empty
       (response.json \\ "otherIncomes") should not be empty
       (response.json \ "understandYourTaxCodeLink").as[String] shouldBe "/"
+    }
+
+    "return OK with P800Repayment with 'missing' links when SANDBOX-CONTROL is REFUND" in {
+      val response = await(request.addHttpHeaders(mobileHeader, "SANDBOX-CONTROL" -> "REFUND").get())
+      response.status shouldBe 200
+      val repayment = response.json.as[MobilePayeResponse].repayment
+      repayment should not be None
+      repayment.foreach(r => r.paymentStatus shouldBe Refund)
+    }
+
+    "return OK with P800Repayment when SANDBOX-CONTROL is CHEQUE_SENT" in {
+      val response = await(request.addHttpHeaders(mobileHeader, "SANDBOX-CONTROL" -> "CHEQUE_SENT").get())
+      response.status shouldBe 200
+      val repayment = response.json.as[MobilePayeResponse].repayment
+      repayment should not be None
+      repayment.foreach(r => r.paymentStatus shouldBe ChequeSent)
+    }
+
+    "return OK with P800Repayment when SANDBOX-CONTROL is PAYMENT_PAID" in {
+      val response = await(request.addHttpHeaders(mobileHeader, "SANDBOX-CONTROL" -> "PAYMENT_PAID").get())
+      response.status shouldBe 200
+      val repayment = response.json.as[MobilePayeResponse].repayment
+      repayment should not be None
+      repayment.foreach(r => r.paymentStatus shouldBe PaymentPaid)
+    }
+
+    "return OK with P800Repayment when SANDBOX-CONTROL is PAYMENT_PROCESSING" in {
+      val response = await(request.addHttpHeaders(mobileHeader, "SANDBOX-CONTROL" -> "PAYMENT_PROCESSING").get())
+      response.status shouldBe 200
+      val repayment = response.json.as[MobilePayeResponse].repayment
+      repayment should not be None
+      repayment.foreach(r => r.paymentStatus shouldBe PaymentProcessing)
     }
 
     "return 404 where SANDBOX-CONTROL is NOT-FOUND" in {
