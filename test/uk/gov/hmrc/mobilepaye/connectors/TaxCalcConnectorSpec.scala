@@ -24,8 +24,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class TaxCalcConnectorSpec extends BaseSpec {
   val mockCoreGet: CoreGet          = mock[CoreGet]
-  val serviceUrl:  String           = "tax-calc-rul"
-  val connector:   TaxCalcConnector = new TaxCalcConnector(mockCoreGet, serviceUrl)
+  val serviceUrl:  String           = "tax-calc-url"
+  val connector:   TaxCalcConnector = new TaxCalcConnector(mockCoreGet, serviceUrl, withTaxCalc = true)
 
   def mockTaxCalcGet[T](f: Future[T]) = {
     (mockCoreGet.GET(_: String)

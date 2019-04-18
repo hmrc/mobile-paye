@@ -26,12 +26,16 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class TaxCalcConnector @Inject()(
                                   httpGet: CoreGet,
-                                  @Named("taxcalc") baseUrl: String)(implicit ec: ExecutionContext) {
+                                  @Named("taxcalc") baseUrl: String,
+                                  @Named("with-taxcalc") withTaxCalc: Boolean)(implicit ec: ExecutionContext) {
   def getP800Summary(nino: Nino, currentTaxYear: Int)(implicit hc: HeaderCarrier): Future[Option[P800Summary]] = {
     val url = baseUrl + s"/taxcalc/${nino.nino}/taxSummary/${currentTaxYear - 1}"
 
-    httpGet.GET[Option[P800Summary]](url).recover {
-      case _: Throwable => None
+    if(withTaxCalc) {
+      httpGet.GET[Option[P800Summary]](url).recover {
+        case _: Throwable => None
+      }
     }
+    else Future.successful(None)
   }
 }
