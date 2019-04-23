@@ -1,7 +1,6 @@
 package stubs
 
-import java.time.Instant
-
+import java.time.LocalDate
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, stubFor, urlEqualTo}
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.libs.json.Writes
@@ -22,10 +21,10 @@ object TaxCalcStub {
                            amount: BigDecimal,
                            p800Status: P800Status,
                            paymentStatus: RepaymentStatus,
-                           time: Instant): StubMapping = {
-    def withPaidDate(): Option[String] = {
+                           time: LocalDate): StubMapping = {
+    def withPaidDate(): Option[LocalDate] = {
       paymentStatus match {
-        case PaymentPaid | ChequeSent => Option(time.toString)
+        case PaymentPaid | ChequeSent => Option(time)
         case _ => None
       }
     }
@@ -38,6 +37,27 @@ object TaxCalcStub {
           aResponse()
             .withStatus(200)
             .withBody(implicitly[Writes[P800Summary]].writes(p800Summary).toString())
+        )
+    )
+  }
+
+  def taxCalcWithInstantDate(nino: String, taxYear: Int, localDate: LocalDate): StubMapping = {
+    val taxCalcResponse =
+      s"""{
+         |      "p800_status": "Overpaid",
+         |      "amount": 1000,
+         |      "paymentStatus": "PAYMENT_PAID",
+         |      "datePaid": "${localDate}T10:23:51Z",
+         |      "taxYear": $taxYear
+         |}
+       """.stripMargin
+
+    stubFor(
+      get(urlEqualTo(s"/taxcalc/$nino/taxSummary/${taxYear - 1}"))
+        .willReturn(
+          aResponse()
+            .withStatus(200)
+            .withBody(taxCalcResponse)
         )
     )
   }

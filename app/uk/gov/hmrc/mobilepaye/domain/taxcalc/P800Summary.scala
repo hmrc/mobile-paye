@@ -16,18 +16,21 @@
 
 package uk.gov.hmrc.mobilepaye.domain.taxcalc
 
-import play.api.libs.json.{Format, Json}
+import java.time.LocalDate
+import play.api.libs.json._
 import uk.gov.hmrc.mobilepaye.domain.P800Repayment
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status.Overpaid
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus.{Refund, SaUser, UnableToClaim}
 import uk.gov.hmrc.time.TaxYear
+
+import scala.util.{Failure, Success, Try}
 
 case class P800Summary(
                         p800_status:   P800Status,
                         paymentStatus: RepaymentStatus,
                         amount:        BigDecimal,
                         taxYear:       Int,
-                        datePaid:      Option[String]
+                        datePaid:      Option[LocalDate]
                       )
 
 object P800Summary {
@@ -65,5 +68,25 @@ object P800Summary {
     } yield result
   }
 
-  implicit val format: Format[P800Summary] = Json.format
+  implicit val format: Format[P800Summary] = {
+    // Historical reasons: https://jira.tools.tax.service.gov.uk/browse/COTCO-632
+    // since there is no interest in the hour and the rest, it is trimmed for the LocalDate only
+
+    implicit val format: Format[LocalDate] = new Format[LocalDate] {
+      override def writes(o: LocalDate): JsValue = JsString(o.toString)
+
+      override def reads(json: JsValue): JsResult[LocalDate] = {
+        json.validate[String].flatMap {
+          s =>
+            val date = s.take(10)
+            Try(LocalDate.parse(date)) match {
+              case Success(d)   => JsSuccess(d)
+              case Failure(err) => JsError(err.getMessage)
+            }
+        }
+      }
+    }
+
+    Json.format[P800Summary]
+  }
 }
