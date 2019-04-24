@@ -16,13 +16,14 @@
 
 package uk.gov.hmrc.mobilepaye.domain
 
+import java.time.LocalDate
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus
 
 case class P800Repayment(
                           amount:          BigDecimal,
                           paymentStatus:   RepaymentStatus,
-                          datePaid:        Option[String],
+                          datePaid:        Option[LocalDate],
                           taxYear:         Int,
                           claimRefundLink: Option[String]
                         )

@@ -1,5 +1,4 @@
-import java.time.Instant
-
+import java.time.LocalDate
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.{WSRequest, WSResponse}
 import stubs.AuthStub._
@@ -196,7 +195,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
         .foreach {
           repaymentStatus =>
             val amount = Random.nextDouble(): BigDecimal
-            val time   = Instant.now
+            val time   = LocalDate.now
 
             grantAccess(nino.toString)
             personalDetailsAreFound(nino.toString, person)
@@ -219,7 +218,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
         .foreach {
           repaymentStatus =>
             val amount = Random.nextDouble(): BigDecimal
-            val time   = Instant.now
+            val time   = LocalDate.now
 
             grantAccess(nino.toString)
             personalDetailsAreFound(nino.toString, person)
@@ -240,7 +239,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
         .foreach {
           repaymentStatus =>
             val amount = Random.nextDouble(): BigDecimal
-            val time   = Instant.now
+            val time   = LocalDate.now
 
             grantAccess(nino.toString)
             personalDetailsAreFound(nino.toString, person)
@@ -254,6 +253,27 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
             response.status shouldBe 200
             response.body[JsValue].as[MobilePayeResponse] shouldBe fullMobilePayeResponse
         }
+    }
+
+    "return OK with P800Repayments for some other date format" in {
+      val time = LocalDate.now
+
+      grantAccess(nino.toString)
+      personalDetailsAreFound(nino.toString, person)
+      taxCodeIncomesAreFound(nino.toString, taxCodeIncomes)
+      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncome)
+      employmentsAreFound(nino.toString(), taiEmployments)
+      taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
+      taxCalcWithInstantDate(nino.toString, currentTaxYear, time)
+
+      val response = await(requestWithCurrentYearAsCurrent.get())
+      response.status shouldBe 200
+      response.body[JsValue].as[MobilePayeResponse].repayment shouldBe a [Some[_]]
+      response.body[JsValue].as[MobilePayeResponse].repayment.foreach {
+        repayment =>
+          repayment.datePaid shouldBe a [Some[_]]
+          repayment.datePaid.foreach(l => l shouldBe time)
+      }
     }
 
     "return GONE when person is deceased" in {
