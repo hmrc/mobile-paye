@@ -111,18 +111,12 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector, taxCalcConnector: 
         estimatedTaxAmount = estimatedTaxAmount)
     }
 
-    val taxCodeIncomesF    = taiConnector.getTaxCodeIncomes(nino, taxYear)
-    val nonTaxCodeIncomesF = taiConnector.getNonTaxCodeIncome(nino, taxYear)
-    val employmentsF       = taiConnector.getEmployments(nino, taxYear)
-    val taxAccountSummaryF = taiConnector.getTaxAccountSummary(nino, taxYear)
-    val taxCalcP800Summary = taxCalcConnector.getP800Summary(nino, taxYear)
-
     (for {
-      taxCodeIncomes    <- taxCodeIncomesF
-      nonTaxCodeIncomes <- nonTaxCodeIncomesF
-      employments       <- employmentsF
-      taxAccountSummary <- taxAccountSummaryF
-      p800Summary       <- taxCalcP800Summary
+      taxCodeIncomes    <- taiConnector.getTaxCodeIncomes(nino, taxYear)
+      nonTaxCodeIncomes <- taiConnector.getNonTaxCodeIncome(nino, taxYear)
+      employments       <- taiConnector.getEmployments(nino, taxYear)
+      taxAccountSummary <- taiConnector.getTaxAccountSummary(nino, taxYear)
+      p800Summary       <- taxCalcConnector.getP800Summary(nino, taxYear)
       mobilePayeResponse: MobilePayeResponse = buildMobilePayeResponse(taxCodeIncomes, nonTaxCodeIncomes, employments, taxAccountSummary, p800Summary)
     } yield mobilePayeResponse) recover {
       case ex if knownException(ex) => MobilePayeResponse.empty
