@@ -61,7 +61,7 @@ class MobilePayeServiceSpec extends BaseSpec {
     }
 
     "return MobilePayeResponse with no employments when employment data is missing" in {
-      mockTaxCodeIncomes(Future.successful(taxCodeIncomes.filter(_.componentType == PensionIncome)))
+      mockTaxCodeIncomes(Future.successful(taxCodeIncomes.filter(_.componentType == TaxCodeIncomeComponentType.PensionIncome)))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncome))
       mockEmployments(Future.successful(taiEmployments))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
@@ -73,7 +73,7 @@ class MobilePayeServiceSpec extends BaseSpec {
     }
 
     "return MobilePayeResponse with no pensions when pension data is missing" in {
-      mockTaxCodeIncomes(Future.successful(taxCodeIncomes.filter(_.componentType == EmploymentIncome)))
+      mockTaxCodeIncomes(Future.successful(taxCodeIncomes.filter(_.componentType == TaxCodeIncomeComponentType.EmploymentIncome)))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncome))
       mockEmployments(Future.successful(taiEmployments))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
@@ -144,5 +144,4 @@ class MobilePayeServiceSpec extends BaseSpec {
       result shouldBe MobilePayeResponse.empty
     }
   }
-
 }

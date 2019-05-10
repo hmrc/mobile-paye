@@ -18,6 +18,7 @@ package uk.gov.hmrc.mobilepaye.connectors
 
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http._
+import uk.gov.hmrc.mobilepaye.domain.tai.{TaxCodeIncome, TaxComponentType}
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 
 import scala.concurrent.{ExecutionContext, Future}

@@ -52,7 +52,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
     "return OK and a valid MobilePayeResponse json without employments" in {
       grantAccess(nino.toString)
       personalDetailsAreFound(nino.toString, person)
-      taxCodeIncomesAreFound(nino.toString, taxCodeIncomes.filter(_.componentType == PensionIncome))
+      taxCodeIncomesAreFound(nino.toString, taxCodeIncomes.filter(_.componentType == TaxCodeIncomeComponentType.PensionIncome))
       nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncome)
       employmentsAreFound(nino.toString(), taiEmployments)
       taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
@@ -66,7 +66,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
     "return OK and a valid MobilePayeResponse json without pensions" in {
       grantAccess(nino.toString)
       personalDetailsAreFound(nino.toString, person)
-      taxCodeIncomesAreFound(nino.toString, taxCodeIncomes.filter(_.componentType == EmploymentIncome))
+      taxCodeIncomesAreFound(nino.toString, taxCodeIncomes.filter(_.componentType == TaxCodeIncomeComponentType.EmploymentIncome))
       nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncome)
       employmentsAreFound(nino.toString(), taiEmployments)
       taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
@@ -151,7 +151,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
     "return OK and a valid MobilePayeResponse json without employments" in {
       grantAccess(nino.toString)
       personalDetailsAreFound(nino.toString, person)
-      taxCodeIncomesAreFound(nino.toString, taxCodeIncomes.filter(_.componentType == PensionIncome))
+      taxCodeIncomesAreFound(nino.toString, taxCodeIncomes.filter(_.componentType == TaxCodeIncomeComponentType.PensionIncome))
       nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncome)
       employmentsAreFound(nino.toString(), taiEmployments)
       taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
@@ -165,7 +165,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
     "return OK and a valid MobilePayeResponse json without pensions" in {
       grantAccess(nino.toString)
       personalDetailsAreFound(nino.toString, person)
-      taxCodeIncomesAreFound(nino.toString, taxCodeIncomes.filter(_.componentType == EmploymentIncome))
+      taxCodeIncomesAreFound(nino.toString, taxCodeIncomes.filter(_.componentType == TaxCodeIncomeComponentType.EmploymentIncome))
       nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncome)
       employmentsAreFound(nino.toString(), taiEmployments)
       taxAccountSummaryIsFound(nino.toString, taxAccountSummary)

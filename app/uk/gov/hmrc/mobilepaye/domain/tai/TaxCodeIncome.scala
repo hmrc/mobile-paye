@@ -16,29 +16,19 @@
 
 package uk.gov.hmrc.mobilepaye.domain.tai
 
+import enumeratum._
 import play.api.libs.json._
 
-sealed trait TaxCodeIncomeStatus
+import scala.collection.immutable
 
-case object Live extends TaxCodeIncomeStatus
+sealed trait TaxCodeIncomeStatus extends EnumEntry
 
-case object PotentiallyCeased extends TaxCodeIncomeStatus
+object TaxCodeIncomeStatus extends Enum[TaxCodeIncomeStatus] with PlayJsonEnum[TaxCodeIncomeStatus] {
+  case object Live              extends TaxCodeIncomeStatus
+  case object PotentiallyCeased extends TaxCodeIncomeStatus
+  case object Ceased            extends TaxCodeIncomeStatus
 
-case object Ceased extends TaxCodeIncomeStatus
-
-object TaxCodeIncomeStatus extends TaxCodeIncomeStatus {
-  implicit val formatTaxCodeIncomeSourceStatusType = new Format[TaxCodeIncomeStatus] {
-    override def reads(json: JsValue): JsResult[TaxCodeIncomeStatus] = {
-      json.as[String] match {
-        case "Live" => JsSuccess(Live)
-        case "PotentiallyCeased" => JsSuccess(PotentiallyCeased)
-        case "Ceased" => JsSuccess(Ceased)
-        case _ => throw new IllegalArgumentException("Invalid TaxCodeIncomeSourceStatus type")
-      }
-    }
-
-    override def writes(taxCodeIncomeStatus: TaxCodeIncomeStatus) = JsString(taxCodeIncomeStatus.toString)
-  }
+  override def values: immutable.IndexedSeq[TaxCodeIncomeStatus] = findValues
 }
 
 case class TaxCodeIncome(componentType: TaxComponentType,

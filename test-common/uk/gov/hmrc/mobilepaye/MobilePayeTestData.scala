@@ -29,19 +29,19 @@ trait MobilePayeTestData {
   val currentTaxYear: Int = TaxYear.current.currentYear
 
   val nino:          Nino          = Nino("CS700100A")
-  val taxCodeIncome: TaxCodeIncome = TaxCodeIncome(EmploymentIncome, Some(3), "The Best Shop Ltd", 1000, Live, "S1150L")
+  val taxCodeIncome: TaxCodeIncome = TaxCodeIncome(TaxCodeIncomeComponentType.EmploymentIncome, Some(3), "The Best Shop Ltd", 1000, TaxCodeIncomeStatus.Live, "S1150L")
 
   val taxCodeIncomes: Seq[TaxCodeIncome] = Seq(
     taxCodeIncome,
     taxCodeIncome.copy(name          = "The Worst Shop Ltd", employmentId = Some(4)),
-    taxCodeIncome.copy(componentType = PensionIncome, name                = "Prestige Pensions", employmentId = Some(5))
+    taxCodeIncome.copy(componentType = TaxCodeIncomeComponentType.PensionIncome, name = "Prestige Pensions", employmentId = Some(5))
   )
 
   val emptyTaxCodeIncomes: Seq[TaxCodeIncome] = Seq.empty
   val emptyEmployments:    Seq[Employment]    = Seq.empty
 
-  val otherNonTaxCodeIncome: OtherNonTaxCodeIncome = OtherNonTaxCodeIncome(StatePension, BigDecimal(250.0))
-  val untaxedIncome = Some(UntaxedInterest(UntaxedInterestIncome, BigDecimal(250.0)))
+  val otherNonTaxCodeIncome: OtherNonTaxCodeIncome = OtherNonTaxCodeIncome(NonTaxCodeIncomeComponentType.StatePension, BigDecimal(250.0))
+  val untaxedIncome = Some(UntaxedInterest(NonTaxCodeIncomeComponentType.UntaxedInterestIncome, BigDecimal(250.0)))
   val nonTaxCodeIncome:    NonTaxCodeIncome = NonTaxCodeIncome(None, Seq(otherNonTaxCodeIncome))
 
   val taiEmployment: Employment = Employment(Some("ABC123"), 3)

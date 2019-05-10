@@ -42,7 +42,7 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector, taxCalcConnector: 
         ex.getMessage.toLowerCase().contains(NpsTaxAccountNoEmploymentsRecorded)
 
 
-    def filterLiveIncomes(emp: TaxCodeIncome, incomeType: TaxCodeIncomeComponentType): Boolean = emp.componentType == incomeType && emp.status == Live
+    def filterLiveIncomes(emp: TaxCodeIncome, incomeType: TaxCodeIncomeComponentType): Boolean = emp.componentType == incomeType && emp.status == TaxCodeIncomeStatus.Live
 
     def buildMobilePayeResponse(taxCodeIncomes: Seq[TaxCodeIncome],
                                 nonTaxCodeIncomes: NonTaxCodeIncome,
@@ -65,7 +65,7 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector, taxCalcConnector: 
       }
 
       val otherNonTaxCodeIncomes: Option[Seq[OtherIncome]] = nonTaxCodeIncomes.otherNonTaxCodeIncomes
-        .filter(_.incomeComponentType != BankOrBuildingSocietyInterest)
+        .filter(_.incomeComponentType != NonTaxCodeIncomeComponentType.BankOrBuildingSocietyInterest)
         .map(income => OtherIncome.withMaybeLink(
           name = income.getFormattedIncomeComponentType,
           amount = income.amount.setScale(0, RoundingMode.FLOOR)
@@ -92,8 +92,8 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector, taxCalcConnector: 
       }
       // $COVERAGE-ON$
 
-      val liveEmployments: Seq[TaxCodeIncome] = taxCodeIncomes.filter(filterLiveIncomes(_, EmploymentIncome))
-      val livePensions:    Seq[TaxCodeIncome] = taxCodeIncomes.filter(filterLiveIncomes(_, PensionIncome))
+      val liveEmployments: Seq[TaxCodeIncome] = taxCodeIncomes.filter(filterLiveIncomes(_, TaxCodeIncomeComponentType.EmploymentIncome))
+      val livePensions:    Seq[TaxCodeIncome] = taxCodeIncomes.filter(filterLiveIncomes(_, TaxCodeIncomeComponentType.PensionIncome))
 
       val employmentPayeIncomes: Option[Seq[PayeIncome]] = buildPayeIncomes(employments, liveEmployments)
       val pensionPayeIncomes:    Option[Seq[PayeIncome]] = buildPayeIncomes(employments, livePensions)
