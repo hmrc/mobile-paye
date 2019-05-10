@@ -1,6 +1,6 @@
 import play.api.libs.json.Json
 import play.api.libs.ws.WSRequest
-import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus.{`CHEQUE_SENT`, `PAYMENT_PAID`, `PAYMENT_PROCESSING`, `REFUND`}
+import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus.{ChequeSent, PaymentPaid, PaymentProcessing, Refund}
 import uk.gov.hmrc.mobilepaye.domain.{MobilePayeResponse, Shuttering}
 import uk.gov.hmrc.time.TaxYear
 import utils.BaseISpec
@@ -192,7 +192,7 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
       response.status shouldBe 200
       val repayment = response.json.as[MobilePayeResponse].repayment
       repayment should not be None
-      repayment.foreach(r => r.paymentStatus shouldBe `REFUND`)
+      repayment.foreach(r => r.paymentStatus shouldBe Refund)
     }
 
     "return OK with P800Repayment when SANDBOX-CONTROL is CHEQUE_SENT" in {
@@ -200,7 +200,7 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
       response.status shouldBe 200
       val repayment = response.json.as[MobilePayeResponse].repayment
       repayment should not be None
-      repayment.foreach(r => r.paymentStatus shouldBe `CHEQUE_SENT`)
+      repayment.foreach(r => r.paymentStatus shouldBe ChequeSent)
     }
 
     "return OK with P800Repayment when SANDBOX-CONTROL is PAYMENT_PAID" in {
@@ -208,7 +208,7 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
       response.status shouldBe 200
       val repayment = response.json.as[MobilePayeResponse].repayment
       repayment should not be None
-      repayment.foreach(r => r.paymentStatus shouldBe `PAYMENT_PAID`)
+      repayment.foreach(r => r.paymentStatus shouldBe PaymentPaid)
     }
 
     "return OK with P800Repayment when SANDBOX-CONTROL is PAYMENT_PROCESSING" in {
@@ -216,7 +216,7 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
       response.status shouldBe 200
       val repayment = response.json.as[MobilePayeResponse].repayment
       repayment should not be None
-      repayment.foreach(r => r.paymentStatus shouldBe `PAYMENT_PROCESSING`)
+      repayment.foreach(r => r.paymentStatus shouldBe PaymentProcessing)
     }
 
     "return 404 where SANDBOX-CONTROL is NOT-FOUND" in {

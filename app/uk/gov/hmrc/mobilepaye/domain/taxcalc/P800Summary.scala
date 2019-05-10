@@ -20,7 +20,7 @@ import java.time.LocalDate
 import play.api.libs.json._
 import uk.gov.hmrc.mobilepaye.domain.P800Repayment
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status.Overpaid
-import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus.{`REFUND`, `SA_USER`, `UNABLE_TO_CLAIM`}
+import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus.{Refund, SaUser, UnableToClaim}
 import uk.gov.hmrc.time.TaxYear
 
 import scala.util.{Failure, Success, Try}
@@ -44,8 +44,8 @@ object P800Summary {
 
     def withAcceptableRepaymentStatus(p800Summary: P800Summary): Option[P800Summary] = {
       p800Summary.paymentStatus match {
-          case `SA_USER`        => None
-          case `UNABLE_TO_CLAIM` => None
+          case SaUser        => None
+          case UnableToClaim => None
           case _             => Option(p800Summary)
         }
     }
@@ -53,7 +53,7 @@ object P800Summary {
     def transform(p800Summary: P800Summary): P800Repayment = {
       def withLink: Option[String] = {
         p800Summary.paymentStatus match {
-          case `REFUND` => Option(s"/tax-you-paid/${TaxYear.current.currentYear - 1}-${TaxYear.current.currentYear}/paid-too-much")
+          case Refund => Option(s"/tax-you-paid/${TaxYear.current.currentYear - 1}-${TaxYear.current.currentYear}/paid-too-much")
           case _      => None
         }}
 

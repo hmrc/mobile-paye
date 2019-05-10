@@ -191,7 +191,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
     }
 
     "return OK with P800Repayments for Overpaid tax and accepted RepaymentStatus" in {
-      List(`REFUND`, `PAYMENT_PROCESSING`, `PAYMENT_PAID`, `CHEQUE_SENT`)
+      List(Refund, PaymentProcessing, PaymentPaid, ChequeSent)
         .foreach {
           repaymentStatus =>
             val amount = Random.nextDouble(): BigDecimal
@@ -214,7 +214,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
     }
 
     "return OK with no P800Repayments for Underpaid tax" in {
-      List(`REFUND`, `PAYMENT_PROCESSING`, `PAYMENT_PAID`, `CHEQUE_SENT`, `SA_USER`, `UNABLE_TO_CLAIM`)
+      List(Refund, PaymentProcessing, PaymentPaid, ChequeSent, SaUser, UnableToClaim)
         .foreach {
           repaymentStatus =>
             val amount = Random.nextDouble(): BigDecimal
@@ -235,7 +235,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
     }
 
     "return OK with no P800Repayments for uncovered RepaymentStatuses" in {
-      List(`SA_USER`, `UNABLE_TO_CLAIM`)
+      List(SaUser, UnableToClaim)
         .foreach {
           repaymentStatus =>
             val amount = Random.nextDouble(): BigDecimal

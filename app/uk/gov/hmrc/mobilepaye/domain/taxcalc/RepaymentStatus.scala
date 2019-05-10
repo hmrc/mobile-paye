@@ -16,22 +16,24 @@
 
 package uk.gov.hmrc.mobilepaye.domain.taxcalc
 
+import enumeratum.EnumEntry.UpperSnakecase
 import enumeratum._
+
 import scala.collection.immutable
 
-sealed trait RepaymentStatus extends EnumEntry
+sealed trait RepaymentStatus extends EnumEntry with UpperSnakecase
 
 object RepaymentStatus extends Enum[RepaymentStatus] with PlayUppercaseJsonEnum[RepaymentStatus] {
-  case object `REFUND`             extends RepaymentStatus
-  case object `PAYMENT_PROCESSING` extends RepaymentStatus
-  case object `PAYMENT_PAID`       extends RepaymentStatus
-  case object `CHEQUE_SENT`        extends RepaymentStatus
-  case object `SA_USER`            extends RepaymentStatus
-  case object `UNABLE_TO_CLAIM`    extends RepaymentStatus
-  case object `PAYMENT_DUE`        extends RepaymentStatus
-  case object `PAID_ALL`           extends RepaymentStatus
-  case object `PAID_PART`          extends RepaymentStatus
-  case object `PAYMENTS_DOWN`      extends RepaymentStatus
+  case object Refund            extends RepaymentStatus
+  case object PaymentProcessing extends RepaymentStatus
+  case object PaymentPaid       extends RepaymentStatus
+  case object ChequeSent        extends RepaymentStatus
+  case object SaUser            extends RepaymentStatus
+  case object UnableToClaim     extends RepaymentStatus
+  case object PaymentDue        extends RepaymentStatus
+  case object PaidAll           extends RepaymentStatus
+  case object PaidPart          extends RepaymentStatus
+  case object PaymentsDown      extends RepaymentStatus
 
   override def values: immutable.IndexedSeq[RepaymentStatus] = findValues
 }
