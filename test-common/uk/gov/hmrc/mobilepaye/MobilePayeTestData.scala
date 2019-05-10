@@ -19,7 +19,7 @@ package uk.gov.hmrc.mobilepaye
 import java.time.LocalDate
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mobilepaye.domain.tai._
-import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus.{ChequeSent, PaymentPaid}
+import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus.{`CHEQUE_SENT`, `PAYMENT_PAID`}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.{P800Status, P800Summary, RepaymentStatus}
 import uk.gov.hmrc.mobilepaye.domain.{MobilePayeResponse, OtherIncome, P800Repayment, PayeIncome}
 import uk.gov.hmrc.time.TaxYear
@@ -62,7 +62,7 @@ trait MobilePayeTestData {
   def repayment(p800Status: P800Status, paymentStatus: RepaymentStatus, taxYear: Int, amount: BigDecimal, time: LocalDate): Option[P800Repayment] = {
     def withPaidDate(): Option[LocalDate] = {
       paymentStatus match {
-        case PaymentPaid | ChequeSent => Option(LocalDate.from(time))
+        case `PAYMENT_PAID` | `CHEQUE_SENT` => Option(LocalDate.from(time))
         case _                        => None
       }
     }

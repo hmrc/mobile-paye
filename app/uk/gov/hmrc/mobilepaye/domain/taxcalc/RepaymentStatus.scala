@@ -16,39 +16,22 @@
 
 package uk.gov.hmrc.mobilepaye.domain.taxcalc
 
-import play.api.libs.json._
+import enumeratum._
+import scala.collection.immutable
 
-sealed trait RepaymentStatus
+sealed trait RepaymentStatus extends EnumEntry
 
-object RepaymentStatus {
-  case object Refund            extends RepaymentStatus
-  case object PaymentProcessing extends RepaymentStatus
-  case object PaymentPaid       extends RepaymentStatus
-  case object ChequeSent        extends RepaymentStatus
-  case object SaUser            extends RepaymentStatus
-  case object UnableToClaim     extends RepaymentStatus
+object RepaymentStatus extends Enum[RepaymentStatus] with PlayUppercaseJsonEnum[RepaymentStatus] {
+  case object `REFUND`             extends RepaymentStatus
+  case object `PAYMENT_PROCESSING` extends RepaymentStatus
+  case object `PAYMENT_PAID`       extends RepaymentStatus
+  case object `CHEQUE_SENT`        extends RepaymentStatus
+  case object `SA_USER`            extends RepaymentStatus
+  case object `UNABLE_TO_CLAIM`    extends RepaymentStatus
+  case object `PAYMENT_DUE`        extends RepaymentStatus
+  case object `PAID_ALL`           extends RepaymentStatus
+  case object `PAID_PART`          extends RepaymentStatus
+  case object `PAYMENTS_DOWN`      extends RepaymentStatus
 
-  implicit val format: Format[RepaymentStatus] = new Format[RepaymentStatus] {
-    override def reads(json: JsValue): JsResult[RepaymentStatus] = {
-      json.validate[String].map {
-        case "REFUND"             => Refund
-        case "PAYMENT_PROCESSING" => PaymentProcessing
-        case "PAYMENT_PAID"       => PaymentPaid
-        case "CHEQUE_SENT"        => ChequeSent
-        case "SA_USER"            => SaUser
-        case "UNABLE_TO_CLAIM"    => UnableToClaim
-      }
-    }
-
-    override def writes(o: RepaymentStatus): JsValue = {
-      o match {
-        case Refund            => JsString("REFUND")
-        case PaymentProcessing => JsString("PAYMENT_PROCESSING")
-        case PaymentPaid       => JsString("PAYMENT_PAID")
-        case ChequeSent        => JsString("CHEQUE_SENT")
-        case SaUser            => JsString("SA_USER")
-        case UnableToClaim     => JsString("UNABLE_TO_CLAIM")
-      }
-    }
-  }
+  override def values: immutable.IndexedSeq[RepaymentStatus] = findValues
 }

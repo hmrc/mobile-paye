@@ -5,24 +5,27 @@ object AppDependencies {
   import play.core.PlayVersion
   import play.sbt.PlayImport._
 
-  private val play26Bootstrap = "0.36.0"
+  private val play26Bootstrap    = "0.36.0"
   private val playHmrcApiVersion = "3.4.0-play-26"
-  private val domainVersion = "5.3.0"
-  private val taxYearVersion = "0.4.0"
+  private val domainVersion      = "5.3.0"
+  private val taxYearVersion     = "0.4.0"
 
-  private val hmrcTestVersion = "3.3.0"
-  private val pegdownVersion = "1.6.0"
-  private val scalaTestVersion = "3.0.5"
-  private val wireMockVersion = "2.20.0"
-  private val scalaMockVersion = "4.1.0"
+  private val hmrcTestVersion      = "3.3.0"
+  private val pegdownVersion       = "1.6.0"
+  private val scalaTestVersion     = "3.0.5"
+  private val wireMockVersion      = "2.20.0"
+  private val scalaMockVersion     = "4.1.0"
+  private val enumeratumVersion    = "1.5.13"
   private val scalaTestPlusVersion = "3.1.2"
 
   val compile: Seq[ModuleID] = Seq(
     ws,
-    "uk.gov.hmrc" %% "bootstrap-play-26" % play26Bootstrap,
-    "uk.gov.hmrc" %% "domain" % domainVersion,
-    "uk.gov.hmrc" %% "play-hmrc-api" % playHmrcApiVersion,
-    "uk.gov.hmrc" %% "tax-year" % taxYearVersion
+    "uk.gov.hmrc"  %% "bootstrap-play-26"    % play26Bootstrap,
+    "uk.gov.hmrc"  %% "domain"               % domainVersion,
+    "uk.gov.hmrc"  %% "play-hmrc-api"        % playHmrcApiVersion,
+    "uk.gov.hmrc"  %% "tax-year"             % taxYearVersion,
+    "com.beachape" %% "enumeratum"           % enumeratumVersion,
+    "com.beachape" %% "enumeratum-play-json" % enumeratumVersion
   )
 
   trait TestDependencies {

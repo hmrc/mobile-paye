@@ -16,22 +16,14 @@
 
 package uk.gov.hmrc.mobilepaye.domain.taxcalc
 
-import play.api.libs.json.{Format, JsResult, JsString, JsValue}
+import enumeratum._
+import scala.collection.immutable
 
-sealed trait P800Status
+sealed trait P800Status extends EnumEntry
 
-object P800Status {
+object P800Status extends Enum[P800Status] with PlayJsonEnum[P800Status] {
   case object Underpaid extends P800Status
   case object Overpaid  extends P800Status
 
-  implicit val format: Format[P800Status] = new Format[P800Status] {
-    override def writes(o: P800Status): JsValue = JsString(o.toString)
-
-    override def reads(json: JsValue): JsResult[P800Status] = {
-      json.validate[String].map {
-        case "Underpaid" => Underpaid
-        case "Overpaid"  => Overpaid
-      }
-    }
-  }
+  override def values: immutable.IndexedSeq[P800Status] = findValues
 }

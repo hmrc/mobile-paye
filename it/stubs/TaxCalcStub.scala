@@ -24,7 +24,7 @@ object TaxCalcStub {
                            time: LocalDate): StubMapping = {
     def withPaidDate(): Option[LocalDate] = {
       paymentStatus match {
-        case PaymentPaid | ChequeSent => Option(time)
+        case `PAYMENT_PAID` | `CHEQUE_SENT` => Option(time)
         case _ => None
       }
     }
