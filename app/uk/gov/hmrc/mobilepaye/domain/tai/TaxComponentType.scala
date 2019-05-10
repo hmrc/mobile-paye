@@ -29,12 +29,12 @@ object TaxComponentType extends Enum[TaxComponentType] with PlayJsonEnum[TaxComp
   }
 }
 
-sealed trait AllowanceComponentType        extends TaxComponentType with EnumEntry
-sealed trait BenefitComponentType          extends TaxComponentType with EnumEntry
-sealed trait DeductionComponentType        extends TaxComponentType with EnumEntry
-sealed trait IncomeComponentType           extends TaxComponentType with EnumEntry
-sealed trait TaxCodeIncomeComponentType    extends IncomeComponentType with EnumEntry
-sealed trait NonTaxCodeIncomeComponentType extends IncomeComponentType with EnumEntry
+sealed trait AllowanceComponentType        extends TaxComponentType
+sealed trait BenefitComponentType          extends TaxComponentType
+sealed trait DeductionComponentType        extends TaxComponentType
+sealed trait IncomeComponentType           extends TaxComponentType
+sealed trait TaxCodeIncomeComponentType    extends IncomeComponentType
+sealed trait NonTaxCodeIncomeComponentType extends IncomeComponentType
 
 object IncomeComponentType extends Enum[IncomeComponentType] with PlayJsonEnum[IncomeComponentType] {
   override def values: immutable.IndexedSeq[IncomeComponentType] = findValues ++ TaxCodeIncomeComponentType.values ++ NonTaxCodeIncomeComponentType.values
