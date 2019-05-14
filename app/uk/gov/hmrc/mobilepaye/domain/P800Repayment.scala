@@ -16,11 +16,18 @@
 
 package uk.gov.hmrc.mobilepaye.domain
 
-import play.api.libs.json.{Json, OFormat}
+import java.time.LocalDate
+import play.api.libs.json.{Format, Json}
+import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus
 
-// Link is only optional to remove it for auditing purposes, it's a mandatory data field, we could consider different classes for auditing instead
-case class PayeIncome(name: String, payrollNumber: Option[String] = None, taxCode: String, amount: BigDecimal, link: Option[String])
+case class P800Repayment(
+                          amount:          BigDecimal,
+                          paymentStatus:   RepaymentStatus,
+                          datePaid:        Option[LocalDate],
+                          taxYear:         Int,
+                          claimRefundLink: Option[String]
+                        )
 
-object PayeIncome {
-  implicit val format: OFormat[PayeIncome] = Json.format[PayeIncome]
+object P800Repayment {
+  implicit val format: Format[P800Repayment] = Json.format
 }

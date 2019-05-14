@@ -19,12 +19,29 @@ API
 |--------|----|----|
 | ```/mobile-paye/nino/:nino/tax-year/:taxYear/summary``` | GET | Fetch the Tax Credits Summary object for a given NINO for a given Tax Year. [More...](docs/summary.md)|
 
-# Sandbox
-All the above endpoints are accessible on sandbox with `/sandbox` prefix on each endpoint,e.g.
-```
-    GET /sandbox/summary
+Shuttered
+---------
+When the service is shuttered it will return the following JSON
+```json
+{
+  "shuttered": true,
+  "title": "Service Unavailable",
+  "message": "You’ll be able to use the PAYE service at 9am on Monday 29 May 2017."
+}
 ```
 
+To enable you need to set the following config:
+```
+mobilePaye {
+  shuttering = {
+    shuttered = true
+    title = "Service Unavailable"
+    message = "You’ll be able to use the PAYE service at 9am on Monday 29 May 2017."
+  }
+}
+```
+
+# Sandbox
 To trigger the sandbox endpoints locally, use the "X-MOBILE-USER-ID" header with one of the following values:
 208606423740 or 167927702220
 
@@ -32,17 +49,22 @@ To test different scenarios, add a header "SANDBOX-CONTROL" with one of the foll
 
 | *Value* | *Description* |
 |--------|----|
-| "SINGLE-EMPLOYMENT" | Happy path, return a single employment with no pensions or other income |
-| "SINGLE-PENSION" | Happy path, return a single pension with no employments or other income |
-| "NO-TAX-YEAR-INCOME" | Happy path, return only tax year and 'add missing' links when no live or previous incomes | 
-| "PREVIOUS-INCOME-ONLY" | Happy path, return all data except employments, pension, other income when previous income but no live incomes | 
-| "OTHER-INCOME-ONLY" | Happy path, return other income when there are previous incomes but no live income | 
-| "DECEASED"  | Happy path, trigger a 410 Gone response when the person is deceased |
-| "MCI"       | Happy path, trigger a 423 Locked response when manual correspondence is required |
-| "NOT-FOUND" | Unhappy path, URL not found |
-| "ERROR-401" | Unhappy path, trigger a 401 Unauthorized response |
-| "ERROR-403" | Unhappy path, trigger a 403 Forbidden response |
-| "ERROR-500" | Unhappy path, trigger a 500 Internal Server Error response |
+| "SINGLE-EMPLOYMENT"        | Happy path, return a single employment with no pensions or other income |
+| "SINGLE-PENSION"           | Happy path, return a single pension with no employments or other income |
+| "NO-TAX-YEAR-INCOME"       | Happy path, return only tax year and 'add missing' links when no live or previous incomes | 
+| "PREVIOUS-INCOME-ONLY"     | Happy path, return all data except employments, pension, other income when previous income but no live incomes | 
+| "OTHER-INCOME-ONLY"        | Happy path, return other income when there are previous incomes but no live income | 
+| "REFUND"                   | Happy path, return the repayment owed to the user, including the link for the claiming the refund
+| "CHEQUE_SENT"              | Happy path, return the fact that the user has been sent a cheque
+| "PAYMENT_PAID"             | Happy path, return the fact that the money owed to the user having been paid
+| "PAYMENT_PROCESSING"       | Happy path, return the fact that the payment is under processing
+| "DECEASED"                 | Happy path, trigger a 410 Gone response when the person is deceased |
+| "MCI"                      | Happy path, trigger a 423 Locked response when manual correspondence is required |
+| "SHUTTERED"                | Unhappy path, trigger a 521 with the shuttered payload
+| "NOT-FOUND"                | Unhappy path, URL not found |
+| "ERROR-401"                | Unhappy path, trigger a 401 Unauthorized response |
+| "ERROR-403"                | Unhappy path, trigger a 403 Forbidden response |
+| "ERROR-500"                | Unhappy path, trigger a 500 Internal Server Error response |
 | Not set or any other value | Happy path, default user with employments, pensions and other income |
 
 # Definition

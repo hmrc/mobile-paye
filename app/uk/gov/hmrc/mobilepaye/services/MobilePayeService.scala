@@ -19,15 +19,17 @@ package uk.gov.hmrc.mobilepaye.services
 import com.google.inject.{Inject, Singleton}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.mobilepaye.connectors.TaiConnector
+import uk.gov.hmrc.mobilepaye.connectors.{TaiConnector, TaxCalcConnector}
 import uk.gov.hmrc.mobilepaye.domain.tai._
 import uk.gov.hmrc.mobilepaye.domain.{IncomeSource, MobilePayeResponse, OtherIncome, PayeIncome}
+import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Summary
+import uk.gov.hmrc.mobilepaye.domain.{MobilePayeResponse, OtherIncome, P800Repayment, PayeIncome}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.math.BigDecimal.RoundingMode
 
 @Singleton
-class MobilePayeService @Inject()(taiConnector: TaiConnector) {
+class MobilePayeService @Inject()(taiConnector: TaiConnector, taxCalcConnector: TaxCalcConnector) {
 
   private val NpsTaxAccountNoEmploymentsCurrentYear = "no employments recorded for current tax year"
   private val NpsTaxAccountDataAbsentMsg = "cannot complete a coding calculation without a primary employment"
@@ -44,7 +46,9 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector) {
     def buildMobilePayeResponse(incomeSourceEmployment: Seq[IncomeSource],
                                 incomeSourcePension: Seq[IncomeSource],
                                 nonTaxCodeIncomes: NonTaxCodeIncome,
-                                taxAccountSummary: TaxAccountSummary): MobilePayeResponse = {
+                                employments: Seq[Employment],
+                                taxAccountSummary: TaxAccountSummary,
+                                p800Summary: Option[P800Summary]): MobilePayeResponse = {
 
       def buildPayeIncomes(incomes: Seq[IncomeSource]): Option[Seq[PayeIncome]] = {
         incomes.map { inc =>
@@ -59,14 +63,18 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector) {
         }
       }
 
-      val otherNonTaxCodeIncomes: Option[Seq[OtherIncome]] = nonTaxCodeIncomes.otherNonTaxCodeIncomes.map(income => OtherIncome.withMaybeLink(
-        name = income.getFormattedIncomeComponentType,
-        amount = income.amount.setScale(0, RoundingMode.FLOOR)
-      )) match {
+      val otherNonTaxCodeIncomes: Option[Seq[OtherIncome]] = nonTaxCodeIncomes.otherNonTaxCodeIncomes
+        .filter(_.incomeComponentType != BankOrBuildingSocietyInterest)
+        .map(income => OtherIncome.withMaybeLink(
+          name = income.getFormattedIncomeComponentType,
+          amount = income.amount.setScale(0, RoundingMode.FLOOR)
+        )) match {
         case Nil => None
         case oi => Some(oi)
       }
 
+      // $COVERAGE-OFF$
+      //TODO We may need to use this in the future still but as part of HMA-546 to remediate a live issue this is unused until the underlying issue with untaxed interest is resolved.
       val untaxedInterest: Option[OtherIncome] = nonTaxCodeIncomes.untaxedInterest match {
         case Some(income) => Some(OtherIncome.withMaybeLink(
           name = income.getFormattedIncomeComponentType,
@@ -81,17 +89,21 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector) {
         case (_, Some(y)) => Some(Seq(y))
         case _ => None
       }
+      // $COVERAGE-ON$
 
       val employmentPayeIncomes: Option[Seq[PayeIncome]] = buildPayeIncomes(incomeSourceEmployment)
       val pensionPayeIncomes: Option[Seq[PayeIncome]] = buildPayeIncomes(incomeSourcePension)
 
-      val taxFreeAmount: Option[BigDecimal] = Some(taxAccountSummary.taxFreeAmount.setScale(0, RoundingMode.FLOOR))
-      val estimatedTaxAmount: Option[BigDecimal] = Some(taxAccountSummary.totalEstimatedTax.setScale(0, RoundingMode.FLOOR))
+      val taxFreeAmount:      Option[BigDecimal]    = Option(taxAccountSummary.taxFreeAmount.setScale(0, RoundingMode.FLOOR))
+      val estimatedTaxAmount: Option[BigDecimal]    = Option(taxAccountSummary.totalEstimatedTax.setScale(0, RoundingMode.FLOOR))
+      val repayment:         Option[P800Repayment] = p800Summary.flatMap(summary => P800Summary.toP800Repayment(summary))
 
-      MobilePayeResponse(employments = employmentPayeIncomes,
-        pensions = pensionPayeIncomes,
-        otherIncomes = otherIncomes,
-        taxFreeAmount = taxFreeAmount,
+      MobilePayeResponse(taxYear = Some(taxYear),
+        employments        = employmentPayeIncomes,
+        repayment          = repayment,
+        pensions           = pensionPayeIncomes,
+        otherIncomes       = otherNonTaxCodeIncomes,
+        taxFreeAmount      = taxFreeAmount,
         estimatedTaxAmount = estimatedTaxAmount)
     }
 

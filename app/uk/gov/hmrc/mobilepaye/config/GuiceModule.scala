@@ -19,11 +19,9 @@ package uk.gov.hmrc.mobilepaye.config
 import com.google.inject.name.Names.named
 import com.google.inject.{AbstractModule, TypeLiteral}
 import play.api.{Configuration, Environment}
-import uk.gov.hmrc.api.connector.{ApiServiceLocatorConnector, ServiceLocatorConnector}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{CoreGet, CorePost}
 import uk.gov.hmrc.mobilepaye.controllers.api.ApiAccess
-import uk.gov.hmrc.mobilepaye.tasks.ServiceLocatorRegistrationTask
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
@@ -39,13 +37,12 @@ class GuiceModule(environment: Environment, configuration: Configuration) extend
 
   override def configure(): Unit = {
 
-    bind(classOf[ServiceLocatorConnector])
-      .to(classOf[ApiServiceLocatorConnector])
     bind(classOf[AuthConnector]).to(classOf[DefaultAuthConnector])
     bind(classOf[CoreGet]).to(classOf[WSHttpImpl])
     bind(classOf[CorePost]).to(classOf[WSHttpImpl])
     bind(classOf[HttpClient]).to(classOf[WSHttpImpl])
-    bind(classOf[ServiceLocatorRegistrationTask]).asEagerSingleton()
+
+    bind(classOf[MobilePayeControllerConfig]).to(classOf[MobilePayeConfig])
 
     bindConfigInt("controllers.confidenceLevel")
     bind(classOf[ApiAccess]).toInstance(
@@ -59,6 +56,8 @@ class GuiceModule(environment: Environment, configuration: Configuration) extend
 
     bindConfigStringSeq("scopes")
     bind(classOf[String]).annotatedWith(named("tai")).toInstance(servicesConfig.baseUrl("tai"))
+    bind(classOf[String]).annotatedWith(named("taxcalc")).toInstance(servicesConfig.baseUrl("taxcalc"))
+    bind(classOf[Boolean]).annotatedWith(named("with-taxcalc")).toInstance(servicesConfig.getBoolean("mobilePaye.feature-flags.taxcalc"))
   }
 
   private def bindConfigStringSeq(path: String): Unit = {

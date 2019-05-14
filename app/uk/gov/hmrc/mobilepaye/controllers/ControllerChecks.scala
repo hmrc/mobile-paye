@@ -14,13 +14,20 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.mobilepaye.domain
+package uk.gov.hmrc.mobilepaye.controllers
+import play.api.libs.json.Json
+import play.api.mvc.{Result, Results}
+import uk.gov.hmrc.mobilepaye.domain.Shuttering
 
-import play.api.libs.json.{Json, OFormat}
+import scala.concurrent.Future
 
-// Link is only optional to remove it for auditing purposes, it's a mandatory data field, we could consider different classes for auditing instead
-case class PayeIncome(name: String, payrollNumber: Option[String] = None, taxCode: String, amount: BigDecimal, link: Option[String])
+trait ControllerChecks  extends Results {
 
-object PayeIncome {
-  implicit val format: OFormat[PayeIncome] = Json.format[PayeIncome]
+  private final val WebServerIsDown = new Status(521)
+
+  def shuttering: Shuttering
+
+  def withShuttering(shuttering: Shuttering)(fn: => Future[Result]): Future[Result] =
+    if (shuttering.shuttered) Future.successful(WebServerIsDown(Json.toJson(shuttering))) else fn
+
 }

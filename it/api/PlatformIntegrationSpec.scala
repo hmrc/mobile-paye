@@ -7,23 +7,19 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsArray, JsValue}
 import play.api.libs.ws.WSResponse
 import play.api.test.PlayRunners
-import stubs.ServiceLocatorStub._
 import utils.BaseISpec
 
 /**
   * Testcase to verify the capability of integration with the API platform.
   *
-  * 1, To integrate with API platform the service needs to register itself to the service locator by calling the /registration endpoint and providing
-  * - application name
-  * - application url
-  *
-  * 2a, To expose API's to Third Party Developers, the service needs to define the APIs in a definition.json and make it available under api/definition GET endpoint
-  * 2b, For all of the endpoints defined in the definition.json a documentation.xml needs to be provided and be available under api/documentation/[version]/[endpoint name] GET endpoint
+  * 1a, To expose API's to Third Party Developers, the service needs to define the APIs in a definition.json and make it available under api/definition GET endpoint
+  * 1b, For all of the endpoints defined in the definition.json a documentation.xml needs to be provided and be available under api/documentation/[version]/[endpoint name] GET endpoint
   * Example: api/documentation/1.0/Fetch-Some-Data
   *
   * See: confluence ApiPlatform/API+Platform+Architecture+with+Flows
   */
 class PlatformIntegrationSpec extends BaseISpec with Eventually with PlayRunners {
+  override def shuttered: Boolean = false
 
   private val appId1: String = "00010002-0003-0004-0005-000600070008"
   private val appId2: String = "00090002-0003-0004-0005-000600070008"
@@ -31,21 +27,11 @@ class PlatformIntegrationSpec extends BaseISpec with Eventually with PlayRunners
   override protected def appBuilder: GuiceApplicationBuilder = new GuiceApplicationBuilder().configure(
     config ++
       Map(
-        "microservice.services.service-locator.host" -> wireMockHost,
-        "microservice.services.service-locator.port" -> wireMockPort,
         "api.access.white-list.applicationIds" -> Seq(appId1, appId2)
       )
   )
 
   "microservice" should {
-    "register itself with the api platform automatically at start up" in {
-      registerShouldNotHaveBeenCalled()
-
-      eventually(Timeout(Span(1000 * 20, Millis))) {
-        registerShouldHaveBeenCalled()
-      }
-    }
-
     "provide definition with configurable whitelist" in {
       val result: WSResponse = await(wsUrl("/api/definition").get())
       result.status shouldBe 200

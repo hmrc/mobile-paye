@@ -20,6 +20,16 @@ object TaiStub {
              |}
           """.stripMargin)))
 
+  def personalLocked(nino: String): StubMapping =
+    stubFor(
+      get(urlEqualTo(s"/tai/$nino/person"))
+        .willReturn(
+          aResponse()
+            .withStatus(423)
+            )
+    )
+
+
   def taxCodeIncomesAreFound(nino: String, taxCodeIncomes: Seq[TaxCodeIncome]): StubMapping =
     stubFor(
       get(urlEqualTo(s"/tai/$nino/tax-account/${TaxYear.current.currentYear}/income/tax-code-incomes"))

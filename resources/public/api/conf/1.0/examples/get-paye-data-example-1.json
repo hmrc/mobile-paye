@@ -1,4 +1,5 @@
 {
+  "taxYear": 2018,
   "employments": [
     {
       "name": "SAINSBURY'S PLC",
@@ -35,6 +36,13 @@
       "link": "/check-income-tax/income-details/3"
     }
   ],
+  "repayment":
+    {
+      "amount": 854.23,
+      "paymentStatus": "REFUND",
+      "taxYear": 2018,
+      "claimRefundLink": "/tax-you-paid/2018-2019/paid-too-much"
+    },
   "otherIncomes": [
     {
       "name": "NON CODED INCOME",

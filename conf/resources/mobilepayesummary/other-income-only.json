@@ -1,4 +1,5 @@
 {
+  "taxYear": <TAX_YEAR>,
   "otherIncomes": [
     {
       "name": "NON CODED INCOME",
@@ -10,9 +11,9 @@
       "link": "/"
     }
   ],
-  "taxFreeAmount": 11850,
+  "taxFreeAmount": 12500,
   "taxFreeAmountLink": "/",
-  "estimatedTaxAmount": 618,
+  "estimatedTaxAmount": 1578,
   "estimatedTaxAmountLink": "/",
   "understandYourTaxCodeLink": "/",
   "addMissingEmployerLink": "/",

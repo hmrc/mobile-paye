@@ -1,13 +1,12 @@
 {
   "taxYear": <TAX_YEAR>,
-  "pensions": [
+  "repayment":
     {
-      "name": "HIGHWIRE RETURNS LTD",
-      "taxCode": "BR",
-      "amount": 4200,
-      "link": "/"
-    }
-  ],
+      "amount": 854.23,
+      "paymentStatus": "REFUND",
+      "taxYear": 2018,
+      "claimRefundLink": "/tax-you-paid/2018-2019/paid-too-much"
+    },
   "taxFreeAmount": 12500,
   "taxFreeAmountLink": "/",
   "estimatedTaxAmount": 1578,

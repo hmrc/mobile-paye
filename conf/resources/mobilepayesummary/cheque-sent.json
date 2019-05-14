@@ -1,13 +1,12 @@
 {
   "taxYear": <TAX_YEAR>,
-  "pensions": [
+  "repayment":
     {
-      "name": "HIGHWIRE RETURNS LTD",
-      "taxCode": "BR",
-      "amount": 4200,
-      "link": "/"
-    }
-  ],
+      "amount": 1000,
+      "paymentStatus": "CHEQUE_SENT",
+      "datePaid": "2018-01-02",
+      "taxYear": 2018
+    },
   "taxFreeAmount": 12500,
   "taxFreeAmountLink": "/",
   "estimatedTaxAmount": 1578,

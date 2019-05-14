@@ -21,7 +21,7 @@ import play.api.mvc.Result
 import play.api.{Logger, mvc}
 import uk.gov.hmrc.api.controllers._
 import uk.gov.hmrc.auth.core.AuthorisationException
-import uk.gov.hmrc.http.{HeaderCarrier, HttpException, NotFoundException, Upstream4xxResponse}
+import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.bootstrap.controller.BackendBaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -34,6 +34,8 @@ case object ErrorUnauthorizedNoNino extends ErrorResponse(401, "UNAUTHORIZED", "
 case object ErrorUnauthorizedUpstream extends ErrorResponse(401, "UNAUTHORIZED", "Upstream service such as auth returned 401")
 
 case object ErrorBadRequest extends ErrorResponse(400, "BAD_REQUEST", "Invalid POST request")
+
+case object LockedUserRequest extends ErrorResponse(423, "LOCKED", "Locked! User is locked due to manual correspondence indicator flag being set")
 
 case object MandatoryResponse extends ErrorResponse(500, "MANDATORY", "Mandatory data not found")
 
@@ -68,6 +70,10 @@ trait ErrorHandling {
       case ex: Upstream4xxResponse if ex.upstreamResponseCode == 401 =>
         log("Upstream service returned 401")
         Status(ErrorUnauthorizedUpstream.httpStatusCode)(toJson(ErrorUnauthorizedUpstream))
+
+      case ex: Upstream4xxResponse if ex.upstreamResponseCode == 423 =>
+        log("Locked! User is locked due to manual correspondence indicator flag being set")
+        Status(LockedUserRequest.httpStatusCode)(toJson(LockedUserRequest))
 
       case _: AuthorisationException =>
         log("Unauthorised! Failure to authorise account or grant access")

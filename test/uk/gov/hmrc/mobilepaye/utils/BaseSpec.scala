@@ -22,11 +22,11 @@ import org.scalatest.{Matchers, WordSpecLike}
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mobilepaye.MobilePayeTestData
-import uk.gov.hmrc.mobilepaye.mocks.AuthorisationMock
+import uk.gov.hmrc.mobilepaye.mocks.{AuditMock, AuthorisationMock}
 
 import scala.concurrent.ExecutionContext
 
-trait BaseSpec extends WordSpecLike with Matchers with FutureAwaits with DefaultAwaitTimeout with MobilePayeTestData with AuthorisationMock {
+trait BaseSpec extends WordSpecLike with Matchers with FutureAwaits with DefaultAwaitTimeout with MobilePayeTestData with AuthorisationMock with AuditMock {
   implicit lazy val ec:           ExecutionContext  = scala.concurrent.ExecutionContext.Implicits.global
   implicit lazy val hc:           HeaderCarrier     = HeaderCarrier()
   implicit lazy val system:       ActorSystem       = ActorSystem()

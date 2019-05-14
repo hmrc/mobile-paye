@@ -14,13 +14,24 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.mobilepaye.domain
+package uk.gov.hmrc.mobilepaye.domain.taxcalc
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{Format, JsResult, JsString, JsValue}
 
-// Link is only optional to remove it for auditing purposes, it's a mandatory data field, we could consider different classes for auditing instead
-case class PayeIncome(name: String, payrollNumber: Option[String] = None, taxCode: String, amount: BigDecimal, link: Option[String])
+sealed trait P800Status
 
-object PayeIncome {
-  implicit val format: OFormat[PayeIncome] = Json.format[PayeIncome]
+object P800Status {
+  case object Underpaid extends P800Status
+  case object Overpaid  extends P800Status
+
+  implicit val format: Format[P800Status] = new Format[P800Status] {
+    override def writes(o: P800Status): JsValue = JsString(o.toString)
+
+    override def reads(json: JsValue): JsResult[P800Status] = {
+      json.validate[String].map {
+        case "Underpaid" => Underpaid
+        case "Overpaid"  => Overpaid
+      }
+    }
+  }
 }

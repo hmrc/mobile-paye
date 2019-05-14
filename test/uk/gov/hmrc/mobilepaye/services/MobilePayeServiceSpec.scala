@@ -20,6 +20,8 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, InternalServerException, UnauthorizedException}
 import uk.gov.hmrc.mobilepaye.connectors.TaiConnector
 import uk.gov.hmrc.mobilepaye.domain.{IncomeSource, MobilePayeResponse}
+import uk.gov.hmrc.mobilepaye.connectors.{TaiConnector, TaxCalcConnector, TaxCalcConnectorSpec}
+import uk.gov.hmrc.mobilepaye.domain.MobilePayeResponse
 import uk.gov.hmrc.mobilepaye.domain.tai._
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 
@@ -27,9 +29,10 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class MobilePayeServiceSpec extends BaseSpec {
 
-  val mockTaiConnector: TaiConnector = mock[TaiConnector]
+  val mockTaiConnector:     TaiConnector     = mock[TaiConnector]
+  val mockTaxCalcConnector: TaxCalcConnector = mock[TaxCalcConnector]
 
-  val service = new MobilePayeService(mockTaiConnector)
+  val service = new MobilePayeService(mockTaiConnector, mockTaxCalcConnector)
 
   def mockMatchingTaxCode(f: Future[Seq[IncomeSource]]) =
     (mockTaiConnector.getMatchingTaxCodeIncomes(_: Nino, _: Int, _: String, _: String)(_: HeaderCarrier, _: ExecutionContext))
@@ -42,12 +45,16 @@ class MobilePayeServiceSpec extends BaseSpec {
   def mockTaxAccountSummary(f: Future[TaxAccountSummary]) =
     (mockTaiConnector.getTaxAccountSummary(_: Nino, _: Int)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *, *).returning(f)
 
+  def mockP800Summary() =
+    (mockTaxCalcConnector.getP800Summary(_: Nino, _: Int)(_: HeaderCarrier)).expects(*, *, *).returning(Future.successful(None))
+
   "getMobilePayeResponse" should {
     "return full MobilePayeResponse when all data is available" in {
       mockMatchingTaxCode(Future.successful(employmentIncomeSource))
       mockMatchingTaxCode(Future.successful(pensionIncomeSource))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockP800Summary()
 
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
 
@@ -70,6 +77,7 @@ class MobilePayeServiceSpec extends BaseSpec {
       mockMatchingTaxCode(Future.successful(pensionIncomeSource))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockP800Summary()
 
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
 
@@ -81,6 +89,7 @@ class MobilePayeServiceSpec extends BaseSpec {
       mockMatchingTaxCode(Future.successful(Seq.empty[IncomeSource]))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockP800Summary()
 
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
 
@@ -92,6 +101,7 @@ class MobilePayeServiceSpec extends BaseSpec {
       mockMatchingTaxCode(Future.successful(pensionIncomeSource))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithoutUntaxedInterest.copy(otherNonTaxCodeIncomes = Nil)))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockP800Summary()
 
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
 
@@ -103,6 +113,7 @@ class MobilePayeServiceSpec extends BaseSpec {
       mockMatchingTaxCode(Future.failed(new UnauthorizedException("Unauthorized")))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest.copy(otherNonTaxCodeIncomes = Nil)))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockTaxCodeIncomes(Future.failed(new UnauthorizedException("Unauthorized")))
 
       intercept[UnauthorizedException] {
         await(service.getMobilePayeResponse(nino, currentTaxYear))
@@ -110,6 +121,7 @@ class MobilePayeServiceSpec extends BaseSpec {
     }
 
     "throw ForbiddenException when receiving ForbiddenException from taiConnector" in {
+      mockTaxCodeIncomes(Future.failed(new ForbiddenException("Forbidden")))
       mockMatchingTaxCode(Future.failed(new ForbiddenException("Forbidden")))
       mockMatchingTaxCode(Future.failed(new ForbiddenException("Forbidden")))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest.copy(otherNonTaxCodeIncomes = Nil)))
@@ -121,6 +133,7 @@ class MobilePayeServiceSpec extends BaseSpec {
     }
 
     "throw InternalServerError when receiving InternalServerError from taiConnector" in {
+      mockTaxCodeIncomes(Future.failed(new InternalServerException("Internal Server Error")))
       mockMatchingTaxCode(Future.failed(new InternalServerException("Internal Server Error")))
       mockMatchingTaxCode(Future.failed(new InternalServerException("Internal Server Error")))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest.copy(otherNonTaxCodeIncomes = Nil)))
@@ -132,6 +145,7 @@ class MobilePayeServiceSpec extends BaseSpec {
     }
 
     "return an empty MobilePayeResponse when an exception is thrown that contains 'no employments recorded for current tax year'" in {
+      mockTaxCodeIncomes(Future.failed(new Exception("no employments recorded for current tax year")))
       mockMatchingTaxCode(Future.failed(new Exception("no employments recorded for current tax year")))
       mockMatchingTaxCode(Future.successful(pensionIncomeSource))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest.copy(otherNonTaxCodeIncomes = Nil)))
@@ -143,6 +157,7 @@ class MobilePayeServiceSpec extends BaseSpec {
     }
 
     "return an empty MobilePayeResponse when an exception is thrown from NPS that contains 'cannot complete a coding calculation without a primary employment'" in {
+      mockTaxCodeIncomes(Future.failed(new Exception("cannot complete a coding calculation without a primary employment")))
       mockMatchingTaxCode(Future.failed(new Exception("cannot complete a coding calculation without a primary employment")))
       mockMatchingTaxCode(Future.successful(pensionIncomeSource))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest.copy(otherNonTaxCodeIncomes = Nil)))
@@ -154,6 +169,7 @@ class MobilePayeServiceSpec extends BaseSpec {
     }
 
     "return an empty MobilePayeResponse when an exception is thrown from NPS that contains 'no employments recorded for this individual'" in {
+      mockTaxCodeIncomes(Future.failed(new Exception("no employments recorded for this individual")))
       mockMatchingTaxCode(Future.failed(new Exception("no employments recorded for this individual")))
       mockMatchingTaxCode(Future.successful(pensionIncomeSource))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest.copy(otherNonTaxCodeIncomes = Nil)))
