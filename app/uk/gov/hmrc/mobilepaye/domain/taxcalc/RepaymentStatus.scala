@@ -23,7 +23,7 @@ import scala.collection.immutable
 
 sealed trait RepaymentStatus extends EnumEntry with UpperSnakecase
 
-object RepaymentStatus extends Enum[RepaymentStatus] with PlayUppercaseJsonEnum[RepaymentStatus] {
+object RepaymentStatus extends Enum[RepaymentStatus] with PlayJsonEnum[RepaymentStatus] {
   case object Refund            extends RepaymentStatus
   case object PaymentProcessing extends RepaymentStatus
   case object PaymentPaid       extends RepaymentStatus
