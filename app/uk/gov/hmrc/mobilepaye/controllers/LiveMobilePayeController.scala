@@ -118,9 +118,9 @@ class LiveMobilePayeController @Inject()(
         "viewPayeSummary",
         tags = hc.toAuditTags("view-paye-summary", path),
         detail = obj(
-          "nino"      -> nino.value,
-          "journeyId" -> journeyId,
-          "data"      -> auditPayload
+          "nino" -> nino.value,
+          "journeyId"   -> journeyId,
+          "data"        -> auditPayload
         )))
     ()
   }

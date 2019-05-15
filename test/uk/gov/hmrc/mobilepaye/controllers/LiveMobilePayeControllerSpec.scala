@@ -41,7 +41,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
 
   val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withHeaders(acceptHeader)
   val journeyId = "12345"
-
+  val grantAccessWithCL200: GrantAccess = Some(nino.toString()) and L200
   val mockMobilePayeService: MobilePayeService = mock[MobilePayeService]
 
   implicit val mockAuditConnector:   AuditConnector   = mock[AuditConnector]
@@ -70,54 +70,54 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
   "getPayeSummary" should {
     "return 200 and full paye summary data for valid authorised nino" in {
       mockGetPerson(Future.successful(person))
-      mockGetMobilePayeResponse(Future.successful(fullMobilePayeResponse))
-      mockAuthorisationGrantAccess(Some(nino.toString) and L200)
+      mockGetMobilePayeResponse(Future.successful(fullMobilePayeAudit))
+      mockAuthorisationGrantAccess(grantAccessWithCL200)
       mockAudit(nino, fullMobilePayeAudit, journeyId)
 
       val result = controller(notShuttered).getPayeSummary(nino, journeyId, currentTaxYear)(fakeRequest)
 
       status(result)        shouldBe 200
-      contentAsJson(result) shouldBe Json.toJson(fullMobilePayeResponse)
+      contentAsJson(result) shouldBe Json.toJson(fullMobilePayeAudit)
     }
 
     "return 200 and paye summary data with no employment data for valid authorised nino" in {
       mockGetPerson(Future.successful(person))
-      mockGetMobilePayeResponse(Future.successful(fullMobilePayeResponse.copy(employments = None)))
-      mockAuthorisationGrantAccess(Some(nino.toString) and L200)
+      mockGetMobilePayeResponse(Future.successful(fullMobilePayeAudit.copy(employments = None)))
+      mockAuthorisationGrantAccess(grantAccessWithCL200)
       mockAudit(nino, fullMobilePayeAudit.copy(employments = None), journeyId)
 
       val result = controller(notShuttered).getPayeSummary(nino, journeyId, currentTaxYear)(fakeRequest)
 
       status(result)        shouldBe 200
-      contentAsJson(result) shouldBe Json.toJson(fullMobilePayeResponse.copy(employments = None))
+      contentAsJson(result) shouldBe Json.toJson(fullMobilePayeAudit.copy(employments = None))
     }
 
     "return 200 and paye summary data with no pensions data for valid authorised nino" in {
       mockGetPerson(Future.successful(person))
-      mockGetMobilePayeResponse(Future.successful(fullMobilePayeResponse.copy(pensions = None)))
-      mockAuthorisationGrantAccess(Some(nino.toString) and L200)
+      mockGetMobilePayeResponse(Future.successful(fullMobilePayeAudit.copy(pensions = None)))
+      mockAuthorisationGrantAccess(grantAccessWithCL200)
       mockAudit(nino, fullMobilePayeAudit.copy(pensions = None), journeyId)
 
       val result = controller(notShuttered).getPayeSummary(nino, journeyId, currentTaxYear)(fakeRequest)
 
       status(result)        shouldBe 200
-      contentAsJson(result) shouldBe Json.toJson(fullMobilePayeResponse.copy(pensions = None))
+      contentAsJson(result) shouldBe Json.toJson(fullMobilePayeAudit.copy(pensions = None))
     }
 
     "return 200 and paye summary data with no other income data for valid authorised nino" in {
       mockGetPerson(Future.successful(person))
-      mockGetMobilePayeResponse(Future.successful(fullMobilePayeResponse.copy(otherIncomes = None)))
-      mockAuthorisationGrantAccess(Some(nino.toString) and L200)
+      mockGetMobilePayeResponse(Future.successful(fullMobilePayeAudit.copy(otherIncomes = None)))
+      mockAuthorisationGrantAccess(grantAccessWithCL200)
       mockAudit(nino, fullMobilePayeAudit.copy(otherIncomes = None), journeyId)
 
       val result = controller(notShuttered).getPayeSummary(nino, journeyId, currentTaxYear)(fakeRequest)
 
       status(result)        shouldBe 200
-      contentAsJson(result) shouldBe Json.toJson(fullMobilePayeResponse.copy(otherIncomes = None))
+      contentAsJson(result) shouldBe Json.toJson(fullMobilePayeAudit.copy(otherIncomes = None))
     }
 
     "return 423 for a valid nino and authorised user but corrupt/mcierror user" in {
-      mockAuthorisationGrantAccess(Some(nino.toString) and L200)
+      mockAuthorisationGrantAccess(grantAccessWithCL200)
       mockGetPerson(Future.failed(Upstream4xxResponse("locked", 423,423)))
 
       val result = controller(notShuttered).getPayeSummary(nino, journeyId, currentTaxYear)(fakeRequest)
@@ -126,7 +126,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
     }
 
     "return 410 for a valid nino and authorised user but deceased user" in {
-      mockAuthorisationGrantAccess(Some(nino.toString) and L200)
+      mockAuthorisationGrantAccess(grantAccessWithCL200)
       mockGetPerson(Future.successful(person.copy(isDeceased = true)))
 
       val result = controller(notShuttered).getPayeSummary(nino, journeyId, currentTaxYear)(fakeRequest)
@@ -135,7 +135,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
     }
 
     "return 500 when MobilePayeService throws an InternalServerException" in {
-      mockAuthorisationGrantAccess(Some(nino.toString) and L200)
+      mockAuthorisationGrantAccess(grantAccessWithCL200)
       mockGetPerson(Future.successful(person))
       mockGetMobilePayeResponse(Future.failed(new InternalServerException("Internal Server Error")))
 
@@ -145,7 +145,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
     }
 
     "return 401 for valid nino and user but low CL" in {
-      mockAuthorisationGrantAccess(Some(nino.toString) and L100)
+      mockAuthorisationGrantAccess(Some(nino.toString()) and L100)
 
       val result = controller(notShuttered).getPayeSummary(nino, journeyId, currentTaxYear)(fakeRequest)
 
@@ -160,7 +160,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
     }
 
     "return 403 for valid nino for authorised user but for a different nino" in {
-      mockAuthorisationGrantAccess(Some(nino.toString) and L200)
+      mockAuthorisationGrantAccess(grantAccessWithCL200)
 
       val result = controller(notShuttered).getPayeSummary(Nino("CS100700A"), journeyId, currentTaxYear)(fakeRequest)
 
@@ -168,7 +168,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
     }
 
     "return 404 when handling NotFoundException" in {
-      mockAuthorisationGrantAccess(Some(nino.toString) and L200)
+      mockAuthorisationGrantAccess(grantAccessWithCL200)
       mockGetPerson(Future.failed(new NotFoundException("Not Found Exception")))
 
       val result = controller(notShuttered).getPayeSummary(nino, journeyId, currentTaxYear)(fakeRequest)
@@ -177,7 +177,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
     }
 
     "return 400 when handling BadRequestException" in {
-      mockAuthorisationGrantAccess(Some(nino.toString) and L200)
+      mockAuthorisationGrantAccess(grantAccessWithCL200)
       mockGetPerson(Future.failed(new BadRequestException("Bad Request Exception")))
 
       val result = controller(notShuttered).getPayeSummary(nino, journeyId, currentTaxYear)(fakeRequest)
@@ -186,7 +186,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
     }
 
     "return 401 when handling 401 Upstream4xxResponse" in {
-      mockAuthorisationGrantAccess(Some(nino.toString) and L200)
+      mockAuthorisationGrantAccess(grantAccessWithCL200)
       mockGetPerson(Future.failed(Upstream4xxResponse("Upstream Exception", 401, 401)))
 
       val result = controller(notShuttered).getPayeSummary(nino, journeyId, currentTaxYear)(fakeRequest)
@@ -195,7 +195,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
     }
 
     "return 401 when handling AuthorisationException" in {
-      mockAuthorisationGrantAccess(Some(nino.toString) and L200)
+      mockAuthorisationGrantAccess(grantAccessWithCL200)
       mockGetPerson(Future.failed(new MissingBearerToken))
 
       val result = controller(notShuttered).getPayeSummary(nino, journeyId, currentTaxYear)(fakeRequest)
@@ -204,7 +204,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
     }
 
     "return 521 when shuttered" in {
-      mockAuthorisationGrantAccess(Some(nino.toString) and L200)
+      mockAuthorisationGrantAccess(grantAccessWithCL200)
       val result = controller(shuttered).getPayeSummary(nino, journeyId, currentTaxYear)(fakeRequest)
 
       status(result) shouldBe 521

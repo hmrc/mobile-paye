@@ -3,6 +3,7 @@ package stubs
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.libs.json.Json
+import uk.gov.hmrc.mobilepaye.domain.IncomeSource
 import uk.gov.hmrc.mobilepaye.domain.tai._
 import uk.gov.hmrc.time.TaxYear
 
@@ -29,18 +30,31 @@ object TaiStub {
             )
     )
 
-
-  def taxCodeIncomesAreFound(nino: String, taxCodeIncomes: Seq[TaxCodeIncome]): StubMapping =
+  def stubForEmployments(nino: String, employments: Seq[IncomeSource]): StubMapping = {
     stubFor(
-      get(urlEqualTo(s"/tai/$nino/tax-account/${TaxYear.current.currentYear}/income/tax-code-incomes"))
+      get(urlEqualTo(s"/tai/$nino/tax-account/year/${TaxYear.current.currentYear}/income/EmploymentIncome/status/Live"))
         .willReturn(
           aResponse()
             .withStatus(200)
             .withBody(s"""
-             |{
-             |  "data": ${Json.toJson(taxCodeIncomes)}
-             |}
+                         |{
+                         |  "data": ${Json.toJson(employments)}
+                         |}
           """.stripMargin)))
+  }
+
+  def stubForPensions(nino: String, pensions: Seq[IncomeSource]): StubMapping = {
+    stubFor(
+      get(urlEqualTo(s"/tai/$nino/tax-account/year/${TaxYear.current.currentYear}/income/PensionIncome/status/Live"))
+        .willReturn(
+          aResponse()
+            .withStatus(200)
+            .withBody(s"""
+                         |{
+                         |  "data": ${Json.toJson(pensions)}
+                         |}
+          """.stripMargin)))
+  }
 
   def taxCodeIncomeNotCalled(nino: String): Unit =
     verify(0, getRequestedFor(urlEqualTo(s"/tai/$nino/tax-account/${TaxYear.current.currentYear}/income/tax-code-incomes")))
@@ -62,22 +76,6 @@ object TaiStub {
   def nonTaxCodeIncomeNotCalled(nino: String): Unit =
     verify(0, getRequestedFor(urlEqualTo(s"/tai/$nino/tax-account/${TaxYear.current.currentYear}/income")))
 
-  def employmentsAreFound(nino: String, employments: Seq[Employment]): StubMapping =
-    stubFor(
-      get(urlEqualTo(s"/tai/$nino/employments/years/${TaxYear.current.currentYear}"))
-        .willReturn(
-          aResponse()
-            .withStatus(200)
-            .withBody(s"""
-             |{
-             |  "data": {
-             |    "employments": ${Json.toJson(employments)}
-             |  }
-             |}
-          """.stripMargin)))
-
-  def employmentsNotCalled(nino: String): Unit =
-    verify(0, getRequestedFor(urlEqualTo(s"/tai/$nino/employments/years/${TaxYear.current.currentYear}")))
 
   def taxAccountSummaryIsFound(nino: String, taxAccountSummary: TaxAccountSummary): StubMapping =
     stubFor(

@@ -167,7 +167,7 @@ class TaiConnectorSpec extends BaseSpec {
       mockTaiGet(s"tax-account/year/$currentTaxYear/income/${EmploymentIncome.toString}/status/${Live.toString}", Future.failed(new NotFoundException("Not Found")))
 
       val result = await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear, EmploymentIncome.toString, Live.toString))
-      result shouldBe emptyEmployments
+      result shouldBe Seq.empty
     }
 
     "throw UnauthorisedException for valid nino but unauthorized user" in {

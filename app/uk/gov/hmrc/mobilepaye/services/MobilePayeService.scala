@@ -21,7 +21,7 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mobilepaye.connectors.{TaiConnector, TaxCalcConnector}
 import uk.gov.hmrc.mobilepaye.domain.tai._
-import uk.gov.hmrc.mobilepaye.domain.{IncomeSource, MobilePayeResponse, OtherIncome, PayeIncome}
+import uk.gov.hmrc.mobilepaye.domain.IncomeSource
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Summary
 import uk.gov.hmrc.mobilepaye.domain.{MobilePayeResponse, OtherIncome, P800Repayment, PayeIncome}
 
@@ -46,17 +46,12 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector, taxCalcConnector: 
     def buildMobilePayeResponse(incomeSourceEmployment: Seq[IncomeSource],
                                 incomeSourcePension: Seq[IncomeSource],
                                 nonTaxCodeIncomes: NonTaxCodeIncome,
-                                employments: Seq[Employment],
                                 taxAccountSummary: TaxAccountSummary,
                                 p800Summary: Option[P800Summary]): MobilePayeResponse = {
 
       def buildPayeIncomes(incomes: Seq[IncomeSource]): Option[Seq[PayeIncome]] = {
         incomes.map { inc =>
-            PayeIncome(name = inc.taxCodeIncome.name,
-              payrollNumber = inc.employment.payrollNumber,
-              taxCode = inc.taxCodeIncome.taxCode,
-              amount = inc.taxCodeIncome.amount.setScale(0, RoundingMode.FLOOR),
-              link = s"/check-income-tax/income-details/${inc.taxCodeIncome.employmentId.getOrElse(throw new Exception("Employment ID not found"))}")
+          PayeIncome.fromIncomeSource(inc)
         } match {
           case Nil => None
           case epi => Some(epi)
@@ -92,11 +87,11 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector, taxCalcConnector: 
       // $COVERAGE-ON$
 
       val employmentPayeIncomes: Option[Seq[PayeIncome]] = buildPayeIncomes(incomeSourceEmployment)
-      val pensionPayeIncomes: Option[Seq[PayeIncome]] = buildPayeIncomes(incomeSourcePension)
+      val pensionPayeIncomes:    Option[Seq[PayeIncome]] = buildPayeIncomes(incomeSourcePension)
 
       val taxFreeAmount:      Option[BigDecimal]    = Option(taxAccountSummary.taxFreeAmount.setScale(0, RoundingMode.FLOOR))
       val estimatedTaxAmount: Option[BigDecimal]    = Option(taxAccountSummary.totalEstimatedTax.setScale(0, RoundingMode.FLOOR))
-      val repayment:         Option[P800Repayment] = p800Summary.flatMap(summary => P800Summary.toP800Repayment(summary))
+      val repayment:          Option[P800Repayment] = p800Summary.flatMap(summary => P800Summary.toP800Repayment(summary))
 
       MobilePayeResponse(taxYear = Some(taxYear),
         employments        = employmentPayeIncomes,
@@ -107,18 +102,13 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector, taxCalcConnector: 
         estimatedTaxAmount = estimatedTaxAmount)
     }
 
-    val taxCodeIncomesEmploymentF = taiConnector.getMatchingTaxCodeIncomes(nino, taxYear, EmploymentIncome.toString, Live.toString)
-    val taxCodeIncomesPensionF = taiConnector.getMatchingTaxCodeIncomes(nino, taxYear, PensionIncome.toString, Live.toString)
-
-    val nonTaxCodeIncomesF = taiConnector.getNonTaxCodeIncome(nino, taxYear)
-    val taxAccountSummaryF = taiConnector.getTaxAccountSummary(nino, taxYear)
-
     (for {
-      taxCodeIncomesEmployment <- taxCodeIncomesEmploymentF
-      taxCodeIncomesPension <- taxCodeIncomesPensionF
-      nonTaxCodeIncomes <- nonTaxCodeIncomesF
-      taxAccountSummary <- taxAccountSummaryF
-      mobilePayeResponse: MobilePayeResponse = buildMobilePayeResponse(taxCodeIncomesEmployment, taxCodeIncomesPension, nonTaxCodeIncomes, taxAccountSummary)
+      taxCodeIncomesEmployment <- taiConnector.getMatchingTaxCodeIncomes(nino, taxYear, EmploymentIncome.toString, Live.toString)
+      taxCodeIncomesPension    <- taiConnector.getMatchingTaxCodeIncomes(nino, taxYear, PensionIncome.toString, Live.toString)
+      nonTaxCodeIncomes        <- taiConnector.getNonTaxCodeIncome(nino, taxYear)
+      taxAccountSummary        <- taiConnector.getTaxAccountSummary(nino, taxYear)
+      p800Summary              <- taxCalcConnector.getP800Summary(nino, taxYear)
+      mobilePayeResponse: MobilePayeResponse = buildMobilePayeResponse(taxCodeIncomesEmployment, taxCodeIncomesPension, nonTaxCodeIncomes, taxAccountSummary, p800Summary)
     } yield mobilePayeResponse) recover {
       case ex if knownException(ex) => MobilePayeResponse.empty
       case ex => throw ex
