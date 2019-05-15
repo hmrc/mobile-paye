@@ -43,6 +43,9 @@ object TaiStub {
           """.stripMargin)))
   }
 
+  def employmentsNotCalled(nino: String): Unit =
+    verify(0, getRequestedFor(urlEqualTo(s"/tai/$nino/tax-account/year/${TaxYear.current.currentYear}/income/EmploymentIncome/status/Live")))
+
   def stubForPensions(nino: String, pensions: Seq[IncomeSource]): StubMapping = {
     stubFor(
       get(urlEqualTo(s"/tai/$nino/tax-account/year/${TaxYear.current.currentYear}/income/PensionIncome/status/Live"))
@@ -55,6 +58,9 @@ object TaiStub {
                          |}
           """.stripMargin)))
   }
+
+  def pensionsNotCalled(nino: String): Unit =
+    verify(0, getRequestedFor(urlEqualTo(s"/tai/$nino/tax-account/year/${TaxYear.current.currentYear}/income/PensionIncome/status/Live")))
 
   def taxCodeIncomeNotCalled(nino: String): Unit =
     verify(0, getRequestedFor(urlEqualTo(s"/tai/$nino/tax-account/${TaxYear.current.currentYear}/income/tax-code-incomes")))

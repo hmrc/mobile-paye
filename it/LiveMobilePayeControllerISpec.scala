@@ -101,8 +101,11 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
       response.status shouldBe 410
 
       taxCodeIncomeNotCalled(nino)
+      employmentsNotCalled(nino)
+      pensionsNotCalled(nino)
       nonTaxCodeIncomeNotCalled(nino)
       taxAccountSummaryNotCalled(nino)
+      taxCalcNotCalled(nino, currentTaxYear)
     }
 
     "return 423 when person is locked in CID" in {
@@ -113,8 +116,11 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
       response.status shouldBe 423
 
       taxCodeIncomeNotCalled(nino)
+      employmentsNotCalled(nino)
+      pensionsNotCalled(nino)
       nonTaxCodeIncomeNotCalled(nino)
       taxAccountSummaryNotCalled(nino)
+      taxCalcNotCalled(nino, currentTaxYear)
     }
   }
 
@@ -284,6 +290,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
       taxCodeIncomeNotCalled(nino)
       nonTaxCodeIncomeNotCalled(nino)
       taxAccountSummaryNotCalled(nino)
+      taxCalcNotCalled(nino, currentTaxYear)
     }
 
     "return 423 when person data locked in CID" in {
@@ -294,8 +301,11 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
       response.status shouldBe 423
 
       taxCodeIncomeNotCalled(nino)
+      employmentsNotCalled(nino)
+      pensionsNotCalled(nino)
       nonTaxCodeIncomeNotCalled(nino)
       taxAccountSummaryNotCalled(nino)
+      taxCalcNotCalled(nino, currentTaxYear)
     }
   }
 
@@ -334,7 +344,10 @@ class LiveMobilePayeControllerShutteredISpec extends BaseISpec {
 
       taxCodeIncomeNotCalled(nino)
       nonTaxCodeIncomeNotCalled(nino)
+      employmentsNotCalled(nino)
+      pensionsNotCalled(nino)
       taxAccountSummaryNotCalled(nino)
+      taxCalcNotCalled(nino, currentTaxYear)
     }
   }
 }
