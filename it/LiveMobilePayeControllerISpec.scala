@@ -267,6 +267,8 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+      stubForPensions(nino, pensionIncomeSource)
+      stubForEmployments(nino, employmentIncomeSource)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxCalcWithInstantDate(nino, currentTaxYear, time)
 
@@ -314,6 +316,8 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
     personalDetailsAreFound(nino, person)
     nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
     taxAccountSummaryIsFound(nino, taxAccountSummary)
+    stubForPensions(nino, pensionIncomeSource)
+    stubForEmployments(nino, employmentIncomeSource)
     taxCalcNoResponse(nino, currentTaxYear)
 
     val response = await(requestWithCurrentYearAsCurrent.get())
@@ -321,7 +325,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
     val response2 = await(requestWithCurrentYearAsInt.get())
     response2.status shouldBe 200
 
-    response.body   shouldBe response2.body
+    response.body shouldBe response2.body
   }
 }
 
