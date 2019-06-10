@@ -1,4 +1,5 @@
 import java.time.LocalDate
+
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.{WSRequest, WSResponse}
 import stubs.AuthStub._
@@ -7,6 +8,7 @@ import uk.gov.hmrc.mobilepaye.domain.{MobilePayeResponse, P800Repayment, Shutter
 import uk.gov.hmrc.mobilepaye.domain.tai._
 import utils.BaseISpec
 import stubs.TaxCalcStub._
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status.{Overpaid, Underpaid}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus._
@@ -16,19 +18,19 @@ import scala.util.Random
 class LiveMobilePayeControllerISpec extends BaseISpec {
   lazy val requestWithCurrentYearAsInt:     WSRequest = wsUrl(s"/nino/$nino/tax-year/$currentTaxYear/summary?journeyId=12345").addHttpHeaders(acceptJsonHeader)
   lazy val requestWithCurrentYearAsCurrent: WSRequest = wsUrl(s"/nino/$nino/tax-year/current/summary?journeyId=12345").addHttpHeaders(acceptJsonHeader)
+  implicit def ninoToString(nino: Nino): String = nino.toString()
 
   override def shuttered: Boolean   = false
 
   s"GET /nino/$nino/tax-year/$currentTaxYear/summary" should {
-
     "return OK and a full valid MobilePayeResponse json" in {
-      grantAccess(nino.toString)
-      personalDetailsAreFound(nino.toString, person)
-      taxCodeIncomesAreFound(nino.toString, taxCodeIncomes)
-      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncome)
-      employmentsAreFound(nino.toString(), taiEmployments)
-      taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
-      taxCalcNoResponse(nino.toString, currentTaxYear)
+      grantAccess(nino)
+      personalDetailsAreFound(nino, person)
+      stubForPensions(nino, pensionIncomeSource)
+      stubForEmployments(nino, employmentIncomeSource)
+      nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+      taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxCalcNoResponse(nino, currentTaxYear)
 
       val response = await(requestWithCurrentYearAsInt.get())
       response.status shouldBe 200
@@ -36,158 +38,162 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
     }
 
     "return OK and a valid MobilePayeResponse json without untaxed income but other income" in {
-      grantAccess(nino.toString)
-      personalDetailsAreFound(nino.toString, person)
-      taxCodeIncomesAreFound(nino.toString, taxCodeIncomes)
-      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncome)
-      employmentsAreFound(nino.toString(), taiEmployments)
-      taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
-      taxCalcNoResponse(nino.toString, currentTaxYear)
+      grantAccess(nino)
+      stubForPensions(nino, pensionIncomeSource)
+      stubForEmployments(nino, employmentIncomeSource)
+      personalDetailsAreFound(nino, person)
+      nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+      taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxCalcNoResponse(nino, currentTaxYear)
 
       val response = await(requestWithCurrentYearAsInt.get())
       response.status shouldBe 200
-      response.body   shouldBe Json.toJson(fullMobilePayeResponse.copy(otherIncomes = Some(Seq(otherIncome)))).toString()
+      Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse.copy(otherIncomes = Some(Seq(otherIncome)))
     }
 
     "return OK and a valid MobilePayeResponse json without employments" in {
-      grantAccess(nino.toString)
-      personalDetailsAreFound(nino.toString, person)
-      taxCodeIncomesAreFound(nino.toString, taxCodeIncomes.filter(_.componentType == PensionIncome))
-      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncome)
-      employmentsAreFound(nino.toString(), taiEmployments)
-      taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
-      taxCalcNoResponse(nino.toString, currentTaxYear)
+      grantAccess(nino)
+      personalDetailsAreFound(nino, person)
+      stubForPensions(nino, pensionIncomeSource)
+      stubForEmployments(nino, Seq.empty)
+      nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+      taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxCalcNoResponse(nino, currentTaxYear)
 
       val response = await(requestWithCurrentYearAsInt.get())
       response.status shouldBe 200
-      response.body   shouldBe Json.toJson(fullMobilePayeResponse.copy(employments = None)).toString()
+      Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse.copy(employments = None)
     }
 
     "return OK and a valid MobilePayeResponse json without pensions" in {
-      grantAccess(nino.toString)
-      personalDetailsAreFound(nino.toString, person)
-      taxCodeIncomesAreFound(nino.toString, taxCodeIncomes.filter(_.componentType == EmploymentIncome))
-      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncome)
-      employmentsAreFound(nino.toString(), taiEmployments)
-      taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
-      taxCalcNoResponse(nino.toString, currentTaxYear)
+      grantAccess(nino)
+      personalDetailsAreFound(nino, person)
+      stubForPensions(nino, Seq.empty)
+      stubForEmployments(nino, employmentIncomeSource)
+      nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+      taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxCalcNoResponse(nino, currentTaxYear)
 
       val response = await(requestWithCurrentYearAsInt.get())
       response.status shouldBe 200
-      response.body   shouldBe Json.toJson(fullMobilePayeResponse.copy(pensions = None)).toString()
+      Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse.copy(pensions = None)
     }
 
     "return OK and a valid MobilePayeResponse json without otherIncomes" in {
-      grantAccess(nino.toString)
-      personalDetailsAreFound(nino.toString, person)
-      taxCodeIncomesAreFound(nino.toString, taxCodeIncomes)
-      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncome.copy(otherNonTaxCodeIncomes = Nil))
-      employmentsAreFound(nino.toString(), taiEmployments)
-      taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
-      taxCalcNoResponse(nino.toString, currentTaxYear)
+      grantAccess(nino)
+      personalDetailsAreFound(nino, person)
+      stubForEmployments(nino, employmentIncomeSource)
+      stubForPensions(nino, pensionIncomeSource)
+      nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome.copy(otherNonTaxCodeIncomes = Nil))
+      taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxCalcNoResponse(nino, currentTaxYear)
 
       val response = await(requestWithCurrentYearAsInt.get())
       response.status shouldBe 200
-      response.body   shouldBe Json.toJson(fullMobilePayeResponse.copy(otherIncomes = None)).toString()
+      Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse.copy(otherIncomes = None)
     }
 
     "return GONE when person is deceased" in {
-      grantAccess(nino.toString)
-      personalDetailsAreFound(nino.toString, person.copy(isDeceased = true))
+      grantAccess(nino)
+      personalDetailsAreFound(nino, person.copy(isDeceased = true))
 
       val response = await(requestWithCurrentYearAsInt.get())
       response.status shouldBe 410
 
-      taxCodeIncomeNotCalled(nino.toString)
-      nonTaxCodeIncomeNotCalled(nino.toString)
-      employmentsNotCalled(nino.toString)
-      taxAccountSummaryNotCalled(nino.toString)
+      taxCodeIncomeNotCalled(nino)
+      employmentsNotCalled(nino)
+      pensionsNotCalled(nino)
+      nonTaxCodeIncomeNotCalled(nino)
+      taxAccountSummaryNotCalled(nino)
+      taxCalcNotCalled(nino, currentTaxYear)
     }
 
     "return 423 when person is locked in CID" in {
-      grantAccess(nino.toString)
-      personalLocked(nino.toString)
+      grantAccess(nino)
+      personalLocked(nino)
 
       val response = await(requestWithCurrentYearAsInt.get())
       response.status shouldBe 423
 
-      taxCodeIncomeNotCalled(nino.toString)
-      nonTaxCodeIncomeNotCalled(nino.toString)
-      employmentsNotCalled(nino.toString)
-      taxAccountSummaryNotCalled(nino.toString)
+      taxCodeIncomeNotCalled(nino)
+      employmentsNotCalled(nino)
+      pensionsNotCalled(nino)
+      nonTaxCodeIncomeNotCalled(nino)
+      taxAccountSummaryNotCalled(nino)
+      taxCalcNotCalled(nino, currentTaxYear)
     }
   }
 
   s"GET /nino/$nino/tax-year/current/summary" should {
 
     "return OK and a full valid MobilePayeResponse json" in {
-      grantAccess(nino.toString)
-      personalDetailsAreFound(nino.toString, person)
-      taxCodeIncomesAreFound(nino.toString, taxCodeIncomes)
-      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncome)
-      employmentsAreFound(nino.toString(), taiEmployments)
-      taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
-      taxCalcNoResponse(nino.toString, currentTaxYear)
+      grantAccess(nino)
+      personalDetailsAreFound(nino, person)
+      nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+      taxAccountSummaryIsFound(nino, taxAccountSummary)
+      stubForPensions(nino, pensionIncomeSource)
+      stubForEmployments(nino, employmentIncomeSource)
+      taxCalcNoResponse(nino, currentTaxYear)
 
       val response = await(requestWithCurrentYearAsCurrent.get())
       response.status shouldBe 200
-      response.body   shouldBe Json.toJson(fullMobilePayeResponse).toString()
+      Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse
     }
 
     "return OK and a valid MobilePayeResponse json without untaxed income but other income" in {
-      grantAccess(nino.toString)
-      personalDetailsAreFound(nino.toString, person)
-      taxCodeIncomesAreFound(nino.toString, taxCodeIncomes)
-      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncome)
-      employmentsAreFound(nino.toString(), taiEmployments)
-      taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
-      taxCalcNoResponse(nino.toString, currentTaxYear)
+      grantAccess(nino)
+      personalDetailsAreFound(nino, person)
+      stubForPensions(nino, pensionIncomeSource)
+      stubForEmployments(nino, employmentIncomeSource)
+      nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+      taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxCalcNoResponse(nino, currentTaxYear)
 
       val response = await(requestWithCurrentYearAsCurrent.get())
       response.status shouldBe 200
-      response.body   shouldBe Json.toJson(fullMobilePayeResponse.copy(otherIncomes = Some(Seq(otherIncome)))).toString()
+      Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse.copy(otherIncomes = Some(Seq(otherIncome)))
     }
 
     "return OK and a valid MobilePayeResponse json without employments" in {
-      grantAccess(nino.toString)
-      personalDetailsAreFound(nino.toString, person)
-      taxCodeIncomesAreFound(nino.toString, taxCodeIncomes.filter(_.componentType == PensionIncome))
-      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncome)
-      employmentsAreFound(nino.toString(), taiEmployments)
-      taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
-      taxCalcNoResponse(nino.toString, currentTaxYear)
+      grantAccess(nino)
+      personalDetailsAreFound(nino, person)
+      stubForPensions(nino, pensionIncomeSource)
+      stubForEmployments(nino, Seq.empty)
+      nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+      taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxCalcNoResponse(nino, currentTaxYear)
 
       val response = await(requestWithCurrentYearAsCurrent.get())
       response.status shouldBe 200
-      response.body   shouldBe Json.toJson(fullMobilePayeResponse.copy(employments = None)).toString()
+      Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse.copy(employments = None)
     }
 
     "return OK and a valid MobilePayeResponse json without pensions" in {
-      grantAccess(nino.toString)
-      personalDetailsAreFound(nino.toString, person)
-      taxCodeIncomesAreFound(nino.toString, taxCodeIncomes.filter(_.componentType == EmploymentIncome))
-      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncome)
-      employmentsAreFound(nino.toString(), taiEmployments)
-      taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
-      taxCalcNoResponse(nino.toString, currentTaxYear)
+      grantAccess(nino)
+      personalDetailsAreFound(nino, person)
+      stubForPensions(nino, Seq.empty)
+      stubForEmployments(nino, employmentIncomeSource)
+      nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+      taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxCalcNoResponse(nino, currentTaxYear)
 
       val response = await(requestWithCurrentYearAsCurrent.get())
       response.status shouldBe 200
-      response.body   shouldBe Json.toJson(fullMobilePayeResponse.copy(pensions = None)).toString()
+      Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse.copy(pensions = None)
     }
 
     "return OK and a valid MobilePayeResponse json without otherIncomes" in {
-      grantAccess(nino.toString)
-      personalDetailsAreFound(nino.toString, person)
-      taxCodeIncomesAreFound(nino.toString, taxCodeIncomes)
-      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncome.copy(otherNonTaxCodeIncomes = Nil))
-      employmentsAreFound(nino.toString(), taiEmployments)
-      taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
-      taxCalcNoResponse(nino.toString, currentTaxYear)
+      grantAccess(nino)
+      personalDetailsAreFound(nino, person)
+      stubForPensions(nino, pensionIncomeSource)
+      stubForEmployments(nino, employmentIncomeSource)
+      nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome.copy(otherNonTaxCodeIncomes = Nil))
+      taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxCalcNoResponse(nino, currentTaxYear)
 
       val response = await(requestWithCurrentYearAsCurrent.get())
       response.status shouldBe 200
-      response.body   shouldBe Json.toJson(fullMobilePayeResponse.copy(otherIncomes = None)).toString()
+      Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse.copy(otherIncomes = None)
     }
 
     "return OK with P800Repayments for Overpaid tax and accepted RepaymentStatus" in {
@@ -197,13 +203,13 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
             val amount = Random.nextDouble(): BigDecimal
             val time   = LocalDate.now
 
-            grantAccess(nino.toString)
-            personalDetailsAreFound(nino.toString, person)
-            taxCodeIncomesAreFound(nino.toString, taxCodeIncomes)
-            nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncome)
-            employmentsAreFound(nino.toString(), taiEmployments)
-            taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
-            taxCalcValidResponse(nino.toString, currentTaxYear, amount, Overpaid, repaymentStatus, time)
+            grantAccess(nino)
+            personalDetailsAreFound(nino, person)
+            stubForPensions(nino, pensionIncomeSource)
+            stubForEmployments(nino, employmentIncomeSource)
+            nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+            taxAccountSummaryIsFound(nino, taxAccountSummary)
+            taxCalcValidResponse(nino, currentTaxYear, amount, Overpaid, repaymentStatus, time)
 
             val expectedRepayment: Option[P800Repayment] = repayment(P800Status.Overpaid, repaymentStatus, currentTaxYear, amount, time)
 
@@ -220,13 +226,13 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
             val amount = Random.nextDouble(): BigDecimal
             val time   = LocalDate.now
 
-            grantAccess(nino.toString)
-            personalDetailsAreFound(nino.toString, person)
-            taxCodeIncomesAreFound(nino.toString, taxCodeIncomes)
-            nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncome)
-            employmentsAreFound(nino.toString(), taiEmployments)
-            taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
-            taxCalcValidResponse(nino.toString, currentTaxYear, amount, Underpaid, repaymentStatus, time)
+            grantAccess(nino)
+            personalDetailsAreFound(nino, person)
+            stubForPensions(nino, pensionIncomeSource)
+            stubForEmployments(nino, employmentIncomeSource)
+            nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+            taxAccountSummaryIsFound(nino, taxAccountSummary)
+            taxCalcValidResponse(nino, currentTaxYear, amount, Underpaid, repaymentStatus, time)
 
             val response = await(requestWithCurrentYearAsCurrent.get())
             response.status shouldBe 200
@@ -241,13 +247,13 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
             val amount = Random.nextDouble(): BigDecimal
             val time   = LocalDate.now
 
-            grantAccess(nino.toString)
-            personalDetailsAreFound(nino.toString, person)
-            taxCodeIncomesAreFound(nino.toString, taxCodeIncomes)
-            nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncome)
-            employmentsAreFound(nino.toString(), taiEmployments)
-            taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
-            taxCalcValidResponse(nino.toString, currentTaxYear, amount, Overpaid, repaymentStatus, time)
+            grantAccess(nino)
+            personalDetailsAreFound(nino, person)
+            stubForPensions(nino, pensionIncomeSource)
+            stubForEmployments(nino, employmentIncomeSource)
+            nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+            taxAccountSummaryIsFound(nino, taxAccountSummary)
+            taxCalcValidResponse(nino, currentTaxYear, amount, Overpaid, repaymentStatus, time)
 
             val response = await(requestWithCurrentYearAsCurrent.get())
             response.status shouldBe 200
@@ -258,13 +264,13 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
     "return OK with P800Repayments for some other date format" in {
       val time = LocalDate.now
 
-      grantAccess(nino.toString)
-      personalDetailsAreFound(nino.toString, person)
-      taxCodeIncomesAreFound(nino.toString, taxCodeIncomes)
-      nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncome)
-      employmentsAreFound(nino.toString(), taiEmployments)
-      taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
-      taxCalcWithInstantDate(nino.toString, currentTaxYear, time)
+      grantAccess(nino)
+      personalDetailsAreFound(nino, person)
+      nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+      stubForPensions(nino, pensionIncomeSource)
+      stubForEmployments(nino, employmentIncomeSource)
+      taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxCalcWithInstantDate(nino, currentTaxYear, time)
 
       val response = await(requestWithCurrentYearAsCurrent.get())
       response.status shouldBe 200
@@ -277,58 +283,61 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
     }
 
     "return GONE when person is deceased" in {
-      grantAccess(nino.toString)
-      personalDetailsAreFound(nino.toString, person.copy(isDeceased = true))
+      grantAccess(nino)
+      personalDetailsAreFound(nino, person.copy(isDeceased = true))
 
       val response = await(requestWithCurrentYearAsCurrent.get())
       response.status shouldBe 410
 
-      taxCodeIncomeNotCalled(nino.toString)
-      nonTaxCodeIncomeNotCalled(nino.toString)
-      employmentsNotCalled(nino.toString)
-      taxAccountSummaryNotCalled(nino.toString)
+      taxCodeIncomeNotCalled(nino)
+      nonTaxCodeIncomeNotCalled(nino)
+      taxAccountSummaryNotCalled(nino)
+      taxCalcNotCalled(nino, currentTaxYear)
     }
 
     "return 423 when person data locked in CID" in {
-      grantAccess(nino.toString)
-      personalLocked(nino.toString)
+      grantAccess(nino)
+      personalLocked(nino)
 
       val response = await(requestWithCurrentYearAsCurrent.get())
       response.status shouldBe 423
 
-      taxCodeIncomeNotCalled(nino.toString)
-      nonTaxCodeIncomeNotCalled(nino.toString)
-      employmentsNotCalled(nino.toString)
-      taxAccountSummaryNotCalled(nino.toString)
+      taxCodeIncomeNotCalled(nino)
+      employmentsNotCalled(nino)
+      pensionsNotCalled(nino)
+      nonTaxCodeIncomeNotCalled(nino)
+      taxAccountSummaryNotCalled(nino)
+      taxCalcNotCalled(nino, currentTaxYear)
     }
   }
 
   "return matching payloads when called with the current year as int and as 'current' " in {
-    grantAccess(nino.toString)
-    personalDetailsAreFound(nino.toString, person)
-    taxCodeIncomesAreFound(nino.toString, taxCodeIncomes)
-    nonTaxCodeIncomeIsFound(nino.toString, nonTaxCodeIncome)
-    employmentsAreFound(nino.toString(), taiEmployments)
-    taxAccountSummaryIsFound(nino.toString, taxAccountSummary)
-    taxCalcNoResponse(nino.toString, currentTaxYear)
+    grantAccess(nino)
+    personalDetailsAreFound(nino, person)
+    nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+    taxAccountSummaryIsFound(nino, taxAccountSummary)
+    stubForPensions(nino, pensionIncomeSource)
+    stubForEmployments(nino, employmentIncomeSource)
+    taxCalcNoResponse(nino, currentTaxYear)
 
     val response = await(requestWithCurrentYearAsCurrent.get())
     response.status shouldBe 200
     val response2 = await(requestWithCurrentYearAsInt.get())
     response2.status shouldBe 200
 
-    response.body   shouldBe response2.body
+    response.body shouldBe response2.body
   }
 }
 
 class LiveMobilePayeControllerShutteredISpec extends BaseISpec {
   val request:            WSRequest = wsUrl(s"/nino/$nino/tax-year/$currentTaxYear/summary?journeyId=12345").addHttpHeaders(acceptJsonHeader)
   override def shuttered: Boolean   = true
+  implicit def ninoToString(nino: Nino): String = nino.toString()
 
   s"GET /nino/$nino/tax-year/$currentTaxYear/summary but SHUTTERED" should {
 
     "return SHUTTERED when shuttered" in {
-      grantAccess(nino.toString)
+      grantAccess(nino)
 
       val response: WSResponse = await(request.get())
       response.status shouldBe 521
@@ -337,10 +346,12 @@ class LiveMobilePayeControllerShutteredISpec extends BaseISpec {
       shuttering.title     shouldBe "Shuttered"
       shuttering.message   shouldBe "PAYE is currently not available"
 
-      taxCodeIncomeNotCalled(nino.toString)
-      nonTaxCodeIncomeNotCalled(nino.toString)
-      employmentsNotCalled(nino.toString)
-      taxAccountSummaryNotCalled(nino.toString)
+      taxCodeIncomeNotCalled(nino)
+      nonTaxCodeIncomeNotCalled(nino)
+      employmentsNotCalled(nino)
+      pensionsNotCalled(nino)
+      taxAccountSummaryNotCalled(nino)
+      taxCalcNotCalled(nino, currentTaxYear)
     }
   }
 }

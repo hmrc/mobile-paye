@@ -21,6 +21,7 @@ import com.google.inject.{Inject, Singleton}
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, NotFoundException}
+import uk.gov.hmrc.mobilepaye.domain._
 import uk.gov.hmrc.mobilepaye.domain.tai._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -37,27 +38,9 @@ class TaiConnector @Inject()(http: CoreGet,
     }
   }
 
-  def getTaxCodeIncomes(nino: Nino, taxYear: Int)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Seq[TaxCodeIncome]] = {
-    http.GET[JsValue](url(nino, s"tax-account/$taxYear/income/tax-code-incomes")).map {
-      json => (json \ "data").as[Seq[TaxCodeIncome]]
-    }.recover {
-      case _: NotFoundException => Seq.empty[TaxCodeIncome]
-      case e => throw e
-    }
-  }
-
   def getNonTaxCodeIncome(nino: Nino, taxYear: Int)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[NonTaxCodeIncome] = {
     http.GET[JsValue](url(nino, s"tax-account/$taxYear/income")).map {
       json => (json \ "data" \ "nonTaxCodeIncomes").as[NonTaxCodeIncome]
-    }
-  }
-
-  def getEmployments(nino: Nino, taxYear: Int)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Seq[Employment]] = {
-    http.GET[JsValue](url(nino, s"employments/years/$taxYear")).map {
-      json => (json \ "data" \ "employments").as[Seq[Employment]]
-    }.recover {
-      case _: NotFoundException => Seq.empty[Employment]
-      case e => throw e
     }
   }
 
@@ -67,4 +50,12 @@ class TaiConnector @Inject()(http: CoreGet,
     }
   }
 
+  def getMatchingTaxCodeIncomes(nino: Nino, taxYear: Int, incomeType: String, status: String)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Seq[IncomeSource]] = {
+    http.GET[JsValue](url(nino, s"tax-account/year/$taxYear/income/$incomeType/status/$status")).map {
+      json => (json \ "data").as[Seq[IncomeSource]]
+    }.recover {
+      case _: NotFoundException => Seq.empty[IncomeSource]
+      case e => throw e
+    }
+  }
 }

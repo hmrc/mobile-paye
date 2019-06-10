@@ -1,11 +1,13 @@
 package stubs
 
 import java.time.LocalDate
-import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, stubFor, urlEqualTo}
+
+import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.libs.json.Writes
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.{P800Status, P800Summary, RepaymentStatus}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus._
+import uk.gov.hmrc.time.TaxYear
 
 object TaxCalcStub {
   def taxCalcNoResponse(nino: String, taxYear: Int): StubMapping =
@@ -61,4 +63,8 @@ object TaxCalcStub {
         )
     )
   }
+
+  def taxCalcNotCalled(nino: String, taxYear: Int): Unit =
+    verify(0, getRequestedFor(urlEqualTo(s"/taxcalc/$nino/taxSummary/${taxYear - 1}")))
+
 }

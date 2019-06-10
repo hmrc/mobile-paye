@@ -18,6 +18,7 @@ package uk.gov.hmrc.mobilepaye.connectors
 
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http._
+import uk.gov.hmrc.mobilepaye.domain.tai.{EmploymentIncome, Live, PensionIncome}
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -29,9 +30,9 @@ class TaiConnectorSpec extends BaseSpec {
   val connector: TaiConnector = new TaiConnector(mockCoreGet, serviceUrl)
 
   def mockTaiGet[T](url: String, f: Future[T]) = {
-    (mockCoreGet.GET(_: String)
-    (_: HttpReads[T], _: HeaderCarrier, _: ExecutionContext)).expects(
-      s"$serviceUrl/tai/${nino.value}/$url", *, *, *).returning(f)
+    (mockCoreGet.GET(_: String)(_: HttpReads[T], _: HeaderCarrier, _: ExecutionContext))
+      .expects(s"$serviceUrl/tai/${nino.value}/$url", *, *, *)
+      .returning(f)
   }
 
   "Person - GET /tai/:nino/person" should {
@@ -71,54 +72,6 @@ class TaiConnectorSpec extends BaseSpec {
 
       intercept[InternalServerException] {
         await(connector.getPerson(nino))
-      }
-    }
-  }
-
-  "Tax Code Incomes - GET /tai/:nino/tax-account/:year/income/tax-code-incomes" should {
-    "return a valid Seq[TaxCodeIncome] when receiving a valid 200 response for an authorised user" in {
-      val taiTaxCodeIncomesJson: JsValue =
-        Json.parse(
-          s"""
-             |{
-             |  "data": ${Json.toJson(taxCodeIncomes)}
-             |}
-          """.stripMargin)
-
-      mockTaiGet(s"tax-account/$currentTaxYear/income/tax-code-incomes", Future.successful(taiTaxCodeIncomesJson))
-
-      val result = await(connector.getTaxCodeIncomes(nino, currentTaxYear))
-      result shouldBe taxCodeIncomes
-    }
-
-    "return an empty Seq[TaxCodeIncome] when a NotFoundException is thrown for an authorised user" in {
-      mockTaiGet(s"tax-account/$currentTaxYear/income/tax-code-incomes", Future.failed(new NotFoundException("Not Found")))
-
-      val result = await(connector.getTaxCodeIncomes(nino, currentTaxYear))
-      result shouldBe emptyTaxCodeIncomes
-    }
-
-    "throw UnauthorisedException for valid nino but unauthorized user" in {
-      mockTaiGet(s"tax-account/$currentTaxYear/income/tax-code-incomes", Future.failed(new UnauthorizedException("Unauthorized")))
-
-      intercept[UnauthorizedException] {
-        await(connector.getTaxCodeIncomes(nino, currentTaxYear))
-      }
-    }
-
-    "throw ForbiddenException for valid nino for authorised user but for a different nino" in {
-      mockTaiGet(s"tax-account/$currentTaxYear/income/tax-code-incomes", Future.failed(new ForbiddenException("Forbidden")))
-
-      intercept[ForbiddenException] {
-        await(connector.getTaxCodeIncomes(nino, currentTaxYear))
-      }
-    }
-
-    "throw InternalServerErrorException for valid nino for authorised user when receiving a 500 response from tai" in {
-      mockTaiGet(s"tax-account/$currentTaxYear/income/tax-code-incomes", Future.failed(new InternalServerException("Internal Server Error")))
-
-      intercept[InternalServerException] {
-        await(connector.getTaxCodeIncomes(nino, currentTaxYear))
       }
     }
   }
@@ -166,52 +119,78 @@ class TaiConnectorSpec extends BaseSpec {
     }
   }
 
-  "Employments - GET /tai/:nino/employments/years/:year" should {
-    "return a valid Seq[Employment] when receiving a valid 200 response for an authorised user" in {
+  "Matching Tax Code Employments - GET /tai/tax-account/year/:taxYear/income/:incomeType/status/:status" should {
+    "return a valid Seq[IncomeSource] when receiving a valid 200 response for an authorised user for Employment" in {
       val taiEmploymentsJson: JsValue =
         Json.parse(
           s"""
              |{
-             |  "data": {
-             |    "employments": ${Json.toJson(taiEmployments)}
+             |  "data": [{
+             |    "taxCodeIncome": ${Json.toJson(taxCodeIncome)},
+             |    "employment": ${Json.toJson(taiEmployment)}
+             |  },
+             |  {
+             |    "taxCodeIncome": ${Json.toJson(taxCodeIncome2)},
+             |    "employment": ${Json.toJson(taiEmployment2)}
              |  }
+             |   ]
              |}
           """.stripMargin)
 
-      mockTaiGet(s"employments/years/$currentTaxYear", Future.successful(taiEmploymentsJson))
+      mockTaiGet(s"tax-account/year/$currentTaxYear/income/${EmploymentIncome.toString}/status/${Live.toString}", Future.successful(taiEmploymentsJson))
 
-      val result = await(connector.getEmployments(nino, currentTaxYear))
-      result shouldBe taiEmployments
+      val result = await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear, EmploymentIncome.toString, Live.toString))
+      result shouldBe employmentIncomeSource
     }
 
-    "return an empty Seq[Employment] when receiving when a NotFoundException is thrown for an authorised user" in {
-      mockTaiGet(s"employments/years/$currentTaxYear", Future.failed(new NotFoundException("Not Found")))
+    "return a valid Seq[IncomeSource] when receiving a valid 200 response for an authorised user for Pensions" in {
+      val taiJson: JsValue =
+        Json.parse(
+          s"""
+             |{
+             |  "data": [{
+             |    "taxCodeIncome": ${Json.toJson(taxCodeIncome3)},
+             |    "employment": ${Json.toJson(taiEmployment3)}
+             |  }
+             | ]
+             |}
+          """.stripMargin)
 
-      val result = await(connector.getEmployments(nino, currentTaxYear))
-      result shouldBe emptyEmployments
+      mockTaiGet(s"tax-account/year/$currentTaxYear/income/${PensionIncome.toString}/status/${Live.toString}", Future.successful(taiJson))
+
+      val result = await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear, PensionIncome.toString, Live.toString))
+      result shouldBe pensionIncomeSource
+    }
+
+
+    "return an empty Seq[IncomeSource] when receiving when a NotFoundException is thrown for an authorised user" in {
+      mockTaiGet(s"tax-account/year/$currentTaxYear/income/${EmploymentIncome.toString}/status/${Live.toString}", Future.failed(new NotFoundException("Not Found")))
+
+      val result = await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear, EmploymentIncome.toString, Live.toString))
+      result shouldBe Seq.empty
     }
 
     "throw UnauthorisedException for valid nino but unauthorized user" in {
-      mockTaiGet(s"employments/years/$currentTaxYear", Future.failed(new UnauthorizedException("Unauthorized")))
+      mockTaiGet(s"tax-account/year/$currentTaxYear/income/${EmploymentIncome.toString}/status/${Live.toString}", Future.failed(new UnauthorizedException("Unauthorized")))
 
       intercept[UnauthorizedException] {
-        await(connector.getEmployments(nino, currentTaxYear))
+        await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear, EmploymentIncome.toString, Live.toString))
       }
     }
 
     "throw ForbiddenException for valid nino for authorised user but for a different nino" in {
-      mockTaiGet(s"employments/years/$currentTaxYear", Future.failed(new ForbiddenException("Forbidden")))
+      mockTaiGet(s"tax-account/year/$currentTaxYear/income/${EmploymentIncome.toString}/status/${Live.toString}", Future.failed(new ForbiddenException("Forbidden")))
 
       intercept[ForbiddenException] {
-        await(connector.getEmployments(nino, currentTaxYear))
+        await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear, EmploymentIncome.toString, Live.toString))
       }
     }
 
     "throw InternalServerErrorException for valid nino for authorised user when receiving a 500 response from tai" in {
-      mockTaiGet(s"employments/years/$currentTaxYear", Future.failed(new InternalServerException("Internal Server Error")))
+      mockTaiGet(s"tax-account/year/$currentTaxYear/income/${EmploymentIncome.toString}/status/${Live.toString}", Future.failed(new InternalServerException("Internal Server Error")))
 
       intercept[InternalServerException] {
-        await(connector.getEmployments(nino, currentTaxYear))
+        await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear, EmploymentIncome.toString, Live.toString))
       }
     }
   }
