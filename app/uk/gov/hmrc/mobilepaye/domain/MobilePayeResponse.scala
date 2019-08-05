@@ -19,23 +19,26 @@ package uk.gov.hmrc.mobilepaye.domain
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.time.TaxYear
 
-case class MobilePayeResponse(taxYear:                   Option[Int],
-                              employments:               Option[Seq[PayeIncome]],
-                              pensions:                  Option[Seq[PayeIncome]],
-                              repayment:                 Option[P800Repayment],
-                              otherIncomes:              Option[Seq[OtherIncome]],
-                              taxFreeAmount:             Option[BigDecimal],
-                              taxFreeAmountLink:         Option[String] = Some("/check-income-tax/tax-free-allowance"),
-                              estimatedTaxAmount:        Option[BigDecimal],
-                              estimatedTaxAmountLink:    Option[String] = Some("/check-income-tax/paye-income-tax-estimate"),
-                              understandYourTaxCodeLink: Option[String] = Some("/check-income-tax/tax-codes"),
-                              addMissingEmployerLink:    Option[String] = Some("/check-income-tax/add-employment/employment-name"),
-                              addMissingPensionLink:     Option[String] = Some("/check-income-tax/add-pension-provider/name"),
-                              addMissingIncomeLink:      Option[String] = Some("/forms/form/tell-us-about-other-income/guide"))
+case class MobilePayeResponse(
+  taxYear:                   Option[Int],
+  employments:               Option[Seq[PayeIncome]],
+  pensions:                  Option[Seq[PayeIncome]],
+  repayment:                 Option[P800Repayment],
+  otherIncomes:              Option[Seq[OtherIncome]],
+  taxFreeAmount:             Option[BigDecimal],
+  taxFreeAmountLink:         Option[String] = Some("/check-income-tax/tax-free-allowance"),
+  estimatedTaxAmount:        Option[BigDecimal],
+  estimatedTaxAmountLink:    Option[String] = Some("/check-income-tax/paye-income-tax-estimate"),
+  understandYourTaxCodeLink: Option[String] = Some("/check-income-tax/tax-codes"),
+  addMissingEmployerLink:    Option[String] = Some("/check-income-tax/add-employment/employment-name"),
+  addMissingPensionLink:     Option[String] = Some("/check-income-tax/add-pension-provider/name"),
+  addMissingIncomeLink:      Option[String] = Some("/forms/form/tell-us-about-other-income/guide"),
+  previousTaxYearLink:       Option[String])
 
 object MobilePayeResponse {
-  def empty: MobilePayeResponse = {
-    MobilePayeResponse(taxYear  = Option(TaxYear.current.currentYear),
+  def empty: MobilePayeResponse =
+    MobilePayeResponse(
+      taxYear                   = Option(TaxYear.current.currentYear),
       employments               = None,
       pensions                  = None,
       repayment                 = None,
@@ -44,9 +47,9 @@ object MobilePayeResponse {
       taxFreeAmountLink         = None,
       estimatedTaxAmount        = None,
       estimatedTaxAmountLink    = None,
-      understandYourTaxCodeLink = None
+      understandYourTaxCodeLink = None,
+      previousTaxYearLink       = None
     )
-  }
 
   implicit val format: OFormat[MobilePayeResponse] = Json.format[MobilePayeResponse]
 }

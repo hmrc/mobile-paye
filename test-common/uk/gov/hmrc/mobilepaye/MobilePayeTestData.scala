@@ -19,7 +19,7 @@ package uk.gov.hmrc.mobilepaye
 import java.time.LocalDate
 
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.mobilepaye.domain.{IncomeSource, P800Repayment, MobilePayeResponse, OtherIncome, PayeIncome}
+import uk.gov.hmrc.mobilepaye.domain.{IncomeSource, MobilePayeResponse, OtherIncome, P800Repayment, PayeIncome}
 import uk.gov.hmrc.mobilepaye.domain.tai._
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus.{ChequeSent, PaymentPaid}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.{P800Status, P800Summary, RepaymentStatus}
@@ -55,12 +55,11 @@ trait MobilePayeTestData {
   val otherIncome:       OtherIncome       = OtherIncome("STATE PENSION", 250.0, None)
 
   def repayment(p800Status: P800Status, paymentStatus: RepaymentStatus, taxYear: Int, amount: BigDecimal, time: LocalDate): Option[P800Repayment] = {
-    def withPaidDate(): Option[LocalDate] = {
+    def withPaidDate(): Option[LocalDate] =
       paymentStatus match {
         case PaymentPaid | ChequeSent => Option(LocalDate.from(time))
         case _                        => None
       }
-    }
 
     val summary = P800Summary(p800Status, paymentStatus, amount, taxYear, withPaidDate())
 
@@ -70,13 +69,14 @@ trait MobilePayeTestData {
   val otherIncomes: Seq[OtherIncome] = Seq(otherIncome)
 
   val fullMobilePayeResponse: MobilePayeResponse = MobilePayeResponse(
-    taxYear            = Some(TaxYear.current.currentYear),
-    employments        = Some(employments),
-    repayment          = None,
-    pensions           = Some(pensions),
-    otherIncomes       = Some(otherIncomes),
-    taxFreeAmount      = Some(10000),
-    estimatedTaxAmount = Some(250)
+    taxYear             = Some(TaxYear.current.currentYear),
+    employments         = Some(employments),
+    repayment           = None,
+    pensions            = Some(pensions),
+    otherIncomes        = Some(otherIncomes),
+    taxFreeAmount       = Some(10000),
+    estimatedTaxAmount  = Some(250),
+    previousTaxYearLink = Some(s"/check-income-tax/historic-paye/${TaxYear.current.currentYear - 1}")
   )
 
   val employmentsNoLinks: Seq[PayeIncome]  = employments.map(employment => employment.copy(link = None, payrollNumber = None))
