@@ -74,7 +74,8 @@ The Mobile Paye response
   "understandYourTaxCodeLink": "/",
   "addMissingEmployerLink": "/",
   "addMissingPensionLink": "/",
-  "addMissingIncomeLink": "/"
+  "addMissingIncomeLink": "/",
+  "previousTaxYearLink": "/"
 }
 ```
 
@@ -99,7 +100,8 @@ The Mobile Paye response
   "understandYourTaxCodeLink": "/",
   "addMissingEmployerLink": "/",
   "addMissingPensionLink": "/",
-  "addMissingIncomeLink": "/"
+  "addMissingIncomeLink": "/",
+  "previousTaxYearLink": "/"
 }
 ```
 
@@ -124,7 +126,8 @@ The Mobile Paye response
   "understandYourTaxCodeLink": "/",
   "addMissingEmployerLink": "/",
   "addMissingPensionLink": "/",
-  "addMissingIncomeLink": "/"
+  "addMissingIncomeLink": "/",
+  "previousTaxYearLink": "/"
 }
 ```
 
@@ -152,7 +155,8 @@ The Mobile Paye response
   "understandYourTaxCodeLink": "/",
   "addMissingEmployerLink": "/",
   "addMissingPensionLink": "/",
-  "addMissingIncomeLink": "/"
+  "addMissingIncomeLink": "/",
+  "previousTaxYearLink": "/"
 }
 ```
 
@@ -169,7 +173,8 @@ The Mobile Paye response
   "understandYourTaxCodeLink": "/",
   "addMissingEmployerLink": "/",
   "addMissingPensionLink": "/",
-  "addMissingIncomeLink": "/"
+  "addMissingIncomeLink": "/",
+  "previousTaxYearLink": "/"
 }
 ```
 
@@ -181,7 +186,8 @@ The Mobile Paye response
   "taxYear": 2018,
   "addMissingEmployerLink": "/",
   "addMissingPensionLink": "/",
-  "addMissingIncomeLink": "/"
+  "addMissingIncomeLink": "/",
+  "previousTaxYearLink": "/"
 }
 ```
 
