@@ -14,5 +14,6 @@
   "understandYourTaxCodeLink": "/",
   "addMissingEmployerLink": "/",
   "addMissingPensionLink": "/",
-  "addMissingIncomeLink": "/"
+  "addMissingIncomeLink": "/",
+  "previousTaxYearLink": "/"
 }

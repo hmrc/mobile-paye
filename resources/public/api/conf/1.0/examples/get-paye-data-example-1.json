@@ -36,13 +36,12 @@
       "link": "/check-income-tax/income-details/3"
     }
   ],
-  "repayment":
-    {
-      "amount": 854.23,
-      "paymentStatus": "REFUND",
-      "taxYear": 2018,
-      "claimRefundLink": "/tax-you-paid/2018-2019/paid-too-much"
-    },
+  "repayment": {
+    "amount": 854.23,
+    "paymentStatus": "REFUND",
+    "taxYear": 2018,
+    "claimRefundLink": "/tax-you-paid/2018-2019/paid-too-much"
+  },
   "otherIncomes": [
     {
       "name": "NON CODED INCOME",
@@ -61,5 +60,6 @@
   "understandYourTaxCodeLink": "/check-income-tax/tax-codes",
   "addMissingEmployerLink": "/check-income-tax/add-employment/employment-name",
   "addMissingPensionLink": "/check-income-tax/add-pension-provider/name",
-  "addMissingIncomeLink": "/forms/form/tell-us-about-other-income/guide"
+  "addMissingIncomeLink": "/forms/form/tell-us-about-other-income/guide",
+  "previousTaxYearLink": "/check-income-tax/historic-paye/2017"
 }

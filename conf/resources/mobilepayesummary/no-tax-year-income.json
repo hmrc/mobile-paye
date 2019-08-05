@@ -2,5 +2,6 @@
   "taxYear": <TAX_YEAR>,
   "addMissingEmployerLink": "/",
   "addMissingPensionLink": "/",
-  "addMissingIncomeLink": "/"
+  "addMissingIncomeLink": "/",
+  "previousTaxYearLink": "/"
 }
