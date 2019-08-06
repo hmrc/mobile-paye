@@ -33,7 +33,7 @@ case class MobilePayeResponse(
   addMissingEmployerLink:    Option[String] = Some("/check-income-tax/add-employment/employment-name"),
   addMissingPensionLink:     Option[String] = Some("/check-income-tax/add-pension-provider/name"),
   addMissingIncomeLink:      Option[String] = Some("/forms/form/tell-us-about-other-income/guide"),
-  previousTaxYearLink:       Option[String])
+  previousTaxYearLink:       Option[String] = Some(s"/check-income-tax/historic-paye/${TaxYear.current.previous.startYear}"))
 
 object MobilePayeResponse {
   def empty: MobilePayeResponse =
@@ -47,8 +47,7 @@ object MobilePayeResponse {
       taxFreeAmountLink         = None,
       estimatedTaxAmount        = None,
       estimatedTaxAmountLink    = None,
-      understandYourTaxCodeLink = None,
-      previousTaxYearLink       = None
+      understandYourTaxCodeLink = None
     )
 
   implicit val format: OFormat[MobilePayeResponse] = Json.format[MobilePayeResponse]

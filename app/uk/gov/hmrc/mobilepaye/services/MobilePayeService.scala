@@ -96,14 +96,13 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector, taxCalcConnector: 
       val repayment:          Option[P800Repayment] = p800Summary.flatMap(summary => P800Summary.toP800Repayment(summary))
 
       MobilePayeResponse(
-        taxYear             = Some(taxYear),
-        employments         = employmentPayeIncomes,
-        repayment           = repayment,
-        pensions            = pensionPayeIncomes,
-        otherIncomes        = otherNonTaxCodeIncomes,
-        taxFreeAmount       = taxFreeAmount,
-        estimatedTaxAmount  = estimatedTaxAmount,
-        previousTaxYearLink = Some(s"/check-income-tax/historic-paye/${taxYear - 1}")
+        taxYear            = Some(taxYear),
+        employments        = employmentPayeIncomes,
+        repayment          = repayment,
+        pensions           = pensionPayeIncomes,
+        otherIncomes       = otherNonTaxCodeIncomes,
+        taxFreeAmount      = taxFreeAmount,
+        estimatedTaxAmount = estimatedTaxAmount
       )
     }
 
