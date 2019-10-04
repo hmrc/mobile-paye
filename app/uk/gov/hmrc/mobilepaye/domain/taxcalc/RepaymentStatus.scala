@@ -21,34 +21,43 @@ import play.api.libs.json._
 sealed trait RepaymentStatus
 
 object RepaymentStatus {
-  case object Refund            extends RepaymentStatus
+  case object Refund extends RepaymentStatus
   case object PaymentProcessing extends RepaymentStatus
-  case object PaymentPaid       extends RepaymentStatus
-  case object ChequeSent        extends RepaymentStatus
-  case object SaUser            extends RepaymentStatus
-  case object UnableToClaim     extends RepaymentStatus
+  case object PaymentPaid extends RepaymentStatus
+  case object ChequeSent extends RepaymentStatus
+  case object SaUser extends RepaymentStatus
+  case object UnableToClaim extends RepaymentStatus
+  case object PaymentDue extends RepaymentStatus
+  case object PartPaid extends RepaymentStatus
+  case object PaidAll extends RepaymentStatus
+  case object PaymentsDown extends RepaymentStatus
+  case object Unknown extends RepaymentStatus
 
   implicit val format: Format[RepaymentStatus] = new Format[RepaymentStatus] {
-    override def reads(json: JsValue): JsResult[RepaymentStatus] = {
+    override def reads(json: JsValue): JsResult[RepaymentStatus] =
       json.validate[String].map {
-        case "REFUND"             => Refund
-        case "PAYMENT_PROCESSING" => PaymentProcessing
-        case "PAYMENT_PAID"       => PaymentPaid
-        case "CHEQUE_SENT"        => ChequeSent
-        case "SA_USER"            => SaUser
-        case "UNABLE_TO_CLAIM"    => UnableToClaim
+        case "refund"             => Refund
+        case "payment_processing" => PaymentProcessing
+        case "payment_paid"       => PaymentPaid
+        case "cheque_sent"        => ChequeSent
+        case "sa_user"            => SaUser
+        case "unable_to_claim"    => UnableToClaim
+        case "payment_due"        => PaymentDue
+        case "part_paid"          => PartPaid
+        case "paid_all"           => PaidAll
+        case "payments_down"      => PaymentsDown
+        case "unknown"            => Unknown
       }
-    }
 
-    override def writes(o: RepaymentStatus): JsValue = {
+    override def writes(o: RepaymentStatus): JsValue =
       o match {
-        case Refund            => JsString("REFUND")
-        case PaymentProcessing => JsString("PAYMENT_PROCESSING")
-        case PaymentPaid       => JsString("PAYMENT_PAID")
-        case ChequeSent        => JsString("CHEQUE_SENT")
-        case SaUser            => JsString("SA_USER")
-        case UnableToClaim     => JsString("UNABLE_TO_CLAIM")
+        case Refund            => JsString("refund")
+        case PaymentProcessing => JsString("payment_processing")
+        case PaymentPaid       => JsString("payment_paid")
+        case ChequeSent        => JsString("cheque_sent")
+        case SaUser            => JsString("sa_user")
+        case UnableToClaim     => JsString("unable_to_claim")
       }
-    }
   }
+
 }

@@ -17,7 +17,7 @@
 package uk.gov.hmrc.mobilepaye.connectors
 
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Summary
+import uk.gov.hmrc.mobilepaye.domain.taxcalc.TaxYearReconciliation
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -27,17 +27,17 @@ class TaxCalcConnectorSpec extends BaseSpec {
   val serviceUrl:  String           = "tax-calc-url"
   val connector:   TaxCalcConnector = new TaxCalcConnector(mockCoreGet, serviceUrl, withTaxCalc = true)
 
-  def mockTaxCalcGet[T](f: Future[T]) = {
-    (mockCoreGet.GET(_: String)
-    (_: HttpReads[T], _: HeaderCarrier, _: ExecutionContext)).expects(
-      s"$serviceUrl/taxcalc/${nino.value}/taxSummary/${currentTaxYear - 1}", *, *, *).returning(f)
-  }
+  def mockTaxCalcGet[T](f: Future[T]) =
+    (mockCoreGet
+      .GET(_: String)(_: HttpReads[T], _: HeaderCarrier, _: ExecutionContext))
+      .expects(s"$serviceUrl/taxcalc/${nino.value}/reconciliations", *, *, *)
+      .returning(f)
 
-  "getP800Summary" should {
+  "getTaxReconciliations" should {
     "not fail for some Throwable" in {
       mockTaxCalcGet(Future.failed(new Throwable("")))
 
-      val result: Option[P800Summary] = await(connector.getP800Summary(nino, currentTaxYear))
+      val result: Option[List[TaxYearReconciliation]] = await(connector.getTaxReconciliations(nino))
       result shouldBe None
     }
   }

@@ -3,7 +3,7 @@
   "repayment":
     {
       "amount": 1000,
-      "paymentStatus": "CHEQUE_SENT",
+      "paymentStatus": "cheque_sent",
       "datePaid": "2018-01-02",
       "taxYear": 2018
     },

@@ -19,23 +19,20 @@ package uk.gov.hmrc.mobilepaye.connectors
 import javax.inject.{Inject, Named, Singleton}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Summary
+import uk.gov.hmrc.mobilepaye.domain.taxcalc.TaxYearReconciliation
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class TaxCalcConnector @Inject()(
-                                  httpGet: CoreGet,
-                                  @Named("taxcalc") baseUrl: String,
-                                  @Named("with-taxcalc") withTaxCalc: Boolean)(implicit ec: ExecutionContext) {
-  def getP800Summary(nino: Nino, currentTaxYear: Int)(implicit hc: HeaderCarrier): Future[Option[P800Summary]] = {
-    val url = baseUrl + s"/taxcalc/${nino.nino}/taxSummary/${currentTaxYear - 1}"
+class TaxCalcConnector @Inject()(httpGet: CoreGet, @Named("taxcalc") baseUrl: String, @Named("with-taxcalc") withTaxCalc: Boolean)(
+  implicit ec:                            ExecutionContext) {
+  def getTaxReconciliations(nino: Nino)(implicit hc: HeaderCarrier): Future[Option[List[TaxYearReconciliation]]] = {
+    val url = baseUrl + s"/taxcalc/${nino.nino}/reconciliations"
 
-    if(withTaxCalc) {
-      httpGet.GET[Option[P800Summary]](url).recover {
+    if (withTaxCalc) {
+      httpGet.GET[Option[List[TaxYearReconciliation]]](url).recover {
         case _: Throwable => None
       }
-    }
-    else Future.successful(None)
+    } else Future.successful(None)
   }
 }

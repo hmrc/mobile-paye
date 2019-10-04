@@ -17,6 +17,7 @@
 package uk.gov.hmrc.mobilepaye.domain.taxcalc
 
 import java.time.LocalDate
+
 import play.api.libs.json._
 import uk.gov.hmrc.mobilepaye.domain.P800Repayment
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status.Overpaid
@@ -26,45 +27,41 @@ import uk.gov.hmrc.time.TaxYear
 import scala.util.{Failure, Success, Try}
 
 case class P800Summary(
-                        p800_status:   P800Status,
-                        paymentStatus: RepaymentStatus,
-                        amount:        BigDecimal,
-                        taxYear:       Int,
-                        datePaid:      Option[LocalDate]
-                      )
+  _type:    P800Status,
+  status:   RepaymentStatus,
+  amount:   BigDecimal,
+  datePaid: Option[LocalDate]
+)
 
 object P800Summary {
-  def toP800Repayment(p800Summary: P800Summary): Option[P800Repayment] = {
-    def withOverpaidP800(p800Summary: P800Summary): Option[P800Summary] = {
-      p800Summary.p800_status match {
+  def toP800Repayment(p800Summary: P800Summary, taxYear: Int): Option[P800Repayment] = {
+    def withOverpaidP800(p800Summary: P800Summary): Option[P800Summary] =
+      p800Summary._type match {
         case Overpaid => Option(p800Summary)
         case _        => None
       }
-    }
 
-    def withAcceptableRepaymentStatus(p800Summary: P800Summary): Option[P800Summary] = {
-      p800Summary.paymentStatus match {
-          case SaUser        => None
-          case UnableToClaim => None
-          case _             => Option(p800Summary)
-        }
-    }
+    def withAcceptableRepaymentStatus(p800Summary: P800Summary): Option[P800Summary] =
+      p800Summary.status match {
+        case SaUser        => None
+        case UnableToClaim => None
+        case _             => Option(p800Summary)
+      }
 
     def transform(p800Summary: P800Summary): P800Repayment = {
-      def withLink: Option[String] = {
-        p800Summary.paymentStatus match {
-          case Refund => Option(s"/tax-you-paid/${TaxYear.current.currentYear - 1}-${TaxYear.current.currentYear}/paid-too-much")
+      def withLink: Option[String] =
+        p800Summary.status match {
+          case Refund => Option(s"/tax-you-paid/${taxYear - 1}-${TaxYear.current.currentYear}/paid-too-much")
           case _      => None
-        }}
+        }
 
-      P800Repayment(p800Summary.amount, p800Summary.paymentStatus, p800Summary.datePaid, p800Summary.taxYear, withLink)
+      P800Repayment(p800Summary.amount, p800Summary.status, p800Summary.datePaid, taxYear, withLink)
     }
 
-
     for {
-      _      <- withOverpaidP800(p800Summary)
-      _      <- withAcceptableRepaymentStatus(p800Summary)
-      result =  transform(p800Summary)
+      _ <- withOverpaidP800(p800Summary)
+      _ <- withAcceptableRepaymentStatus(p800Summary)
+      result = transform(p800Summary)
     } yield result
   }
 
@@ -75,18 +72,23 @@ object P800Summary {
     implicit val format: Format[LocalDate] = new Format[LocalDate] {
       override def writes(o: LocalDate): JsValue = JsString(o.toString)
 
-      override def reads(json: JsValue): JsResult[LocalDate] = {
-        json.validate[String].flatMap {
-          s =>
-            val date = s.take(10)
-            Try(LocalDate.parse(date)) match {
-              case Success(d)   => JsSuccess(d)
-              case Failure(err) => JsError(err.getMessage)
-            }
+      override def reads(json: JsValue): JsResult[LocalDate] =
+        json.validate[String].flatMap { s =>
+          val date = s.take(10)
+          Try(LocalDate.parse(date)) match {
+            case Success(d)   => JsSuccess(d)
+            case Failure(err) => JsError(err.getMessage)
+          }
         }
-      }
     }
 
     Json.format[P800Summary]
   }
+}
+
+case class TaxYearReconciliation(taxYear: Int, reconciliation: P800Summary)
+
+object TaxYearReconciliation {
+
+  implicit val format: OFormat[TaxYearReconciliation] = Json.format[TaxYearReconciliation]
 }

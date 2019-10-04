@@ -44,7 +44,7 @@ class MobilePayeServiceSpec extends BaseSpec {
     (mockTaiConnector.getTaxAccountSummary(_: Nino, _: Int)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *, *).returning(f)
 
   def mockP800Summary() =
-    (mockTaxCalcConnector.getP800Summary(_: Nino, _: Int)(_: HeaderCarrier)).expects(*, *, *).returning(Future.successful(None))
+    (mockTaxCalcConnector.getTaxReconciliations(_: Nino)(_: HeaderCarrier)).expects(*, *).returning(Future.successful(None))
 
   "getMobilePayeResponse" should {
     "return full MobilePayeResponse when all data is available" in {
