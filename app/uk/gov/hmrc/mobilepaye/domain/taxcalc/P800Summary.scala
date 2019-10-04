@@ -51,7 +51,7 @@ object P800Summary {
     def transform(p800Summary: P800Summary): P800Repayment = {
       def withLink: Option[String] =
         p800Summary.status match {
-          case Refund => Option(s"/tax-you-paid/${taxYear - 1}-${TaxYear.current.currentYear}/paid-too-much")
+          case Refund => Option(s"/tax-you-paid/${taxYear - 1}-${taxYear}/paid-too-much")
           case _      => None
         }
 
