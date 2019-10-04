@@ -324,6 +324,20 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
 
     response.body shouldBe response2.body
   }
+
+  "return OK and a full valid MobilePayeResponse json wben no P800" in {
+    grantAccess(nino)
+    personalDetailsAreFound(nino, person)
+    nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+    taxAccountSummaryIsFound(nino, taxAccountSummary)
+    stubForPensions(nino, pensionIncomeSource)
+    stubForEmployments(nino, employmentIncomeSource)
+    taxCalcWithNoP800(nino, currentTaxYear, LocalDate.now)
+
+    val response = await(requestWithCurrentYearAsCurrent.get())
+    response.status                                  shouldBe 200
+    Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse
+  }
 }
 
 class LiveMobilePayeControllerShutteredISpec extends BaseISpec {
