@@ -61,9 +61,9 @@ trait MobilePayeTestData {
         case _                        => None
       }
 
-    val summary = P800Summary(p800Status, paymentStatus, amount, taxYear, withPaidDate())
+    val summary = P800Summary(p800Status, paymentStatus, amount, withPaidDate())
 
-    P800Summary.toP800Repayment(summary)
+    P800Summary.toP800Repayment(summary, taxYear)
   }
 
   val otherIncomes: Seq[OtherIncome] = Seq(otherIncome)

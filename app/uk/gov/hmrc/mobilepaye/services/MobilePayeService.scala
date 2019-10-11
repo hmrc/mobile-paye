@@ -22,7 +22,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mobilepaye.connectors.{TaiConnector, TaxCalcConnector}
 import uk.gov.hmrc.mobilepaye.domain.tai._
 import uk.gov.hmrc.mobilepaye.domain.IncomeSource
-import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Summary
+import uk.gov.hmrc.mobilepaye.domain.taxcalc.{P800Summary, TaxYearReconciliation}
 import uk.gov.hmrc.mobilepaye.domain.{MobilePayeResponse, OtherIncome, P800Repayment, PayeIncome}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -93,7 +93,7 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector, taxCalcConnector: 
 
       val taxFreeAmount:      Option[BigDecimal]    = Option(taxAccountSummary.taxFreeAmount.setScale(0, RoundingMode.FLOOR))
       val estimatedTaxAmount: Option[BigDecimal]    = Option(taxAccountSummary.totalEstimatedTax.setScale(0, RoundingMode.FLOOR))
-      val repayment:          Option[P800Repayment] = p800Summary.flatMap(summary => P800Summary.toP800Repayment(summary))
+      val repayment:          Option[P800Repayment] = p800Summary.flatMap(summary => P800Summary.toP800Repayment(summary, taxYear))
 
       MobilePayeResponse(
         taxYear            = Some(taxYear),
@@ -111,13 +111,13 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector, taxCalcConnector: 
       taxCodeIncomesPension    <- taiConnector.getMatchingTaxCodeIncomes(nino, taxYear, PensionIncome.toString, Live.toString)
       nonTaxCodeIncomes        <- taiConnector.getNonTaxCodeIncome(nino, taxYear)
       taxAccountSummary        <- taiConnector.getTaxAccountSummary(nino, taxYear)
-      p800Summary              <- taxCalcConnector.getP800Summary(nino, taxYear)
+      reconciliations          <- taxCalcConnector.getTaxReconciliations(nino)
       mobilePayeResponse: MobilePayeResponse = buildMobilePayeResponse(
         taxCodeIncomesEmployment,
         taxCodeIncomesPension,
         nonTaxCodeIncomes,
         taxAccountSummary,
-        p800Summary)
+        getP800Summary(reconciliations, taxYear))
     } yield mobilePayeResponse) recover {
       case ex if knownException(ex) => MobilePayeResponse.empty
       case ex                       => throw ex
@@ -125,5 +125,14 @@ class MobilePayeService @Inject()(taiConnector: TaiConnector, taxCalcConnector: 
   }
 
   def getPerson(nino: Nino)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Person] = taiConnector.getPerson(nino)
+
+  def getP800Summary(reconciliations: Option[List[TaxYearReconciliation]], taxYear: Int): Option[P800Summary] = {
+    val previousYear = taxYear - 1
+    reconciliations match {
+      case None => None
+      case _ => reconciliations.get.find(recon => recon.taxYear == previousYear).map(_.reconciliation)
+
+    }
+  }
 
 }

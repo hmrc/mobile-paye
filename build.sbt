@@ -1,13 +1,12 @@
 import play.sbt.PlayImport.PlayKeys._
 import sbt.Tests.{Group, SubProcess}
-import scoverage.ScoverageKeys
 import uk.gov.hmrc.SbtArtifactory
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 
 val appName: String = "mobile-paye"
 
 lazy val microservice = Project(appName, file("."))
-  .enablePlugins(Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory): _*)
+  .enablePlugins(Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory, ScoverageSbtPlugin): _*)
   .configs(IntegrationTest)
   .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
   .settings(publishingSettings: _*)
@@ -15,10 +14,6 @@ lazy val microservice = Project(appName, file("."))
   .settings(
     majorVersion := 0,
     scalaVersion := "2.11.12",
-    ScoverageKeys.coverageExcludedFiles := "<empty>;com.kenshoo.play.metrics.*;.*definition.*;prod.*;testOnlyDoNotUseInAppConf.*;app.*;.*BuildInfo.*;.*Routes.*",
-    ScoverageKeys.coverageMinimum := 90,
-    ScoverageKeys.coverageFailOnMinimum := true,
-    ScoverageKeys.coverageHighlighting := true,
     playDefaultPort := 8247,
     libraryDependencies ++= AppDependencies(),
     dependencyOverrides ++= overrides,
@@ -46,7 +41,12 @@ lazy val microservice = Project(appName, file("."))
       //"-Ywarn-unused-import", - does not work well with fatal-warnings because of play-generated sources
       //"-Xfatal-warnings",
       "-Xlint"
-    )
+    ),
+    coverageMinimum := 90,
+    coverageFailOnMinimum := true,
+    coverageHighlighting := true,
+    coverageExcludedPackages := "<empty>;com.kenshoo.play.metrics.*;.*definition.*;prod.*;testOnlyDoNotUseInAppConf.*;app.*;.*BuildInfo.*;.*Routes.*;.*javascript.*;.*Reverse.*"
+
   )
 
 def oneForkedJvmPerTest(tests: Seq[TestDefinition]): Seq[Group] =

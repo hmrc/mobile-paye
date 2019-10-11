@@ -3,7 +3,7 @@
   "repayment":
     {
       "amount": 1000,
-      "paymentStatus": "PAYMENT_PROCESSING",
+      "paymentStatus": "payment_processing",
       "taxYear": 2018
     },
   "taxFreeAmount": 12500,

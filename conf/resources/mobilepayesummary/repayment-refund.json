@@ -3,7 +3,7 @@
   "repayment":
     {
       "amount": 854.23,
-      "paymentStatus": "REFUND",
+      "paymentStatus": "refund",
       "taxYear": 2018,
       "claimRefundLink": "/tax-you-paid/2018-2019/paid-too-much"
     },
