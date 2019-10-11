@@ -325,7 +325,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
     response.body shouldBe response2.body
   }
 
-  "return OK and a full valid MobilePayeResponse json wben no P800" in {
+  "return OK and a full valid MobilePayeResponse json when no P800" in {
     grantAccess(nino)
     personalDetailsAreFound(nino, person)
     nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
