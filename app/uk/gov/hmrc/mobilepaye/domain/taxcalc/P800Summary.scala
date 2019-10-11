@@ -50,6 +50,13 @@ object P800Summary {
         case _                   => Option(p800Summary)
       }
 
+    def notOlderThanSixWeeks(p800Summary: P800Summary): Option[P800Summary] = {
+      p800Summary.datePaid match {
+        case None => None
+        case Some(date) => if (date.plusWeeks(6).plusDays(1).isAfter(LocalDate.now())) Option(p800Summary) else None
+      }
+    }
+
     def transform(p800Summary: P800Summary): P800Repayment = {
       def withLink: Option[String] =
         p800Summary.status match {
@@ -63,6 +70,7 @@ object P800Summary {
     for {
       _ <- withOverpaidP800(p800Summary)
       _ <- withAcceptableRepaymentStatus(p800Summary)
+      _ <- notOlderThanSixWeeks(p800Summary)
       result = transform(p800Summary)
     } yield result
   }
