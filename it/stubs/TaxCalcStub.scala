@@ -30,7 +30,7 @@ object TaxCalcStub {
         case PaymentPaid | ChequeSent => Option(time)
         case _                        => None
       }
-    val taxYearReconciliation = TaxYearReconciliation(taxYear, P800Summary(p800Status, paymentStatus, amount, withPaidDate()))
+    val taxYearReconciliation = TaxYearReconciliation(taxYear, P800Summary(p800Status, Some(paymentStatus), Some(amount), withPaidDate()))
 
     stubFor(
       get(urlEqualTo(s"/taxcalc/$nino/reconciliations"))
@@ -52,7 +52,7 @@ object TaxCalcStub {
          |    "_type": "overpaid",
          |    "amount": 1000,
          |    "status": "payment_paid",
-         |    "datePaid": "${localDate}T10:23:51Z"}}]
+         |    "datePaid": "$localDate"}}]
        """.stripMargin
 
     stubFor(

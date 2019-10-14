@@ -61,7 +61,7 @@ trait MobilePayeTestData {
         case _                        => None
       }
 
-    val summary = P800Summary(p800Status, paymentStatus, amount, withPaidDate())
+    val summary = P800Summary(p800Status, Some(paymentStatus), Some(amount), withPaidDate())
 
     P800Summary.toP800Repayment(summary, taxYear)
   }

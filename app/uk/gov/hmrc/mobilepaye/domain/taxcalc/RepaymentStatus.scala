@@ -35,28 +35,34 @@ object RepaymentStatus {
 
   implicit val format: Format[RepaymentStatus] = new Format[RepaymentStatus] {
     override def reads(json: JsValue): JsResult[RepaymentStatus] =
-      json.validate[String].map {
-        case "refund"             => Refund
-        case "payment_processing" => PaymentProcessing
-        case "payment_paid"       => PaymentPaid
-        case "cheque_sent"        => ChequeSent
-        case "sa_user"            => SaUser
-        case "unable_to_claim"    => UnableToClaim
-        case "payment_due"        => PaymentDue
-        case "part_paid"          => PartPaid
-        case "paid_all"           => PaidAll
-        case "payments_down"      => PaymentsDown
-        case "unknown"            => Unknown
+      json.as[String].toLowerCase() match {
+        case "refund"             => JsSuccess(Refund)
+        case "payment_processing" => JsSuccess(PaymentProcessing)
+        case "payment_paid"       => JsSuccess(PaymentPaid)
+        case "cheque_sent"        => JsSuccess(ChequeSent)
+        case "sa_user"            => JsSuccess(SaUser)
+        case "unable_to_claim"    => JsSuccess(UnableToClaim)
+        case "payment_due"        => JsSuccess(PaymentDue)
+        case "part_paid"          => JsSuccess(PartPaid)
+        case "paid_all"           => JsSuccess(PaidAll)
+        case "payments_down"      => JsSuccess(PaymentsDown)
+        case "unknown"            => JsSuccess(Unknown)
+        case _                    => JsError("unknown Repayment Status")
       }
 
     override def writes(o: RepaymentStatus): JsValue =
       o match {
-        case Refund            => JsString("refund")
-        case PaymentProcessing => JsString("payment_processing")
-        case PaymentPaid       => JsString("payment_paid")
-        case ChequeSent        => JsString("cheque_sent")
-        case SaUser            => JsString("sa_user")
-        case UnableToClaim     => JsString("unable_to_claim")
+        case Refund            => JsString("REFUND")
+        case PaymentProcessing => JsString("PAYMENT_PROCESSING")
+        case PaymentPaid       => JsString("PAYMENT_PAID")
+        case ChequeSent        => JsString("CHEQUE_SENT")
+        case SaUser            => JsString("SA_USER")
+        case UnableToClaim     => JsString("UNABLE_TO_CLAIM")
+        case PaymentDue        => JsString("PAYMENT_DUE")
+        case PartPaid          => JsString("PART_PAID")
+        case PaidAll           => JsString("PAID_ALL")
+        case PaymentsDown      => JsString("PAYMENTS_DOWN")
+        case Unknown           => JsString("UNKNOWN")
       }
   }
 
