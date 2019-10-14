@@ -220,7 +220,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
     }
 
     "return OK with no P800Repayments for Underpaid tax" in {
-      List(Refund, PaymentProcessing, PaymentPaid, ChequeSent, SaUser, UnableToClaim)
+      List(PaymentDue, PartPaid, PaidAll, PaymentsDown, Unknown)
         .foreach { repaymentStatus =>
           val amount = Random.nextDouble(): BigDecimal
           val time   = LocalDate.now

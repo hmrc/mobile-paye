@@ -22,19 +22,21 @@ import play.api.libs.json._
 import uk.gov.hmrc.mobilepaye.domain.P800Repayment
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status.Overpaid
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus.{Refund, SaUser, UnableToClaim}
-import uk.gov.hmrc.time.TaxYear
 
 import scala.util.{Failure, Success, Try}
 
 case class P800Summary(
   _type:    P800Status,
-  status:   RepaymentStatus,
-  amount:   BigDecimal,
+  status:   Option[RepaymentStatus],
+  amount:   Option[BigDecimal],
   datePaid: Option[LocalDate]
 )
 
 object P800Summary {
   def toP800Repayment(p800Summary: P800Summary, taxYear: Int): Option[P800Repayment] = {
+
+    val previousTaxYear = taxYear - 1
+
     def withOverpaidP800(p800Summary: P800Summary): Option[P800Summary] =
       p800Summary._type match {
         case Overpaid => Option(p800Summary)
@@ -43,19 +45,19 @@ object P800Summary {
 
     def withAcceptableRepaymentStatus(p800Summary: P800Summary): Option[P800Summary] =
       p800Summary.status match {
-        case SaUser        => None
-        case UnableToClaim => None
-        case _             => Option(p800Summary)
+        case Some(SaUser)        => None
+        case Some(UnableToClaim) => None
+        case _                   => Option(p800Summary)
       }
 
     def transform(p800Summary: P800Summary): P800Repayment = {
       def withLink: Option[String] =
         p800Summary.status match {
-          case Refund => Option(s"/tax-you-paid/${taxYear - 1}-${taxYear}/paid-too-much")
-          case _      => None
+          case Some(Refund) => Option(s"/tax-you-paid/$previousTaxYear-$taxYear/paid-too-much")
+          case _            => None
         }
 
-      P800Repayment(p800Summary.amount, p800Summary.status, p800Summary.datePaid, taxYear, withLink)
+      P800Repayment(p800Summary.amount, p800Summary.status, p800Summary.datePaid, previousTaxYear, withLink)
     }
 
     for {
