@@ -37,7 +37,7 @@ case class MobilePayeConfig @Inject()(configuration: Configuration) extends Mobi
     val configuration2 = configuration
 
     configuration2.underlying.getBoolean(path)
-}
+  }
   private def configBase64String(path: String): String = {
     val encoded = configuration.underlying.getString(path)
     Base64.decode(encoded)
