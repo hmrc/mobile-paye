@@ -42,17 +42,17 @@ object TaxCalcStub {
     )
   }
 
-  def taxCalcWithInstantDate(nino: String, taxYear: Int, localDate: LocalDate): StubMapping = {
+  def taxCalcWithInstantDate(nino: String, taxYear: Int, localDate: LocalDate, yearTwoStatus: String = "payment_paid", yearTwoType: String = "overpaid"): StubMapping = {
     val taxCalcResponse =
       s"""[{"taxYear": ${taxYear - 2},"reconciliation":{
          |    "_type": "underpaid",
          |    "amount": 800,
          |    "status": "part_paid"}},
          |{"taxYear": ${taxYear - 1},"reconciliation":{
-         |    "_type": "overpaid",
+         |    "_type": "$yearTwoType",
          |    "amount": 1000,
-         |    "status": "payment_paid",
-         |    "datePaid": "$localDate"}}]
+         |    "status": "$yearTwoStatus",
+         |    "datePaid": "${localDate}"}}]
        """.stripMargin
 
     stubFor(
