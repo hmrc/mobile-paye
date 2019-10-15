@@ -1,4 +1,4 @@
-import java.time.LocalDate
+import java.time.{LocalDate, Month}
 
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.{WSRequest, WSResponse}
@@ -347,7 +347,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
     taxAccountSummaryIsFound(nino, taxAccountSummary)
     stubForPensions(nino, pensionIncomeSource)
     stubForEmployments(nino, employmentIncomeSource)
-    taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now.minusWeeks(6).minusDays(1))
+    taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.of(2019, Month.SEPTEMBER, 2))
 
     val response = await(requestWithCurrentYearAsCurrent.get())
     response.status                                  shouldBe 200
@@ -361,7 +361,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
     taxAccountSummaryIsFound(nino, taxAccountSummary)
     stubForPensions(nino, pensionIncomeSource)
     stubForEmployments(nino, employmentIncomeSource)
-    taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now.minusWeeks(6))
+    taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.of(2019, Month.SEPTEMBER, 3))
 
     val response = await(requestWithCurrentYearAsCurrent.get())
     response.status                                         shouldBe 200
@@ -369,6 +369,24 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
     response.body[JsValue].as[MobilePayeResponse].repayment.foreach { repayment =>
       repayment.datePaid shouldBe a[Some[_]]
       repayment.datePaid.foreach(l => l shouldBe LocalDate.now.minusWeeks(6))
+    }
+  }
+
+  "return OK and a P800 when datePaid is not present" in {
+    grantAccess(nino)
+    personalDetailsAreFound(nino, person)
+    nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+    taxAccountSummaryIsFound(nino, taxAccountSummary)
+    stubForPensions(nino, pensionIncomeSource)
+    stubForEmployments(nino, employmentIncomeSource)
+    taxCalcWithNoDate(nino, currentTaxYear)
+
+    val response = await(requestWithCurrentYearAsCurrent.get())
+    response.status                                         shouldBe 200
+    response.body[JsValue].as[MobilePayeResponse].repayment shouldBe a[Some[_]]
+    response.body[JsValue].as[MobilePayeResponse].repayment.foreach { repayment =>
+      repayment.amount shouldBe a[Some[_]]
+      repayment.amount.foreach(l => l shouldBe 1000)
     }
   }
 

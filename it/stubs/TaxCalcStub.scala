@@ -65,6 +65,28 @@ object TaxCalcStub {
     )
   }
 
+  def taxCalcWithNoDate(nino: String, taxYear: Int): StubMapping = {
+    val taxCalcResponse =
+      s"""[{"taxYear": ${taxYear - 2},"reconciliation":{
+         |    "_type": "underpaid",
+         |    "amount": 800,
+         |    "status": "part_paid"}},
+         |{"taxYear": ${taxYear - 1},"reconciliation":{
+         |    "_type": "overpaid",
+         |    "amount": 1000,
+         |    "status": "refund"}}]
+       """.stripMargin
+
+    stubFor(
+      get(urlEqualTo(s"/taxcalc/$nino/reconciliations"))
+        .willReturn(
+          aResponse()
+            .withStatus(200)
+            .withBody(taxCalcResponse)
+        )
+    )
+  }
+
   def taxCalcWithNoP800(nino: String, taxYear: Int, localDate: LocalDate): StubMapping = {
     val taxCalcResponse =
       s"""[{"taxYear": ${taxYear - 2},"reconciliation":{
