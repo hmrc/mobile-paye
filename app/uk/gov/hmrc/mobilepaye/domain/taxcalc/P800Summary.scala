@@ -52,7 +52,7 @@ object P800Summary {
 
     def notOlderThanSixWeeks(p800Summary: P800Summary): Option[P800Summary] = {
       p800Summary.datePaid match {
-        case None => None
+        case None => Option(p800Summary)
         case Some(date) => if (date.plusWeeks(6).plusDays(1).isAfter(LocalDate.now())) Option(p800Summary) else None
       }
     }
