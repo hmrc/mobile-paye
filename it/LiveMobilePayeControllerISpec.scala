@@ -347,7 +347,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
     taxAccountSummaryIsFound(nino, taxAccountSummary)
     stubForPensions(nino, pensionIncomeSource)
     stubForEmployments(nino, employmentIncomeSource)
-    taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.of(2019, Month.SEPTEMBER, 2))
+    taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now.minusWeeks(6).minusDays(1))
 
     val response = await(requestWithCurrentYearAsCurrent.get())
     response.status                                  shouldBe 200
@@ -361,7 +361,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
     taxAccountSummaryIsFound(nino, taxAccountSummary)
     stubForPensions(nino, pensionIncomeSource)
     stubForEmployments(nino, employmentIncomeSource)
-    taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.of(2019, Month.SEPTEMBER, 3))
+    taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now.minusWeeks(6))
 
     val response = await(requestWithCurrentYearAsCurrent.get())
     response.status                                         shouldBe 200
