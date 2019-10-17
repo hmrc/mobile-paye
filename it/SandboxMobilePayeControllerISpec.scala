@@ -18,6 +18,7 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
       response.status                                shouldBe 200
       (response.json \ "taxYear").as[Int]            shouldBe TaxYear.current.currentYear
       (response.json \\ "employments")               should not be empty
+      (response.json \\ "repayment")                 should not be empty
       (response.json \\ "pensions")                  should not be empty
       (response.json \\ "otherIncomes")              should not be empty
       (response.json \ "taxFreeAmount").as[Int]      shouldBe 12500
