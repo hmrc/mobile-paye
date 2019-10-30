@@ -1,7 +1,9 @@
-import java.time.{LocalDate, Month}
+import java.time.LocalDate
 
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.{WSRequest, WSResponse}
+import play.api.test.Injecting
+import play.modules.reactivemongo.ReactiveMongoComponent
 import stubs.AuthStub._
 import stubs.TaiStub._
 import stubs.TaxCalcStub._
@@ -12,9 +14,10 @@ import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus._
 import uk.gov.hmrc.mobilepaye.domain.{MobilePayeResponse, P800Repayment, Shuttering}
 import utils.BaseISpec
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Random
 
-class LiveMobilePayeControllerISpec extends BaseISpec {
+class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
   lazy val requestWithCurrentYearAsInt: WSRequest =
     wsUrl(s"/nino/$nino/tax-year/$currentTaxYear/summary?journeyId=12345").addHttpHeaders(acceptJsonHeader)
   lazy val requestWithCurrentYearAsCurrent: WSRequest =
@@ -24,8 +27,13 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
 
   override def shuttered: Boolean = false
 
+  val mongo = inject[ReactiveMongoComponent]
+
+  def dropDb = mongo.mongoConnector.db.apply().drop()
+
   s"GET /nino/$nino/tax-year/$currentTaxYear/summary" should {
     "return OK and a full valid MobilePayeResponse json" in {
+
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
       stubForPensions(nino, pensionIncomeSource)
@@ -37,6 +45,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
       val response = await(requestWithCurrentYearAsInt.get())
       response.status shouldBe 200
       response.body   shouldBe Json.toJson(fullMobilePayeResponse).toString()
+
     }
 
     "return OK and a valid MobilePayeResponse json without untaxed income but other income" in {
@@ -49,8 +58,10 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
       taxCalcNoResponse(nino, currentTaxYear)
 
       val response = await(requestWithCurrentYearAsInt.get())
-      response.status                                  shouldBe 200
-      Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse.copy(otherIncomes = Some(Seq(otherIncome)))
+      response.status shouldBe 200
+      Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse.copy(
+        otherIncomes = Some(Seq(otherIncome))
+      )
     }
 
     "return OK and a valid MobilePayeResponse json without employments" in {
@@ -107,7 +118,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
       pensionsNotCalled(nino)
       nonTaxCodeIncomeNotCalled(nino)
       taxAccountSummaryNotCalled(nino)
-      taxCalcNotCalled(nino, currentTaxYear)
+      taxCalcCalled(nino, currentTaxYear)
     }
 
     "return 423 when person is locked in CID" in {
@@ -122,7 +133,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
       pensionsNotCalled(nino)
       nonTaxCodeIncomeNotCalled(nino)
       taxAccountSummaryNotCalled(nino)
-      taxCalcNotCalled(nino, currentTaxYear)
+      taxCalcCalled(nino, currentTaxYear)
     }
   }
 
@@ -152,8 +163,10 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
       taxCalcNoResponse(nino, currentTaxYear)
 
       val response = await(requestWithCurrentYearAsCurrent.get())
-      response.status                                  shouldBe 200
-      Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse.copy(otherIncomes = Some(Seq(otherIncome)))
+      response.status shouldBe 200
+      Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse.copy(
+        otherIncomes = Some(Seq(otherIncome))
+      )
     }
 
     "return OK and a valid MobilePayeResponse json without employments" in {
@@ -199,6 +212,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
     }
 
     "return OK with P800Repayments for Overpaid tax and accepted RepaymentStatus" in {
+      dropDb
       List(Refund, PaymentProcessing, PaymentPaid, ChequeSent)
         .foreach { repaymentStatus =>
           val amount = Random.nextDouble(): BigDecimal
@@ -212,11 +226,14 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
           taxAccountSummaryIsFound(nino, taxAccountSummary)
           taxCalcValidResponse(nino, currentTaxYear - 1, amount, Overpaid, repaymentStatus, time)
 
-          val expectedRepayment: Option[P800Repayment] = repayment(P800Status.Overpaid, repaymentStatus, currentTaxYear, amount, time)
+          val expectedRepayment: Option[P800Repayment] =
+            repayment(P800Status.Overpaid, repaymentStatus, currentTaxYear, amount, time)
 
           val response = await(requestWithCurrentYearAsCurrent.get())
-          response.status                               shouldBe 200
-          response.body[JsValue].as[MobilePayeResponse] shouldBe fullMobilePayeResponse.copy(repayment = expectedRepayment)
+          response.status shouldBe 200
+          response.body[JsValue].as[MobilePayeResponse] shouldBe fullMobilePayeResponse.copy(
+            repayment = expectedRepayment
+          )
         }
     }
 
@@ -261,6 +278,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
     }
 
     "return OK with P800Repayments for some other date format" in {
+      dropDb
       val time = LocalDate.now
 
       grantAccess(nino)
@@ -290,7 +308,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
       taxCodeIncomeNotCalled(nino)
       nonTaxCodeIncomeNotCalled(nino)
       taxAccountSummaryNotCalled(nino)
-      taxCalcNotCalled(nino, currentTaxYear)
+      taxCalcCalled(nino, currentTaxYear)
     }
 
     "return 423 when person data locked in CID" in {
@@ -305,7 +323,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
       pensionsNotCalled(nino)
       nonTaxCodeIncomeNotCalled(nino)
       taxAccountSummaryNotCalled(nino)
-      taxCalcNotCalled(nino, currentTaxYear)
+      taxCalcCalled(nino, currentTaxYear)
     }
   }
 
@@ -355,6 +373,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
   }
 
   "return OK and a P800 when datePaid is less than 6 weeks ago" in {
+    dropDb
     grantAccess(nino)
     personalDetailsAreFound(nino, person)
     nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
@@ -373,6 +392,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
   }
 
   "return OK and a P800 when datePaid is not present" in {
+    dropDb
     grantAccess(nino)
     personalDetailsAreFound(nino, person)
     nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
@@ -433,6 +453,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
   }
 
   "return OK and a P800 with link when status is refund" in {
+    dropDb
     grantAccess(nino)
     personalDetailsAreFound(nino, person)
     nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
@@ -446,14 +467,66 @@ class LiveMobilePayeControllerISpec extends BaseISpec {
     response.body[JsValue].as[MobilePayeResponse].repayment shouldBe a[Some[_]]
     response.body[JsValue].as[MobilePayeResponse].repayment.foreach { repayment =>
       repayment.claimRefundLink shouldBe a[Some[_]]
-      repayment.claimRefundLink.foreach(l => l shouldBe s"/tax-you-paid/${LocalDate.now.getYear - 1}-${LocalDate.now.getYear}/paid-too-much")
+      repayment.claimRefundLink
+        .foreach(l => l shouldBe s"/tax-you-paid/${LocalDate.now.getYear - 1}-${LocalDate.now.getYear}/paid-too-much")
     }
   }
+
+  "Do not call taxcalc for P800 repayments if no repayment was found on a call less than 1 day ago" in {
+    dropDb
+    grantAccess(nino)
+    personalDetailsAreFound(nino, person)
+    nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+    taxAccountSummaryIsFound(nino, taxAccountSummary)
+    stubForPensions(nino, pensionIncomeSource)
+    stubForEmployments(nino, employmentIncomeSource)
+    taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoType = "underpaid")
+
+    val response = await(requestWithCurrentYearAsCurrent.get())
+    response.status                                  shouldBe 200
+    Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse
+
+    val response2 = await(requestWithCurrentYearAsCurrent.get())
+    response2.status                                  shouldBe 200
+    Json.parse(response2.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse
+
+    taxCalcCalled(nino, currentTaxYear, 1)
+  }
+
+  "Call taxcalc for P800 repayments if a repayment was found on a call less than 1 day ago" in {
+    dropDb
+    grantAccess(nino)
+    personalDetailsAreFound(nino, person)
+    nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+    taxAccountSummaryIsFound(nino, taxAccountSummary)
+    stubForPensions(nino, pensionIncomeSource)
+    stubForEmployments(nino, employmentIncomeSource)
+    taxCalcWithNoDate(nino, currentTaxYear)
+
+    val response = await(requestWithCurrentYearAsCurrent.get())
+    response.status                                         shouldBe 200
+    response.body[JsValue].as[MobilePayeResponse].repayment shouldBe a[Some[_]]
+    response.body[JsValue].as[MobilePayeResponse].repayment.foreach { repayment =>
+      repayment.amount shouldBe a[Some[_]]
+      repayment.amount.foreach(l => l shouldBe 1000)
+    }
+
+    val response2 = await(requestWithCurrentYearAsCurrent.get())
+    response2.status                                         shouldBe 200
+    response2.body[JsValue].as[MobilePayeResponse].repayment shouldBe a[Some[_]]
+    response2.body[JsValue].as[MobilePayeResponse].repayment.foreach { repayment =>
+      repayment.amount shouldBe a[Some[_]]
+      repayment.amount.foreach(l => l shouldBe 1000)
+    }
+    taxCalcCalled(nino, currentTaxYear, 2)
+  }
+
 }
 
 class LiveMobilePayeControllerShutteredISpec extends BaseISpec {
-  val request:            WSRequest = wsUrl(s"/nino/$nino/tax-year/$currentTaxYear/summary?journeyId=12345").addHttpHeaders(acceptJsonHeader)
-  override def shuttered: Boolean   = true
+  val request: WSRequest =
+    wsUrl(s"/nino/$nino/tax-year/$currentTaxYear/summary?journeyId=12345").addHttpHeaders(acceptJsonHeader)
+  override def shuttered: Boolean = true
   implicit def ninoToString(nino: Nino): String = nino.toString()
 
   s"GET /nino/$nino/tax-year/$currentTaxYear/summary but SHUTTERED" should {
@@ -473,7 +546,7 @@ class LiveMobilePayeControllerShutteredISpec extends BaseISpec {
       employmentsNotCalled(nino)
       pensionsNotCalled(nino)
       taxAccountSummaryNotCalled(nino)
-      taxCalcNotCalled(nino, currentTaxYear)
+      taxCalcCalled(nino, currentTaxYear)
     }
   }
 }
