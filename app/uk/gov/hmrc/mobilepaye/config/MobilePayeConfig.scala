@@ -25,7 +25,10 @@ trait MobilePayeControllerConfig {
   def shuttering: Shuttering
 }
 
-case class MobilePayeConfig @Inject()(configuration: Configuration) extends MobilePayeControllerConfig {
+case class MobilePayeConfig @Inject() (configuration: Configuration) extends MobilePayeControllerConfig {
+
+  val mongoTtl: Int = configuration.get[Int]("mongodb.ttlSecond")
+
   override val shuttering: Shuttering = Shuttering(
     shuttered = configBoolean("mobilePaye.shuttering.shuttered"),
     title     = configBase64String("mobilePaye.shuttering.title"),
@@ -49,4 +52,3 @@ object Base64 {
 
   def decode(encoded: String): String = new String(decoder.decode(encoded), StandardCharsets.UTF_8)
 }
-

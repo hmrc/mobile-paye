@@ -16,35 +16,47 @@
 
 package uk.gov.hmrc.mobilepaye.services
 
+import com.google.inject.Inject
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, InternalServerException, UnauthorizedException}
 import uk.gov.hmrc.mobilepaye.connectors.{TaiConnector, TaxCalcConnector}
 import uk.gov.hmrc.mobilepaye.domain.{IncomeSource, MobilePayeResponse}
 import uk.gov.hmrc.mobilepaye.domain.tai._
+import uk.gov.hmrc.mobilepaye.repository.P800CacheMongo
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class MobilePayeServiceSpec extends BaseSpec {
+class MobilePayeServiceSpec @Inject()(p800CacheMongo: P800CacheMongo) extends BaseSpec {
 
   val mockTaiConnector:     TaiConnector     = mock[TaiConnector]
   val mockTaxCalcConnector: TaxCalcConnector = mock[TaxCalcConnector]
 
-  val service = new MobilePayeService(mockTaiConnector, mockTaxCalcConnector)
+  val service = new MobilePayeService(mockTaiConnector, mockTaxCalcConnector, p800CacheMongo)
 
   def mockMatchingTaxCode(f: Future[Seq[IncomeSource]]) =
-    (mockTaiConnector.getMatchingTaxCodeIncomes(_: Nino, _: Int, _: String, _: String)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(*,*,*,*,*,*)
+    (mockTaiConnector
+      .getMatchingTaxCodeIncomes(_: Nino, _: Int, _: String, _: String)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *, *, *, *, *)
       .returning(f)
 
   def mockNonTaxCodeIncomes(f: Future[NonTaxCodeIncome]) =
-    (mockTaiConnector.getNonTaxCodeIncome(_: Nino, _: Int)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *, *).returning(f)
+    (mockTaiConnector
+      .getNonTaxCodeIncome(_: Nino, _: Int)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *, *, *)
+      .returning(f)
 
   def mockTaxAccountSummary(f: Future[TaxAccountSummary]) =
-    (mockTaiConnector.getTaxAccountSummary(_: Nino, _: Int)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *, *).returning(f)
+    (mockTaiConnector
+      .getTaxAccountSummary(_: Nino, _: Int)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *, *, *)
+      .returning(f)
 
   def mockP800Summary() =
-    (mockTaxCalcConnector.getTaxReconciliations(_: Nino)(_: HeaderCarrier)).expects(*, *).returning(Future.successful(None))
+    (mockTaxCalcConnector
+      .getTaxReconciliations(_: Nino)(_: HeaderCarrier))
+      .expects(*, *)
+      .returning(Future.successful(None))
 
   "getMobilePayeResponse" should {
     "return full MobilePayeResponse when all data is available" in {
@@ -98,7 +110,9 @@ class MobilePayeServiceSpec extends BaseSpec {
     "return MobilePayeResponse with no otherIncomes when OtherIncome data is missing" in {
       mockMatchingTaxCode(Future.successful(employmentIncomeSource))
       mockMatchingTaxCode(Future.successful(pensionIncomeSource))
-      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithoutUntaxedInterest.copy(otherNonTaxCodeIncomes = Nil)))
+      mockNonTaxCodeIncomes(
+        Future.successful(nonTaxCodeIncomeWithoutUntaxedInterest.copy(otherNonTaxCodeIncomes = Nil))
+      )
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockP800Summary()
 
@@ -140,7 +154,9 @@ class MobilePayeServiceSpec extends BaseSpec {
     }
 
     "return an empty MobilePayeResponse when an exception is thrown from NPS that contains 'cannot complete a coding calculation without a primary employment'" in {
-      mockMatchingTaxCode(Future.failed(new Exception("cannot complete a coding calculation without a primary employment")))
+      mockMatchingTaxCode(
+        Future.failed(new Exception("cannot complete a coding calculation without a primary employment"))
+      )
 
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
 
@@ -154,6 +170,7 @@ class MobilePayeServiceSpec extends BaseSpec {
 
       result shouldBe MobilePayeResponse.empty
     }
+
   }
 
 }
