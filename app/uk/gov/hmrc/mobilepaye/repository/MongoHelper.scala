@@ -16,24 +16,10 @@
 
 package uk.gov.hmrc.mobilepaye.repository
 import reactivemongo.api.commands.WriteResult
-import reactivemongo.play.json.JSONSerializationPack.Reader
-import reactivemongo.play.json.commands.JSONFindAndModifyCommand.FindAndModifyResult
-import uk.gov.hmrc.mobilepaye.errors.{MongoDBError, MongoDBNoResults}
+import uk.gov.hmrc.mobilepaye.errors.MongoDBError
 import uk.gov.hmrc.serviceResponse.Response
 
 trait MongoHelper {
-
-  protected def resolveUpdateResult[T](dbResult: FindAndModifyResult)(implicit reader: Reader[T]): Response[T] = {
-    val result = dbResult.result[T]
-    val error  = dbResult.lastError
-
-    (error, result) match {
-      case (_, Some(value)) => Right(value)
-      case (Some(err), _) =>
-        Left(err.err.map(MongoDBError).getOrElse(MongoDBNoResults("No document to update was found.")))
-      case _ => Left(MongoDBError("Unexpected error while updating a document."))
-    }
-  }
 
   protected def handleWriteResult[T](
     writeResult: WriteResult,

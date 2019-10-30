@@ -105,7 +105,7 @@ object TaxCalcStub {
     )
   }
 
-  def taxCalcNotCalled(nino: String, taxYear: Int): Unit =
-    verify(0, getRequestedFor(urlEqualTo(s"/taxcalc/$nino/reconciliations")))
+  def taxCalcCalled(nino: String, taxYear: Int, expectedCalls: Int = 0): Unit =
+    verify(expectedCalls, getRequestedFor(urlEqualTo(s"/taxcalc/$nino/reconciliations")))
 
 }
