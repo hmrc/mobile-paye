@@ -17,6 +17,8 @@ object AppDependencies {
   private val simpleReactiveMongoVersion = "7.20.0-play-26"
   private val embedVersion               = "1.48.0"
   private val embedMongoVersion          = "0.2.2"
+  private val reactiveMongoTestVersion   = "4.15.0-play-26"
+  private val mockitoVersion             = "2.25.0"
 
   val compile: Seq[ModuleID] = Seq(
     ws,
@@ -36,7 +38,9 @@ object AppDependencies {
     def apply(): Seq[ModuleID] =
       new TestDependencies {
         override lazy val test: Seq[ModuleID] = testCommon(scope) ++ Seq(
-          "org.scalamock" %% "scalamock" % scalaMockVersion % scope
+          "org.scalamock" %% "scalamock"          % scalaMockVersion         % scope,
+          "org.mockito"   % "mockito-core"        % mockitoVersion           % scope,
+          "uk.gov.hmrc"   %% "reactivemongo-test" % reactiveMongoTestVersion % scope
         )
       }.test
   }
@@ -48,9 +52,7 @@ object AppDependencies {
         override lazy val scope: String = "it"
 
         override lazy val test: Seq[ModuleID] = testCommon(scope) ++ Seq(
-          "com.github.tomakehurst" % "wiremock"                  % wireMockVersion   % scope,
-          "de.flapdoodle.embed"    % "de.flapdoodle.embed.mongo" % embedVersion      % scope,
-          "com.github.simplyscala" %% "scalatest-embedmongo"     % embedMongoVersion % scope
+          "com.github.tomakehurst" % "wiremock" % wireMockVersion % scope
         )
       }.test
   }
