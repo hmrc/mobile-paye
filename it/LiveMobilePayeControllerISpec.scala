@@ -425,6 +425,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
   }
 
   "return OK and no P800 when status is sa_user" in {
+    dropDb
     grantAccess(nino)
     personalDetailsAreFound(nino, person)
     nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
@@ -439,6 +440,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
   }
 
   "return OK and no P800 when status is unable_to_claim" in {
+    dropDb
     grantAccess(nino)
     personalDetailsAreFound(nino, person)
     nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
@@ -526,7 +528,9 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
 class LiveMobilePayeControllerShutteredISpec extends BaseISpec {
   val request: WSRequest =
     wsUrl(s"/nino/$nino/tax-year/$currentTaxYear/summary?journeyId=12345").addHttpHeaders(acceptJsonHeader)
+
   override def shuttered: Boolean = true
+
   implicit def ninoToString(nino: Nino): String = nino.toString()
 
   s"GET /nino/$nino/tax-year/$currentTaxYear/summary but SHUTTERED" should {
@@ -549,4 +553,5 @@ class LiveMobilePayeControllerShutteredISpec extends BaseISpec {
       taxCalcCalled(nino, currentTaxYear)
     }
   }
+
 }
