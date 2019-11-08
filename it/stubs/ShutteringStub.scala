@@ -1,7 +1,5 @@
 package stubs
 
-import java.util.Base64
-
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import com.github.tomakehurst.wiremock.client.WireMock._
 
@@ -36,8 +34,5 @@ object ShutteringStub {
                          |}
           """.stripMargin)))
   }
-
-  private def base64Encode(s: String): String =
-    Base64.getEncoder.encodeToString(s.getBytes("UTF-8"))
 
 }
