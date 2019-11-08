@@ -37,14 +37,14 @@ class ShutteringConnectorSpec extends BaseSpec {
       mockShutteringGet(Future.successful(new InternalServerException("")))
 
       val result: Shuttering = await(connector.getShutteringStatus("journeyId"))
-      result shouldBe Shuttering(false, "", "")
+      result shouldBe Shuttering.shutteringDisabled
     }
 
     "Assume unshuttered for BadGatewayException response" in {
       mockShutteringGet(Future.successful(new BadGatewayException("")))
 
       val result: Shuttering = await(connector.getShutteringStatus("journeyId"))
-      result shouldBe Shuttering(false, "", "")
+      result shouldBe Shuttering.shutteringDisabled
     }
   }
 }

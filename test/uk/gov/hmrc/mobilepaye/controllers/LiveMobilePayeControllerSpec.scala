@@ -45,8 +45,8 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
   implicit val mockAuthConnector:       AuthConnector       = mock[AuthConnector]
   implicit val mockShutteringConnector: ShutteringConnector = mock[ShutteringConnector]
 
-  private val shuttered    = Shuttering(shuttered = true, "Shuttered", "PAYE is currently not available")
-  private val notShuttered = Shuttering(shuttered = false, "", "")
+  private val shuttered    = Shuttering(shuttered = true, Some("Shuttered"), Some("PAYE is currently not available"))
+  private val notShuttered = Shuttering.shutteringDisabled
 
   def controller =
     new LiveMobilePayeController(

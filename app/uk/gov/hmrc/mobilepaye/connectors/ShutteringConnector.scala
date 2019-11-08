@@ -42,12 +42,12 @@ class ShutteringConnector @Inject() (
     } recover {
       case e: Upstream5xxResponse => {
         Logger.warn(s"Internal Server Error received from mobile-shuttering:\n $e \nAssuming unshuttered.")
-        Shuttering(false, "", "")
+        Shuttering.shutteringDisabled
       }
 
       case e => {
         Logger.warn(s"Call to mobile-shuttering failed:\n $e \nAssuming unshuttered.")
-        Shuttering(false, "", "")
+        Shuttering.shutteringDisabled
       }
     }
 }

@@ -583,8 +583,8 @@ class LiveMobilePayeControllerShutteredISpec extends BaseISpec {
       response.status shouldBe 521
       val shuttering: Shuttering = Json.parse(response.body).as[Shuttering]
       shuttering.shuttered shouldBe true
-      shuttering.title     shouldBe "Shuttered"
-      shuttering.message   shouldBe "PAYE is currently not available"
+      shuttering.title     shouldBe Some("Shuttered")
+      shuttering.message   shouldBe Some("PAYE is currently not available")
 
       taxCodeIncomeNotCalled(nino)
       nonTaxCodeIncomeNotCalled(nino)

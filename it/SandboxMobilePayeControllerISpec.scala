@@ -114,8 +114,8 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
 
       val shuttering = Json.parse(response.body).as[Shuttering]
       shuttering.shuttered shouldBe true
-      shuttering.title     shouldBe "Shuttered"
-      shuttering.message   shouldBe "PAYE is currently shuttered"
+      shuttering.title     shouldBe Some("Shuttered")
+      shuttering.message   shouldBe Some("PAYE is currently shuttered")
     }
   }
 
@@ -255,8 +255,8 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
 
       val shuttering = Json.parse(response.body).as[Shuttering]
       shuttering.shuttered shouldBe true
-      shuttering.title     shouldBe "Shuttered"
-      shuttering.message   shouldBe "PAYE is currently shuttered"
+      shuttering.title     shouldBe Some("Shuttered")
+      shuttering.message   shouldBe Some("PAYE is currently shuttered")
     }
   }
 
