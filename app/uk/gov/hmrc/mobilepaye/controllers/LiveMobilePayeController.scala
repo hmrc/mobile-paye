@@ -25,7 +25,7 @@ import uk.gov.hmrc.api.controllers.HeaderValidator
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, HeaderNames}
-import uk.gov.hmrc.mobilepaye.config.MobilePayeControllerConfig
+import uk.gov.hmrc.mobilepaye.connectors.ShutteringConnector
 import uk.gov.hmrc.mobilepaye.controllers.action.AccessControl
 import uk.gov.hmrc.mobilepaye.domain.{MobilePayeResponse, OtherIncome, PayeIncome, Shuttering}
 import uk.gov.hmrc.mobilepaye.services.MobilePayeService
@@ -40,54 +40,71 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
 trait MobilePayeController extends BackendBaseController with HeaderValidator with ErrorHandling {
-  def getPayeSummary(nino: Nino, journeyId: String, taxYear: Int): Action[AnyContent]
+  def getPayeSummary(
+    nino:      Nino,
+    journeyId: String,
+    taxYear:   Int
+  ): Action[AnyContent]
 }
 
 @Singleton
-class LiveMobilePayeController @Inject()(
+class LiveMobilePayeController @Inject() (
   override val authConnector:                                   AuthConnector,
   @Named("controllers.confidenceLevel") override val confLevel: Int,
   mobilePayeService:                                            MobilePayeService,
   val controllerComponents:                                     ControllerComponents,
   val auditConnector:                                           AuditConnector,
   @Named("appName") override val appName:                       String,
-  config:                                                       MobilePayeControllerConfig
+  shutteringConnector:                                          ShutteringConnector
 )(
-  implicit val executionContext: ExecutionContext
-) extends MobilePayeController
+  implicit val executionContext: ExecutionContext)
+    extends MobilePayeController
     with AccessControl
     with Auditor
     with ControllerChecks {
 
-  override def shuttering: Shuttering             = config.shuttering
   override def parser:     BodyParser[AnyContent] = controllerComponents.parsers.anyContent
   override val app:        String                 = "Live-Paye-Controller"
 
-  override def getPayeSummary(nino: Nino, journeyId: String, taxYear: Int): Action[AnyContent] =
+  override def getPayeSummary(
+    nino:      Nino,
+    journeyId: String,
+    taxYear:   Int
+  ): Action[AnyContent] =
     validateAcceptWithAuth(acceptHeaderValidationRules, Option(nino)).async { implicit request =>
-      implicit val hc: HeaderCarrier = fromHeadersAndSession(request.headers, None).withExtraHeaders(HeaderNames.xSessionId -> journeyId)
-      withShuttering(shuttering) {
-        errorWrapper {
-          mobilePayeService.getPerson(nino).flatMap { person =>
-            if (person.isDeceased) {
-              Future.successful(Gone)
-            } else {
-              mobilePayeService.getMobilePayeResponse(nino, taxYear).map { mpr =>
-                sendAuditEvent(
-                  nino,
-                  mpr,
-                  request.path,
-                  journeyId
-                )
-                Ok(Json.toJson(mpr))
+      implicit val hc: HeaderCarrier =
+        fromHeadersAndSession(request.headers, None).withExtraHeaders(HeaderNames.xSessionId -> journeyId)
+        shutteringConnector.getShutteringStatus(journeyId).flatMap { shuttered =>
+          withShuttering(shuttered) {
+            errorWrapper {
+              mobilePayeService.getPerson(nino).flatMap { person =>
+                if (person.isDeceased) {
+                  Future.successful(Gone)
+                } else {
+                  mobilePayeService.getMobilePayeResponse(nino, taxYear).map { mpr =>
+                    sendAuditEvent(
+                      nino,
+                      mpr,
+                      request.path,
+                      journeyId
+                    )
+                    Ok(Json.toJson(mpr))
+                  }
+                }
               }
             }
           }
-        }
       }
     }
 
-  private def sendAuditEvent(nino: Nino, response: MobilePayeResponse, path: String, journeyId: String)(implicit hc: HeaderCarrier): Unit = {
+  private def sendAuditEvent(
+    nino:      Nino,
+    response:  MobilePayeResponse,
+    path:      String,
+    journeyId: String
+  )(
+    implicit hc: HeaderCarrier
+  ): Unit = {
     def removeLinks(data: Option[Seq[PayeIncome]]): Option[Seq[PayeIncome]] = data match {
       case Some(d) if d.nonEmpty => Some(d.map(_.copy(link = None)))
       case None                  => None
@@ -118,10 +135,12 @@ class LiveMobilePayeController @Inject()(
         "viewPayeSummary",
         tags = hc.toAuditTags("view-paye-summary", path),
         detail = obj(
-          "nino" -> nino.value,
-          "journeyId"   -> journeyId,
-          "data"        -> auditPayload
-        )))
+          "nino"      -> nino.value,
+          "journeyId" -> journeyId,
+          "data"      -> auditPayload
+        )
+      )
+    )
     ()
   }
 }

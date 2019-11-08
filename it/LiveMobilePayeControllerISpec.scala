@@ -7,6 +7,7 @@ import play.modules.reactivemongo.ReactiveMongoComponent
 import stubs.AuthStub._
 import stubs.TaiStub._
 import stubs.TaxCalcStub._
+import stubs.ShutteringStub._
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status.{Overpaid, Underpaid}
@@ -25,15 +26,13 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
 
   implicit def ninoToString(nino: Nino): String = nino.toString()
 
-  override def shuttered: Boolean = false
-
   val mongo = inject[ReactiveMongoComponent]
 
   def dropDb = mongo.mongoConnector.db.apply().drop()
 
   s"GET /nino/$nino/tax-year/$currentTaxYear/summary" should {
     "return OK and a full valid MobilePayeResponse json" in {
-
+      stubForShutteringDisabled
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
       stubForPensions(nino, pensionIncomeSource)
@@ -49,6 +48,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     }
 
     "return OK and a valid MobilePayeResponse json without untaxed income but other income" in {
+      stubForShutteringDisabled
       grantAccess(nino)
       stubForPensions(nino, pensionIncomeSource)
       stubForEmployments(nino, employmentIncomeSource)
@@ -65,6 +65,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     }
 
     "return OK and a valid MobilePayeResponse json without employments" in {
+      stubForShutteringDisabled
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
       stubForPensions(nino, pensionIncomeSource)
@@ -79,6 +80,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     }
 
     "return OK and a valid MobilePayeResponse json without pensions" in {
+      stubForShutteringDisabled
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
       stubForPensions(nino, Seq.empty)
@@ -93,6 +95,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     }
 
     "return OK and a valid MobilePayeResponse json without otherIncomes" in {
+      stubForShutteringDisabled
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
       stubForEmployments(nino, employmentIncomeSource)
@@ -107,6 +110,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     }
 
     "return GONE when person is deceased" in {
+      stubForShutteringDisabled
       grantAccess(nino)
       personalDetailsAreFound(nino, person.copy(isDeceased = true))
 
@@ -122,6 +126,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     }
 
     "return 423 when person is locked in CID" in {
+      stubForShutteringDisabled
       grantAccess(nino)
       personalLocked(nino)
 
@@ -140,6 +145,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
   s"GET /nino/$nino/tax-year/current/summary" should {
 
     "return OK and a full valid MobilePayeResponse json" in {
+      stubForShutteringDisabled
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
@@ -154,6 +160,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     }
 
     "return OK and a valid MobilePayeResponse json without untaxed income but other income" in {
+      stubForShutteringDisabled
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
       stubForPensions(nino, pensionIncomeSource)
@@ -170,6 +177,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     }
 
     "return OK and a valid MobilePayeResponse json without employments" in {
+      stubForShutteringDisabled
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
       stubForPensions(nino, pensionIncomeSource)
@@ -184,6 +192,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     }
 
     "return OK and a valid MobilePayeResponse json without pensions" in {
+      stubForShutteringDisabled
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
       stubForPensions(nino, Seq.empty)
@@ -198,6 +207,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     }
 
     "return OK and a valid MobilePayeResponse json without otherIncomes" in {
+      stubForShutteringDisabled
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
       stubForPensions(nino, pensionIncomeSource)
@@ -212,6 +222,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     }
 
     "return OK with P800Repayments for Overpaid tax and accepted RepaymentStatus" in {
+      stubForShutteringDisabled
       dropDb
       List(Refund, PaymentProcessing, PaymentPaid, ChequeSent)
         .foreach { repaymentStatus =>
@@ -238,6 +249,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     }
 
     "return OK with no P800Repayments for Underpaid tax" in {
+      stubForShutteringDisabled
       List(PaymentDue, PartPaid, PaidAll, PaymentsDown, Unknown)
         .foreach { repaymentStatus =>
           val amount = Random.nextDouble(): BigDecimal
@@ -258,6 +270,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     }
 
     "return OK with no P800Repayments for uncovered RepaymentStatuses" in {
+      stubForShutteringDisabled
       List(SaUser, UnableToClaim)
         .foreach { repaymentStatus =>
           val amount = Random.nextDouble(): BigDecimal
@@ -278,6 +291,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     }
 
     "return OK with P800Repayments for some other date format" in {
+      stubForShutteringDisabled
       dropDb
       val time = LocalDate.now
 
@@ -299,6 +313,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     }
 
     "return GONE when person is deceased" in {
+      stubForShutteringDisabled
       grantAccess(nino)
       personalDetailsAreFound(nino, person.copy(isDeceased = true))
 
@@ -312,6 +327,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     }
 
     "return 423 when person data locked in CID" in {
+      stubForShutteringDisabled
       grantAccess(nino)
       personalLocked(nino)
 
@@ -328,6 +344,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
   }
 
   "return matching payloads when called with the current year as int and as 'current' " in {
+    stubForShutteringDisabled
     grantAccess(nino)
     personalDetailsAreFound(nino, person)
     nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
@@ -345,6 +362,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
   }
 
   "return OK and a full valid MobilePayeResponse json when no P800" in {
+    stubForShutteringDisabled
     grantAccess(nino)
     personalDetailsAreFound(nino, person)
     nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
@@ -359,6 +377,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
   }
 
   "return OK and no P800 when datePaid is more than 6 weeks ago" in {
+    stubForShutteringDisabled
     grantAccess(nino)
     personalDetailsAreFound(nino, person)
     nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
@@ -373,6 +392,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
   }
 
   "return OK and a P800 when datePaid is less than 6 weeks ago" in {
+    stubForShutteringDisabled
     dropDb
     grantAccess(nino)
     personalDetailsAreFound(nino, person)
@@ -392,6 +412,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
   }
 
   "return OK and a P800 when datePaid is not present" in {
+    stubForShutteringDisabled
     dropDb
     grantAccess(nino)
     personalDetailsAreFound(nino, person)
@@ -411,6 +432,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
   }
 
   "return OK and no P800 when type is not overpaid" in {
+    stubForShutteringDisabled
     grantAccess(nino)
     personalDetailsAreFound(nino, person)
     nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
@@ -425,6 +447,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
   }
 
   "return OK and no P800 when status is sa_user" in {
+    stubForShutteringDisabled
     dropDb
     grantAccess(nino)
     personalDetailsAreFound(nino, person)
@@ -440,6 +463,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
   }
 
   "return OK and no P800 when status is unable_to_claim" in {
+    stubForShutteringDisabled
     dropDb
     grantAccess(nino)
     personalDetailsAreFound(nino, person)
@@ -455,6 +479,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
   }
 
   "return OK and a P800 with link when status is refund" in {
+    stubForShutteringDisabled
     dropDb
     grantAccess(nino)
     personalDetailsAreFound(nino, person)
@@ -475,6 +500,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
   }
 
   "Do not call taxcalc for P800 repayments if no repayment was found on a call less than 1 day ago" in {
+    stubForShutteringDisabled
     dropDb
     grantAccess(nino)
     personalDetailsAreFound(nino, person)
@@ -496,6 +522,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
   }
 
   "Call taxcalc for P800 repayments if a repayment was found on a call less than 1 day ago" in {
+    stubForShutteringDisabled
     dropDb
     grantAccess(nino)
     personalDetailsAreFound(nino, person)
@@ -523,19 +550,33 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     taxCalcCalled(nino, currentTaxYear, 2)
   }
 
+  "Assume unshuttered and return OK and a full valid MobilePayeResponse json if error returned from mobile-shuttering service" in {
+    grantAccess(nino)
+    personalDetailsAreFound(nino, person)
+    stubForPensions(nino, pensionIncomeSource)
+    stubForEmployments(nino, employmentIncomeSource)
+    nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+    taxAccountSummaryIsFound(nino, taxAccountSummary)
+    taxCalcNoResponse(nino, currentTaxYear)
+
+    val response = await(requestWithCurrentYearAsInt.get())
+    response.status shouldBe 200
+    response.body   shouldBe Json.toJson(fullMobilePayeResponse).toString()
+
+  }
+
 }
 
 class LiveMobilePayeControllerShutteredISpec extends BaseISpec {
   val request: WSRequest =
     wsUrl(s"/nino/$nino/tax-year/$currentTaxYear/summary?journeyId=12345").addHttpHeaders(acceptJsonHeader)
 
-  override def shuttered: Boolean = true
-
   implicit def ninoToString(nino: Nino): String = nino.toString()
 
   s"GET /nino/$nino/tax-year/$currentTaxYear/summary but SHUTTERED" should {
 
     "return SHUTTERED when shuttered" in {
+      stubForShutteringEnabled
       grantAccess(nino)
 
       val response: WSResponse = await(request.get())
