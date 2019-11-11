@@ -21,34 +21,19 @@ abstract class BaseISpec
     with DefaultAwaitTimeout
     with MobilePayeTestData {
 
-  def shuttered: Boolean
-
   override implicit lazy val app: Application = appBuilder.build()
 
   protected val acceptJsonHeader: (String, String) = "Accept" -> "application/vnd.hmrc.1.0+json"
 
-  def config: Map[String, Any] = {
-
-    val baseConfig = Map[String, Any](
-      "auditing.enabled"            -> false,
-      "microservice.services.auth.port"    -> wireMockPort,
-      "microservice.services.tai.port"     -> wireMockPort,
-      "microservice.services.taxcalc.port" -> wireMockPort,
-      "auditing.consumer.baseUri.port"     -> wireMockPort
+  def config: Map[String, Any] =
+    Map[String, Any](
+      "auditing.enabled"                      -> false,
+      "microservice.services.auth.port"       -> wireMockPort,
+      "microservice.services.tai.port"        -> wireMockPort,
+      "microservice.services.taxcalc.port"    -> wireMockPort,
+      "microservice.services.shuttering.port" -> wireMockPort,
+      "auditing.consumer.baseUri.port"        -> wireMockPort
     )
-
-    if (shuttered) {
-      val conf = baseConfig + ("mobilePaye.shuttering.shuttered" -> true,
-      "mobilePaye.shuttering.title"   -> base64Encode("Shuttered"),
-      "mobilePaye.shuttering.message" -> base64Encode("PAYE is currently not available"))
-      conf
-    } else {
-      val conf = baseConfig + ("mobilePaye.shuttering.shuttered" -> false,
-      "mobilePaye.shuttering.title"   -> base64Encode(""),
-      "mobilePaye.shuttering.message" -> base64Encode(""))
-      conf
-    }
-  }
 
   private def base64Encode(s: String): String =
     Base64.getEncoder.encodeToString(s.getBytes("UTF-8"))

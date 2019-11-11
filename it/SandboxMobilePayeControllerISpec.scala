@@ -8,7 +8,6 @@ import utils.BaseISpec
 class SandboxMobilePayeControllerISpec extends BaseISpec {
 
   private val mobileHeader = "X-MOBILE-USER-ID" -> "208606423740"
-  override def shuttered: Boolean = false
 
   s"GET sandbox/nino/$nino/tax-year/$currentTaxYear/summary" should {
     val request: WSRequest = wsUrl(s"/nino/$nino/tax-year/$currentTaxYear/summary?journeyId=12345").addHttpHeaders(acceptJsonHeader)
@@ -115,8 +114,8 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
 
       val shuttering = Json.parse(response.body).as[Shuttering]
       shuttering.shuttered shouldBe true
-      shuttering.title     shouldBe "Shuttered"
-      shuttering.message   shouldBe "PAYE is currently shuttered"
+      shuttering.title     shouldBe Some("Shuttered")
+      shuttering.message   shouldBe Some("PAYE is currently shuttered")
     }
   }
 
@@ -256,8 +255,8 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
 
       val shuttering = Json.parse(response.body).as[Shuttering]
       shuttering.shuttered shouldBe true
-      shuttering.title     shouldBe "Shuttered"
-      shuttering.message   shouldBe "PAYE is currently shuttered"
+      shuttering.title     shouldBe Some("Shuttered")
+      shuttering.message   shouldBe Some("PAYE is currently shuttered")
     }
   }
 

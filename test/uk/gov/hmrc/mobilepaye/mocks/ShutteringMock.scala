@@ -14,18 +14,26 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.mobilepaye.controllers
-import play.api.libs.json.Json
-import play.api.mvc.{Result, Results}
+package uk.gov.hmrc.mobilepaye.mocks
+
+import org.scalamock.handlers.CallHandler
+import org.scalamock.scalatest.MockFactory
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.mobilepaye.connectors.ShutteringConnector
 import uk.gov.hmrc.mobilepaye.domain.Shuttering
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-trait ControllerChecks extends Results {
+trait ShutteringMock extends MockFactory {
 
-  private final val WebServerIsDown = new Status(521)
-
-  def withShuttering(shuttering: Shuttering)(fn: => Future[Result]): Future[Result] =
-    if (shuttering.shuttered) Future.successful(WebServerIsDown(Json.toJson(shuttering))) else fn
+  def mockShutteringResponse(
+    response: Shuttering
+  )(
+    implicit shutteringConnector: ShutteringConnector
+  ): CallHandler[Future[Shuttering]] =
+    (shutteringConnector
+      .getShutteringStatus(_: String)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *, *)
+      .returning(Future successful response)
 
 }
