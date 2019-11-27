@@ -56,7 +56,7 @@ class GuiceModule(environment: Environment, configuration: Configuration) extend
     bind(classOf[String]).annotatedWith(named("tai")).toInstance(servicesConfig.baseUrl("tai"))
     bind(classOf[String]).annotatedWith(named("taxcalc")).toInstance(servicesConfig.baseUrl("taxcalc"))
     bind(classOf[Boolean]).annotatedWith(named("with-taxcalc")).toInstance(servicesConfig.getBoolean("mobilePaye.feature-flags.taxcalc"))
-    bind(classOf[String]).annotatedWith(named("shuttering")).toInstance(servicesConfig.baseUrl("shuttering"))
+    bind(classOf[String]).annotatedWith(named("mobile-shuttering")).toInstance(servicesConfig.baseUrl("mobile-shuttering"))
   }
 
   private def bindConfigStringSeq(path: String): Unit = {
