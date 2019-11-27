@@ -27,12 +27,12 @@ abstract class BaseISpec
 
   def config: Map[String, Any] =
     Map[String, Any](
-      "auditing.enabled"                      -> false,
-      "microservice.services.auth.port"       -> wireMockPort,
-      "microservice.services.tai.port"        -> wireMockPort,
-      "microservice.services.taxcalc.port"    -> wireMockPort,
-      "microservice.services.shuttering.port" -> wireMockPort,
-      "auditing.consumer.baseUri.port"        -> wireMockPort
+      "auditing.enabled"                             -> false,
+      "microservice.services.auth.port"              -> wireMockPort,
+      "microservice.services.tai.port"               -> wireMockPort,
+      "microservice.services.taxcalc.port"           -> wireMockPort,
+      "microservice.services.mobile-shuttering.port" -> wireMockPort,
+      "auditing.consumer.baseUri.port"               -> wireMockPort
     )
 
   private def base64Encode(s: String): String =
