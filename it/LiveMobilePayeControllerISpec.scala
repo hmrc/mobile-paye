@@ -20,9 +20,9 @@ import scala.util.Random
 
 class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
   lazy val requestWithCurrentYearAsInt: WSRequest =
-    wsUrl(s"/nino/$nino/tax-year/$currentTaxYear/summary?journeyId=12345").addHttpHeaders(acceptJsonHeader)
+    wsUrl(s"/nino/$nino/tax-year/$currentTaxYear/summary?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0").addHttpHeaders(acceptJsonHeader)
   lazy val requestWithCurrentYearAsCurrent: WSRequest =
-    wsUrl(s"/nino/$nino/tax-year/current/summary?journeyId=12345").addHttpHeaders(acceptJsonHeader)
+    wsUrl(s"/nino/$nino/tax-year/current/summary?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0").addHttpHeaders(acceptJsonHeader)
 
   implicit def ninoToString(nino: Nino): String = nino.toString()
 
@@ -569,7 +569,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
 
 class LiveMobilePayeControllerShutteredISpec extends BaseISpec {
   val request: WSRequest =
-    wsUrl(s"/nino/$nino/tax-year/$currentTaxYear/summary?journeyId=12345").addHttpHeaders(acceptJsonHeader)
+    wsUrl(s"/nino/$nino/tax-year/$currentTaxYear/summary?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0").addHttpHeaders(acceptJsonHeader)
 
   implicit def ninoToString(nino: Nino): String = nino.toString()
 

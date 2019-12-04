@@ -15,8 +15,6 @@ object AppDependencies {
   private val scalaMockVersion           = "4.1.0"
   private val scalaTestPlusVersion       = "3.1.2"
   private val simpleReactiveMongoVersion = "7.20.0-play-26"
-  private val embedVersion               = "1.48.0"
-  private val embedMongoVersion          = "0.2.2"
   private val reactiveMongoTestVersion   = "4.15.0-play-26"
   private val mockitoVersion             = "2.25.0"
 
@@ -26,7 +24,8 @@ object AppDependencies {
     "uk.gov.hmrc" %% "domain"               % domainVersion,
     "uk.gov.hmrc" %% "play-hmrc-api"        % playHmrcApiVersion,
     "uk.gov.hmrc" %% "tax-year"             % taxYearVersion,
-    "uk.gov.hmrc" %% "simple-reactivemongo" % simpleReactiveMongoVersion
+    "uk.gov.hmrc" %% "simple-reactivemongo" % simpleReactiveMongoVersion,
+    "eu.timepit" %% "refined" % "0.9.4"
   )
 
   trait TestDependencies {
