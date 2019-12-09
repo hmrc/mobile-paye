@@ -17,6 +17,7 @@ object AppDependencies {
   private val simpleReactiveMongoVersion = "7.20.0-play-26"
   private val reactiveMongoTestVersion   = "4.15.0-play-26"
   private val mockitoVersion             = "2.25.0"
+  private val refinedVersion             = "0.9.4"
 
   val compile: Seq[ModuleID] = Seq(
     ws,
@@ -25,7 +26,7 @@ object AppDependencies {
     "uk.gov.hmrc" %% "play-hmrc-api"        % playHmrcApiVersion,
     "uk.gov.hmrc" %% "tax-year"             % taxYearVersion,
     "uk.gov.hmrc" %% "simple-reactivemongo" % simpleReactiveMongoVersion,
-    "eu.timepit" %% "refined" % "0.9.4"
+    "eu.timepit"  %% "refined"              % refinedVersion
   )
 
   trait TestDependencies {
