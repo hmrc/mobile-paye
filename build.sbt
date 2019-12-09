@@ -6,11 +6,28 @@ import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 val appName: String = "mobile-paye"
 
 lazy val microservice = Project(appName, file("."))
-  .enablePlugins(Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory, ScoverageSbtPlugin): _*)
+  .enablePlugins(
+    Seq(
+      play.sbt.PlayScala,
+      SbtAutoBuildPlugin,
+      SbtGitVersioning,
+      SbtDistributablesPlugin,
+      SbtArtifactory,
+      ScoverageSbtPlugin
+    ): _*
+  )
   .configs(IntegrationTest)
   .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
   .settings(publishingSettings: _*)
-  .settings(routesImport ++= Seq("uk.gov.hmrc.domain._", "uk.gov.hmrc.mobilepaye.binders.Binders._", "uk.gov.hmrc.time.TaxYear"))
+  .settings(
+    routesImport ++= Seq(
+      "uk.gov.hmrc.domain._",
+      "uk.gov.hmrc.mobilepaye.binders.Binders._",
+      "uk.gov.hmrc.time.TaxYear",
+      "uk.gov.hmrc.mobilepaye.domain.types._",
+      "uk.gov.hmrc.mobilepaye.domain.types.ModelTypes._"
+    )
+  )
   .settings(
     majorVersion := 0,
     scalaVersion := "2.11.12",
@@ -20,7 +37,9 @@ lazy val microservice = Project(appName, file("."))
     evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
     resolvers += Resolver.jcenterRepo,
     unmanagedResourceDirectories in Compile += baseDirectory.value / "resources",
-    unmanagedSourceDirectories in IntegrationTest := (baseDirectory in IntegrationTest)(base => Seq(base / "it", base / "test-common")).value,
+    unmanagedSourceDirectories in IntegrationTest := (baseDirectory in IntegrationTest)(
+      base => Seq(base / "it", base / "test-common")
+    ).value,
     unmanagedSourceDirectories in Test := (baseDirectory in Test)(base => Seq(base / "test", base / "test-common")).value,
     testGrouping in IntegrationTest := oneForkedJvmPerTest((definedTests in IntegrationTest).value),
     scalacOptions ++= Seq(
@@ -46,7 +65,6 @@ lazy val microservice = Project(appName, file("."))
     coverageFailOnMinimum := true,
     coverageHighlighting := true,
     coverageExcludedPackages := "<empty>;com.kenshoo.play.metrics.*;.*definition.*;prod.*;testOnlyDoNotUseInAppConf.*;app.*;.*BuildInfo.*;.*Routes.*;.*javascript.*;.*Reverse.*"
-
   )
 
 def oneForkedJvmPerTest(tests: Seq[TestDefinition]): Seq[Group] =

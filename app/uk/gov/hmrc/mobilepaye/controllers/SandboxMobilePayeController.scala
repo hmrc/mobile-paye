@@ -23,6 +23,7 @@ import play.api.mvc._
 import uk.gov.hmrc.api.sandbox.FileResource
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mobilepaye.domain._
+import uk.gov.hmrc.mobilepaye.domain.types.ModelTypes.JourneyId
 import uk.gov.hmrc.time.TaxYear
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -35,7 +36,7 @@ class SandboxMobilePayeController @Inject()(val controllerComponents: Controller
   override val app: String = "Sandbox-Paye-Controller"
   private final val WebServerIsDown = new Status(521)
 private val shuttered = Json.toJson(Shuttering(shuttered = true, title = Some("Shuttered"), message=Some("PAYE is currently shuttered")))
-  override def getPayeSummary(nino: Nino, journeyId: String, taxYear: Int): Action[AnyContent] =
+  override def getPayeSummary(nino: Nino, journeyId: JourneyId, taxYear: Int): Action[AnyContent] =
     validateAccept(acceptHeaderValidationRules).async { implicit request =>
       Future.successful(request.headers.get("SANDBOX-CONTROL") match {
         case Some("ERROR-401")            => Unauthorized
