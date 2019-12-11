@@ -43,7 +43,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
 
       val response = await(requestWithCurrentYearAsInt.get())
       response.status shouldBe 200
-      response.body   shouldBe Json.toJson(fullMobilePayeResponse).toString()
+      response.body shouldBe Json.toJson(fullMobilePayeResponse).toString()
 
     }
 
@@ -75,7 +75,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       taxCalcNoResponse(nino, currentTaxYear)
 
       val response = await(requestWithCurrentYearAsInt.get())
-      response.status                                  shouldBe 200
+      response.status shouldBe 200
       Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse.copy(employments = None)
     }
 
@@ -90,7 +90,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       taxCalcNoResponse(nino, currentTaxYear)
 
       val response = await(requestWithCurrentYearAsInt.get())
-      response.status                                  shouldBe 200
+      response.status shouldBe 200
       Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse.copy(pensions = None)
     }
 
@@ -105,7 +105,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       taxCalcNoResponse(nino, currentTaxYear)
 
       val response = await(requestWithCurrentYearAsInt.get())
-      response.status                                  shouldBe 200
+      response.status shouldBe 200
       Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse.copy(otherIncomes = None)
     }
 
@@ -139,6 +139,22 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       nonTaxCodeIncomeNotCalled(nino)
       taxAccountSummaryNotCalled(nino)
       taxCalcCalled(nino, currentTaxYear)
+    }
+
+    "return 400 when no journeyId supplied" in {
+      stubForShutteringDisabled
+      grantAccess(nino)
+
+      val response = await(wsUrl(s"/nino/$nino/tax-year/$currentTaxYear/summary").addHttpHeaders(acceptJsonHeader).get())
+      response.status shouldBe 400
+    }
+
+    "return 400 when invalid journeyId supplied" in {
+      stubForShutteringDisabled
+      grantAccess(nino)
+
+      val response = await(wsUrl(s"/nino/$nino/tax-year/$currentTaxYear/summary?journeyId=ThisIsAnInvalidJourneyId").addHttpHeaders(acceptJsonHeader).get())
+      response.status shouldBe 400
     }
   }
 
