@@ -258,6 +258,16 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
       shuttering.title     shouldBe Some("Shuttered")
       shuttering.message   shouldBe Some("PAYE is currently shuttered")
     }
+
+    "return 400 if no journeyId supplied" in {
+      val response = await(wsUrl(s"/nino/$nino/tax-year/current/summary").addHttpHeaders(acceptJsonHeader).get())
+      response.status shouldBe 400
+    }
+
+    "return 400 if invalid journeyId supplied" in {
+      val response = await(wsUrl(s"/nino/$nino/tax-year/current/summary?journeyId=ThisIsAnInvalidJourneyId").addHttpHeaders(acceptJsonHeader).get())
+      response.status shouldBe 400
+    }
   }
 
 }
