@@ -511,7 +511,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     response.body[JsValue].as[MobilePayeResponse].repayment.foreach { repayment =>
       repayment.claimRefundLink shouldBe a[Some[_]]
       repayment.claimRefundLink
-        .foreach(l => l shouldBe s"/tax-you-paid/${LocalDate.now.getYear - 1}-${LocalDate.now.getYear}/paid-too-much")
+        .foreach(l => l shouldBe s"/tax-you-paid/${currentTaxYear - 1}-${currentTaxYear}/paid-too-much")
     }
   }
 

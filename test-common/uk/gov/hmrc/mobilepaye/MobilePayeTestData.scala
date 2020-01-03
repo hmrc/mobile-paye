@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,8 @@ import uk.gov.hmrc.mobilepaye.domain.taxcalc.{P800Status, P800Summary, Repayment
 import uk.gov.hmrc.time.TaxYear
 
 trait MobilePayeTestData {
-  val currentTaxYear: Int = TaxYear.current.currentYear
+  val currentTaxYear: Int = TaxYear.current.startYear
+  val endOfTaxYear: Int = TaxYear.current.finishYear
 
   val nino:           Nino          = Nino("CS700100A")
   val taxCodeIncome:  TaxCodeIncome = TaxCodeIncome(EmploymentIncome, Some(3), "The Best Shop Ltd", 1000, Live, "S1150L")
