@@ -1,12 +1,11 @@
 {
   "taxYear": <TAX_YEAR>,
-  "repayment":
-    {
-      "amount": 1000,
-      "paymentStatus": "cheque_sent",
-      "datePaid": "2018-01-02",
-      "taxYear": 2018
-    },
+  "repayment": {
+    "amount": 1000,
+    "paymentStatus": "cheque_sent",
+    "datePaid": "2018-01-02",
+    "taxYear": 2018
+  },
   "taxFreeAmount": 12500,
   "taxFreeAmountLink": "/",
   "estimatedTaxAmount": 1578,

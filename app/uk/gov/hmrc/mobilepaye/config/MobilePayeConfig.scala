@@ -18,7 +18,6 @@ package uk.gov.hmrc.mobilepaye.config
 import javax.inject.Inject
 import play.api.Configuration
 
-
 case class MobilePayeConfig @Inject() (configuration: Configuration) {
 
   val mongoTtl: Int = configuration.get[Int]("mongodb.ttlSecond")

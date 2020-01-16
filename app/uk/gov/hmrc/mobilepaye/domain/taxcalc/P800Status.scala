@@ -26,6 +26,7 @@ object P800Status {
   case object NotReconciled extends P800Status
 
   implicit val format: Format[P800Status] = new Format[P800Status] {
+
     override def writes(o: P800Status): JsValue = o match {
       case Underpaid     => JsString("underpaid")
       case Overpaid      => JsString("overpaid")

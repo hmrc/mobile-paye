@@ -19,10 +19,14 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Random
 
 class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
+
   lazy val requestWithCurrentYearAsInt: WSRequest =
-    wsUrl(s"/nino/$nino/tax-year/$currentTaxYear/summary?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0").addHttpHeaders(acceptJsonHeader)
+    wsUrl(s"/nino/$nino/tax-year/$currentTaxYear/summary?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0")
+      .addHttpHeaders(acceptJsonHeader)
+
   lazy val requestWithCurrentYearAsCurrent: WSRequest =
-    wsUrl(s"/nino/$nino/tax-year/current/summary?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0").addHttpHeaders(acceptJsonHeader)
+    wsUrl(s"/nino/$nino/tax-year/current/summary?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0")
+      .addHttpHeaders(acceptJsonHeader)
 
   implicit def ninoToString(nino: Nino): String = nino.toString()
 
@@ -43,7 +47,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
 
       val response = await(requestWithCurrentYearAsInt.get())
       response.status shouldBe 200
-      response.body shouldBe Json.toJson(fullMobilePayeResponse).toString()
+      response.body   shouldBe Json.toJson(fullMobilePayeResponse).toString()
 
     }
 
@@ -75,7 +79,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       taxCalcNoResponse(nino, currentTaxYear)
 
       val response = await(requestWithCurrentYearAsInt.get())
-      response.status shouldBe 200
+      response.status                                  shouldBe 200
       Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse.copy(employments = None)
     }
 
@@ -90,7 +94,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       taxCalcNoResponse(nino, currentTaxYear)
 
       val response = await(requestWithCurrentYearAsInt.get())
-      response.status shouldBe 200
+      response.status                                  shouldBe 200
       Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse.copy(pensions = None)
     }
 
@@ -105,7 +109,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       taxCalcNoResponse(nino, currentTaxYear)
 
       val response = await(requestWithCurrentYearAsInt.get())
-      response.status shouldBe 200
+      response.status                                  shouldBe 200
       Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse.copy(otherIncomes = None)
     }
 
@@ -145,7 +149,8 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       stubForShutteringDisabled
       grantAccess(nino)
 
-      val response = await(wsUrl(s"/nino/$nino/tax-year/$currentTaxYear/summary").addHttpHeaders(acceptJsonHeader).get())
+      val response =
+        await(wsUrl(s"/nino/$nino/tax-year/$currentTaxYear/summary").addHttpHeaders(acceptJsonHeader).get())
       response.status shouldBe 400
     }
 
@@ -153,7 +158,11 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       stubForShutteringDisabled
       grantAccess(nino)
 
-      val response = await(wsUrl(s"/nino/$nino/tax-year/$currentTaxYear/summary?journeyId=ThisIsAnInvalidJourneyId").addHttpHeaders(acceptJsonHeader).get())
+      val response = await(
+        wsUrl(s"/nino/$nino/tax-year/$currentTaxYear/summary?journeyId=ThisIsAnInvalidJourneyId")
+          .addHttpHeaders(acceptJsonHeader)
+          .get()
+      )
       response.status shouldBe 400
     }
   }
@@ -511,7 +520,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     response.body[JsValue].as[MobilePayeResponse].repayment.foreach { repayment =>
       repayment.claimRefundLink shouldBe a[Some[_]]
       repayment.claimRefundLink
-        .foreach(l => l shouldBe s"/tax-you-paid/${currentTaxYear - 1}-${currentTaxYear}/paid-too-much")
+        .foreach(l => l shouldBe s"/tax-you-paid/${currentTaxYear - 1}-$currentTaxYear/paid-too-much")
     }
   }
 
@@ -584,8 +593,10 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
 }
 
 class LiveMobilePayeControllerShutteredISpec extends BaseISpec {
+
   val request: WSRequest =
-    wsUrl(s"/nino/$nino/tax-year/$currentTaxYear/summary?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0").addHttpHeaders(acceptJsonHeader)
+    wsUrl(s"/nino/$nino/tax-year/$currentTaxYear/summary?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0")
+      .addHttpHeaders(acceptJsonHeader)
 
   implicit def ninoToString(nino: Nino): String = nino.toString()
 

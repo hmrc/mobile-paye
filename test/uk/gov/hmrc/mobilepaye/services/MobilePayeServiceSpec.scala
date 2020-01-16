@@ -27,7 +27,7 @@ import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class MobilePayeServiceSpec @Inject()(p800CacheMongo: P800CacheMongo) extends BaseSpec {
+class MobilePayeServiceSpec @Inject() (p800CacheMongo: P800CacheMongo) extends BaseSpec {
 
   val mockTaiConnector:     TaiConnector     = mock[TaiConnector]
   val mockTaxCalcConnector: TaxCalcConnector = mock[TaxCalcConnector]

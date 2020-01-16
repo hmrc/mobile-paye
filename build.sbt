@@ -30,7 +30,7 @@ lazy val microservice = Project(appName, file("."))
   )
   .settings(
     majorVersion := 0,
-    scalaVersion := "2.11.12",
+    scalaVersion := "2.12.8",
     playDefaultPort := 8247,
     libraryDependencies ++= AppDependencies(),
     dependencyOverrides ++= overrides,
@@ -69,14 +69,14 @@ lazy val microservice = Project(appName, file("."))
 
 def oneForkedJvmPerTest(tests: Seq[TestDefinition]): Seq[Group] =
   tests map { test =>
-    Group(test.name, Seq(test), SubProcess(ForkOptions(runJVMOptions = Seq("-Dtest.name=" + test.name))))
+    Group(test.name, Seq(test), SubProcess(ForkOptions().withRunJVMOptions(Vector(s"-Dtest.name=${test.name}"))))
   }
 
 // Transitive dependencies in scalatest/scalatestplusplay drag in a newer version of jetty that is not
 // compatible with wiremock, so we need to pin the jetty stuff to the older version.
 // see https://groups.google.com/forum/#!topic/play-framework/HAIM1ukUCnI
 val jettyVersion = "9.2.13.v20150730"
-val overrides: Set[ModuleID] = Set(
+val overrides: Seq[ModuleID] = Seq(
   "org.eclipse.jetty"           % "jetty-server"       % jettyVersion,
   "org.eclipse.jetty"           % "jetty-servlet"      % jettyVersion,
   "org.eclipse.jetty"           % "jetty-security"     % jettyVersion,

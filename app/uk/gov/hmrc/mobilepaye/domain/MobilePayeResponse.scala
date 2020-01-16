@@ -36,6 +36,7 @@ case class MobilePayeResponse(
   previousTaxYearLink:       Option[String] = Some(s"/check-income-tax/historic-paye/${TaxYear.current.previous.startYear}"))
 
 object MobilePayeResponse {
+
   def empty: MobilePayeResponse =
     MobilePayeResponse(
       taxYear                   = Option(TaxYear.current.currentYear),

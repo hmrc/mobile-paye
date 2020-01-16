@@ -29,7 +29,10 @@ trait AuthorisationMock extends MockFactory {
 
   type GrantAccess = Option[String] ~ ConfidenceLevel
 
-  def mockAuthorisationGrantAccess(response: GrantAccess)(implicit authConnector: AuthConnector): CallHandler[Future[GrantAccess]] =
+  def mockAuthorisationGrantAccess(
+    response:               GrantAccess
+  )(implicit authConnector: AuthConnector
+  ): CallHandler[Future[GrantAccess]] =
     (authConnector
       .authorise(_: Predicate, _: Retrieval[GrantAccess])(_: HeaderCarrier, _: ExecutionContext))
       .expects(*, *, *, *)

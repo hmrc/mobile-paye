@@ -18,8 +18,9 @@ package uk.gov.hmrc.mobilepaye.domain.tai
 
 import play.api.libs.json.{Format, Json}
 
-case class Employment(payrollNumber: Option[String],
-                      sequenceNumber: Int)
+case class Employment(
+  payrollNumber:  Option[String],
+  sequenceNumber: Int)
 
 object Employment {
   implicit val employmentFormats: Format[Employment] = Json.format[Employment]

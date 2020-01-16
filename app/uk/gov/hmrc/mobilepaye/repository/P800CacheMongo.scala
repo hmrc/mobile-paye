@@ -30,10 +30,9 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class P800CacheMongo @Inject() (
-  mongo:     ReactiveMongoComponent,
-  appConfig: MobilePayeConfig
-)(
-  implicit executionContext: ExecutionContext)
+  mongo:                     ReactiveMongoComponent,
+  appConfig:                 MobilePayeConfig
+)(implicit executionContext: ExecutionContext)
     extends ReactiveRepository[P800Cache, BSONObjectID](
       collectionName = "p800Cache",
       mongo          = mongo.mongoConnector.db,
@@ -54,12 +53,11 @@ class P800CacheMongo @Inject() (
 
   def add(p800Cache: P800Cache): ServiceResponse[P800Cache] =
     insert(p800Cache)
-      .map(
-        result =>
-          handleWriteResult[P800Cache](
-            result,
-            p800Cache
-          )
+      .map(result =>
+        handleWriteResult[P800Cache](
+          result,
+          p800Cache
+        )
       )
 
   def selectByNino(nino: Nino): Future[List[P800Cache]] =

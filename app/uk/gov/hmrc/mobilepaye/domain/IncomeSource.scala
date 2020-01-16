@@ -19,7 +19,9 @@ package uk.gov.hmrc.mobilepaye.domain
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.mobilepaye.domain.tai.{Employment, TaxCodeIncome}
 
-case class IncomeSource(taxCodeIncome: TaxCodeIncome, employment: Employment)
+case class IncomeSource(
+  taxCodeIncome: TaxCodeIncome,
+  employment:    Employment)
 
 object IncomeSource {
   implicit val format: OFormat[IncomeSource] = Json.format[IncomeSource]

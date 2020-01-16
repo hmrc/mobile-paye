@@ -10,7 +10,9 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
   private val mobileHeader = "X-MOBILE-USER-ID" -> "208606423740"
 
   s"GET sandbox/nino/$nino/tax-year/$currentTaxYear/summary" should {
-    val request: WSRequest = wsUrl(s"/nino/$nino/tax-year/$currentTaxYear/summary?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0").addHttpHeaders(acceptJsonHeader)
+    val request: WSRequest = wsUrl(
+      s"/nino/$nino/tax-year/$currentTaxYear/summary?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0"
+    ).addHttpHeaders(acceptJsonHeader)
 
     "return OK and default paye data with no SANDBOX-CONTROL" in {
       val response = await(request.addHttpHeaders(mobileHeader).get())
@@ -120,7 +122,9 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
   }
 
   s"GET sandbox/nino/$nino/tax-year/current/summary" should {
-    val request: WSRequest = wsUrl(s"/nino/$nino/tax-year/current/summary?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0").addHttpHeaders(acceptJsonHeader)
+    val request: WSRequest = wsUrl(
+      s"/nino/$nino/tax-year/current/summary?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0"
+    ).addHttpHeaders(acceptJsonHeader)
 
     "return OK and default paye data with no SANDBOX-CONTROL" in {
       val response = await(request.addHttpHeaders(mobileHeader).get())
@@ -265,7 +269,11 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
     }
 
     "return 400 if invalid journeyId supplied" in {
-      val response = await(wsUrl(s"/nino/$nino/tax-year/current/summary?journeyId=ThisIsAnInvalidJourneyId").addHttpHeaders(acceptJsonHeader).get())
+      val response = await(
+        wsUrl(s"/nino/$nino/tax-year/current/summary?journeyId=ThisIsAnInvalidJourneyId")
+          .addHttpHeaders(acceptJsonHeader)
+          .get()
+      )
       response.status shouldBe 400
     }
   }

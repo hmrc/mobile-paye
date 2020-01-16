@@ -26,7 +26,15 @@ import uk.gov.hmrc.mobilepaye.mocks.{AuditMock, AuthorisationMock, ShutteringMoc
 
 import scala.concurrent.ExecutionContext
 
-trait BaseSpec extends WordSpecLike with Matchers with FutureAwaits with DefaultAwaitTimeout with MobilePayeTestData with AuthorisationMock with AuditMock with ShutteringMock {
+trait BaseSpec
+    extends WordSpecLike
+    with Matchers
+    with FutureAwaits
+    with DefaultAwaitTimeout
+    with MobilePayeTestData
+    with AuthorisationMock
+    with AuditMock
+    with ShutteringMock {
   implicit lazy val ec:           ExecutionContext  = scala.concurrent.ExecutionContext.Implicits.global
   implicit lazy val hc:           HeaderCarrier     = HeaderCarrier()
   implicit lazy val system:       ActorSystem       = ActorSystem()

@@ -32,13 +32,13 @@ trait Hooks extends HttpHooks with HttpAuditing {
   val hooks: Seq[HttpHook] = Seq(AuditingHook)
 }
 
-class WSHttpImpl @Inject()(
+class WSHttpImpl @Inject() (
   val wsClient:                  WSClient,
   @Named("appName") val appName: String,
   val auditConnector:            AuditConnector,
   override val actorSystem:      ActorSystem,
-  config:                        Configuration
-) extends HttpClient
+  config:                        Configuration)
+    extends HttpClient
     with WSGet
     with WSPut
     with WSPost

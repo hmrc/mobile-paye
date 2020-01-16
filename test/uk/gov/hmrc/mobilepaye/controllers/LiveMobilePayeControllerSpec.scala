@@ -162,7 +162,8 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
     }
 
     "return 406 for missing accept header" in {
-      val result = controller.getPayeSummary(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42", currentTaxYear)(FakeRequest("GET", "/"))
+      val result =
+        controller.getPayeSummary(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42", currentTaxYear)(FakeRequest("GET", "/"))
 
       status(result) shouldBe 406
     }
@@ -170,7 +171,9 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
     "return 403 for valid nino for authorised user but for a different nino" in {
       mockAuthorisationGrantAccess(grantAccessWithCL200)
 
-      val result = controller.getPayeSummary(Nino("CS100700A"), "9bcb9c5a-0cfd-49e3-a935-58a28c386a42", currentTaxYear)(fakeRequest)
+      val result = controller.getPayeSummary(Nino("CS100700A"), "9bcb9c5a-0cfd-49e3-a935-58a28c386a42", currentTaxYear)(
+        fakeRequest
+      )
 
       status(result) shouldBe 403
     }

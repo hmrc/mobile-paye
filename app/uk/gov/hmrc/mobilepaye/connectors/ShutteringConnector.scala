@@ -28,13 +28,12 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ShutteringConnector @Inject() (
-  http:                            CoreGet,
+  http:                                   CoreGet,
   @Named("mobile-shuttering") serviceUrl: String) {
 
   def getShutteringStatus(
-    journeyId: JourneyId
-  )(
-    implicit headerCarrier: HeaderCarrier,
+    journeyId:              JourneyId
+  )(implicit headerCarrier: HeaderCarrier,
     ex:                     ExecutionContext
   ): Future[Shuttering] =
     http.GET[JsValue](s"$serviceUrl/mobile-shuttering/service/mobile-paye/shuttered-status?journeyId=$journeyId").map {

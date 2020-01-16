@@ -54,7 +54,11 @@ trait Authorisation extends Results with AuthorisedFunctions {
           throw ninoNotFoundOnAccount
       }
 
-  def invokeAuthBlock[A](request: Request[A], block: Request[A] => Future[Result], taxId: Option[Nino]): Future[Result] = {
+  def invokeAuthBlock[A](
+    request: Request[A],
+    block:   Request[A] => Future[Result],
+    taxId:   Option[Nino]
+  ): Future[Result] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, None)
 
     grantAccess(taxId.getOrElse(Nino("")))
@@ -85,13 +89,19 @@ trait AccessControl extends HeaderValidator with Authorisation {
   outer =>
   def parser: BodyParser[AnyContent]
 
-  def validateAcceptWithAuth(rules: Option[String] => Boolean, taxId: Option[Nino]): ActionBuilder[Request, AnyContent] =
+  def validateAcceptWithAuth(
+    rules: Option[String] => Boolean,
+    taxId: Option[Nino]
+  ): ActionBuilder[Request, AnyContent] =
     new ActionBuilder[Request, AnyContent] {
 
       override def parser:                     BodyParser[AnyContent] = outer.parser
       override protected def executionContext: ExecutionContext       = outer.executionContext
 
-      def invokeBlock[A](request: Request[A], block: Request[A] => Future[Result]): Future[Result] =
+      def invokeBlock[A](
+        request: Request[A],
+        block:   Request[A] => Future[Result]
+      ): Future[Result] =
         if (rules(request.headers.get("Accept"))) {
           if (requiresAuth) invokeAuthBlock(request, block, taxId)
           else block(request)

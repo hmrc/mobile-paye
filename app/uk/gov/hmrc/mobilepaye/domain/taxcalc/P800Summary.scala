@@ -29,11 +29,14 @@ case class P800Summary(
   _type:    P800Status,
   status:   Option[RepaymentStatus],
   amount:   Option[BigDecimal],
-  datePaid: Option[LocalDate]
-)
+  datePaid: Option[LocalDate])
 
 object P800Summary {
-  def toP800Repayment(p800Summary: P800Summary, taxYear: Int): Option[P800Repayment] = {
+
+  def toP800Repayment(
+    p800Summary: P800Summary,
+    taxYear:     Int
+  ): Option[P800Repayment] = {
 
     val previousTaxYear = taxYear - 1
 
@@ -50,12 +53,11 @@ object P800Summary {
         case _                   => Option(p800Summary)
       }
 
-    def notOlderThanSixWeeks(p800Summary: P800Summary): Option[P800Summary] = {
+    def notOlderThanSixWeeks(p800Summary: P800Summary): Option[P800Summary] =
       p800Summary.datePaid match {
-        case None => Option(p800Summary)
+        case None       => Option(p800Summary)
         case Some(date) => if (date.plusWeeks(6).plusDays(1).isAfter(LocalDate.now())) Option(p800Summary) else None
       }
-    }
 
     def transform(p800Summary: P800Summary): P800Repayment = {
       def withLink: Option[String] =
@@ -96,7 +98,9 @@ object P800Summary {
   }
 }
 
-case class TaxYearReconciliation(taxYear: Int, reconciliation: P800Summary)
+case class TaxYearReconciliation(
+  taxYear:        Int,
+  reconciliation: P800Summary)
 
 object TaxYearReconciliation {
 
