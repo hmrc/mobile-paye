@@ -29,14 +29,23 @@ import uk.gov.hmrc.time.TaxYear
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class SandboxMobilePayeController @Inject()(val controllerComponents: ControllerComponents)(implicit val executionContext: ExecutionContext)
+class SandboxMobilePayeController @Inject() (
+  val controllerComponents:      ControllerComponents
+)(implicit val executionContext: ExecutionContext)
     extends MobilePayeController
     with FileResource {
 
   override val app: String = "Sandbox-Paye-Controller"
   private final val WebServerIsDown = new Status(521)
-private val shuttered = Json.toJson(Shuttering(shuttered = true, title = Some("Shuttered"), message=Some("PAYE is currently shuttered")))
-  override def getPayeSummary(nino: Nino, journeyId: JourneyId, taxYear: Int): Action[AnyContent] =
+
+  private val shuttered =
+    Json.toJson(Shuttering(shuttered = true, title = Some("Shuttered"), message = Some("PAYE is currently shuttered")))
+
+  override def getPayeSummary(
+    nino:      Nino,
+    journeyId: JourneyId,
+    taxYear:   Int
+  ): Action[AnyContent] =
     validateAccept(acceptHeaderValidationRules).async { implicit request =>
       Future.successful(request.headers.get("SANDBOX-CONTROL") match {
         case Some("ERROR-401")            => Unauthorized
@@ -62,9 +71,13 @@ private val shuttered = Json.toJson(Shuttering(shuttered = true, title = Some("S
   private def readData(resource: String): JsValue =
     toJson(
       Json
-        .parse(findResource(s"/resources/mobilepayesummary/$resource")
-          .getOrElse(throw new IllegalArgumentException("Resource not found!")).replace("<TAX_YEAR>", TaxYear.current.currentYear.toString))
-        .as[MobilePayeResponse])
+        .parse(
+          findResource(s"/resources/mobilepayesummary/$resource")
+            .getOrElse(throw new IllegalArgumentException("Resource not found!"))
+            .replace("<TAX_YEAR>", TaxYear.current.currentYear.toString)
+        )
+        .as[MobilePayeResponse]
+    )
 
   override def parser: BodyParser[AnyContent] = controllerComponents.parsers.anyContent
 }

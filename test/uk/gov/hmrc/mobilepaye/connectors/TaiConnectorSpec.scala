@@ -25,24 +25,26 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class TaiConnectorSpec extends BaseSpec {
 
-  val mockCoreGet: CoreGet = mock[CoreGet]
-  val serviceUrl: String = "tst-url"
-  val connector: TaiConnector = new TaiConnector(mockCoreGet, serviceUrl)
+  val mockCoreGet: CoreGet      = mock[CoreGet]
+  val serviceUrl:  String       = "tst-url"
+  val connector:   TaiConnector = new TaiConnector(mockCoreGet, serviceUrl)
 
-  def mockTaiGet[T](url: String, f: Future[T]) = {
-    (mockCoreGet.GET(_: String)(_: HttpReads[T], _: HeaderCarrier, _: ExecutionContext))
+  def mockTaiGet[T](
+    url: String,
+    f:   Future[T]
+  ) =
+    (mockCoreGet
+      .GET(_: String)(_: HttpReads[T], _: HeaderCarrier, _: ExecutionContext))
       .expects(s"$serviceUrl/tai/${nino.value}/$url", *, *, *)
       .returning(f)
-  }
 
   "Person - GET /tai/:nino/person" should {
     "return a valid Person when receiving a valid 200 response for an authorised user" in {
       val taiPersonJson: JsValue =
-        Json.parse(
-          s"""
-             |{
-             |  "data": ${Json.toJson(person)}
-             |}
+        Json.parse(s"""
+                      |{
+                      |  "data": ${Json.toJson(person)}
+                      |}
           """.stripMargin)
 
       mockTaiGet("person", Future.successful(taiPersonJson))
@@ -79,13 +81,12 @@ class TaiConnectorSpec extends BaseSpec {
   "Non Tax Code Incomes - GET /tai/:nino/tax-account/:year/income" should {
     "return a valid NonTaxCodeIncome when receiving a valid 200 response for an authorised user" in {
       val taiNonTaxCodeIncomeJson: JsValue =
-        Json.parse(
-          s"""
-             |{
-             |  "data": {
-             |    "nonTaxCodeIncomes": ${Json.toJson(nonTaxCodeIncome)}
-             |  }
-             |}
+        Json.parse(s"""
+                      |{
+                      |  "data": {
+                      |    "nonTaxCodeIncomes": ${Json.toJson(nonTaxCodeIncome)}
+                      |  }
+                      |}
           """.stripMargin)
 
       mockTaiGet(s"tax-account/$currentTaxYear/income", Future.successful(taiNonTaxCodeIncomeJson))
@@ -111,7 +112,8 @@ class TaiConnectorSpec extends BaseSpec {
     }
 
     "throw InternalServerErrorException for valid nino for authorised user when receiving a 500 response from tai" in {
-      mockTaiGet(s"tax-account/$currentTaxYear/income", Future.failed(new InternalServerException("Internal Server Error")))
+      mockTaiGet(s"tax-account/$currentTaxYear/income",
+                 Future.failed(new InternalServerException("Internal Server Error")))
 
       intercept[InternalServerException] {
         await(connector.getNonTaxCodeIncome(nino, currentTaxYear))
@@ -122,56 +124,62 @@ class TaiConnectorSpec extends BaseSpec {
   "Matching Tax Code Employments - GET /tai/tax-account/year/:taxYear/income/:incomeType/status/:status" should {
     "return a valid Seq[IncomeSource] when receiving a valid 200 response for an authorised user for Employment" in {
       val taiEmploymentsJson: JsValue =
-        Json.parse(
-          s"""
-             |{
-             |  "data": [{
-             |    "taxCodeIncome": ${Json.toJson(taxCodeIncome)},
-             |    "employment": ${Json.toJson(taiEmployment)}
-             |  },
-             |  {
-             |    "taxCodeIncome": ${Json.toJson(taxCodeIncome2)},
-             |    "employment": ${Json.toJson(taiEmployment2)}
-             |  }
-             |   ]
-             |}
+        Json.parse(s"""
+                      |{
+                      |  "data": [{
+                      |    "taxCodeIncome": ${Json.toJson(taxCodeIncome)},
+                      |    "employment": ${Json.toJson(taiEmployment)}
+                      |  },
+                      |  {
+                      |    "taxCodeIncome": ${Json.toJson(taxCodeIncome2)},
+                      |    "employment": ${Json.toJson(taiEmployment2)}
+                      |  }
+                      |   ]
+                      |}
           """.stripMargin)
 
-      mockTaiGet(s"tax-account/year/$currentTaxYear/income/${EmploymentIncome.toString}/status/${Live.toString}", Future.successful(taiEmploymentsJson))
+      mockTaiGet(s"tax-account/year/$currentTaxYear/income/${EmploymentIncome.toString}/status/${Live.toString}",
+                 Future.successful(taiEmploymentsJson))
 
-      val result = await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear, EmploymentIncome.toString, Live.toString))
+      val result =
+        await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear, EmploymentIncome.toString, Live.toString))
       result shouldBe employmentIncomeSource
     }
 
     "return a valid Seq[IncomeSource] when receiving a valid 200 response for an authorised user for Pensions" in {
       val taiJson: JsValue =
-        Json.parse(
-          s"""
-             |{
-             |  "data": [{
-             |    "taxCodeIncome": ${Json.toJson(taxCodeIncome3)},
-             |    "employment": ${Json.toJson(taiEmployment3)}
-             |  }
-             | ]
-             |}
+        Json.parse(s"""
+                      |{
+                      |  "data": [{
+                      |    "taxCodeIncome": ${Json.toJson(taxCodeIncome3)},
+                      |    "employment": ${Json.toJson(taiEmployment3)}
+                      |  }
+                      | ]
+                      |}
           """.stripMargin)
 
-      mockTaiGet(s"tax-account/year/$currentTaxYear/income/${PensionIncome.toString}/status/${Live.toString}", Future.successful(taiJson))
+      mockTaiGet(s"tax-account/year/$currentTaxYear/income/${PensionIncome.toString}/status/${Live.toString}",
+                 Future.successful(taiJson))
 
-      val result = await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear, PensionIncome.toString, Live.toString))
+      val result =
+        await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear, PensionIncome.toString, Live.toString))
       result shouldBe pensionIncomeSource
     }
 
-
     "return an empty Seq[IncomeSource] when receiving when a NotFoundException is thrown for an authorised user" in {
-      mockTaiGet(s"tax-account/year/$currentTaxYear/income/${EmploymentIncome.toString}/status/${Live.toString}", Future.failed(new NotFoundException("Not Found")))
+      mockTaiGet(s"tax-account/year/$currentTaxYear/income/${EmploymentIncome.toString}/status/${Live.toString}",
+                 Future.failed(new NotFoundException("Not Found")))
 
-      val result = await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear, EmploymentIncome.toString, Live.toString))
+      val result =
+        await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear, EmploymentIncome.toString, Live.toString))
       result shouldBe Seq.empty
     }
 
     "throw UnauthorisedException for valid nino but unauthorized user" in {
-      mockTaiGet(s"tax-account/year/$currentTaxYear/income/${EmploymentIncome.toString}/status/${Live.toString}", Future.failed(new UnauthorizedException("Unauthorized")))
+      mockTaiGet(
+        s"tax-account/year/$currentTaxYear/income/${EmploymentIncome.toString}/status/${Live.toString}",
+        Future.failed(new UnauthorizedException("Unauthorized"))
+      )
 
       intercept[UnauthorizedException] {
         await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear, EmploymentIncome.toString, Live.toString))
@@ -179,7 +187,8 @@ class TaiConnectorSpec extends BaseSpec {
     }
 
     "throw ForbiddenException for valid nino for authorised user but for a different nino" in {
-      mockTaiGet(s"tax-account/year/$currentTaxYear/income/${EmploymentIncome.toString}/status/${Live.toString}", Future.failed(new ForbiddenException("Forbidden")))
+      mockTaiGet(s"tax-account/year/$currentTaxYear/income/${EmploymentIncome.toString}/status/${Live.toString}",
+                 Future.failed(new ForbiddenException("Forbidden")))
 
       intercept[ForbiddenException] {
         await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear, EmploymentIncome.toString, Live.toString))
@@ -187,7 +196,10 @@ class TaiConnectorSpec extends BaseSpec {
     }
 
     "throw InternalServerErrorException for valid nino for authorised user when receiving a 500 response from tai" in {
-      mockTaiGet(s"tax-account/year/$currentTaxYear/income/${EmploymentIncome.toString}/status/${Live.toString}", Future.failed(new InternalServerException("Internal Server Error")))
+      mockTaiGet(
+        s"tax-account/year/$currentTaxYear/income/${EmploymentIncome.toString}/status/${Live.toString}",
+        Future.failed(new InternalServerException("Internal Server Error"))
+      )
 
       intercept[InternalServerException] {
         await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear, EmploymentIncome.toString, Live.toString))
@@ -198,11 +210,10 @@ class TaiConnectorSpec extends BaseSpec {
   "Tax Account Summary - GET /tai/:nino/tax-account/:year/summary" should {
     "return a valid TaxAccountSummary when receiving a valid 200 response for an authorised user" in {
       val taiTaxAccountSummaryJson: JsValue =
-        Json.parse(
-          s"""
-             |{
-             |  "data": ${Json.toJson(taxAccountSummary)}
-             |}
+        Json.parse(s"""
+                      |{
+                      |  "data": ${Json.toJson(taxAccountSummary)}
+                      |}
           """.stripMargin)
 
       mockTaiGet(s"tax-account/$currentTaxYear/summary", Future.successful(taiTaxAccountSummaryJson))
@@ -228,7 +239,8 @@ class TaiConnectorSpec extends BaseSpec {
     }
 
     "throw InternalServerErrorException for valid nino for authorised user when receiving a 500 response from tai" in {
-      mockTaiGet(s"tax-account/$currentTaxYear/summary", Future.failed(new InternalServerException("Internal Server Error")))
+      mockTaiGet(s"tax-account/$currentTaxYear/summary",
+                 Future.failed(new InternalServerException("Internal Server Error")))
 
       intercept[InternalServerException] {
         await(connector.getTaxAccountSummary(nino, currentTaxYear))

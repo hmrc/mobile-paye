@@ -5,10 +5,10 @@ object AppDependencies {
   import play.core.PlayVersion
   import play.sbt.PlayImport._
 
-  private val play26Bootstrap    = "0.36.0"
-  private val playHmrcApiVersion = "3.4.0-play-26"
+  private val play26Bootstrap    = "1.3.0"
+  private val playHmrcApiVersion = "4.1.0-play-26"
   private val domainVersion      = "5.6.0-play-26"
-  private val taxYearVersion     = "0.6.0"
+  private val taxYearVersion     = "1.0.0"
 
   private val pegdownVersion             = "1.6.0"
   private val wireMockVersion            = "2.20.0"

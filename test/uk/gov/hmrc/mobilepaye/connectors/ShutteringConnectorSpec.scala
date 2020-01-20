@@ -30,7 +30,10 @@ class ShutteringConnectorSpec extends BaseSpec {
   def mockShutteringGet[T](f: Future[T]) =
     (mockCoreGet
       .GET(_: String)(_: HttpReads[T], _: HeaderCarrier, _: ExecutionContext))
-      .expects("/mobile-shuttering/service/mobile-paye/shuttered-status?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0", *, *, *)
+      .expects("/mobile-shuttering/service/mobile-paye/shuttered-status?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0",
+               *,
+               *,
+               *)
       .returning(f)
 
   "getTaxReconciliations" should {

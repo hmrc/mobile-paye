@@ -9,7 +9,11 @@ import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus._
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.{P800Status, P800Summary, RepaymentStatus, TaxYearReconciliation}
 
 object TaxCalcStub {
-  def taxCalcNoResponse(nino: String, taxYear: Int): StubMapping =
+
+  def taxCalcNoResponse(
+    nino:    String,
+    taxYear: Int
+  ): StubMapping =
     stubFor(
       get(urlEqualTo(s"/taxcalc/$nino/reconciliations"))
         .willReturn(
@@ -24,13 +28,15 @@ object TaxCalcStub {
     amount:        BigDecimal,
     p800Status:    P800Status,
     paymentStatus: RepaymentStatus,
-    time:          LocalDate): StubMapping = {
+    time:          LocalDate
+  ): StubMapping = {
     def withPaidDate(): Option[LocalDate] =
       paymentStatus match {
         case PaymentPaid | ChequeSent => Option(time)
         case _                        => None
       }
-    val taxYearReconciliation = TaxYearReconciliation(taxYear, P800Summary(p800Status, Some(paymentStatus), Some(amount), withPaidDate()))
+    val taxYearReconciliation =
+      TaxYearReconciliation(taxYear, P800Summary(p800Status, Some(paymentStatus), Some(amount), withPaidDate()))
 
     stubFor(
       get(urlEqualTo(s"/taxcalc/$nino/reconciliations"))
@@ -42,7 +48,13 @@ object TaxCalcStub {
     )
   }
 
-  def taxCalcWithInstantDate(nino: String, taxYear: Int, localDate: LocalDate, yearTwoStatus: String = "payment_paid", yearTwoType: String = "overpaid"): StubMapping = {
+  def taxCalcWithInstantDate(
+    nino:          String,
+    taxYear:       Int,
+    localDate:     LocalDate,
+    yearTwoStatus: String = "payment_paid",
+    yearTwoType:   String = "overpaid"
+  ): StubMapping = {
     val taxCalcResponse =
       s"""[{"taxYear": ${taxYear - 2},"reconciliation":{
          |    "_type": "underpaid",
@@ -52,7 +64,7 @@ object TaxCalcStub {
          |    "_type": "$yearTwoType",
          |    "amount": 1000,
          |    "status": "$yearTwoStatus",
-         |    "datePaid": "${localDate}"}}]
+         |    "datePaid": "$localDate"}}]
        """.stripMargin
 
     stubFor(
@@ -65,7 +77,10 @@ object TaxCalcStub {
     )
   }
 
-  def taxCalcWithNoDate(nino: String, taxYear: Int): StubMapping = {
+  def taxCalcWithNoDate(
+    nino:    String,
+    taxYear: Int
+  ): StubMapping = {
     val taxCalcResponse =
       s"""[{"taxYear": ${taxYear - 2},"reconciliation":{
          |    "_type": "underpaid",
@@ -87,7 +102,11 @@ object TaxCalcStub {
     )
   }
 
-  def taxCalcWithNoP800(nino: String, taxYear: Int, localDate: LocalDate): StubMapping = {
+  def taxCalcWithNoP800(
+    nino:      String,
+    taxYear:   Int,
+    localDate: LocalDate
+  ): StubMapping = {
     val taxCalcResponse =
       s"""[{"taxYear": ${taxYear - 2},"reconciliation":{
          |    "_type": "balanced"}},
@@ -105,7 +124,11 @@ object TaxCalcStub {
     )
   }
 
-  def taxCalcCalled(nino: String, taxYear: Int, expectedCalls: Int = 0): Unit =
+  def taxCalcCalled(
+    nino:          String,
+    taxYear:       Int,
+    expectedCalls: Int = 0
+  ): Unit =
     verify(expectedCalls, getRequestedFor(urlEqualTo(s"/taxcalc/$nino/reconciliations")))
 
 }

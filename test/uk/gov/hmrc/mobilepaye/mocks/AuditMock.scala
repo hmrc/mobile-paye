@@ -30,34 +30,41 @@ import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 import scala.concurrent.{ExecutionContext, Future}
 
 trait AuditMock extends MockFactory {
-  def dataEventWith(auditSource: String,
-                    auditType: String,
-                    transactionName: String,
-                    detail: JsValue): MatcherBase = {
-    argThat((dataEvent: ExtendedDataEvent) => {
-      dataEvent.auditSource.equals(auditSource) &&
-        dataEvent.auditType.equals(auditType) &&
-        dataEvent.tags("transactionName").equals(transactionName) &&
-        dataEvent.tags.get("path").isDefined &&
-        dataEvent.tags.get("clientIP").isDefined &&
-        dataEvent.tags.get("clientPort").isDefined &&
-        dataEvent.tags.get("X-Request-ID").isDefined &&
-        dataEvent.tags.get("X-Session-ID").isDefined &&
-        dataEvent.tags.get("Unexpected").isEmpty &&
-        dataEvent.detail.equals(detail)
-    })
-  }
 
-  def mockAudit(nino: Nino, expectedDetails: MobilePayeResponse, journeyId: String)(implicit auditConnector: AuditConnector): Unit = {
-    (auditConnector.sendExtendedEvent(_: ExtendedDataEvent)(_: HeaderCarrier, _: ExecutionContext)).expects(
-      dataEventWith(
-        "mobile-paye",
-        "viewPayeSummary",
-        "view-paye-summary",
-        obj(
-          "nino" -> nino.value,
-          "journeyId" -> journeyId,
-          "data" -> expectedDetails)), *, * ).returning(Future successful Success)
+  def dataEventWith(
+    auditSource:     String,
+    auditType:       String,
+    transactionName: String,
+    detail:          JsValue
+  ): MatcherBase =
+    argThat { (dataEvent: ExtendedDataEvent) =>
+      dataEvent.auditSource.equals(auditSource) &&
+      dataEvent.auditType.equals(auditType) &&
+      dataEvent.tags("transactionName").equals(transactionName) &&
+      dataEvent.tags.get("path").isDefined &&
+      dataEvent.tags.get("clientIP").isDefined &&
+      dataEvent.tags.get("clientPort").isDefined &&
+      dataEvent.tags.get("X-Request-ID").isDefined &&
+      dataEvent.tags.get("X-Session-ID").isDefined &&
+      dataEvent.tags.get("Unexpected").isEmpty &&
+      dataEvent.detail.equals(detail)
+    }
+
+  def mockAudit(
+    nino:                    Nino,
+    expectedDetails:         MobilePayeResponse,
+    journeyId:               String
+  )(implicit auditConnector: AuditConnector
+  ): Unit = {
+    (auditConnector
+      .sendExtendedEvent(_: ExtendedDataEvent)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(dataEventWith("mobile-paye",
+                             "viewPayeSummary",
+                             "view-paye-summary",
+                             obj("nino" -> nino.value, "journeyId" -> journeyId, "data" -> expectedDetails)),
+               *,
+               *)
+      .returning(Future successful Success)
     ()
   }
 

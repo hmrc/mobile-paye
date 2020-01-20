@@ -37,10 +37,10 @@ import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 import uk.gov.hmrc.play.bootstrap.controller.BackendBaseController
 import uk.gov.hmrc.service.Auditor
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
 trait MobilePayeController extends BackendBaseController with HeaderValidator with ErrorHandling {
+
   def getPayeSummary(
     nino:      Nino,
     journeyId: JourneyId,
@@ -57,8 +57,7 @@ class LiveMobilePayeController @Inject() (
   val auditConnector:                                           AuditConnector,
   @Named("appName") override val appName:                       String,
   shutteringConnector:                                          ShutteringConnector
-)(
-  implicit val executionContext: ExecutionContext)
+)(implicit val executionContext:                                ExecutionContext)
     extends MobilePayeController
     with AccessControl
     with Auditor
@@ -99,12 +98,11 @@ class LiveMobilePayeController @Inject() (
     }
 
   private def sendAuditEvent(
-    nino:      Nino,
-    response:  MobilePayeResponse,
-    path:      String,
-    journeyId: JourneyId
-  )(
-    implicit hc: HeaderCarrier
+    nino:        Nino,
+    response:    MobilePayeResponse,
+    path:        String,
+    journeyId:   JourneyId
+  )(implicit hc: HeaderCarrier
   ): Unit = {
     def removeLinks(data: Option[Seq[PayeIncome]]): Option[Seq[PayeIncome]] = data match {
       case Some(d) if d.nonEmpty => Some(d.map(_.copy(link = None)))

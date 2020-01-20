@@ -21,17 +21,25 @@ import play.api.libs.json.{Json, OFormat}
 import scala.math.BigDecimal.RoundingMode
 
 // Link is only optional to remove it for auditing purposes, it's a mandatory data field, we could consider different classes for auditing instead
-case class PayeIncome(name: String, payrollNumber: Option[String] = None, taxCode: String, amount: BigDecimal, link: Option[String])
+case class PayeIncome(
+  name:          String,
+  payrollNumber: Option[String] = None,
+  taxCode:       String,
+  amount:        BigDecimal,
+  link:          Option[String])
 
 object PayeIncome {
-  def fromIncomeSource(incomeSource: IncomeSource): PayeIncome = {
-    PayeIncome(name = incomeSource.taxCodeIncome.name,
+
+  def fromIncomeSource(incomeSource: IncomeSource): PayeIncome =
+    PayeIncome(
+      name          = incomeSource.taxCodeIncome.name,
       payrollNumber = incomeSource.employment.payrollNumber,
       taxCode       = incomeSource.taxCodeIncome.taxCode,
       amount        = incomeSource.taxCodeIncome.amount.setScale(0, RoundingMode.FLOOR),
-      link          = Option(s"/check-income-tax/income-details/${incomeSource.taxCodeIncome.employmentId.getOrElse(throw new Exception("Employment ID not found"))}"))
-
-  }
+      link = Option(
+        s"/check-income-tax/income-details/${incomeSource.taxCodeIncome.employmentId.getOrElse(throw new Exception("Employment ID not found"))}"
+      )
+    )
 
   implicit val format: OFormat[PayeIncome] = Json.format[PayeIncome]
 }

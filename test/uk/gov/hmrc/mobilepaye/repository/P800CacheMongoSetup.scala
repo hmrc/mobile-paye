@@ -55,6 +55,7 @@ trait P800CacheMongoSetup extends MongoSpecSupport {
     failing:      Boolean,
     doc:          Option[Document],
     errorMessage: Option[String] = Some("error")) {
+
     val p800CacheMongo: P800CacheMongo =
       new P800CacheMongo(new ReactiveMongoComponent {
         override def mongoConnector: MongoConnector = mongoConnectorForTest

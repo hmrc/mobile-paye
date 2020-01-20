@@ -26,8 +26,7 @@ case class P800Repayment(
   paymentStatus:   Option[RepaymentStatus],
   datePaid:        Option[LocalDate],
   taxYear:         Int,
-  claimRefundLink: Option[String]
-)
+  claimRefundLink: Option[String])
 
 object P800Repayment {
   implicit val format: Format[P800Repayment] = Json.format

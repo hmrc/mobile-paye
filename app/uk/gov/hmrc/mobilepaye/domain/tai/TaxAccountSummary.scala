@@ -18,9 +18,10 @@ package uk.gov.hmrc.mobilepaye.domain.tai
 
 import play.api.libs.json.{Json, OFormat}
 
-case class TaxAccountSummary(totalEstimatedTax: BigDecimal,
-                             taxFreeAmount: BigDecimal)
+case class TaxAccountSummary(
+  totalEstimatedTax: BigDecimal,
+  taxFreeAmount:     BigDecimal)
 
-object TaxAccountSummary{
+object TaxAccountSummary {
   implicit val formats: OFormat[TaxAccountSummary] = Json.format[TaxAccountSummary]
 }

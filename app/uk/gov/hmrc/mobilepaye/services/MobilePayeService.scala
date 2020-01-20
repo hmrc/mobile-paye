@@ -39,17 +39,16 @@ class MobilePayeService @Inject() (
   private val NpsTaxAccountNoEmploymentsRecorded    = "no employments recorded for this individual"
 
   def getMobilePayeResponse(
-    nino:    Nino,
-    taxYear: Int
-  )(
-    implicit hc: HeaderCarrier,
+    nino:        Nino,
+    taxYear:     Int
+  )(implicit hc: HeaderCarrier,
     ec:          ExecutionContext
   ): Future[MobilePayeResponse] = {
 
     def knownException(ex: Throwable): Boolean =
       ex.getMessage.toLowerCase().contains(NpsTaxAccountNoEmploymentsCurrentYear) ||
-        ex.getMessage.toLowerCase().contains(NpsTaxAccountDataAbsentMsg) ||
-        ex.getMessage.toLowerCase().contains(NpsTaxAccountNoEmploymentsRecorded)
+      ex.getMessage.toLowerCase().contains(NpsTaxAccountDataAbsentMsg) ||
+      ex.getMessage.toLowerCase().contains(NpsTaxAccountNoEmploymentsRecorded)
 
     def getAndCacheP800RepaymentCheck(p800Summary: Option[P800Summary]): Option[P800Repayment] = {
       val repayment = p800Summary.flatMap(summary => P800Summary.toP800Repayment(summary, taxYear))
@@ -80,12 +79,11 @@ class MobilePayeService @Inject() (
 
       val otherNonTaxCodeIncomes: Option[Seq[OtherIncome]] = nonTaxCodeIncomes.otherNonTaxCodeIncomes
         .filter(_.incomeComponentType != BankOrBuildingSocietyInterest)
-        .map(
-          income =>
-            OtherIncome.withMaybeLink(
-              name   = income.getFormattedIncomeComponentType,
-              amount = income.amount.setScale(0, RoundingMode.FLOOR)
-            )
+        .map(income =>
+          OtherIncome.withMaybeLink(
+            name   = income.getFormattedIncomeComponentType,
+            amount = income.amount.setScale(0, RoundingMode.FLOOR)
+          )
         ) match {
         case Nil => None
         case oi  => Some(oi)
@@ -154,9 +152,8 @@ class MobilePayeService @Inject() (
   }
 
   def getPerson(
-    nino: Nino
-  )(
-    implicit hc: HeaderCarrier,
+    nino:        Nino
+  )(implicit hc: HeaderCarrier,
     ec:          ExecutionContext
   ): Future[Person] = taiConnector.getPerson(nino)
 
@@ -173,14 +170,13 @@ class MobilePayeService @Inject() (
   }
 
   def getTaxYearReconciliationsForP800(
-    nino: Nino
-  )(
-    implicit hc: HeaderCarrier,
+    nino:        Nino
+  )(implicit hc: HeaderCarrier,
     ec:          ExecutionContext
   ): Future[Option[List[TaxYearReconciliation]]] = {
     val cacheCheckResult = p800CacheMongo.selectByNino(nino)
-    cacheCheckResult.flatMap(
-      recordFound => if (recordFound.isEmpty) taxCalcConnector.getTaxReconciliations(nino) else Future.successful(None)
+    cacheCheckResult.flatMap(recordFound =>
+      if (recordFound.isEmpty) taxCalcConnector.getTaxReconciliations(nino) else Future.successful(None)
     )
   }
 

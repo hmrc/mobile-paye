@@ -34,6 +34,7 @@ object RepaymentStatus {
   case object Unknown extends RepaymentStatus
 
   implicit val format: Format[RepaymentStatus] = new Format[RepaymentStatus] {
+
     override def reads(json: JsValue): JsResult[RepaymentStatus] =
       json.as[String].toLowerCase() match {
         case "refund"             => JsSuccess(Refund)

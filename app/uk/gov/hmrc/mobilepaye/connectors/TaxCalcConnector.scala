@@ -24,8 +24,12 @@ import uk.gov.hmrc.mobilepaye.domain.taxcalc.TaxYearReconciliation
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class TaxCalcConnector @Inject()(httpGet: CoreGet, @Named("taxcalc") baseUrl: String, @Named("with-taxcalc") withTaxCalc: Boolean)(
-  implicit ec:                            ExecutionContext) {
+class TaxCalcConnector @Inject() (
+  httpGet:                            CoreGet,
+  @Named("taxcalc") baseUrl:          String,
+  @Named("with-taxcalc") withTaxCalc: Boolean
+)(implicit ec:                        ExecutionContext) {
+
   def getTaxReconciliations(nino: Nino)(implicit hc: HeaderCarrier): Future[Option[List[TaxYearReconciliation]]] = {
     val url = baseUrl + s"/taxcalc/${nino.nino}/reconciliations"
 
