@@ -456,7 +456,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     }
   }
 
-  "return OK and no P800 when type is not overpaid" in {
+  "return OK and no P800 when type is underpaid" in {
     stubForShutteringDisabled
     grantAccess(nino)
     personalDetailsAreFound(nino, person)
@@ -465,6 +465,21 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     stubForPensions(nino, pensionIncomeSource)
     stubForEmployments(nino, employmentIncomeSource)
     taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoType = "underpaid")
+
+    val response = await(requestWithCurrentYearAsCurrent.get())
+    response.status                                  shouldBe 200
+    Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse
+  }
+
+  "return OK and no P800 when type is not overpaid" in {
+    stubForShutteringDisabled
+    grantAccess(nino)
+    personalDetailsAreFound(nino, person)
+    nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+    taxAccountSummaryIsFound(nino, taxAccountSummary)
+    stubForPensions(nino, pensionIncomeSource)
+    stubForEmployments(nino, employmentIncomeSource)
+    taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoType = "balanced")
 
     val response = await(requestWithCurrentYearAsCurrent.get())
     response.status                                  shouldBe 200
