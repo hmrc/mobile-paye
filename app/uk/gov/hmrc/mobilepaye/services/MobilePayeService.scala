@@ -17,6 +17,7 @@
 package uk.gov.hmrc.mobilepaye.services
 
 import com.google.inject.{Inject, Singleton}
+import play.api.Logger
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mobilepaye.connectors.{TaiConnector, TaxCalcConnector}
@@ -145,7 +146,10 @@ class MobilePayeService @Inject() (
         taxAccountSummary,
         getP800Summary(reconciliations, taxYear)
       )
-    } yield mobilePayeResponse) recover {
+    } yield  {
+      Logger.info(s"HMA-2322 User has ${taxCodeIncomesEmployment.size} Employment(s)")
+      mobilePayeResponse
+    }) recover {
       case ex if knownException(ex) => MobilePayeResponse.empty
       case ex                       => throw ex
     }
