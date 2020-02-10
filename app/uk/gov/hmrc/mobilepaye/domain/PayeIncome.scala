@@ -17,6 +17,7 @@
 package uk.gov.hmrc.mobilepaye.domain
 
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.mobilepaye.domain.tai.Payment
 
 import scala.math.BigDecimal.RoundingMode
 
@@ -26,7 +27,8 @@ case class PayeIncome(
   payrollNumber: Option[String] = None,
   taxCode:       String,
   amount:        BigDecimal,
-  link:          Option[String])
+  link:          Option[String],
+  payments:      Seq[Payment])
 
 object PayeIncome {
 
@@ -36,9 +38,11 @@ object PayeIncome {
       payrollNumber = incomeSource.employment.payrollNumber,
       taxCode       = incomeSource.taxCodeIncome.taxCode,
       amount        = incomeSource.taxCodeIncome.amount.setScale(0, RoundingMode.FLOOR),
-      link = Option(
+      link = Option
+      (
         s"/check-income-tax/income-details/${incomeSource.taxCodeIncome.employmentId.getOrElse(throw new Exception("Employment ID not found"))}"
-      )
+      ),
+      payments = incomeSource.employment.annualAccounts.headOption.map(accounts => accounts.payments).getOrElse(Seq.empty)
     )
 
   implicit val format: OFormat[PayeIncome] = Json.format[PayeIncome]

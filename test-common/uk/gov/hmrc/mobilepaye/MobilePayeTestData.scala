@@ -41,7 +41,7 @@ trait MobilePayeTestData {
   val nonTaxCodeIncomeWithUntaxedInterest:    NonTaxCodeIncome = NonTaxCodeIncome(untaxedIncome, Seq(otherNonTaxCodeIncome))
   val nonTaxCodeIncomeWithoutUntaxedInterest: NonTaxCodeIncome = NonTaxCodeIncome(None, Seq(otherNonTaxCodeIncome))
 
-  val taiEmployment:  Employment = Employment(Some("ABC123"), 3)
+  val taiEmployment:  Employment = Employment(Some("ABC123"), 3, Seq.empty)
   val taiEmployment2: Employment = taiEmployment.copy(payrollNumber = Some("DEF456"), sequenceNumber = 4)
   val taiEmployment3: Employment = taiEmployment.copy(payrollNumber = None, sequenceNumber = 5)
 

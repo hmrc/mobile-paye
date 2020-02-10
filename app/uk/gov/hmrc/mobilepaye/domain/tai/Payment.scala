@@ -16,13 +16,25 @@
 
 package uk.gov.hmrc.mobilepaye.domain.tai
 
+import java.time.LocalDate
+
 import play.api.libs.json.{Format, Json}
 
-case class Employment(
-  payrollNumber:  Option[String],
-  sequenceNumber: Int,
-  annualAccounts: Seq[AnnualAccount])
+case class Payment(
+  date:                              LocalDate,
+  amountYearToDate:                  BigDecimal,
+  taxAmountYearToDate:               BigDecimal,
+  nationalInsuranceAmountYearToDate: BigDecimal,
+  amount:                            BigDecimal,
+  taxAmount:                         BigDecimal,
+  nationalInsuranceAmount:           BigDecimal)
+    extends Ordered[Payment] {
 
-object Employment {
-  implicit val employmentFormats: Format[Employment] = Json.format[Employment]
+  def compare(that: Payment): Int = this.date.compareTo(that.date)
+}
+
+object Payment {
+  implicit val dateOrdering: Ordering[Payment] = Ordering.by(x => x.date.toEpochDay)
+
+  implicit val format: Format[Payment] = Json.format[Payment]
 }

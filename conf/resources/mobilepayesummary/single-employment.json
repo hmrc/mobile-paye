@@ -6,7 +6,8 @@
       "taxCode": "1250L",
       "payrollNumber": "EMP0000001",
       "amount": 4143,
-      "link": "/"
+      "link": "/",
+      "payments": []
     }
   ],
   "taxFreeAmount": 12500,
