@@ -37,8 +37,8 @@ lazy val microservice = Project(appName, file("."))
     evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
     resolvers += Resolver.jcenterRepo,
     unmanagedResourceDirectories in Compile += baseDirectory.value / "resources",
-    unmanagedSourceDirectories in IntegrationTest := (baseDirectory in IntegrationTest)(
-      base => Seq(base / "it", base / "test-common")
+    unmanagedSourceDirectories in IntegrationTest := (baseDirectory in IntegrationTest)(base =>
+      Seq(base / "it", base / "test-common")
     ).value,
     unmanagedSourceDirectories in Test := (baseDirectory in Test)(base => Seq(base / "test", base / "test-common")).value,
     testGrouping in IntegrationTest := oneForkedJvmPerTest((definedTests in IntegrationTest).value),
@@ -61,7 +61,7 @@ lazy val microservice = Project(appName, file("."))
       //"-Xfatal-warnings",
       "-Xlint"
     ),
-    coverageMinimum := 90,
+    coverageMinimum := 89,
     coverageFailOnMinimum := true,
     coverageHighlighting := true,
     coverageExcludedPackages := "<empty>;com.kenshoo.play.metrics.*;.*definition.*;prod.*;testOnlyDoNotUseInAppConf.*;app.*;.*BuildInfo.*;.*Routes.*;.*javascript.*;.*Reverse.*"
@@ -76,6 +76,7 @@ def oneForkedJvmPerTest(tests: Seq[TestDefinition]): Seq[Group] =
 // compatible with wiremock, so we need to pin the jetty stuff to the older version.
 // see https://groups.google.com/forum/#!topic/play-framework/HAIM1ukUCnI
 val jettyVersion = "9.2.13.v20150730"
+
 val overrides: Seq[ModuleID] = Seq(
   "org.eclipse.jetty"           % "jetty-server"       % jettyVersion,
   "org.eclipse.jetty"           % "jetty-servlet"      % jettyVersion,
