@@ -46,10 +46,16 @@ class MobilePayeService @Inject() (
     ec:          ExecutionContext
   ): Future[MobilePayeResponse] = {
 
-    def knownException(ex: Throwable): Boolean =
-      ex.getMessage.toLowerCase().contains(NpsTaxAccountNoEmploymentsCurrentYear) ||
-      ex.getMessage.toLowerCase().contains(NpsTaxAccountDataAbsentMsg) ||
-      ex.getMessage.toLowerCase().contains(NpsTaxAccountNoEmploymentsRecorded)
+    def knownException(
+      ex:   Throwable,
+      nino: Nino
+    ): Boolean = {
+      val known = ex.getMessage.toLowerCase().contains(NpsTaxAccountNoEmploymentsCurrentYear) ||
+        ex.getMessage.toLowerCase().contains(NpsTaxAccountDataAbsentMsg) ||
+        ex.getMessage.toLowerCase().contains(NpsTaxAccountNoEmploymentsRecorded)
+      Logger.info(s"[HMA-2505] - Tai exception (known: $known) for ${nino.nino} - " + ex.getMessage.toLowerCase())
+      known
+    }
 
     def getAndCacheP800RepaymentCheck(p800Summary: Option[P800Summary]): Option[P800Repayment] = {
       val repayment = p800Summary.flatMap(summary => P800Summary.toP800Repayment(summary, taxYear))
@@ -146,12 +152,12 @@ class MobilePayeService @Inject() (
         taxAccountSummary,
         getP800Summary(reconciliations, taxYear)
       )
-    } yield  {
+    } yield {
       Logger.info(s"HMA-2322 User has ${taxCodeIncomesEmployment.size} Employment(s)")
       mobilePayeResponse
     }) recover {
-      case ex if knownException(ex) => MobilePayeResponse.empty
-      case ex                       => throw ex
+      case ex if knownException(ex, nino) => MobilePayeResponse.empty
+      case ex                             => throw ex
     }
   }
 
