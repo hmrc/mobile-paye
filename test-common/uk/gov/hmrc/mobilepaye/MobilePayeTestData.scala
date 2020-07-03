@@ -30,7 +30,7 @@ trait MobilePayeTestData {
   val endOfTaxYear: Int = TaxYear.current.finishYear
 
   val nino:           Nino          = Nino("CS700100A")
-  val taxCodeIncome:  TaxCodeIncome = TaxCodeIncome(EmploymentIncome, Some(3), "The Best Shop Ltd", 1000, Live, "S1150L")
+  val taxCodeIncome:  TaxCodeIncome = TaxCodeIncome(EmploymentIncome, Some(3), "The Best Shop Ltd", 1000, "S1150L")
   val taxCodeIncome2: TaxCodeIncome = taxCodeIncome.copy(name = "The Worst Shop Ltd", employmentId = Some(4))
   val taxCodeIncome3: TaxCodeIncome = taxCodeIncome.copy(componentType = PensionIncome, name = "Prestige Pensions", employmentId = Some(5))
 
