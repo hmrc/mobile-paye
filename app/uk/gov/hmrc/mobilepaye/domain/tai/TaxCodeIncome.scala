@@ -26,28 +26,11 @@ case object PotentiallyCeased extends TaxCodeIncomeStatus
 
 case object Ceased extends TaxCodeIncomeStatus
 
-object TaxCodeIncomeStatus extends TaxCodeIncomeStatus {
-
-  implicit val formatTaxCodeIncomeSourceStatusType = new Format[TaxCodeIncomeStatus] {
-
-    override def reads(json: JsValue): JsResult[TaxCodeIncomeStatus] =
-      json.as[String] match {
-        case "Live"              => JsSuccess(Live)
-        case "PotentiallyCeased" => JsSuccess(PotentiallyCeased)
-        case "Ceased"            => JsSuccess(Ceased)
-        case _                   => throw new IllegalArgumentException("Invalid TaxCodeIncomeSourceStatus type")
-      }
-
-    override def writes(taxCodeIncomeStatus: TaxCodeIncomeStatus) = JsString(taxCodeIncomeStatus.toString)
-  }
-}
-
 case class TaxCodeIncome(
   componentType: TaxComponentType,
   employmentId:  Option[Int],
   name:          String,
   amount:        BigDecimal,
-  status:        TaxCodeIncomeStatus,
   taxCode:       String)
 
 object TaxCodeIncome {
