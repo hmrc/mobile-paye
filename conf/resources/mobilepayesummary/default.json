@@ -6,7 +6,8 @@
       "taxCode": "1250L",
       "payrollNumber": "EMP0000001",
       "amount": 18900,
-      "link": "/"
+      "link": "/",
+      "updateIncomeLink": "/"
     }
   ],
   "repayment": {
