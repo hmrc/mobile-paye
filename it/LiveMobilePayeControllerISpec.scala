@@ -47,8 +47,6 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
 
       val response = await(requestWithCurrentYearAsInt.get())
       response.status shouldBe 200
-      println("EXPECTED BODY = " + Json.prettyPrint(Json.toJson(fullMobilePayeResponse)))
-      println("RESPONSE BODY = " + Json.prettyPrint(Json.toJson(response.body)))
       response.body   shouldBe Json.toJson(fullMobilePayeResponse).toString()
 
     }
