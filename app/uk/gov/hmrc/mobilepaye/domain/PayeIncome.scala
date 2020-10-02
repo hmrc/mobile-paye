@@ -31,7 +31,10 @@ case class PayeIncome(
 
 object PayeIncome {
 
-  def fromIncomeSource(incomeSource: IncomeSource): PayeIncome =
+  def fromIncomeSource(
+    incomeSource:     IncomeSource,
+    updateIncomeLink: Boolean = false
+  ): PayeIncome =
     PayeIncome(
       name          = incomeSource.taxCodeIncome.name,
       payrollNumber = incomeSource.employment.payrollNumber,
@@ -40,9 +43,11 @@ object PayeIncome {
       link = Option(
         s"/check-income-tax/income-details/${incomeSource.taxCodeIncome.employmentId.getOrElse(throw new Exception("Employment ID not found"))}"
       ),
-      updateIncomeLink = Option(
-        s"/check-income-tax/update-income/load/${incomeSource.taxCodeIncome.employmentId.getOrElse(throw new Exception("Employment ID not found"))}"
-      )
+      updateIncomeLink = if (updateIncomeLink)
+        Option(
+          s"/check-income-tax/update-income/load/${incomeSource.taxCodeIncome.employmentId.getOrElse(throw new Exception("Employment ID not found"))}"
+        )
+      else None
     )
 
   implicit val format: OFormat[PayeIncome] = Json.format[PayeIncome]

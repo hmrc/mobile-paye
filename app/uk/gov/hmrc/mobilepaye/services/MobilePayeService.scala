@@ -76,9 +76,9 @@ class MobilePayeService @Inject() (
       p800Summary:            Option[P800Summary]
     ): MobilePayeResponse = {
 
-      def buildPayeIncomes(incomes: Seq[IncomeSource]): Option[Seq[PayeIncome]] =
+      def buildPayeIncomes(incomes: Seq[IncomeSource], updateIncomeLink: Boolean = false): Option[Seq[PayeIncome]] =
         incomes.map { inc =>
-          PayeIncome.fromIncomeSource(inc)
+          PayeIncome.fromIncomeSource(inc, updateIncomeLink)
         } match {
           case Nil => None
           case epi => Some(epi)
@@ -117,7 +117,7 @@ class MobilePayeService @Inject() (
       }
       // $COVERAGE-ON$
 
-      val employmentPayeIncomes: Option[Seq[PayeIncome]] = buildPayeIncomes(incomeSourceEmployment)
+      val employmentPayeIncomes: Option[Seq[PayeIncome]] = buildPayeIncomes(incomeSourceEmployment, updateIncomeLink = true)
       val pensionPayeIncomes:    Option[Seq[PayeIncome]] = buildPayeIncomes(incomeSourcePension)
 
       val taxFreeAmount: Option[BigDecimal] = Option(taxAccountSummary.taxFreeAmount.setScale(0, RoundingMode.FLOOR))
