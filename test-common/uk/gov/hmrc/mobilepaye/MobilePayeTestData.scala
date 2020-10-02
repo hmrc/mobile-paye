@@ -48,7 +48,7 @@ trait MobilePayeTestData {
   val employmentIncomeSource: Seq[IncomeSource] = Seq(IncomeSource(taxCodeIncome, taiEmployment), IncomeSource(taxCodeIncome2, taiEmployment2))
   val pensionIncomeSource:    Seq[IncomeSource] = Seq(IncomeSource(taxCodeIncome3, taiEmployment3))
 
-  val employments: Seq[PayeIncome] = employmentIncomeSource.map(ic => PayeIncome.fromIncomeSource(ic))
+  val employments: Seq[PayeIncome] = employmentIncomeSource.map(ic => PayeIncome.fromIncomeSource(ic, updateIncomeLink = true))
   val pensions:    Seq[PayeIncome] = pensionIncomeSource.map(ic => PayeIncome.fromIncomeSource(ic))
 
   val taxAccountSummary: TaxAccountSummary = TaxAccountSummary(BigDecimal(250), BigDecimal(10000))
