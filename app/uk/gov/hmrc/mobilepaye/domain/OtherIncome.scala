@@ -28,11 +28,21 @@ object OtherIncome {
 
   def withMaybeLink(
     name:   String,
-    amount: BigDecimal,
-    link:   Option[String] = None
+    amount: BigDecimal
   ): OtherIncome =
     if (name == "UNTAXED INTEREST INCOME")
       OtherIncome(name, amount, Some("/check-income-tax/income/bank-building-society-savings"))
     else
       OtherIncome(name, amount)
+}
+
+case class OtherIncomeAudit(
+  name:   String,
+  amount: BigDecimal)
+
+object OtherIncomeAudit {
+  implicit val format: OFormat[OtherIncomeAudit] = Json.format[OtherIncomeAudit]
+
+  def fromOtherIncome(otherIncome: OtherIncome): OtherIncomeAudit =
+    OtherIncomeAudit(otherIncome.name, otherIncome.amount)
 }

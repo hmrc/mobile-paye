@@ -28,7 +28,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HeaderNames}
 import uk.gov.hmrc.mobilepaye.connectors.ShutteringConnector
 import uk.gov.hmrc.mobilepaye.controllers.action.AccessControl
 import uk.gov.hmrc.mobilepaye.domain.types.ModelTypes.JourneyId
-import uk.gov.hmrc.mobilepaye.domain.{MobilePayeResponse, OtherIncome, PayeIncome}
+import uk.gov.hmrc.mobilepaye.domain.{MobilePayeResponse, MobilePayeResponseAudit, OtherIncome, PayeIncome, PayeIncomeAudit}
 import uk.gov.hmrc.mobilepaye.services.MobilePayeService
 import uk.gov.hmrc.play.HeaderCarrierConverter.fromHeadersAndSession
 import uk.gov.hmrc.play.audit.AuditExtensions.auditHeaderCarrier
@@ -103,43 +103,16 @@ class LiveMobilePayeController @Inject() (
     path:        String,
     journeyId:   JourneyId
   )(implicit hc: HeaderCarrier
-  ): Unit = {
-    def removeLinks(data: Option[Seq[PayeIncome]]): Option[Seq[PayeIncome]] = data match {
-      case Some(d) if d.nonEmpty => Some(d.map(_.copy(link = None)))
-      case None                  => None
-    }
-
-    val emps: Option[Seq[PayeIncome]] = removeLinks(response.employments)
-    val pens: Option[Seq[PayeIncome]] = removeLinks(response.pensions)
-    val otIncs: Option[Seq[OtherIncome]] = response.otherIncomes match {
-      case Some(data) if data.nonEmpty => Some(data.map(_.copy(link = None)))
-      case None                        => None
-    }
-
-    val auditPayload = response.copy(
-      employments               = emps,
-      pensions                  = pens,
-      otherIncomes              = otIncs,
-      taxFreeAmountLink         = None,
-      estimatedTaxAmountLink    = None,
-      understandYourTaxCodeLink = None,
-      addMissingEmployerLink    = None,
-      addMissingPensionLink     = None,
-      addMissingIncomeLink      = None
-    )
-
-    auditConnector.sendExtendedEvent(
-      ExtendedDataEvent(
-        appName,
-        "viewPayeSummary",
-        tags = hc.toAuditTags("view-paye-summary", path),
-        detail = obj(
-          "nino"      -> nino.value,
-          "journeyId" -> journeyId.value,
-          "data"      -> auditPayload
-        )
+  ): Unit = auditConnector.sendExtendedEvent(
+    ExtendedDataEvent(
+      appName,
+      "viewPayeSummary",
+      tags = hc.toAuditTags("view-paye-summary", path),
+      detail = obj(
+        "nino"      -> nino.value,
+        "journeyId" -> journeyId.value,
+        "data"      -> MobilePayeResponseAudit.fromResponse(response)
       )
     )
-    ()
-  }
+  )
 }

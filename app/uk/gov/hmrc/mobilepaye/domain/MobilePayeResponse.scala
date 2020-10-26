@@ -30,10 +30,10 @@ case class MobilePayeResponse(
   estimatedTaxAmount:        Option[BigDecimal],
   estimatedTaxAmountLink:    Option[String] = Some("/check-income-tax/paye-income-tax-estimate"),
   understandYourTaxCodeLink: Option[String] = Some("/check-income-tax/tax-codes"),
-  addMissingEmployerLink:    Option[String] = Some("/check-income-tax/add-employment/employment-name"),
-  addMissingPensionLink:     Option[String] = Some("/check-income-tax/add-pension-provider/name"),
-  addMissingIncomeLink:      Option[String] = Some("/forms/form/tell-us-about-other-income/guide"),
-  previousTaxYearLink:       Option[String] = Some(s"/check-income-tax/historic-paye/${TaxYear.current.previous.startYear}"))
+  addMissingEmployerLink:    String = "/check-income-tax/add-employment/employment-name",
+  addMissingPensionLink:     String = "/check-income-tax/add-pension-provider/name",
+  addMissingIncomeLink:      String = "/forms/form/tell-us-about-other-income/guide",
+  previousTaxYearLink:       String = s"/check-income-tax/historic-paye/${TaxYear.current.previous.startYear}")
 
 object MobilePayeResponse {
 
@@ -52,4 +52,29 @@ object MobilePayeResponse {
     )
 
   implicit val format: OFormat[MobilePayeResponse] = Json.format[MobilePayeResponse]
+}
+
+case class MobilePayeResponseAudit(
+  taxYear:            Option[Int],
+  employments:        Option[Seq[PayeIncomeAudit]],
+  pensions:           Option[Seq[PayeIncomeAudit]],
+  repayment:          Option[P800Repayment],
+  otherIncomes:       Option[Seq[OtherIncomeAudit]],
+  taxFreeAmount:      Option[BigDecimal],
+  estimatedTaxAmount: Option[BigDecimal])
+
+object MobilePayeResponseAudit {
+
+  def fromResponse(response: MobilePayeResponse): MobilePayeResponseAudit =
+    MobilePayeResponseAudit(
+      taxYear            = response.taxYear,
+      employments        = response.employments.map(emps => emps.map(PayeIncomeAudit.fromPayeIncome)),
+      pensions           = response.pensions.map(pens => pens.map(PayeIncomeAudit.fromPayeIncome)),
+      repayment          = response.repayment,
+      otherIncomes       = response.otherIncomes.map(oIncs => oIncs.map(OtherIncomeAudit.fromOtherIncome)),
+      taxFreeAmount      = response.taxFreeAmount,
+      estimatedTaxAmount = response.estimatedTaxAmount
+    )
+
+  implicit val format: OFormat[MobilePayeResponseAudit] = Json.format[MobilePayeResponseAudit]
 }
