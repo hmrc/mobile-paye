@@ -51,20 +51,3 @@ object PayeIncome {
 
   implicit val format: OFormat[PayeIncome] = Json.format[PayeIncome]
 }
-
-case class PayeIncomeAudit(
-  name:          String,
-  taxCode:       String,
-  amount:        BigDecimal)
-
-object PayeIncomeAudit {
-
-  def fromPayeIncome(payeIncome: PayeIncome): PayeIncomeAudit =
-    PayeIncomeAudit(
-      name          = payeIncome.name,
-      taxCode       = payeIncome.taxCode,
-      amount        = payeIncome.amount
-    )
-
-  implicit val format: OFormat[PayeIncomeAudit] = Json.format[PayeIncomeAudit]
-}

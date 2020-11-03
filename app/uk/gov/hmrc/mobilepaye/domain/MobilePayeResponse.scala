@@ -53,28 +53,3 @@ object MobilePayeResponse {
 
   implicit val format: OFormat[MobilePayeResponse] = Json.format[MobilePayeResponse]
 }
-
-case class MobilePayeResponseAudit(
-  taxYear:            Option[Int],
-  employments:        Option[Seq[PayeIncomeAudit]],
-  pensions:           Option[Seq[PayeIncomeAudit]],
-  repayment:          Option[P800Repayment],
-  otherIncomes:       Option[Seq[OtherIncomeAudit]],
-  taxFreeAmount:      Option[BigDecimal],
-  estimatedTaxAmount: Option[BigDecimal])
-
-object MobilePayeResponseAudit {
-
-  def fromResponse(response: MobilePayeResponse): MobilePayeResponseAudit =
-    MobilePayeResponseAudit(
-      taxYear            = response.taxYear,
-      employments        = response.employments.map(emps => emps.map(PayeIncomeAudit.fromPayeIncome)),
-      pensions           = response.pensions.map(pens => pens.map(PayeIncomeAudit.fromPayeIncome)),
-      repayment          = response.repayment,
-      otherIncomes       = response.otherIncomes.map(oIncs => oIncs.map(OtherIncomeAudit.fromOtherIncome)),
-      taxFreeAmount      = response.taxFreeAmount,
-      estimatedTaxAmount = response.estimatedTaxAmount
-    )
-
-  implicit val format: OFormat[MobilePayeResponseAudit] = Json.format[MobilePayeResponseAudit]
-}
