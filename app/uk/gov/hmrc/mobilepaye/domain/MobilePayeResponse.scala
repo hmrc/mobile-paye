@@ -30,10 +30,10 @@ case class MobilePayeResponse(
   estimatedTaxAmount:        Option[BigDecimal],
   estimatedTaxAmountLink:    Option[String] = Some("/check-income-tax/paye-income-tax-estimate"),
   understandYourTaxCodeLink: Option[String] = Some("/check-income-tax/tax-codes"),
-  addMissingEmployerLink:    Option[String] = Some("/check-income-tax/add-employment/employment-name"),
-  addMissingPensionLink:     Option[String] = Some("/check-income-tax/add-pension-provider/name"),
-  addMissingIncomeLink:      Option[String] = Some("/forms/form/tell-us-about-other-income/guide"),
-  previousTaxYearLink:       Option[String] = Some(s"/check-income-tax/historic-paye/${TaxYear.current.previous.startYear}"))
+  addMissingEmployerLink:    String = "/check-income-tax/add-employment/employment-name",
+  addMissingPensionLink:     String = "/check-income-tax/add-pension-provider/name",
+  addMissingIncomeLink:      String = "/forms/form/tell-us-about-other-income/guide",
+  previousTaxYearLink:       String = s"/check-income-tax/historic-paye/${TaxYear.current.previous.startYear}")
 
 object MobilePayeResponse {
 

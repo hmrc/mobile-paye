@@ -22,7 +22,7 @@ import play.api.libs.json.JsValue
 import play.api.libs.json.Json.obj
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.mobilepaye.domain.MobilePayeResponse
+import uk.gov.hmrc.mobilepaye.domain.{MobilePayeResponse, MobilePayeResponseAudit}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
@@ -52,7 +52,7 @@ trait AuditMock extends MockFactory {
 
   def mockAudit(
     nino:                    Nino,
-    expectedDetails:         MobilePayeResponse,
+    expectedDetails:         MobilePayeResponseAudit,
     journeyId:               String
   )(implicit auditConnector: AuditConnector
   ): Unit = {

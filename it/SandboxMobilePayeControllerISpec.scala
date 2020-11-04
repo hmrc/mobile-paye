@@ -18,10 +18,10 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
       val response = await(request.addHttpHeaders(mobileHeader).get())
       response.status                                shouldBe 200
       (response.json \ "taxYear").as[Int]            shouldBe TaxYear.current.currentYear
-      (response.json \\ "employments")               should not be empty
-      (response.json \\ "repayment")                 should not be empty
-      (response.json \\ "pensions")                  should not be empty
-      (response.json \\ "otherIncomes")              should not be empty
+      (response.json \\ "employments").isEmpty       shouldBe false
+      (response.json \\ "repayment").isEmpty         shouldBe false
+      (response.json \\ "pensions").isEmpty          shouldBe false
+      (response.json \\ "otherIncomes").isEmpty      shouldBe false
       (response.json \ "taxFreeAmount").as[Int]      shouldBe 12500
       (response.json \ "estimatedTaxAmount").as[Int] shouldBe 1578
     }
@@ -30,10 +30,10 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
       val response = await(request.addHttpHeaders(mobileHeader, "SANDBOX-CONTROL" -> "SINGLE-EMPLOYMENT").get())
       response.status                                         shouldBe 200
       (response.json \ "taxYear").as[Int]                     shouldBe TaxYear.current.currentYear
-      (response.json \\ "employments")                        should not be empty
+      (response.json \\ "employments").isEmpty                shouldBe false
       (response.json \ "employments" \ 0 \ "name").as[String] shouldBe "SAINSBURY'S PLC"
-      (response.json \\ "pensions")                           shouldBe empty
-      (response.json \\ "otherIncomes")                       shouldBe empty
+      (response.json \\ "pensions").isEmpty                   shouldBe true
+      (response.json \\ "otherIncomes").isEmpty               shouldBe true
       (response.json \ "taxFreeAmount").as[Int]               shouldBe 12500
       (response.json \ "estimatedTaxAmount").as[Int]          shouldBe 1578
     }
@@ -42,31 +42,31 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
       val response = await(request.addHttpHeaders(mobileHeader, "SANDBOX-CONTROL" -> "SINGLE-PENSION").get())
       response.status                                      shouldBe 200
       (response.json \ "taxYear").as[Int]                  shouldBe TaxYear.current.currentYear
-      (response.json \\ "employments")                     shouldBe empty
-      (response.json \\ "pensions")                        should not be empty
+      (response.json \\ "employments").isEmpty             shouldBe true
+      (response.json \\ "pensions").isEmpty                shouldBe false
       (response.json \ "pensions" \ 0 \ "name").as[String] shouldBe "HIGHWIRE RETURNS LTD"
-      (response.json \\ "otherIncomes")                    shouldBe empty
+      (response.json \\ "otherIncomes").isEmpty            shouldBe true
       (response.json \ "taxFreeAmount").as[Int]            shouldBe 12500
       (response.json \ "estimatedTaxAmount").as[Int]       shouldBe 1578
     }
 
     "return OK and only TaxYear with 'missing' links when SANDBOX-CONTROL is NO-TAX-YEAR-INCOME" in {
       val response = await(request.addHttpHeaders(mobileHeader, "SANDBOX-CONTROL" -> "NO-TAX-YEAR-INCOME").get())
-      response.status                                shouldBe 200
-      (response.json \ "taxYear").as[Int]            shouldBe TaxYear.current.currentYear
-      (response.json \\ "employments")               shouldBe empty
-      (response.json \\ "pensions")                  shouldBe empty
-      (response.json \\ "otherIncomes")              shouldBe empty
-      (response.json \\ "understandYourTaxCodeLink") shouldBe empty
+      response.status                                        shouldBe 200
+      (response.json \ "taxYear").as[Int]                    shouldBe TaxYear.current.currentYear
+      (response.json \\ "employments").isEmpty               shouldBe true
+      (response.json \\ "pensions").isEmpty                  shouldBe true
+      (response.json \\ "otherIncomes").isEmpty              shouldBe true
+      (response.json \\ "understandYourTaxCodeLink").isEmpty shouldBe true
     }
 
     "return OK and only TaxYear with 'missing' links when SANDBOX-CONTROL is PREVIOUS-INCOME-ONLY" in {
       val response = await(request.addHttpHeaders(mobileHeader, "SANDBOX-CONTROL" -> "PREVIOUS-INCOME-ONLY").get())
       response.status                                          shouldBe 200
       (response.json \ "taxYear").as[Int]                      shouldBe TaxYear.current.currentYear
-      (response.json \\ "employments")                         shouldBe empty
-      (response.json \\ "pensions")                            shouldBe empty
-      (response.json \\ "otherIncomes")                        shouldBe empty
+      (response.json \\ "employments").isEmpty                 shouldBe true
+      (response.json \\ "pensions").isEmpty                    shouldBe true
+      (response.json \\ "otherIncomes").isEmpty                shouldBe true
       (response.json \ "understandYourTaxCodeLink").as[String] shouldBe "/"
     }
 
@@ -74,9 +74,9 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
       val response = await(request.addHttpHeaders(mobileHeader, "SANDBOX-CONTROL" -> "OTHER-INCOME-ONLY").get())
       response.status                                          shouldBe 200
       (response.json \ "taxYear").as[Int]                      shouldBe TaxYear.current.currentYear
-      (response.json \\ "employments")                         shouldBe empty
-      (response.json \\ "pensions")                            shouldBe empty
-      (response.json \\ "otherIncomes")                        should not be empty
+      (response.json \\ "employments").isEmpty                 shouldBe true
+      (response.json \\ "pensions").isEmpty                    shouldBe true
+      (response.json \\ "otherIncomes").isEmpty                shouldBe false
       (response.json \ "understandYourTaxCodeLink").as[String] shouldBe "/"
     }
 
@@ -130,9 +130,9 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
       val response = await(request.addHttpHeaders(mobileHeader).get())
       response.status                                shouldBe 200
       (response.json \ "taxYear").as[Int]            shouldBe TaxYear.current.currentYear
-      (response.json \\ "employments")               should not be empty
-      (response.json \\ "pensions")                  should not be empty
-      (response.json \\ "otherIncomes")              should not be empty
+      (response.json \\ "employments").isEmpty       shouldBe false
+      (response.json \\ "pensions").isEmpty          shouldBe false
+      (response.json \\ "otherIncomes").isEmpty      shouldBe false
       (response.json \ "taxFreeAmount").as[Int]      shouldBe 12500
       (response.json \ "estimatedTaxAmount").as[Int] shouldBe 1578
     }
@@ -141,10 +141,10 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
       val response = await(request.addHttpHeaders(mobileHeader, "SANDBOX-CONTROL" -> "SINGLE-EMPLOYMENT").get())
       response.status                                         shouldBe 200
       (response.json \ "taxYear").as[Int]                     shouldBe TaxYear.current.currentYear
-      (response.json \\ "employments")                        should not be empty
+      (response.json \\ "employments").isEmpty                shouldBe false
       (response.json \ "employments" \ 0 \ "name").as[String] shouldBe "SAINSBURY'S PLC"
-      (response.json \\ "pensions")                           shouldBe empty
-      (response.json \\ "otherIncomes")                       shouldBe empty
+      (response.json \\ "pensions").isEmpty                   shouldBe true
+      (response.json \\ "otherIncomes").isEmpty               shouldBe true
       (response.json \ "taxFreeAmount").as[Int]               shouldBe 12500
       (response.json \ "estimatedTaxAmount").as[Int]          shouldBe 1578
     }
@@ -153,31 +153,31 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
       val response = await(request.addHttpHeaders(mobileHeader, "SANDBOX-CONTROL" -> "SINGLE-PENSION").get())
       response.status                                      shouldBe 200
       (response.json \ "taxYear").as[Int]                  shouldBe TaxYear.current.currentYear
-      (response.json \\ "employments")                     shouldBe empty
-      (response.json \\ "pensions")                        should not be empty
+      (response.json \\ "employments").isEmpty             shouldBe true
+      (response.json \\ "pensions").isEmpty                shouldBe false
       (response.json \ "pensions" \ 0 \ "name").as[String] shouldBe "HIGHWIRE RETURNS LTD"
-      (response.json \\ "otherIncomes")                    shouldBe empty
+      (response.json \\ "otherIncomes").isEmpty            shouldBe true
       (response.json \ "taxFreeAmount").as[Int]            shouldBe 12500
       (response.json \ "estimatedTaxAmount").as[Int]       shouldBe 1578
     }
 
     "return OK and only TaxYear with 'missing' links when SANDBOX-CONTROL is NO-TAX-YEAR-INCOME" in {
       val response = await(request.addHttpHeaders(mobileHeader, "SANDBOX-CONTROL" -> "NO-TAX-YEAR-INCOME").get())
-      response.status                                shouldBe 200
-      (response.json \ "taxYear").as[Int]            shouldBe TaxYear.current.currentYear
-      (response.json \\ "employments")               shouldBe empty
-      (response.json \\ "pensions")                  shouldBe empty
-      (response.json \\ "otherIncomes")              shouldBe empty
-      (response.json \\ "understandYourTaxCodeLink") shouldBe empty
+      response.status                                        shouldBe 200
+      (response.json \ "taxYear").as[Int]                    shouldBe TaxYear.current.currentYear
+      (response.json \\ "employments").isEmpty               shouldBe true
+      (response.json \\ "pensions").isEmpty                  shouldBe true
+      (response.json \\ "otherIncomes").isEmpty              shouldBe true
+      (response.json \\ "understandYourTaxCodeLink").isEmpty shouldBe true
     }
 
     "return OK and only TaxYear with 'missing' links when SANDBOX-CONTROL is PREVIOUS-INCOME-ONLY" in {
       val response = await(request.addHttpHeaders(mobileHeader, "SANDBOX-CONTROL" -> "PREVIOUS-INCOME-ONLY").get())
       response.status                                          shouldBe 200
       (response.json \ "taxYear").as[Int]                      shouldBe TaxYear.current.currentYear
-      (response.json \\ "employments")                         shouldBe empty
-      (response.json \\ "pensions")                            shouldBe empty
-      (response.json \\ "otherIncomes")                        shouldBe empty
+      (response.json \\ "employments").isEmpty                 shouldBe true
+      (response.json \\ "pensions").isEmpty                    shouldBe true
+      (response.json \\ "otherIncomes").isEmpty                shouldBe true
       (response.json \ "understandYourTaxCodeLink").as[String] shouldBe "/"
     }
 
@@ -185,9 +185,9 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
       val response = await(request.addHttpHeaders(mobileHeader, "SANDBOX-CONTROL" -> "OTHER-INCOME-ONLY").get())
       response.status                                          shouldBe 200
       (response.json \ "taxYear").as[Int]                      shouldBe TaxYear.current.currentYear
-      (response.json \\ "employments")                         shouldBe empty
-      (response.json \\ "pensions")                            shouldBe empty
-      (response.json \\ "otherIncomes")                        should not be empty
+      (response.json \\ "employments").isEmpty                 shouldBe true
+      (response.json \\ "pensions").isEmpty                    shouldBe true
+      (response.json \\ "otherIncomes").isEmpty                shouldBe false
       (response.json \ "understandYourTaxCodeLink").as[String] shouldBe "/"
     }
 

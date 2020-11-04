@@ -26,7 +26,7 @@ case class PayeIncome(
   payrollNumber:    Option[String] = None,
   taxCode:          String,
   amount:           BigDecimal,
-  link:             Option[String],
+  link:             String,
   updateIncomeLink: Option[String])
 
 object PayeIncome {
@@ -40,9 +40,8 @@ object PayeIncome {
       payrollNumber = incomeSource.employment.payrollNumber,
       taxCode       = incomeSource.taxCodeIncome.taxCode,
       amount        = incomeSource.taxCodeIncome.amount.setScale(0, RoundingMode.FLOOR),
-      link = Option(
-        s"/check-income-tax/income-details/${incomeSource.taxCodeIncome.employmentId.getOrElse(throw new Exception("Employment ID not found"))}"
-      ),
+      link =
+        s"/check-income-tax/income-details/${incomeSource.taxCodeIncome.employmentId.getOrElse(throw new Exception("Employment ID not found"))}",
       updateIncomeLink = if (updateIncomeLink)
         Option(
           s"/check-income-tax/update-income/load/${incomeSource.taxCodeIncome.employmentId.getOrElse(throw new Exception("Employment ID not found"))}"

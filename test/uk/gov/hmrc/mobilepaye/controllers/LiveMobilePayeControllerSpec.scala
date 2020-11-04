@@ -73,53 +73,55 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
     "return 200 and full paye summary data for valid authorised nino" in {
       mockShutteringResponse(notShuttered)
       mockGetPerson(Future.successful(person))
-      mockGetMobilePayeResponse(Future.successful(fullMobilePayeAudit))
+      mockGetMobilePayeResponse(Future.successful(fullMobilePayeResponse))
       mockAuthorisationGrantAccess(grantAccessWithCL200)
       mockAudit(nino, fullMobilePayeAudit, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42")
+
+      println("Expected: " + Json.prettyPrint(Json.toJson(fullMobilePayeAudit)))
 
       val result = controller.getPayeSummary(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42", currentTaxYear)(fakeRequest)
 
       status(result)        shouldBe 200
-      contentAsJson(result) shouldBe Json.toJson(fullMobilePayeAudit)
+      contentAsJson(result) shouldBe Json.toJson(fullMobilePayeResponse)
     }
 
     "return 200 and paye summary data with no employment data for valid authorised nino" in {
       mockShutteringResponse(notShuttered)
       mockGetPerson(Future.successful(person))
-      mockGetMobilePayeResponse(Future.successful(fullMobilePayeAudit.copy(employments = None)))
+      mockGetMobilePayeResponse(Future.successful(fullMobilePayeResponse.copy(employments = None)))
       mockAuthorisationGrantAccess(grantAccessWithCL200)
       mockAudit(nino, fullMobilePayeAudit.copy(employments = None), "9bcb9c5a-0cfd-49e3-a935-58a28c386a42")
 
       val result = controller.getPayeSummary(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42", currentTaxYear)(fakeRequest)
 
       status(result)        shouldBe 200
-      contentAsJson(result) shouldBe Json.toJson(fullMobilePayeAudit.copy(employments = None))
+      contentAsJson(result) shouldBe Json.toJson(fullMobilePayeResponse.copy(employments = None))
     }
 
     "return 200 and paye summary data with no pensions data for valid authorised nino" in {
       mockShutteringResponse(notShuttered)
       mockGetPerson(Future.successful(person))
-      mockGetMobilePayeResponse(Future.successful(fullMobilePayeAudit.copy(pensions = None)))
+      mockGetMobilePayeResponse(Future.successful(fullMobilePayeResponse.copy(pensions = None)))
       mockAuthorisationGrantAccess(grantAccessWithCL200)
       mockAudit(nino, fullMobilePayeAudit.copy(pensions = None), "9bcb9c5a-0cfd-49e3-a935-58a28c386a42")
 
       val result = controller.getPayeSummary(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42", currentTaxYear)(fakeRequest)
 
       status(result)        shouldBe 200
-      contentAsJson(result) shouldBe Json.toJson(fullMobilePayeAudit.copy(pensions = None))
+      contentAsJson(result) shouldBe Json.toJson(fullMobilePayeResponse.copy(pensions = None))
     }
 
     "return 200 and paye summary data with no other income data for valid authorised nino" in {
       mockShutteringResponse(notShuttered)
       mockGetPerson(Future.successful(person))
-      mockGetMobilePayeResponse(Future.successful(fullMobilePayeAudit.copy(otherIncomes = None)))
+      mockGetMobilePayeResponse(Future.successful(fullMobilePayeResponse.copy(otherIncomes = None)))
       mockAuthorisationGrantAccess(grantAccessWithCL200)
       mockAudit(nino, fullMobilePayeAudit.copy(otherIncomes = None), "9bcb9c5a-0cfd-49e3-a935-58a28c386a42")
 
       val result = controller.getPayeSummary(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42", currentTaxYear)(fakeRequest)
 
       status(result)        shouldBe 200
-      contentAsJson(result) shouldBe Json.toJson(fullMobilePayeAudit.copy(otherIncomes = None))
+      contentAsJson(result) shouldBe Json.toJson(fullMobilePayeResponse.copy(otherIncomes = None))
     }
 
     "return 423 for a valid nino and authorised user but corrupt/mcierror user" in {
