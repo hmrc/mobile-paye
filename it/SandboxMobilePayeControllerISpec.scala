@@ -199,24 +199,24 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
       repayment.foreach(r => r.paymentStatus shouldBe Some(Refund))
     }
 
-    "return OK with P800Repayment when SANDBOX-CONTROL is CHEQUE_SENT" in {
-      val response = await(request.addHttpHeaders(mobileHeader, "SANDBOX-CONTROL" -> "CHEQUE_SENT").get())
+    "return OK with P800Repayment when SANDBOX-CONTROL is CHEQUE-SENT" in {
+      val response = await(request.addHttpHeaders(mobileHeader, "SANDBOX-CONTROL" -> "CHEQUE-SENT").get())
       response.status shouldBe 200
       val repayment = response.json.as[MobilePayeResponse].repayment
       repayment should not be None
       repayment.foreach(r => r.paymentStatus shouldBe Some(ChequeSent))
     }
 
-    "return OK with P800Repayment when SANDBOX-CONTROL is PAYMENT_PAID" in {
-      val response = await(request.addHttpHeaders(mobileHeader, "SANDBOX-CONTROL" -> "PAYMENT_PAID").get())
+    "return OK with P800Repayment when SANDBOX-CONTROL is PAYMENT-PAID" in {
+      val response = await(request.addHttpHeaders(mobileHeader, "SANDBOX-CONTROL" -> "PAYMENT-PAID").get())
       response.status shouldBe 200
       val repayment = response.json.as[MobilePayeResponse].repayment
       repayment should not be None
       repayment.foreach(r => r.paymentStatus shouldBe Some(PaymentPaid))
     }
 
-    "return OK with P800Repayment when SANDBOX-CONTROL is PAYMENT_PROCESSING" in {
-      val response = await(request.addHttpHeaders(mobileHeader, "SANDBOX-CONTROL" -> "PAYMENT_PROCESSING").get())
+    "return OK with P800Repayment when SANDBOX-CONTROL is PAYMENT-PROCESSING" in {
+      val response = await(request.addHttpHeaders(mobileHeader, "SANDBOX-CONTROL" -> "PAYMENT-PROCESSING").get())
       response.status shouldBe 200
       val repayment = response.json.as[MobilePayeResponse].repayment
       repayment should not be None

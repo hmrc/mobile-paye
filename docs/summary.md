@@ -12,6 +12,14 @@ The Mobile Paye response
   
   `GET`
   
+*  **URL Params**
+
+   **Required:**
+  
+   `journeyId=[String]`
+  
+   a string which is included for journey tracking purposes but has no functional impact
+  
 * **Success Responses:**
 
   * **Code:** 200 <br />
