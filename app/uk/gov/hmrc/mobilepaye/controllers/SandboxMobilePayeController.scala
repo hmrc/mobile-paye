@@ -61,9 +61,9 @@ class SandboxMobilePayeController @Inject() (
         case Some("SINGLE-PENSION")       => Ok(readData("single-pension.json"))
         case Some("OTHER-INCOME-ONLY")    => Ok(readData("other-income-only.json"))
         case Some("REFUND")               => Ok(readData("repayment-refund.json"))
-        case Some("CHEQUE_SENT")          => Ok(readData("cheque-sent.json"))
-        case Some("PAYMENT_PAID")         => Ok(readData("payment-paid.json"))
-        case Some("PAYMENT_PROCESSING")   => Ok(readData("payment-processing.json"))
+        case Some("CHEQUE-SENT")          => Ok(readData("cheque-sent.json"))
+        case Some("PAYMENT-PAID")         => Ok(readData("payment-paid.json"))
+        case Some("PAYMENT-PROCESSING")   => Ok(readData("payment-processing.json"))
         case _                            => Ok(readData("default.json"))
       })
     }

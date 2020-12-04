@@ -55,9 +55,9 @@ To test different scenarios, add a header "SANDBOX-CONTROL" with one of the foll
 | "PREVIOUS-INCOME-ONLY"     | Happy path, return all data except employments, pension, other income when previous income but no live incomes | 
 | "OTHER-INCOME-ONLY"        | Happy path, return other income when there are previous incomes but no live income | 
 | "REFUND"                   | Happy path, return the repayment owed to the user, including the link for the claiming the refund
-| "CHEQUE_SENT"              | Happy path, return the fact that the user has been sent a cheque
-| "PAYMENT_PAID"             | Happy path, return the fact that the money owed to the user having been paid
-| "PAYMENT_PROCESSING"       | Happy path, return the fact that the payment is under processing
+| "CHEQUE-SENT"              | Happy path, return the fact that the user has been sent a cheque
+| "PAYMENT-PAID"             | Happy path, return the fact that the money owed to the user having been paid
+| "PAYMENT-PROCESSING"       | Happy path, return the fact that the payment is under processing
 | "DECEASED"                 | Happy path, trigger a 410 Gone response when the person is deceased |
 | "MCI"                      | Happy path, trigger a 423 Locked response when manual correspondence is required |
 | "SHUTTERED"                | Unhappy path, trigger a 521 with the shuttered payload
