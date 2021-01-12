@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,9 @@ case class MobilePayeResponse(
   addMissingEmployerLink:    String = "/check-income-tax/add-employment/employment-name",
   addMissingPensionLink:     String = "/check-income-tax/add-pension-provider/name",
   addMissingIncomeLink:      String = "/forms/form/tell-us-about-other-income/guide",
-  previousTaxYearLink:       String = s"/check-income-tax/historic-paye/${TaxYear.current.previous.startYear}")
+  previousTaxYearLink:       String = s"/check-income-tax/historic-paye/${TaxYear.current.previous.startYear}",
+  currentYearPlusOneLink:    Option[String] = Some("/check-income-tax/income-tax-comparison"),
+  taxCodeLocation:           Option[String] = None)
 
 object MobilePayeResponse {
 
@@ -48,7 +50,8 @@ object MobilePayeResponse {
       taxFreeAmountLink         = None,
       estimatedTaxAmount        = None,
       estimatedTaxAmountLink    = None,
-      understandYourTaxCodeLink = None
+      understandYourTaxCodeLink = None,
+      currentYearPlusOneLink    = None
     )
 
   implicit val format: OFormat[MobilePayeResponse] = Json.format[MobilePayeResponse]

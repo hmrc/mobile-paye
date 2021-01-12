@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,10 +50,18 @@ trait MobilePayeTestData {
 
   val employmentIncomeSource: Seq[IncomeSource] =
     Seq(IncomeSource(taxCodeIncome, taiEmployment), IncomeSource(taxCodeIncome2, taiEmployment2))
+  val employmentIncomeSourceWelsh: Seq[IncomeSource] =
+    Seq(IncomeSource(taxCodeIncome.copy(taxCode = "C1150L"), taiEmployment), IncomeSource(taxCodeIncome2, taiEmployment2))
+  val employmentIncomeSourceUK: Seq[IncomeSource] =
+    Seq(IncomeSource(taxCodeIncome.copy(taxCode = "1150L"), taiEmployment), IncomeSource(taxCodeIncome2, taiEmployment2))
   val pensionIncomeSource: Seq[IncomeSource] = Seq(IncomeSource(taxCodeIncome3, taiEmployment3))
 
   val employments: Seq[PayeIncome] =
     employmentIncomeSource.map(ic => PayeIncome.fromIncomeSource(ic, updateIncomeLink = true))
+  val welshEmployments: Seq[PayeIncome] =
+    employmentIncomeSourceWelsh.map(ic => PayeIncome.fromIncomeSource(ic, updateIncomeLink = true))
+  val ukEmployments: Seq[PayeIncome] =
+    employmentIncomeSourceUK.map(ic => PayeIncome.fromIncomeSource(ic, updateIncomeLink = true))
   val pensions: Seq[PayeIncome] = pensionIncomeSource.map(ic => PayeIncome.fromIncomeSource(ic))
 
   val taxAccountSummary: TaxAccountSummary = TaxAccountSummary(BigDecimal(250), BigDecimal(10000))
@@ -81,6 +89,18 @@ trait MobilePayeTestData {
   val otherIncomes: Seq[OtherIncome] = Seq(otherIncome)
 
   val fullMobilePayeResponse: MobilePayeResponse = MobilePayeResponse(
+    taxYear                = Some(TaxYear.current.currentYear),
+    employments            = Some(employments),
+    repayment              = None,
+    pensions               = Some(pensions),
+    otherIncomes           = Some(otherIncomes),
+    taxFreeAmount          = Some(10000),
+    estimatedTaxAmount     = Some(250),
+    previousTaxYearLink    = s"/check-income-tax/historic-paye/${TaxYear.current.currentYear - 1}",
+    currentYearPlusOneLink = None
+  )
+
+  val fullMobilePayeResponseWithCY1Link: MobilePayeResponse = MobilePayeResponse(
     taxYear             = Some(TaxYear.current.currentYear),
     employments         = Some(employments),
     repayment           = None,
@@ -88,12 +108,14 @@ trait MobilePayeTestData {
     otherIncomes        = Some(otherIncomes),
     taxFreeAmount       = Some(10000),
     estimatedTaxAmount  = Some(250),
-    previousTaxYearLink = s"/check-income-tax/historic-paye/${TaxYear.current.currentYear - 1}"
+    previousTaxYearLink = s"/check-income-tax/historic-paye/${TaxYear.current.currentYear - 1}",
+    taxCodeLocation     = Some("Scottish")
   )
 
   val fullMobilePayeAudit: MobilePayeResponseAudit = MobilePayeResponseAudit(
-    taxYear            = Some(TaxYear.current.currentYear),
-    employments        = Some(employments.map(employment => PayeIncomeAudit.fromPayeIncome(employment.copy(payrollNumber = None)))),
+    taxYear = Some(TaxYear.current.currentYear),
+    employments =
+      Some(employments.map(employment => PayeIncomeAudit.fromPayeIncome(employment.copy(payrollNumber = None)))),
     repayment          = None,
     pensions           = Some(pensions.map(pension => PayeIncomeAudit.fromPayeIncome(pension.copy(payrollNumber = None)))),
     otherIncomes       = Some(otherIncomes.map(otherIncs => OtherIncomeAudit.fromOtherIncome((otherIncs)))),

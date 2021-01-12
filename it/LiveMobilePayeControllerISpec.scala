@@ -43,6 +43,23 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       stubForEmployments(nino, employmentIncomeSource)
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxAccountSummaryIsFound(nino, taxAccountSummary, cyPlusone = true)
+      taxCalcNoResponse(nino, currentTaxYear)
+
+      val response = await(requestWithCurrentYearAsInt.get())
+      response.status shouldBe 200
+      response.body   shouldBe Json.toJson(fullMobilePayeResponseWithCY1Link).toString()
+
+    }
+
+    "return OK and a full valid MobilePayeResponse json with no comparison link if data not found" in {
+      stubForShutteringDisabled
+      grantAccess(nino)
+      personalDetailsAreFound(nino, person)
+      stubForPensions(nino, pensionIncomeSource)
+      stubForEmployments(nino, employmentIncomeSource)
+      nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+      taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxCalcNoResponse(nino, currentTaxYear)
 
       val response = await(requestWithCurrentYearAsInt.get())

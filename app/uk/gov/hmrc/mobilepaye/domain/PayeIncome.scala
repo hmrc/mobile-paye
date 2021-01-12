@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import play.api.libs.json.{Json, OFormat}
 
 import scala.math.BigDecimal.RoundingMode
 
-// Link is only optional to remove it for auditing purposes, it's a mandatory data field, we could consider different classes for auditing instead
 case class PayeIncome(
   name:             String,
   payrollNumber:    Option[String] = None,

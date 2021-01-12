@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,39 @@
 
 package uk.gov.hmrc.mobilepaye.services
 
-import com.google.inject.Inject
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.{Configuration, Environment, Mode}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, InternalServerException, UnauthorizedException}
 import uk.gov.hmrc.mobilepaye.connectors.{TaiConnector, TaxCalcConnector}
 import uk.gov.hmrc.mobilepaye.domain.{IncomeSource, MobilePayeResponse}
 import uk.gov.hmrc.mobilepaye.domain.tai._
-import uk.gov.hmrc.mobilepaye.repository.P800CacheMongo
+import uk.gov.hmrc.mobilepaye.repository.{P800CacheMongo, P800CacheMongoSetup}
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 
+import java.time.{LocalDate, LocalDateTime, ZoneId}
+import java.time.format.DateTimeFormatter
 import scala.concurrent.{ExecutionContext, Future}
 
-class MobilePayeServiceSpec @Inject() (p800CacheMongo: P800CacheMongo) extends BaseSpec {
+class MobilePayeServiceSpec extends BaseSpec with P800CacheMongoSetup {
 
-  val mockTaiConnector:     TaiConnector     = mock[TaiConnector]
-  val mockTaxCalcConnector: TaxCalcConnector = mock[TaxCalcConnector]
+  val mockTaiConnector:     TaiConnector      = mock[TaiConnector]
+  val mockTaxCalcConnector: TaxCalcConnector  = mock[TaxCalcConnector]
+  val p800CacheMongo:       P800CacheMongo    = new P800CacheMongoWithInsert(false, None, None).p800CacheMongo
+  val dateFormatter:        DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd\'T\'HH:mm:ss")
+  val inactiveDate:         String            = "2020-02-01T00:00:00"
+  val activeStartDate:      String            = LocalDateTime.now(ZoneId.of("Europe/London")).minusDays(10).format(dateFormatter)
+  val activeEndDate:        String            = LocalDateTime.now(ZoneId.of("Europe/London")).plusDays(10).format(dateFormatter)
 
-  val service = new MobilePayeService(mockTaiConnector, mockTaxCalcConnector, p800CacheMongo)
+  val service = new MobilePayeService(mockTaiConnector,
+                                      mockTaxCalcConnector,
+                                      p800CacheMongo,
+                                      inactiveDate,
+                                      inactiveDate,
+                                      inactiveDate,
+                                      inactiveDate,
+                                      inactiveDate,
+                                      inactiveDate)
 
   def mockMatchingTaxCode(f: Future[Seq[IncomeSource]]) =
     (mockTaiConnector
@@ -58,6 +74,12 @@ class MobilePayeServiceSpec @Inject() (p800CacheMongo: P800CacheMongo) extends B
       .expects(*, *)
       .returning(Future.successful(None))
 
+  def mockCYPlusOneAccountSummary(f: Future[Boolean]) =
+    (mockTaiConnector
+      .getCYPlusOneAccountSummary(_: Nino, _: Int)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *, *, *)
+      .returning(f)
+
   "getMobilePayeResponse" should {
     "return full MobilePayeResponse when all data is available" in {
       mockMatchingTaxCode(Future.successful(employmentIncomeSource))
@@ -69,6 +91,97 @@ class MobilePayeServiceSpec @Inject() (p800CacheMongo: P800CacheMongo) extends B
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
 
       result shouldBe fullMobilePayeResponse
+    }
+
+    "return full MobilePayeResponse with tax comparison link during Welsh active period" in {
+      mockMatchingTaxCode(Future.successful(employmentIncomeSourceWelsh))
+      mockMatchingTaxCode(Future.successful(pensionIncomeSource))
+      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
+      mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockCYPlusOneAccountSummary(Future successful true)
+      mockP800Summary()
+
+      val service = new MobilePayeService(mockTaiConnector,
+                                          mockTaxCalcConnector,
+                                          p800CacheMongo,
+                                          inactiveDate,
+                                          inactiveDate,
+                                          activeStartDate,
+                                          activeEndDate,
+                                          inactiveDate,
+                                          inactiveDate)
+
+      val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
+
+      result shouldBe fullMobilePayeResponseWithCY1Link.copy(taxCodeLocation = Some("Welsh"), employments = Some(welshEmployments))
+    }
+
+    "return full MobilePayeResponse with tax comparison link during UK active period" in {
+      mockMatchingTaxCode(Future.successful(employmentIncomeSourceUK))
+      mockMatchingTaxCode(Future.successful(pensionIncomeSource))
+      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
+      mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockCYPlusOneAccountSummary(Future successful true)
+      mockP800Summary()
+
+      val service = new MobilePayeService(mockTaiConnector,
+                                          mockTaxCalcConnector,
+                                          p800CacheMongo,
+                                          activeStartDate,
+                                          activeEndDate,
+                                          inactiveDate,
+                                          inactiveDate,
+                                          inactiveDate,
+                                          inactiveDate)
+
+      val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
+
+      result shouldBe fullMobilePayeResponseWithCY1Link.copy(taxCodeLocation = Some("rUK"), employments = Some(ukEmployments))
+    }
+
+    "return full MobilePayeResponse with tax comparison link during Scottish active period" in {
+      mockMatchingTaxCode(Future.successful(employmentIncomeSource))
+      mockMatchingTaxCode(Future.successful(pensionIncomeSource))
+      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
+      mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockCYPlusOneAccountSummary(Future successful true)
+      mockP800Summary()
+
+      val service = new MobilePayeService(mockTaiConnector,
+                                          mockTaxCalcConnector,
+                                          p800CacheMongo,
+                                          inactiveDate,
+                                          inactiveDate,
+                                          inactiveDate,
+                                          inactiveDate,
+                                          activeStartDate,
+                                          activeEndDate)
+
+      val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
+
+      result shouldBe fullMobilePayeResponseWithCY1Link
+    }
+
+    "return full MobilePayeResponse with no tax comparison link if not in active period" in {
+      mockMatchingTaxCode(Future.successful(employmentIncomeSourceWelsh))
+      mockMatchingTaxCode(Future.successful(pensionIncomeSource))
+      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
+      mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockP800Summary()
+
+      val service = new MobilePayeService(mockTaiConnector,
+        mockTaxCalcConnector,
+        p800CacheMongo,
+        activeStartDate,
+        activeEndDate,
+        inactiveDate,
+        inactiveDate,
+        activeStartDate,
+        activeEndDate)
+
+      val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
+
+      result shouldBe fullMobilePayeResponse.copy(employments = Some(welshEmployments))
     }
 
     "return MobilePayeResponse with no untaxed interest" in {

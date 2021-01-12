@@ -61,5 +61,7 @@
   "addMissingEmployerLink": "/check-income-tax/add-employment/employment-name",
   "addMissingPensionLink": "/check-income-tax/add-pension-provider/name",
   "addMissingIncomeLink": "/forms/form/tell-us-about-other-income/guide",
-  "previousTaxYearLink": "/check-income-tax/historic-paye/2017"
+  "previousTaxYearLink": "/check-income-tax/historic-paye/2017",
+  "currentYearPlusOneLink": "/check-income-tax/income-tax-comparison",
+  "taxCodeLocation": "rUK"
 }
