@@ -113,10 +113,12 @@ object TaiStub {
 
   def taxAccountSummaryIsFound(
     nino:              String,
-    taxAccountSummary: TaxAccountSummary
-  ): StubMapping =
+    taxAccountSummary: TaxAccountSummary,
+    cyPlusone:         Boolean = false
+  ): StubMapping = {
+    val taxYear = if(cyPlusone) TaxYear.current.currentYear + 1 else TaxYear.current.currentYear
     stubFor(
-      get(urlEqualTo(s"/tai/$nino/tax-account/${TaxYear.current.currentYear}/summary"))
+      get(urlEqualTo(s"/tai/$nino/tax-account/$taxYear/summary"))
         .willReturn(
           aResponse()
             .withStatus(200)
@@ -127,6 +129,7 @@ object TaiStub {
           """.stripMargin)
         )
     )
+  }
 
   def taxAccountSummaryNotCalled(nino: String): Unit =
     verify(0, getRequestedFor(urlEqualTo(s"/tai/$nino/tax-account/${TaxYear.current.currentYear}/summary")))

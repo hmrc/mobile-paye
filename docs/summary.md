@@ -83,7 +83,9 @@ The Mobile Paye response
   "addMissingEmployerLink": "/",
   "addMissingPensionLink": "/",
   "addMissingIncomeLink": "/",
-  "previousTaxYearLink": "/"
+  "previousTaxYearLink": "/",
+  "currentYearPlusOneLink": "/",
+  "taxCodeLocation": "rUK"
 }
 ```
 
@@ -109,7 +111,9 @@ The Mobile Paye response
   "addMissingEmployerLink": "/",
   "addMissingPensionLink": "/",
   "addMissingIncomeLink": "/",
-  "previousTaxYearLink": "/"
+  "previousTaxYearLink": "/",
+  "currentYearPlusOneLink": "/",
+  "taxCodeLocation": "rUK"
 }
 ```
 
@@ -135,7 +139,9 @@ The Mobile Paye response
   "addMissingEmployerLink": "/",
   "addMissingPensionLink": "/",
   "addMissingIncomeLink": "/",
-  "previousTaxYearLink": "/"
+  "previousTaxYearLink": "/",
+  "currentYearPlusOneLink": "/",
+  "taxCodeLocation": "rUK"
 }
 ```
 

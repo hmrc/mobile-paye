@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,13 @@ class GuiceModule(
     bind(classOf[String])
       .annotatedWith(named("mobile-shuttering"))
       .toInstance(servicesConfig.baseUrl("mobile-shuttering"))
+
+    bindConfigString("rUK.startDate", "incomeTaxComparisonPeriod.rUK.startDate")
+    bindConfigString("rUK.endDate", "incomeTaxComparisonPeriod.rUK.endDate")
+    bindConfigString("wales.startDate", "incomeTaxComparisonPeriod.wales.startDate")
+    bindConfigString("wales.endDate", "incomeTaxComparisonPeriod.wales.endDate")
+    bindConfigString("scotland.startDate", "incomeTaxComparisonPeriod.scotland.startDate")
+    bindConfigString("scotland.endDate", "incomeTaxComparisonPeriod.scotland.endDate")
   }
 
   private def bindConfigStringSeq(path: String): Unit = {
@@ -81,4 +88,10 @@ class GuiceModule(
     bindConstant()
       .annotatedWith(named(path))
       .to(configuration.underlying.getInt(path))
+
+  private def bindConfigString(
+    name: String,
+    path: String
+  ): Unit =
+    bindConstant().annotatedWith(named(name)).to(configuration.underlying.getString(path))
 }

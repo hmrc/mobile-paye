@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,14 +26,22 @@ import uk.gov.hmrc.mobilepaye.domain.taxcalc.{P800Summary, TaxYearReconciliation
 import uk.gov.hmrc.mobilepaye.domain.{IncomeSource, MobilePayeResponse, OtherIncome, P800Cache, P800Repayment, PayeIncome}
 import uk.gov.hmrc.mobilepaye.repository.P800CacheMongo
 
+import java.time.{LocalDateTime, ZoneId}
+import javax.inject.Named
 import scala.concurrent.{ExecutionContext, Future}
 import scala.math.BigDecimal.RoundingMode
 
 @Singleton
 class MobilePayeService @Inject() (
-  taiConnector:     TaiConnector,
-  taxCalcConnector: TaxCalcConnector,
-  p800CacheMongo:   P800CacheMongo) {
+  taiConnector:                                             TaiConnector,
+  taxCalcConnector:                                         TaxCalcConnector,
+  p800CacheMongo:                                           P800CacheMongo,
+  @Named("rUK.startDate") rUKComparisonStartDate:           String,
+  @Named("rUK.endDate") rUKComparisonEndDate:               String,
+  @Named("wales.startDate") walesComparisonStartDate:       String,
+  @Named("wales.endDate") walesComparisonEndDate:           String,
+  @Named("scotland.startDate") scotlandComparisonStartDate: String,
+  @Named("scotland.endDate") scotlandComparisonEndDate:     String) {
 
   private val NpsTaxAccountNoEmploymentsCurrentYear = "no employments recorded for current tax year"
   private val NpsTaxAccountDataAbsentMsg            = "cannot complete a coding calculation without a primary employment"
@@ -76,7 +84,10 @@ class MobilePayeService @Inject() (
       p800Summary:            Option[P800Summary]
     ): MobilePayeResponse = {
 
-      def buildPayeIncomes(incomes: Seq[IncomeSource], updateIncomeLink: Boolean = false): Option[Seq[PayeIncome]] =
+      def buildPayeIncomes(
+        incomes:          Seq[IncomeSource],
+        updateIncomeLink: Boolean = false
+      ): Option[Seq[PayeIncome]] =
         incomes.map { inc =>
           PayeIncome.fromIncomeSource(inc, updateIncomeLink)
         } match {
@@ -117,8 +128,9 @@ class MobilePayeService @Inject() (
       }
       // $COVERAGE-ON$
 
-      val employmentPayeIncomes: Option[Seq[PayeIncome]] = buildPayeIncomes(incomeSourceEmployment, updateIncomeLink = true)
-      val pensionPayeIncomes:    Option[Seq[PayeIncome]] = buildPayeIncomes(incomeSourcePension)
+      val employmentPayeIncomes: Option[Seq[PayeIncome]] =
+        buildPayeIncomes(incomeSourceEmployment, updateIncomeLink = true)
+      val pensionPayeIncomes: Option[Seq[PayeIncome]] = buildPayeIncomes(incomeSourcePension)
 
       val taxFreeAmount: Option[BigDecimal] = Option(taxAccountSummary.taxFreeAmount.setScale(0, RoundingMode.FLOOR))
       val estimatedTaxAmount: Option[BigDecimal] = Option(
@@ -142,9 +154,12 @@ class MobilePayeService @Inject() (
                                    .getMatchingTaxCodeIncomes(nino, taxYear, EmploymentIncome.toString, Live.toString)
       taxCodeIncomesPension <- taiConnector
                                 .getMatchingTaxCodeIncomes(nino, taxYear, PensionIncome.toString, Live.toString)
-      nonTaxCodeIncomes <- taiConnector.getNonTaxCodeIncome(nino, taxYear)
-      taxAccountSummary <- taiConnector.getTaxAccountSummary(nino, taxYear)
-      reconciliations   <- getTaxYearReconciliationsForP800(nino)
+      nonTaxCodeIncomes        <- taiConnector.getNonTaxCodeIncome(nino, taxYear)
+      taxAccountSummary        <- taiConnector.getTaxAccountSummary(nino, taxYear)
+      reconciliations          <- getTaxYearReconciliationsForP800(nino)
+      tcComparisonPeriodActive <- cyPlus1InfoCheck(taxCodeIncomesEmployment)
+      cy1InfoAvailable <- if (tcComparisonPeriodActive) taiConnector.getCYPlusOneAccountSummary(nino, taxYear)
+                         else Future successful false
       mobilePayeResponse: MobilePayeResponse = buildMobilePayeResponse(
         taxCodeIncomesEmployment,
         taxCodeIncomesPension,
@@ -153,8 +168,8 @@ class MobilePayeService @Inject() (
         getP800Summary(reconciliations, taxYear)
       )
     } yield {
-      Logger.info(s"HMA-2322 User has ${taxCodeIncomesEmployment.size} Employment(s)")
-      mobilePayeResponse
+      if (cy1InfoAvailable) mobilePayeResponse.copy(taxCodeLocation = getTaxCodeLocation(taxCodeIncomesEmployment))
+      else mobilePayeResponse.copy(currentYearPlusOneLink           = None)
     }) recover {
       case ex if knownException(ex, nino) => MobilePayeResponse.empty
       case ex                             => throw ex
@@ -188,6 +203,39 @@ class MobilePayeService @Inject() (
     cacheCheckResult.flatMap(recordFound =>
       if (recordFound.isEmpty) taxCalcConnector.getTaxReconciliations(nino) else Future.successful(None)
     )
+  }
+
+  private def cyPlus1InfoCheck(employments: Seq[IncomeSource]): Future[Boolean] =
+    getTaxCodeLocation(employments) match {
+      case Some("Welsh") => Future successful isComparisonPeriodActive(walesComparisonStartDate, walesComparisonEndDate)
+      case Some("Scottish") =>
+        Future successful isComparisonPeriodActive(scotlandComparisonStartDate, scotlandComparisonEndDate)
+      case Some("rUK") => Future successful isComparisonPeriodActive(rUKComparisonStartDate, rUKComparisonEndDate)
+      case _           => Future successful false
+    }
+
+  private def isComparisonPeriodActive(
+    startDate: String,
+    endDate:   String
+  ): Boolean = {
+    val currentTime: LocalDateTime = LocalDateTime.now(ZoneId.of("Europe/London"))
+    if (startDate.isEmpty || endDate.isEmpty) false
+    else {
+      (LocalDateTime.parse(startDate).isBefore(currentTime)
+      &&
+      LocalDateTime.parse(endDate).isAfter(currentTime))
+    }
+  }
+
+  private def getTaxCodeLocation(employments: Seq[IncomeSource]): Option[String] = {
+    val latestEmployment: Option[IncomeSource] = employments.headOption
+    if (latestEmployment.isDefined) {
+      latestEmployment.map(emp => emp.taxCodeIncome.taxCode.charAt(0).toLower) match {
+        case Some('c') => Some("Welsh")
+        case Some('s') => Some("Scottish")
+        case _         => Some("rUK")
+      }
+    } else None
   }
 
 }

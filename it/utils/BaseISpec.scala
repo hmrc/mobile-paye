@@ -1,7 +1,6 @@
 package utils
 
 import java.util.Base64
-
 import org.scalatest.{Matchers, WordSpecLike}
 import org.scalatestplus.play.WsScalaTestClient
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
@@ -10,6 +9,9 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.ws.WSClient
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import uk.gov.hmrc.mobilepaye.MobilePayeTestData
+
+import java.time.format.DateTimeFormatter
+import java.time.{LocalDateTime, ZoneId}
 
 abstract class BaseISpec
     extends WordSpecLike
@@ -32,7 +34,15 @@ abstract class BaseISpec
       "microservice.services.tai.port"               -> wireMockPort,
       "microservice.services.taxcalc.port"           -> wireMockPort,
       "microservice.services.mobile-shuttering.port" -> wireMockPort,
-      "auditing.consumer.baseUri.port"               -> wireMockPort
+      "auditing.consumer.baseUri.port"               -> wireMockPort,
+      "incomeTaxComparisonPeriod.scotland.startDate" -> LocalDateTime
+        .now(ZoneId.of("Europe/London"))
+        .minusDays(10)
+        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd\'T\'HH:mm:ss")),
+      "incomeTaxComparisonPeriod.scotland.endDate" -> LocalDateTime
+        .now(ZoneId.of("Europe/London"))
+        .plusDays(10)
+        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd\'T\'HH:mm:ss"))
     )
 
   private def base64Encode(s: String): String =
