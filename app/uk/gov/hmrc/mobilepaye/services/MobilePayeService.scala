@@ -36,8 +36,8 @@ class MobilePayeService @Inject() (
   taiConnector:                                             TaiConnector,
   taxCalcConnector:                                         TaxCalcConnector,
   p800CacheMongo:                                           P800CacheMongo,
-  @Named("uk.startDate") ukComparisonStartDate:             String,
-  @Named("uk.endDate") ukComparisonEndDate:                 String,
+  @Named("rUK.startDate") rUKComparisonStartDate:           String,
+  @Named("rUK.endDate") rUKComparisonEndDate:               String,
   @Named("wales.startDate") walesComparisonStartDate:       String,
   @Named("wales.endDate") walesComparisonEndDate:           String,
   @Named("scotland.startDate") scotlandComparisonStartDate: String,
@@ -210,7 +210,7 @@ class MobilePayeService @Inject() (
       case Some("Welsh") => Future successful isComparisonPeriodActive(walesComparisonStartDate, walesComparisonEndDate)
       case Some("Scottish") =>
         Future successful isComparisonPeriodActive(scotlandComparisonStartDate, scotlandComparisonEndDate)
-      case Some("rUK") => Future successful isComparisonPeriodActive(ukComparisonStartDate, ukComparisonEndDate)
+      case Some("rUK") => Future successful isComparisonPeriodActive(rUKComparisonStartDate, rUKComparisonEndDate)
       case _           => Future successful false
     }
 
