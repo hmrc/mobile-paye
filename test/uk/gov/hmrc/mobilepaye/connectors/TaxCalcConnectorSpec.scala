@@ -29,8 +29,10 @@ class TaxCalcConnectorSpec extends BaseSpec {
 
   def mockTaxCalcGet[T](f: Future[T]) =
     (mockCoreGet
-      .GET(_: String)(_: HttpReads[T], _: HeaderCarrier, _: ExecutionContext))
-      .expects(s"$serviceUrl/taxcalc/${nino.value}/reconciliations", *, *, *)
+      .GET(_: String, _: Seq[(String, String)], _: Seq[(String, String)])(_: HttpReads[T],
+                                                                          _: HeaderCarrier,
+                                                                          _: ExecutionContext))
+      .expects(s"$serviceUrl/taxcalc/${nino.value}/reconciliations", *, *, *, *, *)
       .returning(f)
 
   "getTaxReconciliations" should {
