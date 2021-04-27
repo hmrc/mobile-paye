@@ -20,13 +20,13 @@ import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc._
 import uk.gov.hmrc.api.controllers._
-import uk.gov.hmrc.auth.core.retrieve.Retrievals._
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.auth.core.{AuthorisedFunctions, Enrolment, EnrolmentIdentifier}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mobilepaye.controllers._
-import uk.gov.hmrc.play.HeaderCarrierConverter
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
@@ -59,7 +59,7 @@ trait Authorisation extends Results with AuthorisedFunctions {
     block:   Request[A] => Future[Result],
     taxId:   Option[Nino]
   ): Future[Result] = {
-    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, None)
+    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
     grantAccess(taxId.getOrElse(Nino("")))
       .flatMap { _ =>

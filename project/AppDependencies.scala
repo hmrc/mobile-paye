@@ -5,8 +5,8 @@ object AppDependencies {
   import play.core.PlayVersion
   import play.sbt.PlayImport._
 
-  private val play26Bootstrap    = "1.3.0"
-  private val playHmrcApiVersion = "4.1.0-play-26"
+  private val play26Bootstrap    = "4.3.0"
+  private val playHmrcApiVersion = "6.2.0-play-26"
   private val domainVersion      = "5.6.0-play-26"
   private val taxYearVersion     = "1.0.0"
 
@@ -21,12 +21,12 @@ object AppDependencies {
 
   val compile: Seq[ModuleID] = Seq(
     ws,
-    "uk.gov.hmrc" %% "bootstrap-play-26"    % play26Bootstrap,
-    "uk.gov.hmrc" %% "domain"               % domainVersion,
-    "uk.gov.hmrc" %% "play-hmrc-api"        % playHmrcApiVersion,
-    "uk.gov.hmrc" %% "tax-year"             % taxYearVersion,
-    "uk.gov.hmrc" %% "simple-reactivemongo" % simpleReactiveMongoVersion,
-    "eu.timepit"  %% "refined"              % refinedVersion
+    "uk.gov.hmrc" %% "bootstrap-backend-play-26" % play26Bootstrap,
+    "uk.gov.hmrc" %% "domain"                    % domainVersion,
+    "uk.gov.hmrc" %% "play-hmrc-api"             % playHmrcApiVersion,
+    "uk.gov.hmrc" %% "tax-year"                  % taxYearVersion,
+    "uk.gov.hmrc" %% "simple-reactivemongo"      % simpleReactiveMongoVersion,
+    "eu.timepit"  %% "refined"                   % refinedVersion
   )
 
   trait TestDependencies {
@@ -35,25 +35,28 @@ object AppDependencies {
   }
 
   object Test {
+
     def apply(): Seq[ModuleID] =
       new TestDependencies {
+
         override lazy val test: Seq[ModuleID] = testCommon(scope) ++ Seq(
-          "org.scalamock" %% "scalamock"          % scalaMockVersion         % scope,
-          "org.mockito"   % "mockito-core"        % mockitoVersion           % scope,
-          "uk.gov.hmrc"   %% "reactivemongo-test" % reactiveMongoTestVersion % scope
-        )
+            "org.scalamock" %% "scalamock"          % scalaMockVersion         % scope,
+            "org.mockito"   % "mockito-core"        % mockitoVersion           % scope,
+            "uk.gov.hmrc"   %% "reactivemongo-test" % reactiveMongoTestVersion % scope
+          )
       }.test
   }
 
   object IntegrationTest {
+
     def apply(): Seq[ModuleID] =
       new TestDependencies {
 
         override lazy val scope: String = "it"
 
         override lazy val test: Seq[ModuleID] = testCommon(scope) ++ Seq(
-          "com.github.tomakehurst" % "wiremock" % wireMockVersion % scope
-        )
+            "com.github.tomakehurst" % "wiremock" % wireMockVersion % scope
+          )
       }.test
   }
 

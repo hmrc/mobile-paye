@@ -34,8 +34,8 @@ class TaiConnectorSpec extends BaseSpec {
     f:   Future[T]
   ) =
     (mockCoreGet
-      .GET(_: String)(_: HttpReads[T], _: HeaderCarrier, _: ExecutionContext))
-      .expects(s"$serviceUrl/tai/${nino.value}/$url", *, *, *)
+      .GET(_: String, _: Seq[(String, String)], _: Seq[(String, String)])(_: HttpReads[T], _: HeaderCarrier, _: ExecutionContext))
+      .expects(s"$serviceUrl/tai/${nino.value}/$url", *, *, *, *, *)
       .returning(f)
 
   "Person - GET /tai/:nino/person" should {
