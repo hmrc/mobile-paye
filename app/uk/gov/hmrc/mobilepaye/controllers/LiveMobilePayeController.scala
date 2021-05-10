@@ -18,6 +18,7 @@ package uk.gov.hmrc.mobilepaye.controllers
 
 import com.google.inject._
 import com.google.inject.name.Named
+import play.api.Logger
 import play.api.libs.json.Json
 import play.api.libs.json.Json.obj
 import play.api.mvc._
@@ -65,6 +66,7 @@ class LiveMobilePayeController @Inject() (
 
   override def parser: BodyParser[AnyContent] = controllerComponents.parsers.anyContent
   override val app:    String                 = "Live-Paye-Controller"
+  val logger:          Logger                 = Logger(this.getClass)
 
   override def getPayeSummary(
     nino:      Nino,
@@ -80,6 +82,9 @@ class LiveMobilePayeController @Inject() (
             mobilePayeService.getPerson(nino).flatMap { person =>
               if (person.isDeceased) {
                 Future.successful(Gone)
+              } else if (person.manualCorrespondenceInd) {
+                logger.info("Locked! User is locked due to manual correspondence indicator flag being set")
+                Future.successful(Locked)
               } else {
                 mobilePayeService.getMobilePayeResponse(nino, taxYear).map { mpr =>
                   sendAuditEvent(

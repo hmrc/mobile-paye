@@ -146,10 +146,10 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       taxCalcCalled(nino, currentTaxYear)
     }
 
-    "return 423 when person is locked in CID" in {
+    "return LOCKED when person is locked in CID" in {
       stubForShutteringDisabled
       grantAccess(nino)
-      personalLocked(nino)
+      personalDetailsAreFound(nino, person.copy(manualCorrespondenceInd = true))
 
       val response = await(requestWithCurrentYearAsInt.get())
       response.status shouldBe 423
@@ -368,10 +368,10 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       taxCalcCalled(nino, currentTaxYear)
     }
 
-    "return 423 when person data locked in CID" in {
+    "return LOCKED when person data locked in CID" in {
       stubForShutteringDisabled
       grantAccess(nino)
-      personalLocked(nino)
+      personalDetailsAreFound(nino, person.copy(manualCorrespondenceInd = true))
 
       val response = await(requestWithCurrentYearAsCurrent.get())
       response.status shouldBe 423
