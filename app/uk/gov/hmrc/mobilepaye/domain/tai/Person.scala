@@ -22,12 +22,13 @@ import play.api.libs.json._
 import uk.gov.hmrc.domain.Nino
 
 case class Person(
-  nino:           Nino,
-  firstName:      String,
-  surname:        String,
-  dateOfBirth:    Option[LocalDate],
-  isDeceased:     Boolean = false,
-  manualCorrespondenceInd: Boolean = false)
+  nino:                    Nino,
+  firstName:               String,
+  surname:                 String,
+  dateOfBirth:             Option[LocalDate],
+  isDeceased:              Boolean = false,
+  hasCorruptData:          Option[Boolean] = Some(false),
+  manualCorrespondenceInd: Option[Boolean] = Some(false))
 
 object Person {
   implicit val personFormat: Format[Person] = Json.format[Person]
