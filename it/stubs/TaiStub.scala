@@ -26,15 +26,6 @@ object TaiStub {
         )
     )
 
-  def personalLocked(nino: String): StubMapping =
-    stubFor(
-      get(urlEqualTo(s"/tai/$nino/person"))
-        .willReturn(
-          aResponse()
-            .withStatus(423)
-        )
-    )
-
   def stubForEmployments(
     nino:        String,
     employments: Seq[IncomeSource]
