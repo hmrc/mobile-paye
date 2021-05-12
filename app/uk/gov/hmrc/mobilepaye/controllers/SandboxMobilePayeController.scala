@@ -17,6 +17,7 @@
 package uk.gov.hmrc.mobilepaye.controllers
 
 import com.google.inject._
+import play.api.Logger
 import play.api.libs.json.Json.toJson
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
@@ -36,6 +37,7 @@ class SandboxMobilePayeController @Inject() (
     with FileResource {
 
   override val app: String = "Sandbox-Paye-Controller"
+  override val logger: Logger = Logger(this.getClass)
   private final val WebServerIsDown = new Status(521)
 
   private val shuttered =

@@ -56,8 +56,9 @@ class AccountWithLowCL extends GrantAccessException("Unauthorised! Account with 
 trait ErrorHandling {
   self: BackendBaseController =>
   val app: String
+  val logger: Logger = Logger(this.getClass)
 
-  def log(message: String): Unit = Logger.info(s"$app $message")
+  def log(message: String): Unit = logger.info(s"$app $message")
 
   def errorWrapper(func: => Future[mvc.Result])(implicit hc: HeaderCarrier): Future[Result] =
     func.recover {
@@ -82,7 +83,7 @@ trait ErrorHandling {
         Unauthorized(toJson(ErrorUnauthorizedUpstream))
 
       case e: Exception =>
-        Logger.warn(s"Native Error - $app Internal server error: ${e.getMessage}", e)
+        logger.warn(s"Native Error - $app Internal server error: ${e.getMessage}", e)
         Status(ErrorInternalServerError.httpStatusCode)(toJson(ErrorInternalServerError))
     }
 
