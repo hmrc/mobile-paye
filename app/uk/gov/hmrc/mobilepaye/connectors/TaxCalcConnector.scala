@@ -22,6 +22,7 @@ import uk.gov.hmrc.http._
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.TaxYearReconciliation
 
 import scala.concurrent.{ExecutionContext, Future}
+import uk.gov.hmrc.http.HttpReads.Implicits._
 
 @Singleton
 class TaxCalcConnector @Inject() (

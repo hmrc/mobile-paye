@@ -20,7 +20,7 @@ import play.api.libs.json.Json
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.auth.core.ConfidenceLevel.{L100, L200}
+import uk.gov.hmrc.auth.core.ConfidenceLevel.{L50, L200}
 import uk.gov.hmrc.auth.core.syntax.retrieved._
 import uk.gov.hmrc.auth.core.{AuthConnector, MissingBearerToken}
 import uk.gov.hmrc.domain.Nino
@@ -166,7 +166,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
     }
 
     "return 401 for valid nino and user but low CL" in {
-      mockAuthorisationGrantAccess(Some(nino.toString()) and L100)
+      mockAuthorisationGrantAccess(Some(nino.toString()) and L50)
 
       val result = controller.getPayeSummary(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42", currentTaxYear)(fakeRequest)
 

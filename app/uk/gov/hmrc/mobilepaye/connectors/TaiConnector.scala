@@ -33,6 +33,8 @@ class TaiConnector @Inject() (
   http:                     CoreGet,
   @Named("tai") serviceUrl: String) {
 
+  val logger: Logger = Logger(this.getClass)
+
   private def url(
     nino:  Nino,
     route: String
@@ -78,7 +80,7 @@ class TaiConnector @Inject() (
       true
     } recover {
       case NonFatal(e) =>
-        Logger.warn(s"Couldn't retrieve tax summary for $nino with exception:${e.getMessage}")
+        logger.warn(s"Couldn't retrieve tax summary for $nino with exception:${e.getMessage}")
         false
     }
 

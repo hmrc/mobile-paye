@@ -5,23 +5,23 @@ object AppDependencies {
   import play.core.PlayVersion
   import play.sbt.PlayImport._
 
-  private val play26Bootstrap    = "4.3.0"
-  private val playHmrcApiVersion = "6.2.0-play-26"
-  private val domainVersion      = "5.6.0-play-26"
+  private val play27Bootstrap    = "5.1.0"
+  private val playHmrcApiVersion = "6.2.0-play-27"
+  private val domainVersion      = "5.11.0-play-27"
   private val taxYearVersion     = "1.0.0"
 
   private val pegdownVersion             = "1.6.0"
   private val wireMockVersion            = "2.20.0"
   private val scalaMockVersion           = "4.1.0"
-  private val scalaTestPlusVersion       = "3.1.2"
-  private val simpleReactiveMongoVersion = "7.30.0-play-26"
-  private val reactiveMongoTestVersion   = "4.15.0-play-26"
+  private val scalaTestPlusVersion       = "4.0.3"
+  private val simpleReactiveMongoVersion = "8.0.0-play-27"
+  private val reactiveMongoTestVersion   = "5.0.0-play-27"
   private val mockitoVersion             = "2.25.0"
   private val refinedVersion             = "0.9.4"
 
   val compile: Seq[ModuleID] = Seq(
     ws,
-    "uk.gov.hmrc" %% "bootstrap-backend-play-26" % play26Bootstrap,
+    "uk.gov.hmrc" %% "bootstrap-backend-play-27" % play27Bootstrap,
     "uk.gov.hmrc" %% "domain"                    % domainVersion,
     "uk.gov.hmrc" %% "play-hmrc-api"             % playHmrcApiVersion,
     "uk.gov.hmrc" %% "tax-year"                  % taxYearVersion,

@@ -66,7 +66,7 @@ class LiveMobilePayeController @Inject() (
 
   override def parser: BodyParser[AnyContent] = controllerComponents.parsers.anyContent
   override val app:    String                 = "Live-Paye-Controller"
-  val logger:          Logger                 = Logger(this.getClass)
+  override val logger:          Logger                 = Logger(this.getClass)
 
   override def getPayeSummary(
     nino:      Nino,

@@ -46,6 +46,7 @@ class MobilePayeService @Inject() (
   private val NpsTaxAccountNoEmploymentsCurrentYear = "no employments recorded for current tax year"
   private val NpsTaxAccountDataAbsentMsg            = "cannot complete a coding calculation without a primary employment"
   private val NpsTaxAccountNoEmploymentsRecorded    = "no employments recorded for this individual"
+  val logger: Logger = Logger(this.getClass)
 
   def getMobilePayeResponse(
     nino:        Nino,
@@ -61,7 +62,7 @@ class MobilePayeService @Inject() (
       val known = ex.getMessage.toLowerCase().contains(NpsTaxAccountNoEmploymentsCurrentYear) ||
         ex.getMessage.toLowerCase().contains(NpsTaxAccountDataAbsentMsg) ||
         ex.getMessage.toLowerCase().contains(NpsTaxAccountNoEmploymentsRecorded)
-      Logger.info(s"[HMA-2505] - Tai exception (known: $known) for ${nino.nino} - " + ex.getMessage.toLowerCase())
+      logger.info(s"[HMA-2505] - Tai exception (known: $known) for ${nino.nino} - " + ex.getMessage.toLowerCase())
       known
     }
 
