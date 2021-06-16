@@ -9,15 +9,6 @@ import uk.gov.hmrc.time.TaxYear
 
 object TaiStub {
 
-  def personalLocked(nino: String): StubMapping =
-    stubFor(
-      get(urlEqualTo(s"/tai/$nino/person"))
-        .willReturn(
-          aResponse()
-            .withStatus(423)
-        )
-    )
-
   def personalDetailsAreFound(
     nino:   String,
     person: Person

@@ -4,7 +4,7 @@ import play.api.libs.ws.{WSRequest, WSResponse}
 import play.api.test.Injecting
 import play.modules.reactivemongo.ReactiveMongoComponent
 import stubs.AuthStub._
-import stubs.TaiStub.{personalLocked, _}
+import stubs.TaiStub._
 import stubs.TaxCalcStub._
 import stubs.ShutteringStub._
 import uk.gov.hmrc.domain.Nino
@@ -145,26 +145,10 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       taxCalcCalled(nino, currentTaxYear)
     }
 
-    "return LOCKED when person is locked in CID - DEPRECATED" in {
-      stubForShutteringDisabled
-      grantAccess(nino)
-      personalLocked(nino)
-
-      val response = await(requestWithCurrentYearAsInt.get())
-      response.status shouldBe 423
-
-      taxCodeIncomeNotCalled(nino)
-      employmentsNotCalled(nino)
-      pensionsNotCalled(nino)
-      nonTaxCodeIncomeNotCalled(nino)
-      taxAccountSummaryNotCalled(nino)
-      taxCalcCalled(nino, currentTaxYear)
-    }
-
     "return LOCKED when person is locked in CID" in {
       stubForShutteringDisabled
       grantAccess(nino)
-      personalDetailsAreFound(nino, person.copy(manualCorrespondenceInd = Some(true)))
+      personalDetailsAreFound(nino, person.copy(manualCorrespondenceInd = true))
 
       val response = await(requestWithCurrentYearAsInt.get())
       response.status shouldBe 423
@@ -383,26 +367,10 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       taxCalcCalled(nino, currentTaxYear)
     }
 
-    "return LOCKED when person data locked in CID - DEPRECATED" in {
-      stubForShutteringDisabled
-      grantAccess(nino)
-      personalLocked(nino)
-
-      val response = await(requestWithCurrentYearAsCurrent.get())
-      response.status shouldBe 423
-
-      taxCodeIncomeNotCalled(nino)
-      employmentsNotCalled(nino)
-      pensionsNotCalled(nino)
-      nonTaxCodeIncomeNotCalled(nino)
-      taxAccountSummaryNotCalled(nino)
-      taxCalcCalled(nino, currentTaxYear)
-    }
-
     "return LOCKED when person data locked in CID" in {
       stubForShutteringDisabled
       grantAccess(nino)
-      personalDetailsAreFound(nino, person.copy(manualCorrespondenceInd = Some(true)))
+      personalDetailsAreFound(nino, person.copy(manualCorrespondenceInd = true))
 
       val response = await(requestWithCurrentYearAsCurrent.get())
       response.status shouldBe 423

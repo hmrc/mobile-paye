@@ -82,7 +82,7 @@ class LiveMobilePayeController @Inject() (
             mobilePayeService.getPerson(nino).flatMap { person =>
               if (person.isDeceased) {
                 Future.successful(Gone)
-              } else if (person.manualCorrespondenceInd.getOrElse(false)) {
+              } else if (person.manualCorrespondenceInd) {
                 logger.info("Locked! User is locked due to manual correspondence indicator flag being set")
                 Future.successful(Locked)
               } else {
