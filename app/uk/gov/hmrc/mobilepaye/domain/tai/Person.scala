@@ -27,8 +27,7 @@ case class Person(
   surname:                 String,
   dateOfBirth:             Option[LocalDate],
   isDeceased:              Boolean = false,
-  hasCorruptData:          Option[Boolean] = Some(false),
-  manualCorrespondenceInd: Option[Boolean] = Some(false))
+  manualCorrespondenceInd: Boolean = false)
 
 object Person {
   implicit val personFormat: Format[Person] = Json.format[Person]

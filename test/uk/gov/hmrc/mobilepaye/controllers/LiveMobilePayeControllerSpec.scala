@@ -124,20 +124,10 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       contentAsJson(result) shouldBe Json.toJson(fullMobilePayeResponse.copy(otherIncomes = None))
     }
 
-    "return 423 for a valid nino and authorised user but mci indicator user - DEPRECATED" in {
-      mockShutteringResponse(notShuttered)
-      mockAuthorisationGrantAccess(grantAccessWithCL200)
-      mockGetPerson(Future.failed(Upstream4xxResponse("locked", 423, 423)))
-
-      val result = controller.getPayeSummary(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42", currentTaxYear)(fakeRequest)
-
-      status(result) shouldBe 423
-    }
-
     "return 423 for a valid nino and authorised user but mci indicator user" in {
       mockShutteringResponse(notShuttered)
       mockAuthorisationGrantAccess(grantAccessWithCL200)
-      mockGetPerson(Future.successful(person.copy(manualCorrespondenceInd = Some(true))))
+      mockGetPerson(Future.successful(person.copy(manualCorrespondenceInd = true)))
 
       val result = controller.getPayeSummary(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42", currentTaxYear)(fakeRequest)
 
