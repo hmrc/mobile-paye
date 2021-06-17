@@ -66,7 +66,7 @@ class LiveMobilePayeController @Inject() (
 
   override def parser: BodyParser[AnyContent] = controllerComponents.parsers.anyContent
   override val app:    String                 = "Live-Paye-Controller"
-  override val logger:          Logger                 = Logger(this.getClass)
+  override val logger: Logger = Logger(this.getClass)
 
   override def getPayeSummary(
     nino:      Nino,
@@ -82,9 +82,6 @@ class LiveMobilePayeController @Inject() (
             mobilePayeService.getPerson(nino).flatMap { person =>
               if (person.isDeceased) {
                 Future.successful(Gone)
-              } else if (person.manualCorrespondenceInd) {
-                logger.info("Locked! User is locked due to manual correspondence indicator flag being set")
-                Future.successful(Locked)
               } else {
                 mobilePayeService.getMobilePayeResponse(nino, taxYear).map { mpr =>
                   sendAuditEvent(

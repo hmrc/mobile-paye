@@ -148,7 +148,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     "return LOCKED when person is locked in CID" in {
       stubForShutteringDisabled
       grantAccess(nino)
-      personalDetailsAreFound(nino, person.copy(manualCorrespondenceInd = true))
+      personalLocked(nino)
 
       val response = await(requestWithCurrentYearAsInt.get())
       response.status shouldBe 423
@@ -370,7 +370,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     "return LOCKED when person data locked in CID" in {
       stubForShutteringDisabled
       grantAccess(nino)
-      personalDetailsAreFound(nino, person.copy(manualCorrespondenceInd = true))
+      personalLocked(nino)
 
       val response = await(requestWithCurrentYearAsCurrent.get())
       response.status shouldBe 423

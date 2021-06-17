@@ -36,6 +36,9 @@ case object ErrorUnauthorizedUpstream
 
 case object ErrorBadRequest extends ErrorResponse(400, "BAD_REQUEST", "Invalid POST request")
 
+case object LockedUserRequest
+  extends ErrorResponse(423, "LOCKED", "Locked! User is locked due to manual correspondence indicator flag being set")
+
 case object MandatoryResponse extends ErrorResponse(500, "MANDATORY", "Mandatory data not found")
 
 case object ForbiddenAccess extends ErrorResponse(403, "UNAUTHORIZED", "Access denied!")
@@ -71,6 +74,10 @@ trait ErrorHandling {
         log("Upstream service returned 401")
         Status(ErrorUnauthorizedUpstream.httpStatusCode)(toJson(ErrorUnauthorizedUpstream))
 
+      case ex: Upstream4xxResponse if ex.upstreamResponseCode == 423 =>
+        log("Locked! User is locked due to manual correspondence indicator flag being set")
+        Status(LockedUserRequest.httpStatusCode)(toJson(LockedUserRequest))
+
       case _: AuthorisationException =>
         log("Unauthorised! Failure to authorise account or grant access")
         Unauthorized(toJson(ErrorUnauthorizedUpstream))
@@ -79,5 +86,4 @@ trait ErrorHandling {
         logger.warn(s"Native Error - $app Internal server error: ${e.getMessage}", e)
         Status(ErrorInternalServerError.httpStatusCode)(toJson(ErrorInternalServerError))
     }
-
 }
