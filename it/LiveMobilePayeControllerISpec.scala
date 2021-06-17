@@ -145,26 +145,10 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       taxCalcCalled(nino, currentTaxYear)
     }
 
-    "return LOCKED when person is locked in CID - DEPRECATED" in {
-      stubForShutteringDisabled
-      grantAccess(nino)
-      personalLocked(nino)
-
-      val response = await(requestWithCurrentYearAsInt.get())
-      response.status shouldBe 423
-
-      taxCodeIncomeNotCalled(nino)
-      employmentsNotCalled(nino)
-      pensionsNotCalled(nino)
-      nonTaxCodeIncomeNotCalled(nino)
-      taxAccountSummaryNotCalled(nino)
-      taxCalcCalled(nino, currentTaxYear)
-    }
-
     "return LOCKED when person is locked in CID" in {
       stubForShutteringDisabled
       grantAccess(nino)
-      personalDetailsAreFound(nino, person.copy(manualCorrespondenceInd = Some(true)))
+      personalLocked(nino)
 
       val response = await(requestWithCurrentYearAsInt.get())
       response.status shouldBe 423
@@ -383,26 +367,10 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       taxCalcCalled(nino, currentTaxYear)
     }
 
-    "return LOCKED when person data locked in CID - DEPRECATED" in {
-      stubForShutteringDisabled
-      grantAccess(nino)
-      personalLocked(nino)
-
-      val response = await(requestWithCurrentYearAsCurrent.get())
-      response.status shouldBe 423
-
-      taxCodeIncomeNotCalled(nino)
-      employmentsNotCalled(nino)
-      pensionsNotCalled(nino)
-      nonTaxCodeIncomeNotCalled(nino)
-      taxAccountSummaryNotCalled(nino)
-      taxCalcCalled(nino, currentTaxYear)
-    }
-
     "return LOCKED when person data locked in CID" in {
       stubForShutteringDisabled
       grantAccess(nino)
-      personalDetailsAreFound(nino, person.copy(manualCorrespondenceInd = Some(true)))
+      personalLocked(nino)
 
       val response = await(requestWithCurrentYearAsCurrent.get())
       response.status shouldBe 423
