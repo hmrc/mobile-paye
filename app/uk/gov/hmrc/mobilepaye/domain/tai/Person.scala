@@ -28,6 +28,7 @@ case class Person(
   dateOfBirth:             Option[LocalDate],
   isDeceased:              Boolean = false)
 
+
 object Person {
   implicit val personFormat: Format[Person] = Json.format[Person]
 }

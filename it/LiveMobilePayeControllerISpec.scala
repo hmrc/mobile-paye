@@ -4,7 +4,7 @@ import play.api.libs.ws.{WSRequest, WSResponse}
 import play.api.test.Injecting
 import play.modules.reactivemongo.ReactiveMongoComponent
 import stubs.AuthStub._
-import stubs.TaiStub.{personalLocked, _}
+import stubs.TaiStub._
 import stubs.TaxCalcStub._
 import stubs.ShutteringStub._
 import uk.gov.hmrc.domain.Nino
