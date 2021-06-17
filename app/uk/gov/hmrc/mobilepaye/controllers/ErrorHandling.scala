@@ -86,5 +86,4 @@ trait ErrorHandling {
         logger.warn(s"Native Error - $app Internal server error: ${e.getMessage}", e)
         Status(ErrorInternalServerError.httpStatusCode)(toJson(ErrorInternalServerError))
     }
-
 }
