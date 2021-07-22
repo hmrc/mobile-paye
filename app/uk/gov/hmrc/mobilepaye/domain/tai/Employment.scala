@@ -20,7 +20,8 @@ import play.api.libs.json.{Format, Json}
 
 case class Employment(
   payrollNumber:  Option[String],
-  sequenceNumber: Int)
+  sequenceNumber: Int,
+  annualAccounts: Seq[AnnualAccount])
 
 object Employment {
   implicit val employmentFormats: Format[Employment] = Json.format[Employment]

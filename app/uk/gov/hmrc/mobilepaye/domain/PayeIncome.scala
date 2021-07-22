@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package uk.gov.hmrc.mobilepaye.domain
 
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.mobilepaye.domain.tai.Payment
 
 import scala.math.BigDecimal.RoundingMode
 
@@ -26,14 +27,12 @@ case class PayeIncome(
   taxCode:          String,
   amount:           BigDecimal,
   link:             String,
-  updateIncomeLink: Option[String])
+  updateIncomeLink: Option[String],
+  payments:      Seq[Payment])
 
 object PayeIncome {
 
-  def fromIncomeSource(
-    incomeSource:     IncomeSource,
-    updateIncomeLink: Boolean = false
-  ): PayeIncome =
+  def fromIncomeSource(incomeSource: IncomeSource): PayeIncome =
     PayeIncome(
       name          = incomeSource.taxCodeIncome.name,
       payrollNumber = incomeSource.employment.payrollNumber,
@@ -45,7 +44,8 @@ object PayeIncome {
         Option(
           s"/check-income-tax/update-income/load/${incomeSource.taxCodeIncome.employmentId.getOrElse(throw new Exception("Employment ID not found"))}"
         )
-      else None
+      else None,
+      payments = incomeSource.employment.annualAccounts.headOption.map(accounts => accounts.payments).getOrElse(Seq.empty)
     )
 
   implicit val format: OFormat[PayeIncome] = Json.format[PayeIncome]
