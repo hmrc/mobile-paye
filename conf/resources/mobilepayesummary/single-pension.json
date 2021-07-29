@@ -5,7 +5,8 @@
       "name": "HIGHWIRE RETURNS LTD",
       "taxCode": "BR",
       "amount": 4200,
-      "link": "/"
+      "link": "/",
+      "payments": []
     }
   ],
   "taxFreeAmount": 12500,

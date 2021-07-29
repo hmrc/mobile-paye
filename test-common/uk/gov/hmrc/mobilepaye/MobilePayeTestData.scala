@@ -17,10 +17,9 @@
 package uk.gov.hmrc.mobilepaye
 
 import java.time.LocalDate
-
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mobilepaye.domain.{IncomeSource, MobilePayeResponse, MobilePayeResponseAudit, OtherIncome, OtherIncomeAudit, P800Repayment, PayeIncome, PayeIncomeAudit}
-import uk.gov.hmrc.mobilepaye.domain.tai._
+import uk.gov.hmrc.mobilepaye.domain.tai.{Payment, _}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus.{ChequeSent, PaymentPaid}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.{P800Status, P800Summary, RepaymentStatus}
 import uk.gov.hmrc.time.TaxYear
@@ -44,37 +43,61 @@ trait MobilePayeTestData {
     NonTaxCodeIncome(untaxedIncome, Seq(otherNonTaxCodeIncome))
   val nonTaxCodeIncomeWithoutUntaxedInterest: NonTaxCodeIncome = NonTaxCodeIncome(None, Seq(otherNonTaxCodeIncome))
 
-  val taiEmployment:  Employment = Employment(Some("ABC123"), 3)
-  val taiEmployment2: Employment = taiEmployment.copy(payrollNumber = Some("DEF456"), sequenceNumber = 4)
-  val taiEmployment3: Employment = taiEmployment.copy(payrollNumber = None, sequenceNumber = 5)
+  val payments: Seq[Payment] = Seq(
+    Payment(LocalDate.now(), 100, 20, 10, 50, 5, 2),
+    Payment(LocalDate.now().minusDays(10), 80, 20, 10, 20, 5, 2),
+    Payment(LocalDate.now().minusDays(20), 50, 20, 10, 30, 5, 2)
+  )
+  val annualAccount: AnnualAccount = AnnualAccount("key", currentTaxYear, Available, payments)
+
+  val taiEmployment: Employment = Employment(Some("ABC123"), 3, Seq(annualAccount))
+
+  val taiEmployment2: Employment = taiEmployment.copy(
+    payrollNumber  = Some("DEF456"),
+    sequenceNumber = 4,
+    annualAccounts = Seq(
+      AnnualAccount("key2", currentTaxYear, Available, Seq(Payment(LocalDate.now().minusDays(32), 50, 20, 10, 30, 5, 2)))
+    )
+  )
+
+  val taiEmployment3: Employment =
+    taiEmployment.copy(payrollNumber = None, sequenceNumber = 5, annualAccounts = Seq.empty)
 
   val employmentIncomeSource: Seq[IncomeSource] =
     Seq(IncomeSource(taxCodeIncome, taiEmployment), IncomeSource(taxCodeIncome2, taiEmployment2))
+
   val employmentIncomeSourceWelsh: Seq[IncomeSource] =
-    Seq(IncomeSource(taxCodeIncome.copy(taxCode = "C1150L"), taiEmployment), IncomeSource(taxCodeIncome2, taiEmployment2))
+    Seq(IncomeSource(taxCodeIncome.copy(taxCode = "C1150L"), taiEmployment),
+      IncomeSource(taxCodeIncome2, taiEmployment2))
+
   val employmentIncomeSourceUK: Seq[IncomeSource] =
-    Seq(IncomeSource(taxCodeIncome.copy(taxCode = "1150L"), taiEmployment), IncomeSource(taxCodeIncome2, taiEmployment2))
+    Seq(IncomeSource(taxCodeIncome.copy(taxCode = "1150L"), taiEmployment),
+      IncomeSource(taxCodeIncome2, taiEmployment2))
   val pensionIncomeSource: Seq[IncomeSource] = Seq(IncomeSource(taxCodeIncome3, taiEmployment3))
 
   val employments: Seq[PayeIncome] =
     employmentIncomeSource.map(ic => PayeIncome.fromIncomeSource(ic, updateIncomeLink = true))
+
   val welshEmployments: Seq[PayeIncome] =
     employmentIncomeSourceWelsh.map(ic => PayeIncome.fromIncomeSource(ic, updateIncomeLink = true))
+
   val ukEmployments: Seq[PayeIncome] =
     employmentIncomeSourceUK.map(ic => PayeIncome.fromIncomeSource(ic, updateIncomeLink = true))
-  val pensions: Seq[PayeIncome] = pensionIncomeSource.map(ic => PayeIncome.fromIncomeSource(ic))
+
+  val pensions: Seq[PayeIncome] =
+    pensionIncomeSource.map(ic => PayeIncome.fromIncomeSource(ic, updateIncomeLink = false))
 
   val taxAccountSummary: TaxAccountSummary = TaxAccountSummary(BigDecimal(250), BigDecimal(10000))
   val person:            Person            = Person(nino, "Carrot", "Smith", None)
   val otherIncome:       OtherIncome       = OtherIncome("STATE PENSION", 250.0, None)
 
   def repayment(
-    p800Status:    P800Status,
-    paymentStatus: RepaymentStatus,
-    taxYear:       Int,
-    amount:        BigDecimal,
-    time:          LocalDate
-  ): Option[P800Repayment] = {
+                 p800Status:    P800Status,
+                 paymentStatus: RepaymentStatus,
+                 taxYear:       Int,
+                 amount:        BigDecimal,
+                 time:          LocalDate
+               ): Option[P800Repayment] = {
     def withPaidDate(): Option[LocalDate] =
       paymentStatus match {
         case PaymentPaid | ChequeSent => Option(LocalDate.from(time))
