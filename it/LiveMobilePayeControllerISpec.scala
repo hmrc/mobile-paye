@@ -45,6 +45,8 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       taxAccountSummaryIsFound(nino, taxAccountSummary, cyPlusone = true)
       taxCalcNoResponse(nino, currentTaxYear)
 
+
+
       val response = await(requestWithCurrentYearAsInt.get())
       response.status shouldBe 200
       response.body   shouldBe Json.toJson(fullMobilePayeResponseWithCY1Link).toString()

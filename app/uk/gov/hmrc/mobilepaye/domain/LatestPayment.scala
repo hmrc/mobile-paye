@@ -18,21 +18,13 @@ package uk.gov.hmrc.mobilepaye.domain
 
 import play.api.libs.json.{Json, OFormat}
 
-case class PayeIncomeAudit(
-  name:               String,
-  taxCode:            String,
-  amount:             BigDecimal,
-  latestPaymentAudit: Option[LatestPaymentAudit])
+import java.time.LocalDate
 
-object PayeIncomeAudit {
+case class LatestPayment(
+  date:   LocalDate,
+  amount: BigDecimal,
+  link:   String)
 
-  def fromPayeIncome(payeIncome: PayeIncome): PayeIncomeAudit =
-    PayeIncomeAudit(
-      name               = payeIncome.name,
-      taxCode            = payeIncome.taxCode,
-      amount             = payeIncome.amount,
-      latestPaymentAudit = LatestPaymentAudit.fromLatestPayment(payeIncome.latestpayment)
-    )
-
-  implicit val format: OFormat[PayeIncomeAudit] = Json.format[PayeIncomeAudit]
+object LatestPayment {
+  implicit val format: OFormat[LatestPayment] = Json.format[LatestPayment]
 }

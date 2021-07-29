@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package uk.gov.hmrc.mobilepaye.domain
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.mobilepaye.domain.tai.Payment
 
+import java.time.LocalDate
 import scala.math.BigDecimal.RoundingMode
 
 case class PayeIncome(
@@ -28,11 +29,14 @@ case class PayeIncome(
   amount:           BigDecimal,
   link:             String,
   updateIncomeLink: Option[String],
-  payments:      Seq[Payment])
+  latestpayment:    Option[LatestPayment])
 
 object PayeIncome {
 
-  def fromIncomeSource(incomeSource: IncomeSource): PayeIncome =
+  def fromIncomeSource(
+    incomeSource:     IncomeSource,
+    updateIncomeLink: Boolean
+  ): PayeIncome =
     PayeIncome(
       name          = incomeSource.taxCodeIncome.name,
       payrollNumber = incomeSource.employment.payrollNumber,
@@ -45,7 +49,28 @@ object PayeIncome {
           s"/check-income-tax/update-income/load/${incomeSource.taxCodeIncome.employmentId.getOrElse(throw new Exception("Employment ID not found"))}"
         )
       else None,
-      payments = incomeSource.employment.annualAccounts.headOption.map(accounts => accounts.payments).getOrElse(Seq.empty)
+      latestpayment = buildLatestPayment(
+        incomeSource.employment.annualAccounts.headOption.flatMap(accounts => accounts.latestPayment),
+        incomeSource.taxCodeIncome.employmentId
+      )
+    )
+
+  private def buildLatestPayment(
+    payment: Option[Payment],
+    empId:   Option[Int]
+  ): Option[LatestPayment] =
+    payment.flatMap(latestPayment =>
+      if (latestPayment.date.isAfter(LocalDate.now.minusDays(31))) {
+        Some(
+          LatestPayment(
+            latestPayment.date,
+            latestPayment.amount,
+            s"/check-income-tax/your-income-calculation-details/${empId.getOrElse(throw new Exception("Employment ID not found"))}"
+          )
+        )
+      } else {
+        None
+      }
     )
 
   implicit val format: OFormat[PayeIncome] = Json.format[PayeIncome]
