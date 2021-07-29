@@ -113,7 +113,8 @@ class MobilePayeServiceSpec extends BaseSpec with P800CacheMongoSetup {
 
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
 
-      result shouldBe fullMobilePayeResponseWithCY1Link.copy(taxCodeLocation = Some("Welsh"), employments = Some(welshEmployments))
+      result shouldBe fullMobilePayeResponseWithCY1Link.copy(taxCodeLocation = Some("Welsh"),
+                                                             employments = Some(welshEmployments))
     }
 
     "return full MobilePayeResponse with tax comparison link during UK active period" in {
@@ -136,7 +137,8 @@ class MobilePayeServiceSpec extends BaseSpec with P800CacheMongoSetup {
 
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
 
-      result shouldBe fullMobilePayeResponseWithCY1Link.copy(taxCodeLocation = Some("rUK"), employments = Some(ukEmployments))
+      result shouldBe fullMobilePayeResponseWithCY1Link.copy(taxCodeLocation = Some("rUK"),
+                                                             employments = Some(ukEmployments))
     }
 
     "return full MobilePayeResponse with tax comparison link during Scottish active period" in {
@@ -170,14 +172,14 @@ class MobilePayeServiceSpec extends BaseSpec with P800CacheMongoSetup {
       mockP800Summary()
 
       val service = new MobilePayeService(mockTaiConnector,
-        mockTaxCalcConnector,
-        p800CacheMongo,
-        activeStartDate,
-        activeEndDate,
-        inactiveDate,
-        inactiveDate,
-        activeStartDate,
-        activeEndDate)
+                                          mockTaxCalcConnector,
+                                          p800CacheMongo,
+                                          activeStartDate,
+                                          activeEndDate,
+                                          inactiveDate,
+                                          inactiveDate,
+                                          activeStartDate,
+                                          activeEndDate)
 
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
 
@@ -232,6 +234,22 @@ class MobilePayeServiceSpec extends BaseSpec with P800CacheMongoSetup {
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
 
       result shouldBe fullMobilePayeResponse.copy(otherIncomes = None)
+    }
+
+    "return MobilePayeResponse with correct employment latestPayments" in {
+      mockMatchingTaxCode(Future.successful(employmentIncomeSource))
+      mockMatchingTaxCode(Future.successful(pensionIncomeSource))
+      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
+      mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockP800Summary()
+
+      val result         = await(service.getMobilePayeResponse(nino, currentTaxYear))
+      val latestPayment1 = result.employments.get.head.latestpayment.get
+      val latestPayment2 = result.employments.get.last.latestpayment
+
+      latestPayment1.amount shouldBe 50
+      latestPayment1.link   shouldBe "/check-income-tax/your-income-calculation-details/3"
+      latestPayment2        shouldBe None
     }
 
     "throw UnauthorizedException when receiving UnauthorizedException from taiConnector" in {

@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.mobilepaye.domain.tai
+package uk.gov.hmrc.mobilepaye.domain
 
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{Json, OFormat}
 
-case class Employment(
-  payrollNumber:  Option[String],
-  sequenceNumber: Int,
-  annualAccounts: Seq[AnnualAccount])
+import java.time.LocalDate
 
-object Employment {
-  implicit val employmentFormats: Format[Employment] = Json.format[Employment]
+case class LatestPayment(
+                          date:   LocalDate,
+                          amount: BigDecimal,
+                          link:   String)
+
+object LatestPayment {
+  implicit val format: OFormat[LatestPayment] = Json.format[LatestPayment]
 }
