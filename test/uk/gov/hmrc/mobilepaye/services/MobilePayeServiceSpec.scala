@@ -244,8 +244,8 @@ class MobilePayeServiceSpec extends BaseSpec with P800CacheMongoSetup {
       mockP800Summary()
 
       val result         = await(service.getMobilePayeResponse(nino, currentTaxYear))
-      val latestPayment1 = result.employments.get.head.latestpayment.get
-      val latestPayment2 = result.employments.get.last.latestpayment
+      val latestPayment1 = result.employments.get.head.latestPayment.get
+      val latestPayment2 = result.employments.get.last.latestPayment
 
       latestPayment1.amount shouldBe 50
       latestPayment1.link   shouldBe "/check-income-tax/your-income-calculation-details/3"

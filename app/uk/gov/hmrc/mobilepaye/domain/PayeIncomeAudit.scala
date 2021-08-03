@@ -31,7 +31,7 @@ object PayeIncomeAudit {
       name               = payeIncome.name,
       taxCode            = payeIncome.taxCode,
       amount             = payeIncome.amount,
-      latestPaymentAudit = LatestPaymentAudit.fromLatestPayment(payeIncome.latestpayment)
+      latestPaymentAudit = LatestPaymentAudit.fromLatestPayment(payeIncome.latestPayment)
     )
 
   implicit val format: OFormat[PayeIncomeAudit] = Json.format[PayeIncomeAudit]

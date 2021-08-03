@@ -29,7 +29,7 @@ case class PayeIncome(
                        amount:           BigDecimal,
                        link:             String,
                        updateIncomeLink: Option[String],
-                       latestpayment:    Option[LatestPayment])
+                       latestPayment:    Option[LatestPayment])
 
 object PayeIncome {
 
@@ -49,7 +49,7 @@ object PayeIncome {
           s"/check-income-tax/update-income/load/${incomeSource.taxCodeIncome.employmentId.getOrElse(throw new Exception("Employment ID not found"))}"
         )
       else None,
-      latestpayment = buildLatestPayment(
+      latestPayment = buildLatestPayment(
         incomeSource.employment.annualAccounts.headOption.flatMap(accounts => accounts.latestPayment),
         incomeSource.taxCodeIncome.employmentId
       )
