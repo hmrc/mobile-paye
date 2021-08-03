@@ -252,6 +252,18 @@ class MobilePayeServiceSpec extends BaseSpec with P800CacheMongoSetup {
       latestPayment2        shouldBe None
     }
 
+    "return MobilePayeResponse with no latestPayment for pension" in {
+      mockMatchingTaxCode(Future.successful(employmentIncomeSource))
+      mockMatchingTaxCode(Future.successful(pensionIncomeSource))
+      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
+      mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockP800Summary()
+
+      val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
+
+      result.pensions.get.head.latestPayment shouldBe None
+    }
+
     "throw UnauthorizedException when receiving UnauthorizedException from taiConnector" in {
       mockMatchingTaxCode(Future.failed(new UnauthorizedException("Unauthorized")))
 

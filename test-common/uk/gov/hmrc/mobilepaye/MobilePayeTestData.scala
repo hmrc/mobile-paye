@@ -61,7 +61,7 @@ trait MobilePayeTestData {
   )
 
   val taiEmployment3: Employment =
-    taiEmployment.copy(payrollNumber = None, sequenceNumber = 5, annualAccounts = Seq.empty)
+    taiEmployment.copy(payrollNumber = None, sequenceNumber = 5, annualAccounts = Seq(annualAccount))
 
   val employmentIncomeSource: Seq[IncomeSource] =
     Seq(IncomeSource(taxCodeIncome, taiEmployment), IncomeSource(taxCodeIncome2, taiEmployment2))
@@ -76,16 +76,16 @@ trait MobilePayeTestData {
   val pensionIncomeSource: Seq[IncomeSource] = Seq(IncomeSource(taxCodeIncome3, taiEmployment3))
 
   val employments: Seq[PayeIncome] =
-    employmentIncomeSource.map(ic => PayeIncome.fromIncomeSource(ic, updateIncomeLink = true))
+    employmentIncomeSource.map(ic => PayeIncome.fromIncomeSource(ic, employment = true))
 
   val welshEmployments: Seq[PayeIncome] =
-    employmentIncomeSourceWelsh.map(ic => PayeIncome.fromIncomeSource(ic, updateIncomeLink = true))
+    employmentIncomeSourceWelsh.map(ic => PayeIncome.fromIncomeSource(ic, employment = true))
 
   val ukEmployments: Seq[PayeIncome] =
-    employmentIncomeSourceUK.map(ic => PayeIncome.fromIncomeSource(ic, updateIncomeLink = true))
+    employmentIncomeSourceUK.map(ic => PayeIncome.fromIncomeSource(ic, employment = true))
 
   val pensions: Seq[PayeIncome] =
-    pensionIncomeSource.map(ic => PayeIncome.fromIncomeSource(ic, updateIncomeLink = false))
+    pensionIncomeSource.map(ic => PayeIncome.fromIncomeSource(ic, employment = false))
 
   val taxAccountSummary: TaxAccountSummary = TaxAccountSummary(BigDecimal(250), BigDecimal(10000))
   val person:            Person            = Person(nino, "Carrot", "Smith", None)

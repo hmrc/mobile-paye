@@ -23,20 +23,20 @@ import java.time.LocalDate
 import scala.math.BigDecimal.RoundingMode
 
 case class PayeIncome(
-                       name:             String,
-                       payrollNumber:    Option[String] = None,
-                       taxCode:          String,
-                       amount:           BigDecimal,
-                       link:             String,
-                       updateIncomeLink: Option[String],
-                       latestPayment:    Option[LatestPayment])
+  name:             String,
+  payrollNumber:    Option[String] = None,
+  taxCode:          String,
+  amount:           BigDecimal,
+  link:             String,
+  updateIncomeLink: Option[String],
+  latestPayment:    Option[LatestPayment])
 
 object PayeIncome {
 
   def fromIncomeSource(
-                        incomeSource:     IncomeSource,
-                        updateIncomeLink: Boolean
-                      ): PayeIncome =
+    incomeSource: IncomeSource,
+    employment:   Boolean
+  ): PayeIncome =
     PayeIncome(
       name          = incomeSource.taxCodeIncome.name,
       payrollNumber = incomeSource.employment.payrollNumber,
@@ -44,21 +44,24 @@ object PayeIncome {
       amount        = incomeSource.taxCodeIncome.amount.setScale(0, RoundingMode.FLOOR),
       link =
         s"/check-income-tax/income-details/${incomeSource.taxCodeIncome.employmentId.getOrElse(throw new Exception("Employment ID not found"))}",
-      updateIncomeLink = if (updateIncomeLink)
+      updateIncomeLink = if (employment)
         Option(
           s"/check-income-tax/update-income/load/${incomeSource.taxCodeIncome.employmentId.getOrElse(throw new Exception("Employment ID not found"))}"
         )
       else None,
-      latestPayment = buildLatestPayment(
-        incomeSource.employment.annualAccounts.headOption.flatMap(accounts => accounts.latestPayment),
-        incomeSource.taxCodeIncome.employmentId
-      )
+      latestPayment =
+        if (employment)
+          buildLatestPayment(
+            incomeSource.employment.annualAccounts.headOption.flatMap(accounts => accounts.latestPayment),
+            incomeSource.taxCodeIncome.employmentId
+          )
+        else None
     )
 
   private def buildLatestPayment(
-                                  payment: Option[Payment],
-                                  empId:   Option[Int]
-                                ): Option[LatestPayment] =
+    payment: Option[Payment],
+    empId:   Option[Int]
+  ): Option[LatestPayment] =
     payment.flatMap(latestPayment =>
       if (latestPayment.date.isAfter(LocalDate.now.minusDays(31))) {
         Some(
