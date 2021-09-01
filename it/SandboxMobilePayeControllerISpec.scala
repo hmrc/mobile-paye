@@ -5,6 +5,8 @@ import uk.gov.hmrc.mobilepaye.domain.{MobilePayeResponse, Shuttering}
 import uk.gov.hmrc.time.TaxYear
 import utils.BaseISpec
 
+import java.time.LocalDate
+
 class SandboxMobilePayeControllerISpec extends BaseISpec {
 
   private val mobileHeader = "X-MOBILE-USER-ID" -> "208606423740"
@@ -24,6 +26,9 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
       (response.json \\ "otherIncomes").isEmpty      shouldBe false
       (response.json \ "taxFreeAmount").as[Int]      shouldBe 12500
       (response.json \ "estimatedTaxAmount").as[Int] shouldBe 1578
+      (response.json \ "employments" \ 0 \ "latestPayment" \ "amount").as[BigDecimal] shouldBe BigDecimal(1575)
+      (response.json \ "employments" \ 0 \ "latestPayment" \ "date").as[String] shouldBe LocalDate.now().plusDays(2).toString
+
     }
 
     "return OK and a single employment with no pension or otherIncome data when SANDBOX-CONTROL is SINGLE-EMPLOYMENT" in {
