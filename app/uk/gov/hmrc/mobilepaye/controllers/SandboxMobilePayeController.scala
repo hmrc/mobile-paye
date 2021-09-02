@@ -27,6 +27,7 @@ import uk.gov.hmrc.mobilepaye.domain._
 import uk.gov.hmrc.mobilepaye.domain.types.ModelTypes.JourneyId
 import uk.gov.hmrc.time.TaxYear
 
+import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -77,6 +78,7 @@ class SandboxMobilePayeController @Inject() (
           findResource(s"/resources/mobilepayesummary/$resource")
             .getOrElse(throw new IllegalArgumentException("Resource not found!"))
             .replace("<TAX_YEAR>", TaxYear.current.currentYear.toString)
+            .replace("<PAYMENT_DATE>", LocalDate.now().plusDays(2).toString)
         )
         .as[MobilePayeResponse]
     )

@@ -8,7 +8,11 @@
       "amount": 18900,
       "link": "/",
       "updateIncomeLink": "/",
-      "payments": []
+      "latestPayment": {
+        "date":   "<PAYMENT_DATE>",
+        "amount": 1575,
+        "link":   "/"
+      }
     }
   ],
   "repayment": {
