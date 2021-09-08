@@ -21,9 +21,12 @@ import play.api.libs.json.{Json, OFormat}
 import java.time.LocalDate
 
 case class LatestPayment(
-                          date:   LocalDate,
-                          amount: BigDecimal,
-                          link:   String)
+  date:                    LocalDate,
+  amount:                  BigDecimal,
+  taxAmount:               BigDecimal,
+  nationalInsuranceAmount: BigDecimal,
+  link:                    String,
+  futurePayment:           Boolean = false)
 
 object LatestPayment {
   implicit val format: OFormat[LatestPayment] = Json.format[LatestPayment]

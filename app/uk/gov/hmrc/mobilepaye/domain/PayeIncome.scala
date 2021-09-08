@@ -17,7 +17,7 @@
 package uk.gov.hmrc.mobilepaye.domain
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.mobilepaye.domain.tai.Payment
+import uk.gov.hmrc.mobilepaye.domain.tai.{AnnualAccount, Payment}
 
 import java.time.LocalDate
 import scala.math.BigDecimal.RoundingMode
@@ -29,7 +29,8 @@ case class PayeIncome(
   amount:           BigDecimal,
   link:             String,
   updateIncomeLink: Option[String],
-  latestPayment:    Option[LatestPayment])
+  latestPayment:    Option[LatestPayment],
+  payments:         Option[Seq[Payment]])
 
 object PayeIncome {
 
@@ -55,7 +56,8 @@ object PayeIncome {
             incomeSource.employment.annualAccounts.headOption.flatMap(accounts => accounts.latestPayment),
             incomeSource.taxCodeIncome.employmentId
           )
-        else None
+        else None,
+      payments = buildPayments(incomeSource.employment.annualAccounts)
     )
 
   private def buildLatestPayment(
@@ -63,18 +65,27 @@ object PayeIncome {
     empId:   Option[Int]
   ): Option[LatestPayment] =
     payment.flatMap(latestPayment =>
-      if (latestPayment.date.isAfter(LocalDate.now.minusDays(31))) {
+      if (latestPayment.date.isAfter(LocalDate.now.minusDays(62))) {
         Some(
           LatestPayment(
             latestPayment.date,
             latestPayment.amount,
-            s"/check-income-tax/your-income-calculation-details/${empId.getOrElse(throw new Exception("Employment ID not found"))}"
+            latestPayment.taxAmount,
+            latestPayment.nationalInsuranceAmount,
+            s"/check-income-tax/your-income-calculation-details/${empId.getOrElse(throw new Exception("Employment ID not found"))}",
+            futurePayment = if (latestPayment.date.isAfter(LocalDate.now())) true else false
           )
         )
       } else {
         None
       }
     )
+
+  private def buildPayments(accounts: Seq[AnnualAccount]): Option[Seq[Payment]] =
+    if (accounts.isEmpty || accounts.headOption.exists(_.payments.isEmpty)) None
+    else {
+      accounts.headOption.map(_.payments).map(_.filterNot(_.date.isAfter(LocalDate.now())))
+    }
 
   implicit val format: OFormat[PayeIncome] = Json.format[PayeIncome]
 }
