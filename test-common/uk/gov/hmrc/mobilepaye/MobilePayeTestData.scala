@@ -48,7 +48,15 @@ trait MobilePayeTestData {
     Payment(LocalDate.now().minusDays(10), 80, 20, 10, 20, 5, 2),
     Payment(LocalDate.now().minusDays(20), 50, 20, 10, 30, 5, 2)
   )
+
+  val payments2: Seq[Payment] = Seq(
+    Payment(LocalDate.now().plusDays(1), 100, 20, 10, 50, 5, 2),
+    Payment(LocalDate.now().minusDays(10), 80, 20, 10, 20, 5, 2),
+    Payment(LocalDate.now().minusDays(20), 50, 20, 10, 30, 5, 2)
+  )
+
   val annualAccount: AnnualAccount = AnnualAccount("key", currentTaxYear, Available, payments)
+  val annualAccount2: AnnualAccount = AnnualAccount("key", currentTaxYear, Available, payments2)
 
   val taiEmployment: Employment = Employment(Some("ABC123"), 3, Seq(annualAccount))
 
@@ -56,15 +64,21 @@ trait MobilePayeTestData {
     payrollNumber  = Some("DEF456"),
     sequenceNumber = 4,
     annualAccounts = Seq(
-      AnnualAccount("key2", currentTaxYear, Available, Seq(Payment(LocalDate.now().minusDays(32), 50, 20, 10, 30, 5, 2)))
+      AnnualAccount("key2", currentTaxYear, Available, Seq(Payment(LocalDate.now().minusDays(63), 50, 20, 10, 30, 5, 2)))
     )
   )
 
   val taiEmployment3: Employment =
     taiEmployment.copy(payrollNumber = None, sequenceNumber = 5, annualAccounts = Seq(annualAccount))
 
+  val taiEmployment4: Employment =
+    taiEmployment.copy(payrollNumber = None, sequenceNumber = 5, annualAccounts = Seq(annualAccount2))
+
   val employmentIncomeSource: Seq[IncomeSource] =
     Seq(IncomeSource(taxCodeIncome, taiEmployment), IncomeSource(taxCodeIncome2, taiEmployment2))
+
+  val employmentIncomeSource2: Seq[IncomeSource] =
+    Seq(IncomeSource(taxCodeIncome, taiEmployment4))
 
   val employmentIncomeSourceWelsh: Seq[IncomeSource] =
     Seq(IncomeSource(taxCodeIncome.copy(taxCode = "C1150L"), taiEmployment),

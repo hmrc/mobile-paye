@@ -247,9 +247,30 @@ class MobilePayeServiceSpec extends BaseSpec with P800CacheMongoSetup {
       val latestPayment1 = result.employments.get.head.latestPayment.get
       val latestPayment2 = result.employments.get.last.latestPayment
 
-      latestPayment1.amount shouldBe 50
-      latestPayment1.link   shouldBe "/check-income-tax/your-income-calculation-details/3"
-      latestPayment2        shouldBe None
+      latestPayment1.amount                  shouldBe 50
+      latestPayment1.taxAmount               shouldBe 5
+      latestPayment1.nationalInsuranceAmount shouldBe 2
+      latestPayment1.futurePayment           shouldBe false
+      latestPayment1.link                    shouldBe "/check-income-tax/your-income-calculation-details/3"
+      latestPayment2                         shouldBe None
+    }
+
+    "return MobilePayeResponse with correct employment latestPayments and previousPayments" in {
+      mockMatchingTaxCode(Future.successful(employmentIncomeSource2))
+      mockMatchingTaxCode(Future.successful(pensionIncomeSource))
+      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
+      mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockP800Summary()
+
+      val result         = await(service.getMobilePayeResponse(nino, currentTaxYear))
+      val latestPayment1 = result.employments.get.head.latestPayment.get
+
+      latestPayment1.amount                         shouldBe 50
+      latestPayment1.taxAmount                      shouldBe 5
+      latestPayment1.nationalInsuranceAmount        shouldBe 2
+      latestPayment1.futurePayment                  shouldBe true
+      latestPayment1.link                           shouldBe "/check-income-tax/your-income-calculation-details/3"
+      result.employments.get.head.payments.get.size shouldBe 2
     }
 
     "return MobilePayeResponse with no latestPayment for pension" in {

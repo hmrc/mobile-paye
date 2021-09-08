@@ -9,10 +9,42 @@
       "link": "/",
       "updateIncomeLink": "/",
       "latestPayment": {
-        "date":   "<PAYMENT_DATE>",
+        "date": "<PAYMENT_DATE>",
         "amount": 1575,
-        "link":   "/"
-      }
+        "taxAmount": 315,
+        "nationalInsuranceAmount": 189,
+        "link": "/",
+        "futurePayment": true
+      },
+      "payments": [
+        {
+          "date": "2021-07-28",
+          "amountYearToDate": 4636,
+          "taxAmountYearToDate": 865,
+          "nationalInsuranceAmountYearToDate": 468,
+          "amount": 1600,
+          "taxAmount": 320,
+          "nationalInsuranceAmount": 195
+        },
+        {
+          "date": "2021-06-28",
+          "amountYearToDate": 3036,
+          "taxAmountYearToDate": 545,
+          "nationalInsuranceAmountYearToDate": 273,
+          "amount": 1566,
+          "taxAmount": 289,
+          "nationalInsuranceAmount": 146
+        },
+        {
+          "date": "2021-05-28",
+          "amountYearToDate": 1470,
+          "taxAmountYearToDate": 256,
+          "nationalInsuranceAmountYearToDate": 127,
+          "amount": 1470,
+          "taxAmount": 256,
+          "nationalInsuranceAmount": 127
+        }
+      ]
     }
   ],
   "repayment": {
