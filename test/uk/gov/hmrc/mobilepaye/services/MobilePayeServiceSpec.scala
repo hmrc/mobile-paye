@@ -270,7 +270,7 @@ class MobilePayeServiceSpec extends BaseSpec with P800CacheMongoSetup {
       latestPayment1.nationalInsuranceAmount        shouldBe 2
       latestPayment1.futurePayment                  shouldBe true
       latestPayment1.link                           shouldBe "/check-income-tax/your-income-calculation-details/3"
-      result.employments.get.head.payments.get.size shouldBe 2
+      result.employments.get.head.payments.get.size shouldBe 3
     }
 
     "return MobilePayeResponse with no latestPayment for pension" in {

@@ -57,7 +57,7 @@ object PayeIncome {
             incomeSource.taxCodeIncome.employmentId
           )
         else None,
-      payments = buildPayments(incomeSource.employment.annualAccounts)
+      payments = incomeSource.employment.annualAccounts.headOption.map(_.payments)
     )
 
   private def buildLatestPayment(
@@ -80,12 +80,6 @@ object PayeIncome {
         None
       }
     )
-
-  private def buildPayments(accounts: Seq[AnnualAccount]): Option[Seq[Payment]] =
-    if (accounts.isEmpty || accounts.headOption.exists(_.payments.isEmpty)) None
-    else {
-      accounts.headOption.map(_.payments).map(_.filterNot(_.date.isAfter(LocalDate.now())))
-    }
 
   implicit val format: OFormat[PayeIncome] = Json.format[PayeIncome]
 }
