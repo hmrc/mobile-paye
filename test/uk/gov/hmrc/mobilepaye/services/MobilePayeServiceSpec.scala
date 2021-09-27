@@ -273,6 +273,20 @@ class MobilePayeServiceSpec extends BaseSpec with P800CacheMongoSetup {
       result.employments.get.head.payments.get.size shouldBe 3
     }
 
+    "return MobilePayeResponse with no payments node for employment with no payments" in {
+      mockMatchingTaxCode(Future.successful(employmentIncomeSourceNoPayments))
+      mockMatchingTaxCode(Future.successful(pensionIncomeSourceNoPension))
+      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
+      mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockP800Summary()
+
+      val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
+
+      val payments = result.employments.get.head.payments
+
+      payments shouldBe None
+    }
+
     "return MobilePayeResponse with no latestPayment for pension" in {
       mockMatchingTaxCode(Future.successful(employmentIncomeSource))
       mockMatchingTaxCode(Future.successful(pensionIncomeSource))
