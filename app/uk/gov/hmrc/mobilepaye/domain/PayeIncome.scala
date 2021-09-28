@@ -57,7 +57,8 @@ object PayeIncome {
             incomeSource.taxCodeIncome.employmentId
           )
         else None,
-      payments = incomeSource.employment.annualAccounts.headOption.map(_.payments)
+      if (incomeSource.employment.annualAccounts.headOption.map(_.payments).getOrElse(Seq.empty).isEmpty) None
+      else incomeSource.employment.annualAccounts.headOption.map(_.payments)
     )
 
   private def buildLatestPayment(
