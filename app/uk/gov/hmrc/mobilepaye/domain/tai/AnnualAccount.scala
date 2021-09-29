@@ -18,25 +18,14 @@ package uk.gov.hmrc.mobilepaye.domain.tai
 
 import play.api.libs.json.{Format, Json}
 
-case class AnnualAccount(
-  key:            String,
-  taxYear:        Int,
-  realTimeStatus: RealTimeStatus,
-  payments:       Seq[Payment]) {
+case class AnnualAccount(payments: Seq[Payment]) {
 
   lazy val totalIncomeYearToDate: BigDecimal =
     if (payments.isEmpty) 0 else payments.max.amountYearToDate
-
-  lazy val employerDesignation: String = {
-    val split = key.split("-")
-    split(0) + "-" + split(1)
-  }
 
   lazy val latestPayment: Option[Payment] = if (payments.isEmpty) None else Some(payments.max)
 }
 
 object AnnualAccount {
-  implicit val annualAccountOrdering: Ordering[AnnualAccount] = Ordering.by(_.taxYear)
-
   implicit val format: Format[AnnualAccount] = Json.format[AnnualAccount]
 }
