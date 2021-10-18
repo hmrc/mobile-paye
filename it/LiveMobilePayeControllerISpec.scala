@@ -161,6 +161,21 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       taxCalcCalled(nino, currentTaxYear)
     }
 
+    "return LOCKED when mci is returned true" in {
+      stubForShutteringDisabled
+      grantAccess(nino)
+      personalDetailsAreFound(nino, person.copy(manualCorrespondenceInd = true))
+
+      val response = await(requestWithCurrentYearAsInt.get())
+      response.status shouldBe 423
+      taxCodeIncomeNotCalled(nino)
+      employmentsNotCalled(nino)
+      pensionsNotCalled(nino)
+      nonTaxCodeIncomeNotCalled(nino)
+      taxAccountSummaryNotCalled(nino)
+      taxCalcCalled(nino, currentTaxYear)
+    }
+
     "return 400 when no journeyId supplied" in {
       stubForShutteringDisabled
       grantAccess(nino)
@@ -382,6 +397,22 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       taxAccountSummaryNotCalled(nino)
       taxCalcCalled(nino, currentTaxYear)
     }
+
+    "return LOCKED when mci set to true" in {
+      stubForShutteringDisabled
+      grantAccess(nino)
+      personalDetailsAreFound(nino, person.copy(manualCorrespondenceInd = true))
+
+      val response = await(requestWithCurrentYearAsCurrent.get())
+      response.status shouldBe 423
+      taxCodeIncomeNotCalled(nino)
+      employmentsNotCalled(nino)
+      pensionsNotCalled(nino)
+      nonTaxCodeIncomeNotCalled(nino)
+      taxAccountSummaryNotCalled(nino)
+      taxCalcCalled(nino, currentTaxYear)
+    }
+
   }
 
   "return matching payloads when called with the current year as int and as 'current' " in {
