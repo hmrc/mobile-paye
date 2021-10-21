@@ -27,7 +27,7 @@ case class Person(
   surname:                 String,
   dateOfBirth:             Option[LocalDate],
   isDeceased:              Boolean = false,
-  manualCorrespondenceInd: Boolean = false)
+  manualCorrespondenceInd: Option[Boolean] = Some(false))
 
 
 object Person {
