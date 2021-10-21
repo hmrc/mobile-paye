@@ -164,7 +164,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     "return LOCKED when mci is returned true" in {
       stubForShutteringDisabled
       grantAccess(nino)
-      personalDetailsAreFound(nino, person.copy(manualCorrespondenceInd = true))
+      personalDetailsAreFound(nino, person.copy(manualCorrespondenceInd = Some(true)))
 
       val response = await(requestWithCurrentYearAsInt.get())
       response.status shouldBe 423
@@ -401,7 +401,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     "return LOCKED when mci set to true" in {
       stubForShutteringDisabled
       grantAccess(nino)
-      personalDetailsAreFound(nino, person.copy(manualCorrespondenceInd = true))
+      personalDetailsAreFound(nino, person.copy(manualCorrespondenceInd = Some(true)))
 
       val response = await(requestWithCurrentYearAsCurrent.get())
       response.status shouldBe 423
