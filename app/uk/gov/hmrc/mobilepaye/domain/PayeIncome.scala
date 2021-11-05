@@ -17,7 +17,7 @@
 package uk.gov.hmrc.mobilepaye.domain
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.mobilepaye.domain.tai.{AnnualAccount, Payment}
+import uk.gov.hmrc.mobilepaye.domain.tai.Payment
 
 import java.time.LocalDate
 import scala.math.BigDecimal.RoundingMode

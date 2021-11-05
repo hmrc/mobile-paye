@@ -64,26 +64,26 @@ trait ErrorHandling {
     func.recover {
       case _: NotFoundException =>
         log("Resource not found!")
-        Status(ErrorNotFound.httpStatusCode)(toJson(ErrorNotFound))
+        Status(ErrorNotFound.httpStatusCode)(toJson[ErrorResponse](ErrorNotFound))
 
       case _: BadRequestException =>
         log("BadRequest!")
-        Status(ErrorBadRequest.httpStatusCode)(toJson(ErrorBadRequest))
+        Status(ErrorBadRequest.httpStatusCode)(toJson[ErrorResponse](ErrorBadRequest))
 
       case ex: Upstream4xxResponse if ex.upstreamResponseCode == 401 =>
         log("Upstream service returned 401")
-        Status(ErrorUnauthorizedUpstream.httpStatusCode)(toJson(ErrorUnauthorizedUpstream))
+        Status(ErrorUnauthorizedUpstream.httpStatusCode)(toJson[ErrorResponse](ErrorUnauthorizedUpstream))
 
       case ex: Upstream4xxResponse if ex.upstreamResponseCode == 423 =>
         log("Locked! User is locked due to manual correspondence indicator flag being set")
-        Status(LockedUserRequest.httpStatusCode)(toJson(LockedUserRequest))
+        Status(LockedUserRequest.httpStatusCode)(toJson[ErrorResponse](LockedUserRequest))
 
       case _: AuthorisationException =>
         log("Unauthorised! Failure to authorise account or grant access")
-        Unauthorized(toJson(ErrorUnauthorizedUpstream))
+        Unauthorized(toJson[ErrorResponse](ErrorUnauthorizedUpstream))
 
       case e: Exception =>
         logger.warn(s"Native Error - $app Internal server error: ${e.getMessage}", e)
-        Status(ErrorInternalServerError.httpStatusCode)(toJson(ErrorInternalServerError))
+        Status(ErrorInternalServerError.httpStatusCode)(toJson[ErrorResponse](ErrorInternalServerError))
     }
 }

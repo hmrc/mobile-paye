@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.mobilepaye.repository
 
-import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{Matchers, WordSpec}
+import org.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.domain.Nino
