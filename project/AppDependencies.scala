@@ -8,7 +8,7 @@ object AppDependencies {
   private val play28Bootstrap = "5.12.0"
   private val playHmrcVersion = "6.4.0-play-28"
   private val domainVersion   = "6.2.0-play-28"
-  private val taxYearVersion  = "1.0.0"
+  private val taxYearVersion  = "1.6.0"
 
   private val pegdownVersion             = "1.6.0"
   private val wireMockVersion            = "2.20.0"
