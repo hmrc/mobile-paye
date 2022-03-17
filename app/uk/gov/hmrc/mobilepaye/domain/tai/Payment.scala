@@ -21,14 +21,14 @@ import java.time.LocalDate
 import play.api.libs.json.{Format, Json}
 
 case class Payment(
-                    date:                              LocalDate,
-                    amountYearToDate:                  BigDecimal,
-                    taxAmountYearToDate:               BigDecimal,
-                    nationalInsuranceAmountYearToDate: BigDecimal,
-                    amount:                            BigDecimal,
-                    taxAmount:                         BigDecimal,
-                    nationalInsuranceAmount:           BigDecimal)
-  extends Ordered[Payment] {
+  date:                              LocalDate,
+  amountYearToDate:                  BigDecimal,
+  taxAmountYearToDate:               BigDecimal,
+  nationalInsuranceAmountYearToDate: BigDecimal,
+  amount:                            BigDecimal,
+  taxAmount:                         BigDecimal,
+  nationalInsuranceAmount:           BigDecimal)
+    extends Ordered[Payment] {
 
   def compare(that: Payment): Int = this.date.compareTo(that.date)
 }

@@ -247,12 +247,15 @@ class MobilePayeServiceSpec extends BaseSpec with P800CacheMongoSetup {
       val latestPayment1 = result.employments.get.head.latestPayment.get
       val latestPayment2 = result.employments.get.last.latestPayment
 
-      latestPayment1.amount                  shouldBe 50
-      latestPayment1.taxAmount               shouldBe 5
-      latestPayment1.nationalInsuranceAmount shouldBe 2
-      latestPayment1.futurePayment           shouldBe false
-      latestPayment1.link                    shouldBe "/check-income-tax/your-income-calculation-details/3"
-      latestPayment2                         shouldBe None
+      latestPayment1.amount                            shouldBe 50
+      latestPayment1.taxAmount                         shouldBe 5
+      latestPayment1.nationalInsuranceAmount           shouldBe 2
+      latestPayment1.amountYearToDate                  shouldBe 100
+      latestPayment1.taxAmountYearToDate               shouldBe 20
+      latestPayment1.nationalInsuranceAmountYearToDate shouldBe 10
+      latestPayment1.futurePayment                     shouldBe false
+      latestPayment1.link                              shouldBe "/check-income-tax/your-income-calculation-details/3"
+      latestPayment2                                   shouldBe None
     }
 
     "return MobilePayeResponse with correct employment latestPayments and previousPayments" in {
@@ -265,12 +268,15 @@ class MobilePayeServiceSpec extends BaseSpec with P800CacheMongoSetup {
       val result         = await(service.getMobilePayeResponse(nino, currentTaxYear))
       val latestPayment1 = result.employments.get.head.latestPayment.get
 
-      latestPayment1.amount                         shouldBe 50
-      latestPayment1.taxAmount                      shouldBe 5
-      latestPayment1.nationalInsuranceAmount        shouldBe 2
-      latestPayment1.futurePayment                  shouldBe true
-      latestPayment1.link                           shouldBe "/check-income-tax/your-income-calculation-details/3"
-      result.employments.get.head.payments.get.size shouldBe 3
+      latestPayment1.amount                            shouldBe 50
+      latestPayment1.taxAmount                         shouldBe 5
+      latestPayment1.nationalInsuranceAmount           shouldBe 2
+      latestPayment1.amountYearToDate                  shouldBe 100
+      latestPayment1.taxAmountYearToDate               shouldBe 20
+      latestPayment1.nationalInsuranceAmountYearToDate shouldBe 10
+      latestPayment1.futurePayment                     shouldBe true
+      latestPayment1.link                              shouldBe "/check-income-tax/your-income-calculation-details/3"
+      result.employments.get.head.payments.get.size    shouldBe 3
     }
 
     "return MobilePayeResponse with no payments node for employment with no payments" in {

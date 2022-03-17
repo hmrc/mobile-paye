@@ -73,6 +73,9 @@ object PayeIncome {
             latestPayment.amount,
             latestPayment.taxAmount,
             latestPayment.nationalInsuranceAmount,
+            latestPayment.amountYearToDate,
+            latestPayment.taxAmountYearToDate,
+            latestPayment.nationalInsuranceAmountYearToDate,
             s"/check-income-tax/your-income-calculation-details/${empId.getOrElse(throw new Exception("Employment ID not found"))}",
             futurePayment = if (latestPayment.date.isAfter(LocalDate.now())) true else false
           )
