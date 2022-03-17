@@ -13,6 +13,9 @@
         "amount": 1575,
         "taxAmount": 315,
         "nationalInsuranceAmount": 189,
+        "amountYearToDate": 6201,
+        "taxAmountYearToDate": 1180,
+        "nationalInsuranceAmountYearToDate": 657,
         "link": "/",
         "futurePayment": true
       },
