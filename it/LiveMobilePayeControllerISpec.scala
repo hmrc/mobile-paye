@@ -19,13 +19,9 @@ import scala.util.Random
 
 class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
 
-  lazy val requestWithCurrentYearAsInt: WSRequest =
-    wsUrl(s"/nino/$nino/tax-year/$currentTaxYear/summary?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0")
-      .addHttpHeaders(acceptJsonHeader)
+  lazy val urlWithCurrentYearAsInt = s"/nino/$nino/tax-year/$currentTaxYear/summary?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0"
 
-  lazy val requestWithCurrentYearAsCurrent: WSRequest =
-    wsUrl(s"/nino/$nino/tax-year/current/summary?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0")
-      .addHttpHeaders(acceptJsonHeader)
+  lazy val urlWithCurrentYearAsCurrent = s"/nino/$nino/tax-year/current/summary?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0"
 
   implicit def ninoToString(nino: Nino): String = nino.toString()
 
@@ -45,7 +41,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       taxAccountSummaryIsFound(nino, taxAccountSummary, cyPlusone = true)
       taxCalcNoResponse(nino, currentTaxYear)
 
-      val response = await(requestWithCurrentYearAsInt.get())
+      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
       response.status shouldBe 200
       response.body   shouldBe Json.toJson(fullMobilePayeResponseWithCY1Link).toString()
 
@@ -61,7 +57,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxCalcNoResponse(nino, currentTaxYear)
 
-      val response = await(requestWithCurrentYearAsInt.get())
+      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
       response.status shouldBe 200
       response.body   shouldBe Json.toJson(fullMobilePayeResponse).toString()
 
@@ -77,7 +73,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxCalcNoResponse(nino, currentTaxYear)
 
-      val response = await(requestWithCurrentYearAsInt.get())
+      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
       response.status shouldBe 200
       Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse.copy(
         otherIncomes = Some(Seq(otherIncome))
@@ -94,7 +90,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxCalcNoResponse(nino, currentTaxYear)
 
-      val response = await(requestWithCurrentYearAsInt.get())
+      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
       response.status                                  shouldBe 200
       Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse.copy(employments = None)
     }
@@ -109,7 +105,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxCalcNoResponse(nino, currentTaxYear)
 
-      val response = await(requestWithCurrentYearAsInt.get())
+      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
       response.status                                  shouldBe 200
       Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse.copy(pensions = None)
     }
@@ -124,7 +120,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxCalcNoResponse(nino, currentTaxYear)
 
-      val response = await(requestWithCurrentYearAsInt.get())
+      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
       response.status                                  shouldBe 200
       Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse.copy(otherIncomes = None)
     }
@@ -134,7 +130,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       grantAccess(nino)
       personalDetailsAreFound(nino, person.copy(isDeceased = true))
 
-      val response = await(requestWithCurrentYearAsInt.get())
+      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
       response.status shouldBe 410
 
       taxCodeIncomeNotCalled(nino)
@@ -150,7 +146,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       grantAccess(nino)
       personalLocked(nino)
 
-      val response = await(requestWithCurrentYearAsInt.get())
+      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
       response.status shouldBe 423
 
       taxCodeIncomeNotCalled(nino)
@@ -166,7 +162,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       grantAccess(nino)
       personalDetailsAreFound(nino, person.copy(manualCorrespondenceInd = Some(true)))
 
-      val response = await(requestWithCurrentYearAsInt.get())
+      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
       response.status shouldBe 423
       taxCodeIncomeNotCalled(nino)
       employmentsNotCalled(nino)
@@ -210,7 +206,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       stubForEmployments(nino, employmentIncomeSource)
       taxCalcNoResponse(nino, currentTaxYear)
 
-      val response = await(requestWithCurrentYearAsCurrent.get())
+      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status                                  shouldBe 200
       Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse
     }
@@ -225,7 +221,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxCalcNoResponse(nino, currentTaxYear)
 
-      val response = await(requestWithCurrentYearAsCurrent.get())
+      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status shouldBe 200
       Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse.copy(
         otherIncomes = Some(Seq(otherIncome))
@@ -242,7 +238,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxCalcNoResponse(nino, currentTaxYear)
 
-      val response = await(requestWithCurrentYearAsCurrent.get())
+      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status                                  shouldBe 200
       Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse.copy(employments = None)
     }
@@ -257,7 +253,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxCalcNoResponse(nino, currentTaxYear)
 
-      val response = await(requestWithCurrentYearAsCurrent.get())
+      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status                                  shouldBe 200
       Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse.copy(pensions = None)
     }
@@ -272,7 +268,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxCalcNoResponse(nino, currentTaxYear)
 
-      val response = await(requestWithCurrentYearAsCurrent.get())
+      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status                                  shouldBe 200
       Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse.copy(otherIncomes = None)
     }
@@ -296,7 +292,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
           val expectedRepayment: Option[P800Repayment] =
             repayment(P800Status.Overpaid, repaymentStatus, currentTaxYear, amount, time)
 
-          val response = await(requestWithCurrentYearAsCurrent.get())
+          val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
           response.status shouldBe 200
           response.body[JsValue].as[MobilePayeResponse] shouldBe fullMobilePayeResponse.copy(
             repayment = expectedRepayment
@@ -319,7 +315,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
           taxAccountSummaryIsFound(nino, taxAccountSummary)
           taxCalcValidResponse(nino, currentTaxYear, amount, Underpaid, repaymentStatus, time)
 
-          val response = await(requestWithCurrentYearAsCurrent.get())
+          val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
           response.status                               shouldBe 200
           response.body[JsValue].as[MobilePayeResponse] shouldBe fullMobilePayeResponse
         }
@@ -340,7 +336,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
           taxAccountSummaryIsFound(nino, taxAccountSummary)
           taxCalcValidResponse(nino, currentTaxYear, amount, Overpaid, repaymentStatus, time)
 
-          val response = await(requestWithCurrentYearAsCurrent.get())
+          val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
           response.status                               shouldBe 200
           response.body[JsValue].as[MobilePayeResponse] shouldBe fullMobilePayeResponse
         }
@@ -359,7 +355,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxCalcWithInstantDate(nino, currentTaxYear, time)
 
-      val response = await(requestWithCurrentYearAsCurrent.get())
+      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status                                         shouldBe 200
       response.body[JsValue].as[MobilePayeResponse].repayment shouldBe a[Some[_]]
       response.body[JsValue].as[MobilePayeResponse].repayment.foreach { repayment =>
@@ -373,7 +369,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       grantAccess(nino)
       personalDetailsAreFound(nino, person.copy(isDeceased = true))
 
-      val response = await(requestWithCurrentYearAsCurrent.get())
+      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status shouldBe 410
 
       taxCodeIncomeNotCalled(nino)
@@ -387,7 +383,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       grantAccess(nino)
       personalLocked(nino)
 
-      val response = await(requestWithCurrentYearAsCurrent.get())
+      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status shouldBe 423
 
       taxCodeIncomeNotCalled(nino)
@@ -403,7 +399,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       grantAccess(nino)
       personalDetailsAreFound(nino, person.copy(manualCorrespondenceInd = Some(true)))
 
-      val response = await(requestWithCurrentYearAsCurrent.get())
+      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status shouldBe 423
       taxCodeIncomeNotCalled(nino)
       employmentsNotCalled(nino)
@@ -425,9 +421,9 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     stubForEmployments(nino, employmentIncomeSource)
     taxCalcNoResponse(nino, currentTaxYear)
 
-    val response = await(requestWithCurrentYearAsCurrent.get())
+    val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
     response.status shouldBe 200
-    val response2 = await(requestWithCurrentYearAsInt.get())
+    val response2 = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
     response2.status shouldBe 200
 
     response.body shouldBe response2.body
@@ -443,7 +439,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     stubForEmployments(nino, employmentIncomeSource)
     taxCalcWithNoP800(nino, currentTaxYear, LocalDate.now)
 
-    val response = await(requestWithCurrentYearAsCurrent.get())
+    val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
     response.status                                  shouldBe 200
     Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse
   }
@@ -458,7 +454,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     stubForEmployments(nino, employmentIncomeSource)
     taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now.minusWeeks(6).minusDays(1))
 
-    val response = await(requestWithCurrentYearAsCurrent.get())
+    val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
     response.status                                  shouldBe 200
     Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse
   }
@@ -474,7 +470,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     stubForEmployments(nino, employmentIncomeSource)
     taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now.minusWeeks(6))
 
-    val response = await(requestWithCurrentYearAsCurrent.get())
+    val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
     response.status                                         shouldBe 200
     response.body[JsValue].as[MobilePayeResponse].repayment shouldBe a[Some[_]]
     response.body[JsValue].as[MobilePayeResponse].repayment.foreach { repayment =>
@@ -494,7 +490,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     stubForEmployments(nino, employmentIncomeSource)
     taxCalcWithNoDate(nino, currentTaxYear)
 
-    val response = await(requestWithCurrentYearAsCurrent.get())
+    val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
     response.status                                         shouldBe 200
     response.body[JsValue].as[MobilePayeResponse].repayment shouldBe a[Some[_]]
     response.body[JsValue].as[MobilePayeResponse].repayment.foreach { repayment =>
@@ -513,7 +509,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     stubForEmployments(nino, employmentIncomeSource)
     taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoType = "underpaid")
 
-    val response = await(requestWithCurrentYearAsCurrent.get())
+    val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
     response.status                                  shouldBe 200
     Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse
   }
@@ -528,7 +524,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     stubForEmployments(nino, employmentIncomeSource)
     taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoType = "balanced")
 
-    val response = await(requestWithCurrentYearAsCurrent.get())
+    val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
     response.status                                  shouldBe 200
     Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse
   }
@@ -544,7 +540,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     stubForEmployments(nino, employmentIncomeSource)
     taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoStatus = "sa_user")
 
-    val response = await(requestWithCurrentYearAsCurrent.get())
+    val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
     response.status                                  shouldBe 200
     Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse
   }
@@ -560,7 +556,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     stubForEmployments(nino, employmentIncomeSource)
     taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoStatus = "unable_to_claim")
 
-    val response = await(requestWithCurrentYearAsCurrent.get())
+    val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
     response.status                                  shouldBe 200
     Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse
   }
@@ -576,7 +572,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     stubForEmployments(nino, employmentIncomeSource)
     taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoStatus = "refund")
 
-    val response = await(requestWithCurrentYearAsCurrent.get())
+    val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
     response.status                                         shouldBe 200
     response.body[JsValue].as[MobilePayeResponse].repayment shouldBe a[Some[_]]
     response.body[JsValue].as[MobilePayeResponse].repayment.foreach { repayment =>
@@ -597,11 +593,11 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     stubForEmployments(nino, employmentIncomeSource)
     taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoType = "underpaid")
 
-    val response = await(requestWithCurrentYearAsCurrent.get())
+    val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
     response.status                                  shouldBe 200
     Json.parse(response.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse
 
-    val response2 = await(requestWithCurrentYearAsCurrent.get())
+    val response2 = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
     response2.status                                  shouldBe 200
     Json.parse(response2.body).as[MobilePayeResponse] shouldBe fullMobilePayeResponse
 
@@ -619,7 +615,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     stubForEmployments(nino, employmentIncomeSource)
     taxCalcWithNoDate(nino, currentTaxYear)
 
-    val response = await(requestWithCurrentYearAsCurrent.get())
+    val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
     response.status                                         shouldBe 200
     response.body[JsValue].as[MobilePayeResponse].repayment shouldBe a[Some[_]]
     response.body[JsValue].as[MobilePayeResponse].repayment.foreach { repayment =>
@@ -627,7 +623,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
       repayment.amount.foreach(l => l shouldBe 1000)
     }
 
-    val response2 = await(requestWithCurrentYearAsCurrent.get())
+    val response2 = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
     response2.status                                         shouldBe 200
     response2.body[JsValue].as[MobilePayeResponse].repayment shouldBe a[Some[_]]
     response2.body[JsValue].as[MobilePayeResponse].repayment.foreach { repayment =>
@@ -646,7 +642,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
     taxAccountSummaryIsFound(nino, taxAccountSummary)
     taxCalcNoResponse(nino, currentTaxYear)
 
-    val response = await(requestWithCurrentYearAsInt.get())
+    val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
     response.status shouldBe 200
     response.body   shouldBe Json.toJson(fullMobilePayeResponse).toString()
 
@@ -656,9 +652,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting {
 
 class LiveMobilePayeControllerShutteredISpec extends BaseISpec {
 
-  val request: WSRequest =
-    wsUrl(s"/nino/$nino/tax-year/$currentTaxYear/summary?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0")
-      .addHttpHeaders(acceptJsonHeader)
+  val request =s"/nino/$nino/tax-year/$currentTaxYear/summary?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0"
 
   implicit def ninoToString(nino: Nino): String = nino.toString()
 
@@ -668,7 +662,7 @@ class LiveMobilePayeControllerShutteredISpec extends BaseISpec {
       stubForShutteringEnabled
       grantAccess(nino)
 
-      val response: WSResponse = await(request.get())
+      val response: WSResponse = await(getRequestWithAuthHeaders(request))
       response.status shouldBe 521
       val shuttering: Shuttering = Json.parse(response.body).as[Shuttering]
       shuttering.shuttered shouldBe true
