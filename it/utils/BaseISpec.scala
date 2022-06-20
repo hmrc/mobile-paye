@@ -6,12 +6,13 @@ import org.scalatestplus.play.WsScalaTestClient
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.ws.WSClient
+import play.api.libs.ws.{WSClient, WSResponse}
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import uk.gov.hmrc.mobilepaye.MobilePayeTestData
 
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDateTime, ZoneId}
+import scala.concurrent.Future
 
 abstract class BaseISpec
     extends WordSpecLike
@@ -26,6 +27,7 @@ abstract class BaseISpec
   override implicit lazy val app: Application = appBuilder.build()
 
   protected val acceptJsonHeader: (String, String) = "Accept" -> "application/vnd.hmrc.1.0+json"
+  protected val authorisationJsonHeader: (String, String) = "AUTHORIZATION" -> "Bearer 123"
 
   def config: Map[String, Any] =
     Map[String, Any](
@@ -44,6 +46,9 @@ abstract class BaseISpec
         .plusDays(10)
         .format(DateTimeFormatter.ofPattern("yyyy-MM-dd\'T\'HH:mm:ss"))
     )
+
+  def getRequestWithAuthHeaders(url: String): Future[WSResponse] =
+    wsUrl(url).addHttpHeaders(acceptJsonHeader, authorisationJsonHeader).get()
 
   private def base64Encode(s: String): String =
     Base64.getEncoder.encodeToString(s.getBytes("UTF-8"))
