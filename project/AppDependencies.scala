@@ -1,4 +1,5 @@
 import sbt._
+import play.sbt.PlayImport.ehcache
 
 object AppDependencies {
 
@@ -15,6 +16,7 @@ object AppDependencies {
   private val scalaMockVersion           = "4.1.0"
   private val scalaTestPlusVersion       = "5.1.0"
   private val simpleReactiveMongoVersion = "8.0.0-play-28"
+  private val hmrcMongoVersion           = "0.62.0"
   private val reactiveMongoTestVersion   = "5.0.0-play-28"
   private val mockitoVersion             = "1.16.46"
   private val refinedVersion             = "0.9.4"
@@ -22,12 +24,14 @@ object AppDependencies {
 
   val compile: Seq[ModuleID] = Seq(
     ws,
-    "uk.gov.hmrc" %% "bootstrap-backend-play-28" % play28Bootstrap,
-    "uk.gov.hmrc" %% "domain"                    % domainVersion,
-    "uk.gov.hmrc" %% "play-hmrc-api"             % playHmrcVersion,
-    "uk.gov.hmrc" %% "tax-year"                  % taxYearVersion,
-    "uk.gov.hmrc" %% "simple-reactivemongo"      % simpleReactiveMongoVersion,
-    "eu.timepit"  %% "refined"                   % refinedVersion
+    "uk.gov.hmrc"         %% "bootstrap-backend-play-28" % play28Bootstrap,
+    "uk.gov.hmrc"         %% "domain"                    % domainVersion,
+    "uk.gov.hmrc"         %% "play-hmrc-api"             % playHmrcVersion,
+    "uk.gov.hmrc"         %% "tax-year"                  % taxYearVersion,
+    "uk.gov.hmrc"         %% "simple-reactivemongo"      % simpleReactiveMongoVersion,
+    "uk.gov.hmrc.mongo"   %% s"hmrc-mongo-play-28"       % hmrcMongoVersion,
+    "eu.timepit"          %% "refined"                   % refinedVersion,
+    ehcache
   )
 
   trait TestDependencies {
@@ -41,9 +45,10 @@ object AppDependencies {
       new TestDependencies {
 
         override lazy val test: Seq[ModuleID] = testCommon(scope) ++ Seq(
-            "org.scalamock" %% "scalamock"          % scalaMockVersion         % scope,
-            "org.mockito"   % "mockito-scala_2.12"  % mockitoVersion           % scope,
-            "uk.gov.hmrc"   %% "reactivemongo-test" % reactiveMongoTestVersion % scope
+            "org.scalamock"  %% "scalamock"          % scalaMockVersion         % scope,
+            "org.mockito"    % "mockito-scala_2.12"  % mockitoVersion           % scope,
+            "uk.gov.hmrc"    %% "reactivemongo-test" % reactiveMongoTestVersion % scope,
+            "org.scalacheck" %% "scalacheck"         % "1.16.0"                 % scope,
           )
       }.test
   }

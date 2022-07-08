@@ -23,6 +23,7 @@ lazy val microservice = Project(appName, file("."))
       "uk.gov.hmrc.mobilepaye.binders.Binders._",
       "uk.gov.hmrc.time.TaxYear",
       "uk.gov.hmrc.mobilepaye.domain.types._",
+      "uk.gov.hmrc.mobilepaye.domain.admin._",
       "uk.gov.hmrc.mobilepaye.domain.types.ModelTypes._"
     )
   )
