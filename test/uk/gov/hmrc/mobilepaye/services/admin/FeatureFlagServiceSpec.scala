@@ -17,11 +17,12 @@
 package uk.gov.hmrc.mobilepaye.services.admin
 
 import akka.Done
-import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{times, verify, when}
+import org.mockito.Mockito.{reset, times, verify, when}
+import org.mockito.{ArgumentCaptor, Mockito}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.{Arbitrary, Gen}
+import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
 import play.api.cache.AsyncCacheApi
@@ -37,12 +38,16 @@ import scala.reflect.ClassTag
 
 class FeatureFlagServiceSpec
   extends BaseSpec
-    with ScalaFutures {
+    with ScalaFutures
+    with BeforeAndAfterEach {
 
   implicit private val arbitraryFeatureFlagName: Arbitrary[FeatureFlagName] =
     Arbitrary {
       Gen.oneOf(FeatureFlagName.flags)
     }
+
+  def mock[T](implicit ev: ClassTag[T]): T =
+    Mockito.mock(ev.runtimeClass.asInstanceOf[Class[T]])
 
   // A cache that doesn't cache
   class FakeCache extends AsyncCacheApi {
@@ -57,55 +62,55 @@ class FeatureFlagServiceSpec
     override def removeAll(): Future[Done] = ???
   }
 
+  val adminRepository: AdminRepository = mock[AdminRepository]
+  val service = new FeatureFlagService(adminRepository, new FakeCache())
+
+  override def beforeEach(): Unit = {
+    reset(adminRepository)
+  }
+
   "When set works in the repo returns true" in {
-    val adminRepository = mock[AdminRepository]
     when(adminRepository.getFeatureFlags).thenReturn(Future.successful(Some(Seq.empty)))
     when(adminRepository.setFeatureFlags(any())).thenReturn(Future.successful(true))
 
-    val OUT = new FeatureFlagService(adminRepository, new FakeCache())
     val flagName = arbitrary[FeatureFlagName].sample.getOrElse(FeatureFlagName.OnlinePaymentIntegration)
 
-    whenReady(OUT.set(flagName, enabled = true)) { result =>
-      result mustBe true
-      val captor = ArgumentCaptor.forClass(classOf[Seq[FeatureFlag]])
-      verify(adminRepository, times(1)).setFeatureFlags(captor.capture())
-      captor.getValue must contain(Enabled(flagName))
-    }
+    val result = service.set(flagName, enabled = true).futureValue
+
+    result mustBe true
+
+    val captor = ArgumentCaptor.forClass(classOf[Seq[FeatureFlag]])
+
+    verify(adminRepository, times(1)).setFeatureFlags(captor.capture())
+
+    captor.getValue must contain(Enabled(flagName))
   }
 
   "When set fails in the repo returns false" in {
-    val adminRepository = mock[AdminRepository]
-
     val flagName = arbitrary[FeatureFlagName].sample.getOrElse(FeatureFlagName.OnlinePaymentIntegration)
-    val OUT = new FeatureFlagService(adminRepository, new FakeCache())
 
     when(adminRepository.getFeatureFlags).thenReturn(Future.successful(Some(Seq.empty)))
     when(adminRepository.setFeatureFlags(any())).thenReturn(Future.successful(false))
 
-    whenReady(OUT.set(flagName, enabled = true))(_ mustBe false)
+    whenReady(service.set(flagName, enabled = true))(_ mustBe false)
   }
 
   "When getAll is called returns all of the flags from the repo" in {
-    val adminRepository = mock[AdminRepository]
-    val OUT = new FeatureFlagService(adminRepository, new FakeCache())
-
     when(adminRepository.getFeatureFlags).thenReturn(Future.successful(Some(Seq.empty)))
 
-    OUT.getAll.futureValue mustBe Seq(Enabled(OnlinePaymentIntegration))
+    service.getAll.futureValue mustBe Seq(Enabled(OnlinePaymentIntegration))
   }
 
   "When a flag doesn't exist in the repo the default is returned" in {
-    val adminRepository = mock[AdminRepository]
     when(adminRepository.getFeatureFlags).thenReturn(Future.successful(Some(Seq.empty)))
-    val OUT = new FeatureFlagService(adminRepository, new FakeCache())
-    OUT.get(OnlinePaymentIntegration).futureValue mustBe Enabled(OnlinePaymentIntegration)
+
+    service.get(OnlinePaymentIntegration).futureValue mustBe Enabled(OnlinePaymentIntegration)
   }
 
   "When a flag exists in the repo that overrides the default" in {
-    val adminRepository = mock[AdminRepository]
     when(adminRepository.getFeatureFlags)
       .thenReturn(Future.successful(Some(Seq(Disabled(OnlinePaymentIntegration)))))
-    val OUT = new FeatureFlagService(adminRepository, new FakeCache())
-    OUT.get(OnlinePaymentIntegration).futureValue mustBe Disabled(OnlinePaymentIntegration)
+
+    service.get(OnlinePaymentIntegration).futureValue mustBe Disabled(OnlinePaymentIntegration)
   }
 }

@@ -18,6 +18,7 @@ package uk.gov.hmrc.mobilepaye.controllers.admin
 
 import akka.Done
 import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito
 import org.mockito.Mockito.when
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.cache.AsyncCacheApi
@@ -58,6 +59,9 @@ class FeatureFlagControllerSpec
 
     override def removeAll(): Future[Done] = ???
   }
+
+  def mock[T](implicit ev: ClassTag[T]): T =
+    Mockito.mock(ev.runtimeClass.asInstanceOf[Class[T]])
 
   val mockAdminRepository: AdminRepository = mock[AdminRepository]
 

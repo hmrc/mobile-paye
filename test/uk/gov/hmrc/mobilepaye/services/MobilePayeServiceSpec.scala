@@ -16,18 +16,16 @@
 
 package uk.gov.hmrc.mobilepaye.services
 
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.{Configuration, Environment, Mode}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, InternalServerException, UnauthorizedException}
 import uk.gov.hmrc.mobilepaye.connectors.{TaiConnector, TaxCalcConnector}
-import uk.gov.hmrc.mobilepaye.domain.{IncomeSource, MobilePayeResponse}
 import uk.gov.hmrc.mobilepaye.domain.tai._
+import uk.gov.hmrc.mobilepaye.domain.{IncomeSource, MobilePayeResponse}
 import uk.gov.hmrc.mobilepaye.repository.{P800CacheMongo, P800CacheMongoSetup}
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 
-import java.time.{LocalDate, LocalDateTime, ZoneId}
 import java.time.format.DateTimeFormatter
+import java.time.{LocalDateTime, ZoneId}
 import scala.concurrent.{ExecutionContext, Future}
 
 class MobilePayeServiceSpec extends BaseSpec with P800CacheMongoSetup {
