@@ -19,7 +19,8 @@ package uk.gov.hmrc.mobilepaye.controllers.admin
 import akka.Done
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
-import org.mockito.Mockito.when
+import org.mockito.Mockito.{reset, when}
+import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.cache.AsyncCacheApi
 import play.api.http.Status.OK
@@ -42,7 +43,8 @@ import scala.reflect.ClassTag
 
 class FeatureFlagControllerSpec
   extends BaseSpec
-    with GuiceOneAppPerSuite {
+    with GuiceOneAppPerSuite
+    with BeforeAndAfterEach {
 
   def fakeCSRFRequest(method: String, uri: String): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest(method, uri).withCSRFToken.asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
@@ -70,24 +72,32 @@ class FeatureFlagControllerSpec
   val flags: Seq[FeatureFlag] =
     Seq(FeatureFlag(OnlinePaymentIntegration, enabled = true))
 
+  def application: GuiceApplicationBuilder =
+    new GuiceApplicationBuilder()
+      .overrides(
+        bind[AsyncCacheApi].toInstance(mockCacheApi),
+        bind[AdminRepository].to(mockAdminRepository),
+        bind[FeatureFlagService].to(mockFeatureFlagService)
+      )
+
+  override def beforeEach(): Unit = {
+    reset(
+      mockAdminRepository,
+      mockFeatureFlagService
+    )
+  }
+
   "Feature Flag Controller" should {
 
     "return OK with the service configuration for a GET request" in {
       when(mockFeatureFlagService.getAll).thenReturn(Future.successful(flags))
 
-      val application =
-        new GuiceApplicationBuilder()
-          .overrides(
-            bind[AsyncCacheApi].toInstance(mockCacheApi),
-            bind[AdminRepository].to(mockAdminRepository),
-            bind[FeatureFlagService].to(mockFeatureFlagService)
-          )
-          .build()
+      val app = application.build()
 
-      running(application) {
+      running(app) {
         val request = fakeCSRFRequest(GET, routes.FeatureFlagController.get.url)
 
-        val result = route(application, request).head
+        val result = route(app, request).head
 
         status(result) shouldBe OK
       }
@@ -96,22 +106,15 @@ class FeatureFlagControllerSpec
     "return NoContent for a successful PUT request" in {
       when(mockFeatureFlagService.set(any(), any())).thenReturn(Future.successful(true))
 
-      val application =
-        new GuiceApplicationBuilder()
-          .overrides(
-            bind[AsyncCacheApi].toInstance(mockCacheApi),
-            bind[AdminRepository].to(mockAdminRepository),
-            bind[FeatureFlagService].to(mockFeatureFlagService)
-          )
-          .build()
+      val app = application.build()
 
-      running(application) {
+      running(app) {
         val request = fakeCSRFRequest(
           PUT,
           routes.FeatureFlagController.put(FeatureFlagName.OnlinePaymentIntegration).url
         ).withBody(JsBoolean(true))
 
-        val result = route(application, request).head
+        val result = route(app, request).head
 
         status(result) shouldBe NO_CONTENT
       }
@@ -120,22 +123,15 @@ class FeatureFlagControllerSpec
     "return BadRequest for a PUT request with an invalid payload" in {
       when(mockFeatureFlagService.set(any(), any())).thenReturn(Future.successful(false))
 
-      val application =
-        new GuiceApplicationBuilder()
-          .overrides(
-            bind[AsyncCacheApi].toInstance(mockCacheApi),
-            bind[AdminRepository].to(mockAdminRepository),
-            bind[FeatureFlagService].to(mockFeatureFlagService)
-          )
-          .build()
+      val app = application.build()
 
-      running(application) {
+      running(app) {
         val request = fakeCSRFRequest(
           PUT,
           routes.FeatureFlagController.put(FeatureFlagName.OnlinePaymentIntegration).url
         ).withBody("This is not a valid request body")
 
-        val result = route(application, request).head
+        val result = route(app, request).head
 
         status(result) shouldBe BAD_REQUEST
       }
