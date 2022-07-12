@@ -92,7 +92,7 @@ class FeatureFlagServiceSpec
     when(adminRepository.getFeatureFlags).thenReturn(Future.successful(Some(Seq.empty)))
     when(adminRepository.setFeatureFlags(any())).thenReturn(Future.successful(false))
 
-    whenReady(service.set(flagName, enabled = true))(_ mustBe false)
+    service.set(flagName, enabled = true).futureValue mustBe false
   }
 
   "When getAll is called returns all of the flags from the repo" in {
