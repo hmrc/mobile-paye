@@ -10,24 +10,23 @@ object AppDependencies {
   private val domainVersion   = "8.1.0-play-28"
   private val taxYearVersion  = "3.0.0"
 
-  private val pegdownVersion             = "1.6.0"
-  private val wireMockVersion            = "2.20.0"
-  private val scalaMockVersion           = "4.1.0"
-  private val scalaTestPlusVersion       = "5.1.0"
-  private val simpleReactiveMongoVersion = "8.0.0-play-28"
-  private val reactiveMongoTestVersion   = "5.0.0-play-28"
-  private val mockitoVersion             = "1.16.46"
-  private val refinedVersion             = "0.9.4"
-  private val flexmarkAllVersion         = "0.36.8"
+  private val pegdownVersion       = "1.6.0"
+  private val wireMockVersion      = "2.20.0"
+  private val scalaMockVersion     = "4.1.0"
+  private val scalaTestPlusVersion = "5.1.0"
+  private val hmrcMongoVersion     = "0.67.0"
+  private val mockitoVersion       = "1.16.46"
+  private val refinedVersion       = "0.9.4"
+  private val flexmarkAllVersion   = "0.36.8"
 
   val compile: Seq[ModuleID] = Seq(
     ws,
-    "uk.gov.hmrc" %% "bootstrap-backend-play-28" % play28Bootstrap,
-    "uk.gov.hmrc" %% "domain"                    % domainVersion,
-    "uk.gov.hmrc" %% "play-hmrc-api"             % playHmrcVersion,
-    "uk.gov.hmrc" %% "tax-year"                  % taxYearVersion,
-    "uk.gov.hmrc" %% "simple-reactivemongo"      % simpleReactiveMongoVersion,
-    "eu.timepit"  %% "refined"                   % refinedVersion
+    "uk.gov.hmrc"       %% "bootstrap-backend-play-28" % play28Bootstrap,
+    "uk.gov.hmrc"       %% "domain"                    % domainVersion,
+    "uk.gov.hmrc"       %% "play-hmrc-api"             % playHmrcVersion,
+    "uk.gov.hmrc"       %% "tax-year"                  % taxYearVersion,
+    "uk.gov.hmrc.mongo" %% "hmrc-mongo-play-28"        % hmrcMongoVersion,
+    "eu.timepit"        %% "refined"                   % refinedVersion
   )
 
   trait TestDependencies {
@@ -41,9 +40,9 @@ object AppDependencies {
       new TestDependencies {
 
         override lazy val test: Seq[ModuleID] = testCommon(scope) ++ Seq(
-            "org.scalamock" %% "scalamock"          % scalaMockVersion         % scope,
-            "org.mockito"   % "mockito-scala_2.12"  % mockitoVersion           % scope,
-            "uk.gov.hmrc"   %% "reactivemongo-test" % reactiveMongoTestVersion % scope
+            "org.scalamock"     %% "scalamock"               % scalaMockVersion % scope,
+            "org.mockito"       % "mockito-scala_2.12"       % mockitoVersion   % scope,
+            "uk.gov.hmrc.mongo" %% "hmrc-mongo-test-play-28" % hmrcMongoVersion % scope
           )
       }.test
   }
