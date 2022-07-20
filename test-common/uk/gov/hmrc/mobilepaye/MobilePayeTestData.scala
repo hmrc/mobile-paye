@@ -142,7 +142,7 @@ trait MobilePayeTestData {
     otherIncomes           = Some(otherIncomes),
     taxFreeAmount          = Some(10000),
     estimatedTaxAmount     = Some(250),
-    previousTaxYearLink    = s"/check-income-tax/historic-paye/${TaxYear.current.currentYear - 1}",
+    previousTaxYearLink    = s"/check-income-tax/income-tax-history",
     currentYearPlusOneLink = None
   )
 
@@ -154,7 +154,7 @@ trait MobilePayeTestData {
     otherIncomes        = Some(otherIncomes),
     taxFreeAmount       = Some(10000),
     estimatedTaxAmount  = Some(250),
-    previousTaxYearLink = s"/check-income-tax/historic-paye/${TaxYear.current.currentYear - 1}",
+    previousTaxYearLink = s"/check-income-tax/income-tax-history",
     taxCodeLocation     = Some("Scottish")
   )
 
