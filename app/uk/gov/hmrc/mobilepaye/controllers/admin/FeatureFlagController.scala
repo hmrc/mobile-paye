@@ -18,31 +18,37 @@ package uk.gov.hmrc.mobilepaye.controllers.admin
 
 import play.api.libs.json.{JsBoolean, Json}
 import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
+import uk.gov.hmrc.mobilepaye.controllers.action.InternalAuthAction
 import uk.gov.hmrc.mobilepaye.domain.admin.FeatureFlagName
 import uk.gov.hmrc.mobilepaye.services.admin.FeatureFlagService
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class FeatureFlagController @Inject() (
+class FeatureFlagController @Inject()(
+  val auth: InternalAuthAction,
   ffService: FeatureFlagService,
   cc: ControllerComponents
 )(implicit ec: ExecutionContext)
-    extends AbstractController(cc) {
+  extends AbstractController(cc) {
 
-  def get(): Action[AnyContent] = Action.async { _ =>
-    ffService.getAll
-      .map(flags => Ok(Json.toJson(flags)))
-  }
-
-  def put(flagName: FeatureFlagName): Action[AnyContent] = Action.async { request =>
-    request.body.asJson match {
-      case Some(JsBoolean(enabled)) =>
-        ffService
-          .set(flagName, enabled)
-          .map(_ => NoContent)
-      case _ =>
-        Future.successful(BadRequest)
+  def get(): Action[AnyContent] =
+    auth().async {
+      ffService
+        .getAll
+        .map(flags => Ok(Json.toJson(flags)))
     }
-  }
+
+  def put(flagName: FeatureFlagName): Action[AnyContent] =
+    auth().async {
+      request =>
+        request.body.asJson match {
+          case Some(JsBoolean(enabled)) =>
+            ffService
+              .set(flagName, enabled)
+              .map(_ => NoContent)
+          case _ =>
+            Future.successful(BadRequest)
+        }
+    }
 }

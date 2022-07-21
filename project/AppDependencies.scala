@@ -24,13 +24,14 @@ object AppDependencies {
 
   val compile: Seq[ModuleID] = Seq(
     ws,
-    "uk.gov.hmrc"         %% "bootstrap-backend-play-28" % play28Bootstrap,
-    "uk.gov.hmrc"         %% "domain"                    % domainVersion,
-    "uk.gov.hmrc"         %% "play-hmrc-api"             % playHmrcVersion,
-    "uk.gov.hmrc"         %% "tax-year"                  % taxYearVersion,
-    "uk.gov.hmrc"         %% "simple-reactivemongo"      % simpleReactiveMongoVersion,
-    "uk.gov.hmrc.mongo"   %% s"hmrc-mongo-play-28"       % hmrcMongoVersion,
-    "eu.timepit"          %% "refined"                   % refinedVersion,
+    "uk.gov.hmrc"         %% "bootstrap-backend-play-28"    % play28Bootstrap,
+    "uk.gov.hmrc"         %% "domain"                       % domainVersion,
+    "uk.gov.hmrc"         %% "play-hmrc-api"                % playHmrcVersion,
+    "uk.gov.hmrc"         %% "tax-year"                     % taxYearVersion,
+    "uk.gov.hmrc"         %% "simple-reactivemongo"         % simpleReactiveMongoVersion,
+    "uk.gov.hmrc.mongo"   %% s"hmrc-mongo-play-28"          % hmrcMongoVersion,
+    "eu.timepit"          %% "refined"                      % refinedVersion,
+    "uk.gov.hmrc"         %% "internal-auth-client-play-28" % "1.2.0",
     ehcache
   )
 
