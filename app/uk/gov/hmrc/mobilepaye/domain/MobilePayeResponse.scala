@@ -33,7 +33,7 @@ case class MobilePayeResponse(
   addMissingEmployerLink:    String = "/check-income-tax/add-employment/employment-name",
   addMissingPensionLink:     String = "/check-income-tax/add-pension-provider/name",
   addMissingIncomeLink:      String = "/forms/form/tell-us-about-other-income/guide",
-  previousTaxYearLink:       String = s"/check-income-tax/historic-paye/${TaxYear.current.previous.startYear}",
+  previousTaxYearLink:       String = s"/check-income-tax/income-tax-history",
   currentYearPlusOneLink:    Option[String] = Some("/check-income-tax/income-tax-comparison"),
   taxCodeLocation:           Option[String] = None)
 
