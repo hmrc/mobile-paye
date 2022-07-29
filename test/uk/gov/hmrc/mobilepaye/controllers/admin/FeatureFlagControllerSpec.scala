@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.mobilepaye.controllers.admin
 
-import akka.Done
 import org.mockito.ArgumentMatchers.{any, eq => meq}
 import org.mockito.Mockito
 import org.mockito.Mockito.{reset, when}
@@ -33,8 +32,8 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.internalauth.client.Predicate.Permission
-import uk.gov.hmrc.internalauth.client.test.{BackendAuthComponentsStub, StubBehaviour}
 import uk.gov.hmrc.internalauth.client._
+import uk.gov.hmrc.internalauth.client.test.{BackendAuthComponentsStub, StubBehaviour}
 import uk.gov.hmrc.mobilepaye.domain.admin.FeatureFlagName.OnlinePaymentIntegration
 import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, FeatureFlagName}
 import uk.gov.hmrc.mobilepaye.repository.admin.AdminRepository
@@ -42,7 +41,6 @@ import uk.gov.hmrc.mobilepaye.services.admin.FeatureFlagService
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 
 import scala.concurrent.Future
-import scala.concurrent.duration.Duration
 import scala.reflect.ClassTag
 
 class FeatureFlagControllerSpec
@@ -52,19 +50,6 @@ class FeatureFlagControllerSpec
 
   def fakeRequest(method: String, uri: String): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest(method, uri)
-
-  // A cache that doesn't cache
-  val mockCacheApi: AsyncCacheApi = new AsyncCacheApi {
-    override def set(key: String, value: Any, expiration: Duration): Future[Done] = ???
-
-    override def remove(key: String): Future[Done] = ???
-
-    override def getOrElseUpdate[A](key: String, expiration: Duration)(orElse: => Future[A])(implicit evidence$1: ClassTag[A]): Future[A] = orElse
-
-    override def get[T](key: String)(implicit evidence$2: ClassTag[T]): Future[Option[T]] = ???
-
-    override def removeAll(): Future[Done] = ???
-  }
 
   def mock[T](implicit ev: ClassTag[T]): T =
     Mockito.mock(ev.runtimeClass.asInstanceOf[Class[T]])

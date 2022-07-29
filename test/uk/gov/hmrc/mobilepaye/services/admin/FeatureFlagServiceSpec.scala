@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.mobilepaye.services.admin
 
-import akka.Done
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, times, verify, when}
 import org.mockito.{ArgumentCaptor, Mockito}
@@ -25,7 +24,6 @@ import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
-import play.api.cache.AsyncCacheApi
 import uk.gov.hmrc.mobilepaye.domain.admin.FeatureFlag.{Disabled, Enabled}
 import uk.gov.hmrc.mobilepaye.domain.admin.FeatureFlagName.OnlinePaymentIntegration
 import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, FeatureFlagName}
@@ -33,7 +31,6 @@ import uk.gov.hmrc.mobilepaye.repository.admin.AdminRepository
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 
 import scala.concurrent.Future
-import scala.concurrent.duration.Duration
 import scala.reflect.ClassTag
 
 class FeatureFlagServiceSpec
@@ -49,21 +46,8 @@ class FeatureFlagServiceSpec
   def mock[T](implicit ev: ClassTag[T]): T =
     Mockito.mock(ev.runtimeClass.asInstanceOf[Class[T]])
 
-  // A cache that doesn't cache
-  class FakeCache extends AsyncCacheApi {
-    override def set(key: String, value: Any, expiration: Duration): Future[Done] = ???
-
-    override def remove(key: String): Future[Done] = ???
-
-    override def getOrElseUpdate[A](key: String, expiration: Duration)(orElse: => Future[A])(implicit evidence$1: ClassTag[A]): Future[A] = orElse
-
-    override def get[T](key: String)(implicit evidence$2: ClassTag[T]): Future[Option[T]] = ???
-
-    override def removeAll(): Future[Done] = ???
-  }
-
   val adminRepository: AdminRepository = mock[AdminRepository]
-  val service = new FeatureFlagService(adminRepository, new FakeCache())
+  val service = new FeatureFlagService(adminRepository, mockCacheApi)
 
   override def beforeEach(): Unit = {
     reset(adminRepository)
