@@ -1,7 +1,9 @@
 package utils
 
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
+
 import java.util.Base64
-import org.scalatest.{Matchers, WordSpecLike}
 import org.scalatestplus.play.WsScalaTestClient
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.Application
@@ -15,7 +17,7 @@ import java.time.{LocalDateTime, ZoneId}
 import scala.concurrent.Future
 
 abstract class BaseISpec
-    extends WordSpecLike
+    extends AnyWordSpecLike
     with Matchers
     with WsScalaTestClient
     with GuiceOneServerPerSuite

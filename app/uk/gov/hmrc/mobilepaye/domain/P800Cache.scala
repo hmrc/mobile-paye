@@ -20,7 +20,7 @@ import org.joda.time.DateTime
 import play.api.libs.functional.syntax.{unlift, _}
 import play.api.libs.json.{OFormat, OWrites, Reads, _}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
+import uk.gov.hmrc.mongo.play.json.formats.MongoJodaFormats
 
 case class P800Cache(
   nino:      Nino,
@@ -28,7 +28,7 @@ case class P800Cache(
 
 object P800Cache {
 
-  private implicit val dateFormat = ReactiveMongoFormats.dateTimeFormats
+  private implicit val dateFormat = MongoJodaFormats.dateTimeFormat
 
   def defaultReads: Reads[P800Cache] =
     (__ \ "nino")
