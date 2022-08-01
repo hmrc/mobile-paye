@@ -58,23 +58,22 @@ trait MobilePayeTestData {
   val annualAccount:  AnnualAccount = AnnualAccount(payments)
   val annualAccount2: AnnualAccount = AnnualAccount(payments2)
 
-  val taiEmployment: Employment = Employment(Some("ABC123"), 3, Seq(annualAccount))
+  val taiEmployment: Employment = Employment(Some("ABC123"), 3, "P12345", Seq(annualAccount))
 
-  val taiEmployment2: Employment = taiEmployment.copy(
+  val taiEmployment2: Employment = Employment(
     payrollNumber  = Some("DEF456"),
     sequenceNumber = 4,
+    payeNumber     = "P54321",
     annualAccounts = Seq(AnnualAccount(Seq(Payment(LocalDate.now().minusDays(63), 50, 20, 10, 30, 5, 2))))
   )
 
   val taiEmployment3: Employment =
-    taiEmployment.copy(payrollNumber = None, sequenceNumber = 5, annualAccounts = Seq(annualAccount))
+    taiEmployment.copy(payrollNumber = None, sequenceNumber = 5)
 
   val taiEmployment4: Employment =
-    taiEmployment.copy(payrollNumber = None, sequenceNumber = 5, annualAccounts = Seq(annualAccount2))
+    taiEmployment3.copy(annualAccounts = Seq(annualAccount2))
 
-  val taiEmployment5: Employment = taiEmployment.copy(
-    payrollNumber  = Some("DEF456"),
-    sequenceNumber = 4,
+  val taiEmployment5: Employment = taiEmployment2.copy(
     annualAccounts = Seq(AnnualAccount(Seq.empty))
   )
 
