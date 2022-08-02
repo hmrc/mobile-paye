@@ -21,6 +21,7 @@ import play.api.libs.json.{Format, Json}
 case class Employment(
   payrollNumber:  Option[String],
   sequenceNumber: Int,
+  payeNumber: String,
   annualAccounts: Seq[AnnualAccount])
 
 object Employment {
