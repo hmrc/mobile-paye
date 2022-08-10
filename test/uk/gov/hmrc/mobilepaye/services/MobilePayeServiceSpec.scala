@@ -16,25 +16,26 @@
 
 package uk.gov.hmrc.mobilepaye.services
 
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.{Configuration, Environment, Mode}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, InternalServerException, UnauthorizedException}
 import uk.gov.hmrc.mobilepaye.connectors.{TaiConnector, TaxCalcConnector}
-import uk.gov.hmrc.mobilepaye.domain.{IncomeSource, MobilePayeResponse}
+import uk.gov.hmrc.mobilepaye.domain.{IncomeSource, MobilePayeResponse, P800Cache}
 import uk.gov.hmrc.mobilepaye.domain.tai._
-import uk.gov.hmrc.mobilepaye.repository.{P800CacheMongo, P800CacheMongoSetup}
+import uk.gov.hmrc.mobilepaye.repository.P800CacheMongo
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
+import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
-import java.time.{LocalDate, LocalDateTime, ZoneId}
+import java.time.{LocalDateTime, ZoneId}
 import java.time.format.DateTimeFormatter
 import scala.concurrent.{ExecutionContext, Future}
 
-class MobilePayeServiceSpec extends BaseSpec with P800CacheMongoSetup {
+class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupport[P800Cache] {
+
+  override lazy val repository = new P800CacheMongo(mongoComponent, appConfig)
 
   val mockTaiConnector:     TaiConnector      = mock[TaiConnector]
   val mockTaxCalcConnector: TaxCalcConnector  = mock[TaxCalcConnector]
-  val p800CacheMongo:       P800CacheMongo    = new P800CacheMongoWithInsert(false, None, None).p800CacheMongo
+  val p800CacheMongo:       P800CacheMongo    = repository
   val dateFormatter:        DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd\'T\'HH:mm:ss")
   val inactiveDate:         String            = "2020-02-01T00:00:00"
   val activeStartDate:      String            = LocalDateTime.now(ZoneId.of("Europe/London")).minusDays(10).format(dateFormatter)

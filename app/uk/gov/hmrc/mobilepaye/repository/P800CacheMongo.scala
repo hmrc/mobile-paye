@@ -16,50 +16,56 @@
 
 package uk.gov.hmrc.mobilepaye.repository
 
+import org.mongodb.scala.model.Filters.equal
+import org.mongodb.scala.model.{IndexModel, IndexOptions}
+import org.mongodb.scala.model.Indexes.ascending
+import play.api.libs.json.Format
+
 import javax.inject.{Inject, Singleton}
-import play.modules.reactivemongo.ReactiveMongoComponent
-import reactivemongo.api.indexes.{Index, IndexType}
-import reactivemongo.bson._
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mobilepaye.config.MobilePayeConfig
 import uk.gov.hmrc.mobilepaye.domain.P800Cache
-import uk.gov.hmrc.mongo.ReactiveRepository
+import uk.gov.hmrc.mobilepaye.errors.MongoDBError
+import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.serviceResponse.ServiceResponse
 
+import java.util.concurrent.TimeUnit
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class P800CacheMongo @Inject() (
-  mongo:                     ReactiveMongoComponent,
+  mongo:                     MongoComponent,
   appConfig:                 MobilePayeConfig
 )(implicit executionContext: ExecutionContext)
-    extends ReactiveRepository[P800Cache, BSONObjectID](
+    extends PlayMongoRepository[P800Cache](
       collectionName = "p800Cache",
-      mongo          = mongo.mongoConnector.db,
-      domainFormat   = P800Cache.format
-    )
-    with MongoHelper {
-
-  override def indexes: Seq[Index] =
-    Seq(
-      Index(
-        Seq("createdAt" -> IndexType.Ascending),
-        name    = Some("createdAt"),
-        sparse  = false,
-        options = BSONDocument("expireAfterSeconds" -> appConfig.mongoTtl)
+      mongoComponent = mongo,
+      domainFormat   = P800Cache.format,
+      indexes = Seq(
+        IndexModel(ascending("createdAt"),
+                   IndexOptions()
+                     .background(false)
+                     .name("createdAt")
+                     .expireAfter(appConfig.mongoTtl, TimeUnit.SECONDS)),
+        IndexModel(ascending("nino"),
+                   IndexOptions()
+                     .background(false)
+                     .name("nino")
+                     .unique(true))
       ),
-      Index(Seq("nino" -> IndexType.Ascending), Some("nino"), unique = true)
-    )
+      replaceIndexes = true
+    ) {
 
   def add(p800Cache: P800Cache): ServiceResponse[P800Cache] =
-    insert(p800Cache)
-      .map(result =>
-        handleWriteResult[P800Cache](
-          result,
-          p800Cache
-        )
-      )
+    collection
+      .insertOne(p800Cache)
+      .toFuture()
+      .map(_ => Right(p800Cache))
+      .recover {
+        case _ => Left(MongoDBError("Unexpected error while writing a document."))
+      }
 
-  def selectByNino(nino: Nino): Future[List[P800Cache]] =
-    find("nino" -> nino)
+  def selectByNino(nino: Nino): Future[Seq[P800Cache]] =
+    collection.find(equal("nino", nino.nino)).toFuture()
 }

@@ -1,7 +1,9 @@
 package utils
 
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
+
 import java.util.Base64
-import org.scalatest.{Matchers, WordSpecLike}
 import org.scalatestplus.play.WsScalaTestClient
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.Application
@@ -15,7 +17,7 @@ import java.time.{LocalDateTime, ZoneId}
 import scala.concurrent.Future
 
 abstract class BaseISpec
-    extends WordSpecLike
+    extends AnyWordSpecLike
     with Matchers
     with WsScalaTestClient
     with GuiceOneServerPerSuite
@@ -36,7 +38,8 @@ abstract class BaseISpec
       "microservice.services.tai.port"               -> wireMockPort,
       "microservice.services.taxcalc.port"           -> wireMockPort,
       "microservice.services.mobile-shuttering.port" -> wireMockPort,
-      "auditing.consumer.baseUri.port"               -> wireMockPort,
+      "microservice.services.mobile-shuttering.port" -> wireMockPort,
+      "mongodb.uri" -> "mongodb://localhost:27017/test-mobile-paye",
       "incomeTaxComparisonPeriod.scotland.startDate" -> LocalDateTime
         .now(ZoneId.of("Europe/London"))
         .minusDays(10)
