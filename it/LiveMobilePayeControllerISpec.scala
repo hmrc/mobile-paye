@@ -1,6 +1,6 @@
 import java.time.LocalDate
 import play.api.libs.json.{JsValue, Json}
-import play.api.libs.ws.{WSRequest, WSResponse}
+import play.api.libs.ws.WSResponse
 import play.api.test.Injecting
 import stubs.AuthStub._
 import stubs.TaiStub._
@@ -13,21 +13,18 @@ import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status.{Overpaid, Underpaid}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus._
 import uk.gov.hmrc.mobilepaye.domain.{MobilePayeResponse, P800Cache, P800Repayment, Shuttering}
 import uk.gov.hmrc.mobilepaye.repository.P800CacheMongo
-import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
+import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
+import uk.gov.hmrc.mongo.test.{CleanMongoCollectionSupport, PlayMongoRepositorySupport}
 import utils.BaseISpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Random
 
-class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with DefaultPlayMongoRepositorySupport[P800Cache] {
+class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMongoRepositorySupport[P800Cache] {
 
   val appConfig: MobilePayeConfig = MobilePayeConfig(app.configuration)
 
-  override def beforeAll():  Unit = super.beforeAll()
-  override def afterAll():   Unit = super.afterAll()
-  override def beforeEach(): Unit = super.beforeEach()
-
-  override lazy val repository = new P800CacheMongo(mongoComponent, appConfig)
+  override lazy val repository: PlayMongoRepository[P800Cache] = app.injector.instanceOf[P800CacheMongo]
 
   lazy val urlWithCurrentYearAsInt =
     s"/nino/$nino/tax-year/$currentTaxYear/summary?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0"
@@ -37,7 +34,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with Defaul
 
   implicit def ninoToString(nino: Nino): String = nino.toString()
 
-  def dropDb = repository.collection.drop()
+  def dropDb = dropCollection()
 
   s"GET /nino/$nino/tax-year/$currentTaxYear/summary" should {
     "return OK and a full valid MobilePayeResponse json" in {

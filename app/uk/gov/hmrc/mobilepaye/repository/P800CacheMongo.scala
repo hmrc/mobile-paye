@@ -37,18 +37,22 @@ import scala.concurrent.{ExecutionContext, Future}
 class P800CacheMongo @Inject() (
   mongo:                     MongoComponent,
   appConfig:                 MobilePayeConfig
-)(implicit executionContext: ExecutionContext,
-  mongoFormats:              Format[P800Cache])
+)(implicit executionContext: ExecutionContext)
     extends PlayMongoRepository[P800Cache](
       collectionName = "p800Cache",
       mongoComponent = mongo,
-      domainFormat   = mongoFormats,
+      domainFormat   = P800Cache.format,
       indexes = Seq(
         IndexModel(ascending("createdAt"),
                    IndexOptions()
+                     .background(false)
                      .name("createdAt")
                      .expireAfter(appConfig.mongoTtl, TimeUnit.SECONDS)),
-        IndexModel(ascending("nino"), IndexOptions().name("nino").unique(true))
+        IndexModel(ascending("nino"),
+                   IndexOptions()
+                     .background(false)
+                     .name("nino")
+                     .unique(true))
       ),
       replaceIndexes = true
     ) {

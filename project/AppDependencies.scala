@@ -14,7 +14,7 @@ object AppDependencies {
   private val wireMockVersion      = "2.20.0"
   private val scalaMockVersion     = "4.1.0"
   private val scalaTestPlusVersion = "5.1.0"
-  private val hmrcMongoVersion     = "0.67.0"
+  private val hmrcMongoVersion     = "0.68.0"
   private val mockitoVersion       = "1.16.46"
   private val refinedVersion       = "0.9.4"
   private val flexmarkAllVersion   = "0.36.8"

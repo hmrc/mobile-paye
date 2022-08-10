@@ -38,7 +38,8 @@ abstract class BaseISpec
       "microservice.services.tai.port"               -> wireMockPort,
       "microservice.services.taxcalc.port"           -> wireMockPort,
       "microservice.services.mobile-shuttering.port" -> wireMockPort,
-      "auditing.consumer.baseUri.port"               -> wireMockPort,
+      "microservice.services.mobile-shuttering.port" -> wireMockPort,
+      "mongodb.uri" -> "mongodb://localhost:27017/test-mobile-paye",
       "incomeTaxComparisonPeriod.scotland.startDate" -> LocalDateTime
         .now(ZoneId.of("Europe/London"))
         .minusDays(10)
