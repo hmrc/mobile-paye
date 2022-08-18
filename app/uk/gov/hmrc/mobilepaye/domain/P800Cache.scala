@@ -16,28 +16,17 @@
 
 package uk.gov.hmrc.mobilepaye.domain
 
-import play.api.libs.functional.syntax.{unlift, _}
-import play.api.libs.json.{OFormat, OWrites, Reads, _}
+import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.domain.Nino
 
 import java.time.LocalDateTime
 
-case class P800Cache(
+case class P800Cache (
   nino:      Nino,
   createdAt: LocalDateTime = LocalDateTime.now())
 
 object P800Cache {
 
-  def defaultReads: Reads[P800Cache] =
-    (__ \ "nino")
-      .read[Nino]
-      .and((__ \ "createdAt").read[LocalDateTime])(P800Cache.apply(_, _))
-
-  def defaultWrites: OWrites[P800Cache] =
-    (__ \ "nino")
-      .write[Nino]
-      .and((__ \ "createdAt").write[LocalDateTime])(unlift(P800Cache.unapply))
-
-  implicit val format: OFormat[P800Cache] = OFormat(defaultReads, defaultWrites)
+  implicit val format: OFormat[P800Cache] = Json.format
 
 }
