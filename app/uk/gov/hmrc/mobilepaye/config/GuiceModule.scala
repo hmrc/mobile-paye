@@ -73,6 +73,9 @@ class GuiceModule(
     bindConfigString("wales.endDate", "incomeTaxComparisonPeriod.wales.endDate")
     bindConfigString("scotland.startDate", "incomeTaxComparisonPeriod.scotland.startDate")
     bindConfigString("scotland.endDate", "incomeTaxComparisonPeriod.scotland.endDate")
+    bind(classOf[Boolean])
+      .annotatedWith(named("p800CacheEnabled"))
+      .toInstance(servicesConfig.getBoolean("p800CacheEnabled"))
   }
 
   private def bindConfigStringSeq(path: String): Unit = {
