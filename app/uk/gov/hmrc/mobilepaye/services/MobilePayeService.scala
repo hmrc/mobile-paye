@@ -41,7 +41,8 @@ class MobilePayeService @Inject() (
   @Named("wales.startDate") walesComparisonStartDate:       String,
   @Named("wales.endDate") walesComparisonEndDate:           String,
   @Named("scotland.startDate") scotlandComparisonStartDate: String,
-  @Named("scotland.endDate") scotlandComparisonEndDate:     String) {
+  @Named("scotland.endDate") scotlandComparisonEndDate:     String,
+  @Named("p800CacheEnabled") p800CacheEnabled:              Boolean) {
 
   private val NpsTaxAccountNoEmploymentsCurrentYear = "no employments recorded for current tax year"
   private val NpsTaxAccountDataAbsentMsg            = "cannot complete a coding calculation without a primary employment"
@@ -70,7 +71,9 @@ class MobilePayeService @Inject() (
       val repayment = p800Summary.flatMap(summary => P800Summary.toP800Repayment(summary, taxYear))
       repayment match {
         case None => {
-          p800CacheMongo.add(P800Cache(nino))
+          if (p800CacheEnabled) {
+            p800CacheMongo.add(P800Cache(nino))
+          }
           None
         }
         case _ => repayment
@@ -199,12 +202,13 @@ class MobilePayeService @Inject() (
     nino:        Nino
   )(implicit hc: HeaderCarrier,
     ec:          ExecutionContext
-  ): Future[Option[List[TaxYearReconciliation]]] = {
-    val cacheCheckResult = p800CacheMongo.selectByNino(nino)
-    cacheCheckResult.flatMap(recordFound =>
-      if (recordFound.isEmpty) taxCalcConnector.getTaxReconciliations(nino) else Future.successful(None)
-    )
-  }
+  ): Future[Option[List[TaxYearReconciliation]]] =
+    if (p800CacheEnabled) {
+      val cacheCheckResult = p800CacheMongo.selectByNino(nino)
+      cacheCheckResult.flatMap(recordFound =>
+        if (recordFound.isEmpty) taxCalcConnector.getTaxReconciliations(nino) else Future.successful(None)
+      )
+    } else taxCalcConnector.getTaxReconciliations(nino)
 
   private def cyPlus1InfoCheck(employments: Seq[IncomeSource]): Future[Boolean] =
     getTaxCodeLocation(employments) match {

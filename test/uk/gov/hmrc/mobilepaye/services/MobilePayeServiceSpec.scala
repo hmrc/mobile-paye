@@ -49,7 +49,8 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
                                       inactiveDate,
                                       inactiveDate,
                                       inactiveDate,
-                                      inactiveDate)
+                                      inactiveDate,
+                                      true)
 
   def mockMatchingTaxCode(f: Future[Seq[IncomeSource]]) =
     (mockTaiConnector
@@ -110,7 +111,8 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
                                           activeStartDate,
                                           activeEndDate,
                                           inactiveDate,
-                                          inactiveDate)
+                                          inactiveDate,
+                                          true)
 
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
 
@@ -134,7 +136,8 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
                                           inactiveDate,
                                           inactiveDate,
                                           inactiveDate,
-                                          inactiveDate)
+                                          inactiveDate,
+                                          true)
 
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
 
@@ -158,7 +161,8 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
                                           inactiveDate,
                                           inactiveDate,
                                           activeStartDate,
-                                          activeEndDate)
+                                          activeEndDate,
+                                          true)
 
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
 
@@ -180,7 +184,8 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
                                           inactiveDate,
                                           inactiveDate,
                                           activeStartDate,
-                                          activeEndDate)
+                                          activeEndDate,
+                                          true)
 
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
 
