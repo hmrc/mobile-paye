@@ -16,17 +16,20 @@
 
 package uk.gov.hmrc.mobilepaye.domain
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
 import java.time.LocalDateTime
 
-case class P800Cache (
+case class P800Cache(
   nino:      Nino,
   createdAt: LocalDateTime = LocalDateTime.now())
 
 object P800Cache {
 
-  implicit val format: OFormat[P800Cache] = Json.format
+  implicit val dateFormat: Format[LocalDateTime] = MongoJavatimeFormats.localDateTimeFormat
+
+  implicit val format: Format[P800Cache] = Json.format[P800Cache]
 
 }
