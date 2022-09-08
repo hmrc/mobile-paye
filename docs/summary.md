@@ -155,7 +155,10 @@ The Mobile Paye response
   "addMissingEmployerLink": "/",
   "addMissingPensionLink": "/",
   "addMissingIncomeLink": "/",
+  "addMissingBenefitLink": "/",
+  "addMissingCompanyCarLink": "/",
   "previousTaxYearLink": "/",
+  "updateEstimatedIncomeLink": "/",
   "currentYearPlusOneLink": "/",
   "taxCodeLocation": "rUK"
 }
@@ -240,7 +243,10 @@ The Mobile Paye response
   "addMissingEmployerLink": "/",
   "addMissingPensionLink": "/",
   "addMissingIncomeLink": "/",
+  "addMissingBenefitLink": "/",
+  "addMissingCompanyCarLink": "/",
   "previousTaxYearLink": "/",
+  "updateEstimatedIncomeLink": "/",
   "currentYearPlusOneLink": "/",
   "taxCodeLocation": "rUK"
 }
@@ -271,7 +277,10 @@ The Mobile Paye response
   "addMissingEmployerLink": "/",
   "addMissingPensionLink": "/",
   "addMissingIncomeLink": "/",
-  "previousTaxYearLink": "/"
+  "addMissingBenefitLink": "/",
+  "addMissingCompanyCarLink": "/",
+  "previousTaxYearLink": "/",
+  "updateEstimatedIncomeLink": "/"
 }
 ```
 
@@ -289,7 +298,10 @@ The Mobile Paye response
   "addMissingEmployerLink": "/",
   "addMissingPensionLink": "/",
   "addMissingIncomeLink": "/",
-  "previousTaxYearLink": "/"
+  "addMissingBenefitLink": "/",
+  "addMissingCompanyCarLink": "/",
+  "previousTaxYearLink": "/",
+  "updateEstimatedIncomeLink": "/"
 }
 ```
 
@@ -302,7 +314,10 @@ The Mobile Paye response
   "addMissingEmployerLink": "/",
   "addMissingPensionLink": "/",
   "addMissingIncomeLink": "/",
-  "previousTaxYearLink": "/"
+  "addMissingBenefitLink": "/",
+  "addMissingCompanyCarLink": "/",
+  "previousTaxYearLink": "/",
+  "updateEstimatedIncomeLink": "/"
 }
 ```
 

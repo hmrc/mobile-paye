@@ -33,7 +33,10 @@ case class MobilePayeResponse(
   addMissingEmployerLink:    String = "/check-income-tax/add-employment/employment-name",
   addMissingPensionLink:     String = "/check-income-tax/add-pension-provider/name",
   addMissingIncomeLink:      String = "/digital-forms/form/tell-us-about-other-income/draft/guide",
-  previousTaxYearLink:       String = s"/check-income-tax/income-tax-history",
+  addMissingBenefitLink:     String = "/digital-forms/form/tell-us-about-company-benefits/draft/guide",
+  addMissingCompanyCarLink:  String = "/paye/company-car/do-you-pay-towards-car/",
+  previousTaxYearLink:       String = "/check-income-tax/income-tax-history",
+  updateEstimatedIncomeLink: String = "/check-income-tax/check-income-tax/update-income/start",
   currentYearPlusOneLink:    Option[String] = Some("/check-income-tax/income-tax-comparison"),
   taxCodeLocation:           Option[String] = None)
 
