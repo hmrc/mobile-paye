@@ -37,6 +37,7 @@ case class MobilePayeResponse(
   addMissingCompanyCarLink:  String = "/paye/company-car/do-you-pay-towards-car/",
   previousTaxYearLink:       String = "/check-income-tax/income-tax-history",
   updateEstimatedIncomeLink: String = "/check-income-tax/check-income-tax/update-income/start",
+  updateEmployerLink:        String = "/check-income-tax/update-remove-employment/decision-page",
   currentYearPlusOneLink:    Option[String] = Some("/check-income-tax/income-tax-comparison"),
   taxCodeLocation:           Option[String] = None)
 

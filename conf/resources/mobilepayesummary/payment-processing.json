@@ -16,5 +16,6 @@
   "addMissingBenefitLink": "/",
   "addMissingCompanyCarLink": "/",
   "previousTaxYearLink": "/",
-  "updateEstimatedIncomeLink": "/"
+  "updateEstimatedIncomeLink": "/",
+  "updateEmployerLink": "/"
 }
