@@ -1,0 +1,646 @@
+openapi: 3.0.0
+info:
+  title: Mobile PAYE
+  description: >-
+    ### What is this API for?
+
+    Expose PAYE data in a pre-agreed format for HMRC Mobile App developers.
+  contact: {}
+  version: '1.0'
+servers:
+  - url: https://test-api.service.hmrc.gov.uk/mobile-messages
+    description: Sandbox
+  - url: https://api.service.hmrc.gov.uk/mobile-messages
+    description: Production
+    variables: {}
+paths:
+  /mobile-paye/nino/{nino}/tax-year/{taxYear}/summary:
+    get:
+      tags:
+        - mobile-paye
+      summary: Get current PAYE income summary
+      description: This endpoint retrieves the current PAYE income summary associated with a user for the current tax year.
+      operationId: GetcurrentPAYEincomesummary
+      parameters:
+        - name: nino
+          in: path
+          description: The NINO for the individual.
+          required: true
+          style: simple
+          schema:
+            type: string
+            example: NS123456B
+        - name: taxYear
+          in: path
+          description: The Tax Year you want information for.
+          required: true
+          style: simple
+          schema:
+            type: integer
+            format: int32
+            example: 2018
+        - name: journeyId
+          in: query
+          description: ''
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/MobilePayeNinoTaxYearSummaryresponse'
+                  - example:
+                      taxYear: 2018
+                      employments:
+                        - name: SAINSBURY'S PLC
+                          taxCode: 1185L
+                          payrollNumber: EMP0000001
+                          amount: 4143
+                          payeNumber: P12345
+                          link: /check-income-tax/income-details/1
+                          updateIncomeLink: /
+                          latestPayment:
+                            date: 2021-08-28
+                            amount: 1575
+                            taxAmount: 315
+                            nationalInsuranceAmount: 189
+                            amountYearToDate: 6201
+                            taxAmountYearToDate: 1180
+                            nationalInsuranceAmountYearToDate: 657
+                            link: /
+                            futurePayment: true
+                          payments:
+                            - date: 2021-07-28
+                              amountYearToDate: 4636
+                              taxAmountYearToDate: 865
+                              nationalInsuranceAmountYearToDate: 468
+                              amount: 1600
+                              taxAmount: 320
+                              nationalInsuranceAmount: 195
+                            - date: 2021-06-28
+                              amountYearToDate: 3036
+                              taxAmountYearToDate: 545
+                              nationalInsuranceAmountYearToDate: 273
+                              amount: 1566
+                              taxAmount: 289
+                              nationalInsuranceAmount: 146
+                            - date: 2021-05-28
+                              amountYearToDate: 1470
+                              taxAmountYearToDate: 256
+                              nationalInsuranceAmountYearToDate: 127
+                              amount: 1470
+                              taxAmount: 256
+                              nationalInsuranceAmount: 127
+                        - name: TESCO
+                          taxCode: BR
+                          amount: 5101
+                          payeNumber: P12345
+                          link: /check-income-tax/income-details/2
+                      pensions:
+                        - name: HIGHWIRE RETURNS LTD
+                          taxCode: BR
+                          amount: 4200
+                          payeNumber: P12345
+                          link: /check-income-tax/income-details/12
+                        - name: AVIVA (2410)
+                          payrollNumber: AB752BR
+                          taxCode: BR
+                          amount: 5690
+                          payeNumber: P12345
+                          link: /check-income-tax/income-details/3
+                      repayment:
+                        amount: 854.23
+                        paymentStatus: REFUND
+                        taxYear: 2018
+                        claimRefundLink: /tax-you-paid/2018-2019/paid-too-much
+                      otherIncomes:
+                        - name: NON CODED INCOME
+                          amount: 22500
+                        - name: UNTAXED INTEREST INCOME
+                          amount: 9301
+                          link: /check-income-tax/income/bank-building-society-savings
+                      taxFreeAmount: 11850
+                      taxFreeAmountLink: /check-income-tax/tax-free-allowance
+                      estimatedTaxAmount: 618
+                      estimatedTaxAmountLink: /check-income-tax/paye-income-tax-estimate
+                      understandYourTaxCodeLink: /check-income-tax/tax-codes
+                      addMissingEmployerLink: /check-income-tax/add-employment/employment-name
+                      addMissingPensionLink: /check-income-tax/add-pension-provider/name
+                      addMissingIncomeLink: /digital-forms/form//tell-us-about-other-income/draft/guide
+                      addMissingBenefitLink: /digital-forms/form/tell-us-about-company-benefits/draft/guide
+                      addMissingCompanyCarLink: /paye/company-car/do-you-pay-towards-car/
+                      previousTaxYearLink: /check-income-tax/historic-paye/2017
+                      updateEstimatedIncomeLink: /check-income-tax/check-income-tax/update-income/start
+                      currentYearPlusOneLink: /check-income-tax/income-tax-comparison
+                      taxCodeLocation: rUK
+              examples:
+                example-1:
+                  value:
+                    taxYear: 2018
+                    employments:
+                      - name: SAINSBURY'S PLC
+                        taxCode: 1185L
+                        payrollNumber: EMP0000001
+                        amount: 4143
+                        payeNumber: P12345
+                        link: /check-income-tax/income-details/1
+                        updateIncomeLink: /
+                        latestPayment:
+                          date: 2021-08-28
+                          amount: 1575
+                          taxAmount: 315
+                          nationalInsuranceAmount: 189
+                          amountYearToDate: 6201
+                          taxAmountYearToDate: 1180
+                          nationalInsuranceAmountYearToDate: 657
+                          link: /
+                          futurePayment: true
+                        payments:
+                          - date: 2021-07-28
+                            amountYearToDate: 4636
+                            taxAmountYearToDate: 865
+                            nationalInsuranceAmountYearToDate: 468
+                            amount: 1600
+                            taxAmount: 320
+                            nationalInsuranceAmount: 195
+                          - date: 2021-06-28
+                            amountYearToDate: 3036
+                            taxAmountYearToDate: 545
+                            nationalInsuranceAmountYearToDate: 273
+                            amount: 1566
+                            taxAmount: 289
+                            nationalInsuranceAmount: 146
+                          - date: 2021-05-28
+                            amountYearToDate: 1470
+                            taxAmountYearToDate: 256
+                            nationalInsuranceAmountYearToDate: 127
+                            amount: 1470
+                            taxAmount: 256
+                            nationalInsuranceAmount: 127
+                      - name: TESCO
+                        taxCode: BR
+                        amount: 5101
+                        payeNumber: P12345
+                        link: /check-income-tax/income-details/2
+                    pensions:
+                      - name: HIGHWIRE RETURNS LTD
+                        taxCode: BR
+                        amount: 4200
+                        payeNumber: P12345
+                        link: /check-income-tax/income-details/12
+                      - name: AVIVA (2410)
+                        payrollNumber: AB752BR
+                        taxCode: BR
+                        amount: 5690
+                        payeNumber: P12345
+                        link: /check-income-tax/income-details/3
+                    repayment:
+                      amount: 854.23
+                      paymentStatus: REFUND
+                      taxYear: 2018
+                      claimRefundLink: /tax-you-paid/2018-2019/paid-too-much
+                    otherIncomes:
+                      - name: NON CODED INCOME
+                        amount: 22500
+                      - name: UNTAXED INTEREST INCOME
+                        amount: 9301
+                        link: /check-income-tax/income/bank-building-society-savings
+                    taxFreeAmount: 11850
+                    taxFreeAmountLink: /check-income-tax/tax-free-allowance
+                    estimatedTaxAmount: 618
+                    estimatedTaxAmountLink: /check-income-tax/paye-income-tax-estimate
+                    understandYourTaxCodeLink: /check-income-tax/tax-codes
+                    addMissingEmployerLink: /check-income-tax/add-employment/employment-name
+                    addMissingPensionLink: /check-income-tax/add-pension-provider/name
+                    addMissingIncomeLink: /digital-forms/form//tell-us-about-other-income/draft/guide
+                    addMissingBenefitLink: /digital-forms/form/tell-us-about-company-benefits/draft/guide
+                    addMissingCompanyCarLink: /paye/company-car/do-you-pay-towards-car/
+                    previousTaxYearLink: /check-income-tax/historic-paye/2017
+                    updateEstimatedIncomeLink: /check-income-tax/check-income-tax/update-income/start
+                    currentYearPlusOneLink: /check-income-tax/income-tax-comparison
+                    taxCodeLocation: rUK
+      deprecated: false
+      security:
+        - userRestricted:
+            - read:native-apps-api-orchestration
+components:
+  securitySchemes:
+    userRestricted:
+      type: oauth2
+      description: |
+        HMRC supports OAuth 2.0 for authenticating user-restricted API requests using an OAuth 2.0 Bearer Token in the
+        AUTHORIZATION header.
+        See https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation/user-restricted-endpoints for details.
+      flows:
+        authorizationCode:
+          authorizationUrl: https://api.service.hmrc.gov.uk/oauth/authorize
+          tokenUrl: https://api.service.hmrc.gov.uk/oauth/token
+          refreshUrl: https://api.service.hmrc.gov.uk/oauth/refresh
+          scopes:
+            read:native-apps-api-orchestration: Expose PAYE data in a pre-agreed format for HMRC Mobile App developers.
+  schemas:
+    errorResponse:
+      title: errorResponse
+      required:
+        - code
+      type: object
+      properties:
+        code:
+          type: string
+    Employment:
+      title: Employment
+      required:
+        - name
+        - taxCode
+        - amount
+        - payeNumber
+        - link
+      type: object
+      properties:
+        name:
+          type: string
+        taxCode:
+          type: string
+        payrollNumber:
+          type: string
+        amount:
+          type: integer
+          format: int32
+        payeNumber:
+          type: string
+        link:
+          type: string
+        updateIncomeLink:
+          type: string
+        latestPayment:
+          $ref: '#/components/schemas/LatestPayment'
+        payments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Payment'
+          description: ''
+      example:
+        name: SAINSBURY'S PLC
+        taxCode: 1185L
+        payrollNumber: EMP0000001
+        amount: 4143
+        payeNumber: P12345
+        link: /check-income-tax/income-details/1
+        updateIncomeLink: /
+        latestPayment:
+          date: 2021-08-28
+          amount: 1575
+          taxAmount: 315
+          nationalInsuranceAmount: 189
+          amountYearToDate: 6201
+          taxAmountYearToDate: 1180
+          nationalInsuranceAmountYearToDate: 657
+          link: /
+          futurePayment: true
+        payments:
+          - date: 2021-07-28
+            amountYearToDate: 4636
+            taxAmountYearToDate: 865
+            nationalInsuranceAmountYearToDate: 468
+            amount: 1600
+            taxAmount: 320
+            nationalInsuranceAmount: 195
+          - date: 2021-06-28
+            amountYearToDate: 3036
+            taxAmountYearToDate: 545
+            nationalInsuranceAmountYearToDate: 273
+            amount: 1566
+            taxAmount: 289
+            nationalInsuranceAmount: 146
+          - date: 2021-05-28
+            amountYearToDate: 1470
+            taxAmountYearToDate: 256
+            nationalInsuranceAmountYearToDate: 127
+            amount: 1470
+            taxAmount: 256
+            nationalInsuranceAmount: 127
+    LatestPayment:
+      title: LatestPayment
+      required:
+        - date
+        - amount
+        - taxAmount
+        - nationalInsuranceAmount
+        - amountYearToDate
+        - taxAmountYearToDate
+        - nationalInsuranceAmountYearToDate
+        - link
+        - futurePayment
+      type: object
+      properties:
+        date:
+          type: string
+        amount:
+          type: integer
+          format: int32
+        taxAmount:
+          type: integer
+          format: int32
+        nationalInsuranceAmount:
+          type: integer
+          format: int32
+        amountYearToDate:
+          type: integer
+          format: int32
+        taxAmountYearToDate:
+          type: integer
+          format: int32
+        nationalInsuranceAmountYearToDate:
+          type: integer
+          format: int32
+        link:
+          type: string
+        futurePayment:
+          type: boolean
+      example:
+        date: 2021-08-28
+        amount: 1575
+        taxAmount: 315
+        nationalInsuranceAmount: 189
+        amountYearToDate: 6201
+        taxAmountYearToDate: 1180
+        nationalInsuranceAmountYearToDate: 657
+        link: /
+        futurePayment: true
+    MobilePayeNinoTaxYearSummaryresponse:
+      title: MobilePayeNinoTaxYearSummaryresponse
+      required:
+        - taxYear
+        - employments
+        - pensions
+        - repayment
+        - otherIncomes
+        - taxFreeAmount
+        - taxFreeAmountLink
+        - estimatedTaxAmount
+        - estimatedTaxAmountLink
+        - understandYourTaxCodeLink
+        - addMissingEmployerLink
+        - addMissingPensionLink
+        - addMissingIncomeLink
+        - addMissingBenefitLink
+        - addMissingCompanyCarLink
+        - previousTaxYearLink
+        - updateEstimatedIncomeLink
+        - currentYearPlusOneLink
+        - taxCodeLocation
+      type: object
+      properties:
+        taxYear:
+          type: integer
+          format: int32
+        employments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Employment'
+          description: ''
+        pensions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Pension'
+          description: ''
+        repayment:
+          $ref: '#/components/schemas/Repayment'
+        otherIncomes:
+          type: array
+          items:
+            $ref: '#/components/schemas/OtherIncome'
+          description: ''
+        taxFreeAmount:
+          type: integer
+          format: int32
+        taxFreeAmountLink:
+          type: string
+        estimatedTaxAmount:
+          type: integer
+          format: int32
+        estimatedTaxAmountLink:
+          type: string
+        understandYourTaxCodeLink:
+          type: string
+        addMissingEmployerLink:
+          type: string
+        addMissingPensionLink:
+          type: string
+        addMissingIncomeLink:
+          type: string
+        addMissingBenefitLink:
+          type: string
+        addMissingCompanyCarLink:
+          type: string
+        previousTaxYearLink:
+          type: string
+        updateEstimatedIncomeLink:
+          type: string
+        currentYearPlusOneLink:
+          type: string
+        taxCodeLocation:
+          type: string
+      example:
+        taxYear: 2018
+        employments:
+          - name: SAINSBURY'S PLC
+            taxCode: 1185L
+            payrollNumber: EMP0000001
+            amount: 4143
+            payeNumber: P12345
+            link: /check-income-tax/income-details/1
+            updateIncomeLink: /
+            latestPayment:
+              date: 2021-08-28
+              amount: 1575
+              taxAmount: 315
+              nationalInsuranceAmount: 189
+              amountYearToDate: 6201
+              taxAmountYearToDate: 1180
+              nationalInsuranceAmountYearToDate: 657
+              link: /
+              futurePayment: true
+            payments:
+              - date: 2021-07-28
+                amountYearToDate: 4636
+                taxAmountYearToDate: 865
+                nationalInsuranceAmountYearToDate: 468
+                amount: 1600
+                taxAmount: 320
+                nationalInsuranceAmount: 195
+              - date: 2021-06-28
+                amountYearToDate: 3036
+                taxAmountYearToDate: 545
+                nationalInsuranceAmountYearToDate: 273
+                amount: 1566
+                taxAmount: 289
+                nationalInsuranceAmount: 146
+              - date: 2021-05-28
+                amountYearToDate: 1470
+                taxAmountYearToDate: 256
+                nationalInsuranceAmountYearToDate: 127
+                amount: 1470
+                taxAmount: 256
+                nationalInsuranceAmount: 127
+          - name: TESCO
+            taxCode: BR
+            amount: 5101
+            payeNumber: P12345
+            link: /check-income-tax/income-details/2
+        pensions:
+          - name: HIGHWIRE RETURNS LTD
+            taxCode: BR
+            amount: 4200
+            payeNumber: P12345
+            link: /check-income-tax/income-details/12
+          - name: AVIVA (2410)
+            payrollNumber: AB752BR
+            taxCode: BR
+            amount: 5690
+            payeNumber: P12345
+            link: /check-income-tax/income-details/3
+        repayment:
+          amount: 854.23
+          paymentStatus: REFUND
+          taxYear: 2018
+          claimRefundLink: /tax-you-paid/2018-2019/paid-too-much
+        otherIncomes:
+          - name: NON CODED INCOME
+            amount: 22500
+          - name: UNTAXED INTEREST INCOME
+            amount: 9301
+            link: /check-income-tax/income/bank-building-society-savings
+        taxFreeAmount: 11850
+        taxFreeAmountLink: /check-income-tax/tax-free-allowance
+        estimatedTaxAmount: 618
+        estimatedTaxAmountLink: /check-income-tax/paye-income-tax-estimate
+        understandYourTaxCodeLink: /check-income-tax/tax-codes
+        addMissingEmployerLink: /check-income-tax/add-employment/employment-name
+        addMissingPensionLink: /check-income-tax/add-pension-provider/name
+        addMissingIncomeLink: /digital-forms/form//tell-us-about-other-income/draft/guide
+        addMissingBenefitLink: /digital-forms/form/tell-us-about-company-benefits/draft/guide
+        addMissingCompanyCarLink: /paye/company-car/do-you-pay-towards-car/
+        previousTaxYearLink: /check-income-tax/historic-paye/2017
+        updateEstimatedIncomeLink: /check-income-tax/check-income-tax/update-income/start
+        currentYearPlusOneLink: /check-income-tax/income-tax-comparison
+        taxCodeLocation: rUK
+    OtherIncome:
+      title: OtherIncome
+      required:
+        - name
+        - amount
+      type: object
+      properties:
+        name:
+          type: string
+        amount:
+          type: integer
+          format: int32
+        link:
+          type: string
+      example:
+        name: NON CODED INCOME
+        amount: 22500
+    Payment:
+      title: Payment
+      required:
+        - date
+        - amountYearToDate
+        - taxAmountYearToDate
+        - nationalInsuranceAmountYearToDate
+        - amount
+        - taxAmount
+        - nationalInsuranceAmount
+      type: object
+      properties:
+        date:
+          type: string
+        amountYearToDate:
+          type: integer
+          format: int32
+        taxAmountYearToDate:
+          type: integer
+          format: int32
+        nationalInsuranceAmountYearToDate:
+          type: integer
+          format: int32
+        amount:
+          type: integer
+          format: int32
+        taxAmount:
+          type: integer
+          format: int32
+        nationalInsuranceAmount:
+          type: integer
+          format: int32
+      example:
+        date: 2021-07-28
+        amountYearToDate: 4636
+        taxAmountYearToDate: 865
+        nationalInsuranceAmountYearToDate: 468
+        amount: 1600
+        taxAmount: 320
+        nationalInsuranceAmount: 195
+    Pension:
+      title: Pension
+      required:
+        - name
+        - taxCode
+        - amount
+        - payeNumber
+        - link
+      type: object
+      properties:
+        name:
+          type: string
+        taxCode:
+          type: string
+        amount:
+          type: integer
+          format: int32
+        payeNumber:
+          type: string
+        link:
+          type: string
+        payrollNumber:
+          type: string
+      example:
+        name: HIGHWIRE RETURNS LTD
+        taxCode: BR
+        amount: 4200
+        payeNumber: P12345
+        link: /check-income-tax/income-details/12
+    Repayment:
+      title: Repayment
+      required:
+        - amount
+        - paymentStatus
+        - taxYear
+        - claimRefundLink
+      type: object
+      properties:
+        amount:
+          type: number
+        paymentStatus:
+          type: string
+        taxYear:
+          type: integer
+          format: int32
+        claimRefundLink:
+          type: string
+      example:
+        amount: 854.23
+        paymentStatus: REFUND
+        taxYear: 2018
+        claimRefundLink: /tax-you-paid/2018-2019/paid-too-much
+tags:
+  - name: mobile-paye
+    description: ''
