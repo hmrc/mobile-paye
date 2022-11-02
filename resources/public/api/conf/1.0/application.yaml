@@ -8,9 +8,9 @@ info:
   contact: {}
   version: '1.0'
 servers:
-  - url: https://test-api.service.hmrc.gov.uk/mobile-messages
+  - url: https://test-api.service.hmrc.gov.uk/mobile-paye
     description: Sandbox
-  - url: https://api.service.hmrc.gov.uk/mobile-messages
+  - url: https://api.service.hmrc.gov.uk/mobile-paye
     description: Production
     variables: {}
 paths:
