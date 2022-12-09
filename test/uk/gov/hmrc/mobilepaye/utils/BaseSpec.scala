@@ -50,7 +50,7 @@ trait BaseSpec
   val mockCacheApi: AsyncCacheApi = new AsyncCacheApi {
     override def set(key: String, value: Any, expiration: Duration): Future[Done] = ???
 
-    override def remove(key: String): Future[Done] = ???
+    override def remove(key: String): Future[Done] = Future.successful(Done)
 
     override def getOrElseUpdate[A](key: String, expiration: Duration)(orElse: => Future[A])(implicit evidence$1: ClassTag[A]): Future[A] = orElse
 

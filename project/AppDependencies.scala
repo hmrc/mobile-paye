@@ -16,7 +16,7 @@ object AppDependencies {
   private val scalaMockVersion           = "4.1.0"
   private val scalaTestPlusVersion       = "5.1.0"
   private val simpleReactiveMongoVersion = "8.0.0-play-28"
-  private val hmrcMongoVersion           = "0.62.0"
+  private val hmrcMongoVersion           = "0.73.0"
   private val reactiveMongoTestVersion   = "5.0.0-play-28"
   private val mockitoVersion             = "1.16.46"
   private val refinedVersion             = "0.9.4"
@@ -46,10 +46,11 @@ object AppDependencies {
       new TestDependencies {
 
         override lazy val test: Seq[ModuleID] = testCommon(scope) ++ Seq(
-            "org.scalamock"  %% "scalamock"          % scalaMockVersion         % scope,
-            "org.mockito"    % "mockito-scala_2.12"  % mockitoVersion           % scope,
-            "uk.gov.hmrc"    %% "reactivemongo-test" % reactiveMongoTestVersion % scope,
-            "org.scalacheck" %% "scalacheck"         % "1.16.0"                 % scope,
+            "org.scalamock"     %% "scalamock"                % scalaMockVersion         % scope,
+            "org.mockito"       %  "mockito-scala_2.12"       % mockitoVersion           % scope,
+            "uk.gov.hmrc"       %% "reactivemongo-test"       % reactiveMongoTestVersion % scope,
+            "org.scalacheck"    %% "scalacheck"               % "1.16.0"                 % scope,
+            "uk.gov.hmrc.mongo" %% "hmrc-mongo-test-play-28"  % hmrcMongoVersion         % scope
           )
       }.test
   }

@@ -18,7 +18,7 @@ package uk.gov.hmrc.mobilepaye.connectors
 
 import org.scalamock.handlers.CallHandler6
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.mobilepaye.domain.admin.FeatureFlagName.OnlinePaymentIntegration
+import uk.gov.hmrc.mobilepaye.domain.admin.OnlinePaymentIntegration
 import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, FeatureFlagName}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.TaxYearReconciliation
 import uk.gov.hmrc.mobilepaye.services.admin.FeatureFlagService
@@ -42,7 +42,7 @@ class TaxCalcConnectorSpec extends BaseSpec {
 
   (mockFeatureFlagService.get(_: FeatureFlagName))
     .expects(OnlinePaymentIntegration)
-    .returning(Future.successful(FeatureFlag(OnlinePaymentIntegration, enabled = true)))
+    .returning(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = true)))
 
   "getTaxReconciliations" should {
     "not fail for some Throwable" in {

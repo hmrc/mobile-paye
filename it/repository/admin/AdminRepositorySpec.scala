@@ -8,7 +8,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Helpers.running
 import uk.gov.hmrc.mobilepaye.domain.admin.FeatureFlag
 import uk.gov.hmrc.mobilepaye.domain.admin.FeatureFlag.Enabled
-import uk.gov.hmrc.mobilepaye.domain.admin.FeatureFlagName.OnlinePaymentIntegration
+import uk.gov.hmrc.mobilepaye.domain.admin.OnlinePaymentIntegration
 import uk.gov.hmrc.mobilepaye.repository.admin.AdminRepository
 
 import scala.concurrent.ExecutionContext.Implicits.global

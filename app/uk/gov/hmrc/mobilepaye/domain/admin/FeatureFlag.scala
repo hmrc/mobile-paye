@@ -16,41 +16,38 @@
 
 package uk.gov.hmrc.mobilepaye.domain.admin
 
-import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.mvc.PathBindable
 
-sealed trait FeatureFlag {
-  def name: FeatureFlagName
+case class FeatureFlag(
+  name: FeatureFlagName,
+  isEnabled: Boolean,
+  description: Option[String] = None
+)
 
-  def isEnabled: Boolean
-
-  def isDisabled: Boolean = !isEnabled
+object FeatureFlag {
+  implicit val format: OFormat[FeatureFlag] =
+    Json.format[FeatureFlag]
 }
 
 sealed trait FeatureFlagName {
-  def asString: String
+  val description: Option[String] = None
 }
 
 object FeatureFlagName {
-
-  case object OnlinePaymentIntegration extends FeatureFlagName {
-    val asString = "online-payment-integration"
+  implicit val writes: Writes[FeatureFlagName] = new Writes[FeatureFlagName] {
+    override def writes(o: FeatureFlagName): JsValue = JsString(o.toString)
   }
 
-  val flags = Seq(
-    OnlinePaymentIntegration
-  )
-
-  implicit val reads: Reads[FeatureFlagName] = Reads {
-    case JsString(OnlinePaymentIntegration.asString) =>
-      JsSuccess(OnlinePaymentIntegration)
-    case _ =>
-      JsError("Unrecognised feature flag name")
+  implicit val reads: Reads[FeatureFlagName] = new Reads[FeatureFlagName] {
+    override def reads(json: JsValue): JsResult[FeatureFlagName] =
+      json match {
+        case name if name == JsString(OnlinePaymentIntegration.toString) =>
+          JsSuccess(OnlinePaymentIntegration)
+        case _ =>
+          JsError("Unknown FeatureFlagName")
+      }
   }
-
-  implicit val writes: Writes[FeatureFlagName] =
-    Writes(value => JsString(value.asString))
 
   implicit def pathBindable: PathBindable[FeatureFlagName] = new PathBindable[FeatureFlagName] {
 
@@ -59,56 +56,28 @@ object FeatureFlagName {
         case JsSuccess(name, _) =>
           Right(name)
         case _ =>
-          Left("invalid feature flag name")
+          Left(s"The feature flag `$value` does not exist")
       }
 
     override def unbind(key: String, value: FeatureFlagName): String =
-      value.asString
+      value.toString
   }
 
   implicit val formats: Format[FeatureFlagName] =
     Format(reads, writes)
+
+  val flags =
+    List(OnlinePaymentIntegration)
 }
 
-object FeatureFlag {
-
-  case class Enabled(name: FeatureFlagName) extends FeatureFlag {
-    val isEnabled = true
-  }
-
-  case class Disabled(name: FeatureFlagName) extends FeatureFlag {
-    val isEnabled = false
-  }
-
-  def apply(name: FeatureFlagName, enabled: Boolean): FeatureFlag =
-    if (enabled) Enabled(name)
-    else Disabled(name)
-
-  implicit val reads: Reads[FeatureFlag] =
-    (__ \ "isEnabled").read[Boolean].flatMap {
-      case true =>
-        (__ \ "name")
-          .read[FeatureFlagName]
-          .map(Enabled(_).asInstanceOf[FeatureFlag])
-      case false =>
-        (__ \ "name")
-          .read[FeatureFlagName]
-          .map(Disabled(_).asInstanceOf[FeatureFlag])
-    }
-
-  implicit val writes: Writes[FeatureFlag] =
-    (
-      (__ \ "name").write[FeatureFlagName] and
-        (__ \ "isEnabled").write[Boolean]
-    ).apply(ff => (ff.name, ff.isEnabled))
-
-  implicit val formats: Format[FeatureFlag] =
-    Format(reads, writes)
+case object OnlinePaymentIntegration extends FeatureFlagName {
+  override def toString: String =
+    "online-payment-integration"
+  override val description: Option[String] =
+    Some("Enable/disable online payment integration")
 }
-
-case class FeatureFlags(flags: Seq[FeatureFlag])
 
 object FeatureFlagMongoFormats {
-  implicit val formats: Format[FeatureFlags] =
-    Json.format[FeatureFlags]
+  implicit val formats: Format[FeatureFlag] =
+    Json.format[FeatureFlag]
 }

@@ -34,7 +34,7 @@ import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.internalauth.client.Predicate.Permission
 import uk.gov.hmrc.internalauth.client._
 import uk.gov.hmrc.internalauth.client.test.{BackendAuthComponentsStub, StubBehaviour}
-import uk.gov.hmrc.mobilepaye.domain.admin.FeatureFlagName.OnlinePaymentIntegration
+import uk.gov.hmrc.mobilepaye.domain.admin.OnlinePaymentIntegration
 import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, FeatureFlagName}
 import uk.gov.hmrc.mobilepaye.repository.admin.AdminRepository
 import uk.gov.hmrc.mobilepaye.services.admin.FeatureFlagService
@@ -62,8 +62,8 @@ class FeatureFlagControllerSpec
 
   val mockFeatureFlagService: FeatureFlagService = mock[FeatureFlagService]
 
-  val flags: Seq[FeatureFlag] =
-    Seq(FeatureFlag(OnlinePaymentIntegration, enabled = true))
+  val flags: List[FeatureFlag] =
+    List(FeatureFlag(OnlinePaymentIntegration, isEnabled = true))
 
   val permission: Permission =
     Permission(
@@ -142,7 +142,7 @@ class FeatureFlagControllerSpec
       running(app) {
         val request = fakeRequest(
           PUT,
-          routes.FeatureFlagController.put(FeatureFlagName.OnlinePaymentIntegration).url
+          routes.FeatureFlagController.put(OnlinePaymentIntegration).url
         )
           .withBody(JsBoolean(true))
           .withHeaders("Authorization" -> "some-token")
@@ -165,7 +165,7 @@ class FeatureFlagControllerSpec
       running(app) {
         val request = fakeRequest(
           PUT,
-          routes.FeatureFlagController.put(FeatureFlagName.OnlinePaymentIntegration).url
+          routes.FeatureFlagController.put(OnlinePaymentIntegration).url
         )
           .withBody("This is not a valid request body")
           .withHeaders("Authorization" -> "some-token")
@@ -175,7 +175,5 @@ class FeatureFlagControllerSpec
         status(result) shouldBe BAD_REQUEST
       }
     }
-
   }
-
 }

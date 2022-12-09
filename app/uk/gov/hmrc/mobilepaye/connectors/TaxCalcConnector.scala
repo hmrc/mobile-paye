@@ -23,7 +23,7 @@ import uk.gov.hmrc.mobilepaye.domain.taxcalc.TaxYearReconciliation
 
 import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.mobilepaye.domain.admin.FeatureFlagName.OnlinePaymentIntegration
+import uk.gov.hmrc.mobilepaye.domain.admin.OnlinePaymentIntegration
 import uk.gov.hmrc.mobilepaye.services.admin.FeatureFlagService
 
 @Singleton

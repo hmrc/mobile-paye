@@ -24,8 +24,7 @@ import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
-import uk.gov.hmrc.mobilepaye.domain.admin.FeatureFlag.{Disabled, Enabled}
-import uk.gov.hmrc.mobilepaye.domain.admin.FeatureFlagName.OnlinePaymentIntegration
+import uk.gov.hmrc.mobilepaye.domain.admin.OnlinePaymentIntegration
 import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, FeatureFlagName}
 import uk.gov.hmrc.mobilepaye.repository.admin.AdminRepository
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
@@ -54,47 +53,34 @@ class FeatureFlagServiceSpec
   }
 
   "When set works in the repo returns true" in {
-    when(adminRepository.getFeatureFlags).thenReturn(Future.successful(Some(Seq.empty)))
-    when(adminRepository.setFeatureFlags(any())).thenReturn(Future.successful(true))
+    when(adminRepository.getFeatureFlags).thenReturn(Future.successful(List.empty))
+    when(adminRepository.setFeatureFlags(any())).thenReturn(Future.successful(()))
 
-    val flagName = arbitrary[FeatureFlagName].sample.getOrElse(FeatureFlagName.OnlinePaymentIntegration)
+    val flagName = arbitrary[FeatureFlagName].sample.getOrElse(OnlinePaymentIntegration)
 
     val result = service.set(flagName, enabled = true).futureValue
 
     result mustBe true
 
-    val captor = ArgumentCaptor.forClass(classOf[Seq[FeatureFlag]])
+    val captor = ArgumentCaptor.forClass(classOf[Map[FeatureFlagName, Boolean]])
 
     verify(adminRepository, times(1)).setFeatureFlags(captor.capture())
 
-    captor.getValue must contain(Enabled(flagName))
+    captor.getValue must contain(FeatureFlag(OnlinePaymentIntegration, isEnabled = true))
   }
 
   "When set fails in the repo returns false" in {
-    val flagName = arbitrary[FeatureFlagName].sample.getOrElse(FeatureFlagName.OnlinePaymentIntegration)
+    val flagName = arbitrary[FeatureFlagName].sample.getOrElse(OnlinePaymentIntegration)
 
-    when(adminRepository.getFeatureFlags).thenReturn(Future.successful(Some(Seq.empty)))
-    when(adminRepository.setFeatureFlags(any())).thenReturn(Future.successful(false))
+    when(adminRepository.getFeatureFlags).thenReturn(Future.successful(List.empty))
+    when(adminRepository.setFeatureFlags(any())).thenReturn(Future.successful(()))
 
     service.set(flagName, enabled = true).futureValue mustBe false
   }
 
   "When getAll is called returns all of the flags from the repo" in {
-    when(adminRepository.getFeatureFlags).thenReturn(Future.successful(Some(Seq.empty)))
+    when(adminRepository.getFeatureFlags).thenReturn(Future.successful(List.empty))
 
-    service.getAll.futureValue mustBe Seq(Enabled(OnlinePaymentIntegration))
-  }
-
-  "When a flag doesn't exist in the repo the default is returned" in {
-    when(adminRepository.getFeatureFlags).thenReturn(Future.successful(Some(Seq.empty)))
-
-    service.get(OnlinePaymentIntegration).futureValue mustBe Enabled(OnlinePaymentIntegration)
-  }
-
-  "When a flag exists in the repo that overrides the default" in {
-    when(adminRepository.getFeatureFlags)
-      .thenReturn(Future.successful(Some(Seq(Disabled(OnlinePaymentIntegration)))))
-
-    service.get(OnlinePaymentIntegration).futureValue mustBe Disabled(OnlinePaymentIntegration)
+    service.getAll.futureValue mustBe List(FeatureFlag(OnlinePaymentIntegration, isEnabled = false))
   }
 }

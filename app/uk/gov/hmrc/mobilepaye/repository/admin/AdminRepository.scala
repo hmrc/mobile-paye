@@ -18,54 +18,81 @@ package uk.gov.hmrc.mobilepaye.repository.admin
 
 import org.mongodb.scala.model.Filters._
 import org.mongodb.scala.model.Indexes._
-import org.mongodb.scala.model.Projections._
-import org.mongodb.scala.model.Updates.set
-import org.mongodb.scala.model.{IndexModel, IndexOptions, UpdateOptions}
+import org.mongodb.scala.model.{IndexModel, IndexOptions, ReplaceOptions}
 import uk.gov.hmrc.mobilepaye.domain.admin._
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
+import uk.gov.hmrc.mongo.transaction.{TransactionConfiguration, Transactions}
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class AdminRepository @Inject() (
-  mongoComponent: MongoComponent
+  val mongoComponent: MongoComponent
 )(
   implicit ec: ExecutionContext
-) extends PlayMongoRepository[FeatureFlags](
-  collectionName = "admin-data",
+) extends PlayMongoRepository[FeatureFlag](
+  collectionName = "admin-feature-flags",
   mongoComponent = mongoComponent,
-  domainFormat   = FeatureFlagMongoFormats.formats,
+  domainFormat   = FeatureFlag.format,
   indexes = Seq(
     IndexModel(
-      keys         = ascending("feature-flags"),
+      keys         = ascending("name"),
       indexOptions = IndexOptions()
-        .name("flags")
+        .name("name")
         .unique(true)
     )
   ),
-  extraCodecs = Seq(
-    Codecs.playFormatCodec(FeatureFlag.formats),
-    Codecs.playFormatCodec(FeatureFlagName.formats)
-  )
-) {
+  extraCodecs = Codecs.playFormatSumCodecs(FeatureFlagName.formats)
 
-  def getFeatureFlags: Future[Option[Seq[FeatureFlag]]] =
+) with Transactions {
+
+  private implicit val tc: TransactionConfiguration =
+    TransactionConfiguration.strict
+
+  def getFeatureFlag(name: FeatureFlagName): Future[Option[FeatureFlag]] =
     collection
-      .find()
-      .projection(excludeId())
-      .map(_.flags)
+      .find(equal("name", name.toString))
       .headOption()
 
-  def setFeatureFlags(featureFlags: Seq[FeatureFlag]): Future[Boolean] =
+  def getFeatureFlags: Future[List[FeatureFlag]] =
     collection
-      .updateOne(
-        filter  = equal("_id", "feature-flags"),
-        update  = set("flags", Codecs.toBson(featureFlags)),
-        options = UpdateOptions().upsert(true)
+      .find()
+      .toFuture()
+      .map(_.toList)
+
+  def setFeatureFlag(name: FeatureFlagName, enabled: Boolean): Future[Boolean] =
+    collection
+      .replaceOne(
+        filter = equal("name", name),
+        replacement = FeatureFlag(
+          name        = name,
+          isEnabled   = enabled,
+          description = name.description
+        ),
+        options = ReplaceOptions().upsert(true)
       )
       .map(_.wasAcknowledged())
       .toSingle()
       .toFuture()
+
+  def setFeatureFlags(featureFlags: Map[FeatureFlagName, Boolean]): Future[Unit] = {
+    val flags: List[FeatureFlag] = featureFlags.map {
+      case (flag, status) =>
+        FeatureFlag(
+          name        = flag,
+          isEnabled   = status,
+          description = flag.description
+        )
+    }.toList
+
+    withSessionAndTransaction(
+      session =>
+        for {
+          _ <- collection.deleteMany(session, filter = in("name", featureFlags.keys.toSeq: _*)).toFuture()
+          _ <- collection.insertMany(session, flags).toFuture()
+        } yield ()
+    )
+  }
 }
