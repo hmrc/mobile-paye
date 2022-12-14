@@ -18,17 +18,18 @@ package uk.gov.hmrc.mobilepaye.repository.admin
 
 import org.mongodb.scala.MongoWriteException
 import org.mongodb.scala.bson.BsonDocument
+import org.mongodb.scala.model.Filters
 import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.cache.AsyncCacheApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, OnlinePaymentIntegration}
-import uk.gov.hmrc.mobilepaye.utils.BaseSpec
-import uk.gov.hmrc.mobilepaye.utils.admin.AdminRepositoryUtils
-import uk.gov.hmrc.mongo.cache.SessionCacheRepository
+import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, FeatureFlagName, OnlinePaymentIntegration}
+import uk.gov.hmrc.mobilepaye.utils.{BaseSpec, MockAsyncCacheApi}
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
+
+import scala.concurrent.Future
 
 class AdminRepositorySpec
   extends BaseSpec
@@ -61,16 +62,30 @@ class AdminRepositorySpec
       }"""
     ))
 
+  val mockCacheApi: MockAsyncCacheApi =
+    new MockAsyncCacheApi()
+
   def application: Application =
     new GuiceApplicationBuilder()
-      .overrides(
-        bind[AsyncCacheApi].toInstance(mockCacheApi)
-      )
+      .overrides(bind[AsyncCacheApi].toInstance(mockCacheApi))
       .configure(Map("mongodb.uri" -> mongoUri))
       .build()
 
   lazy val repository: AdminRepository =
     application.injector.instanceOf[AdminRepository]
+
+  def insertRecord(
+    flag: FeatureFlagName = OnlinePaymentIntegration,
+    enabled: Boolean = true
+  ): Future[Boolean] =
+    insert(
+      FeatureFlag(flag, enabled, flag.description)
+    ).map(_.wasAcknowledged())
+
+  override def beforeEach(): Unit = {
+    dropCollection()
+    super.beforeEach()
+  }
 
   "getFlag" should {
     "return None if there is no record" in {
@@ -83,7 +98,7 @@ class AdminRepositorySpec
   "setFeatureFlag and getFeatureFlag" should {
     "insert and read a record in mongo" in {
       val result = (for {
-        _      <- repository.setFeatureFlag(name = OnlinePaymentIntegration, enabled = true)
+        _      <- insertRecord()
         result <- repository.getFeatureFlag(name = OnlinePaymentIntegration)
       } yield result).futureValue
 
@@ -97,10 +112,23 @@ class AdminRepositorySpec
     }
   }
 
+  "setFeatureFlag" should {
+    "replace a record not create a new one" in {
+      val result = (for {
+        _      <- repository.setFeatureFlag(OnlinePaymentIntegration, enabled = true)
+        _      <- repository.setFeatureFlag(OnlinePaymentIntegration, enabled = false)
+        result <- find(Filters.equal("name", OnlinePaymentIntegration.toString))
+      } yield result).futureValue
+
+      result.length mustBe 1
+      result.head.isEnabled mustBe false
+    }
+  }
+
   "getAllFeatureFlags" should {
     "get a list of all the feature toggles" in {
       val allFlags: Seq[FeatureFlag] = (for {
-        _      <- repository.setFeatureFlag(name = OnlinePaymentIntegration, enabled = true)
+        _      <- insertRecord()
         result <- repository.getFeatureFlags
       } yield result).futureValue
 
@@ -116,18 +144,16 @@ class AdminRepositorySpec
 
   "Collection" should {
     "not allow duplicates" in {
-      lazy val adminRepositoryUtils = app.injector.instanceOf[AdminRepositoryUtils]
-
       val result = intercept[MongoWriteException] {
         await(for {
-          _ <- adminRepositoryUtils.insertFeatureFlag(OnlinePaymentIntegration, enabled = true)
-          _ <- adminRepositoryUtils.insertFeatureFlag(OnlinePaymentIntegration, enabled = false)
+          _ <- insertRecord()
+          _ <- insertRecord(enabled = false)
         } yield true)
       }
 
       result.getCode mustBe 11000
       result.getError.getMessage mustBe
-        s"""E11000 duplicate key error collection: mobile-paye.admin-feature-flags index: name dup key: { name: "$OnlinePaymentIntegration" }"""
+        s"""E11000 duplicate key error collection: test-AdminRepositorySpec.admin-feature-flags index: name dup key: { name: "$OnlinePaymentIntegration" }"""
     }
   }
 }

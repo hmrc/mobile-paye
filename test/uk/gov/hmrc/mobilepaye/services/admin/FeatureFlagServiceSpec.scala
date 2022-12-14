@@ -16,71 +16,77 @@
 
 package uk.gov.hmrc.mobilepaye.services.admin
 
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.{any, anyBoolean}
+import org.mockito.Mockito
 import org.mockito.Mockito.{reset, times, verify, when}
-import org.mockito.{ArgumentCaptor, Mockito}
-import org.scalacheck.Arbitrary.arbitrary
-import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.BeforeAndAfterEach
-import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
-import uk.gov.hmrc.mobilepaye.domain.admin.OnlinePaymentIntegration
-import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, FeatureFlagName}
+import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, FeatureFlagName, OnlinePaymentIntegration}
 import uk.gov.hmrc.mobilepaye.repository.admin.AdminRepository
-import uk.gov.hmrc.mobilepaye.utils.BaseSpec
+import uk.gov.hmrc.mobilepaye.utils.{BaseSpec, MockAsyncCacheApi}
 
 import scala.concurrent.Future
 import scala.reflect.ClassTag
 
 class FeatureFlagServiceSpec
   extends BaseSpec
-    with ScalaFutures
     with BeforeAndAfterEach {
-
-  implicit private val arbitraryFeatureFlagName: Arbitrary[FeatureFlagName] =
-    Arbitrary {
-      Gen.oneOf(FeatureFlagName.flags)
-    }
 
   def mock[T](implicit ev: ClassTag[T]): T =
     Mockito.mock(ev.runtimeClass.asInstanceOf[Class[T]])
-
-  val adminRepository: AdminRepository = mock[AdminRepository]
-  val service = new FeatureFlagService(adminRepository, mockCacheApi)
+  val mockCacheApi: MockAsyncCacheApi =
+    new MockAsyncCacheApi()
+  val mockAdminRepository: AdminRepository =
+    mock[AdminRepository]
+  val service: FeatureFlagService =
+    new FeatureFlagService(mockAdminRepository, mockCacheApi)
+  def flag(isEnabled: Boolean = true): FeatureFlag =
+    FeatureFlag(OnlinePaymentIntegration, isEnabled)
 
   override def beforeEach(): Unit = {
-    reset(adminRepository)
+    reset(mockAdminRepository)
+    when(mockAdminRepository.getFeatureFlags).thenReturn(Future.successful(List.empty))
   }
 
   "When set works in the repo returns true" in {
-    when(adminRepository.getFeatureFlags).thenReturn(Future.successful(List.empty))
-    when(adminRepository.setFeatureFlags(any())).thenReturn(Future.successful(()))
+    when(mockAdminRepository.setFeatureFlag(any(), any())).thenReturn(Future.successful(true))
 
-    val flagName = arbitrary[FeatureFlagName].sample.getOrElse(OnlinePaymentIntegration)
+    await(service.set(OnlinePaymentIntegration, enabled = true)) mustBe true
 
-    val result = service.set(flagName, enabled = true).futureValue
-
-    result mustBe true
-
-    val captor = ArgumentCaptor.forClass(classOf[Map[FeatureFlagName, Boolean]])
-
-    verify(adminRepository, times(1)).setFeatureFlags(captor.capture())
-
-    captor.getValue must contain(FeatureFlag(OnlinePaymentIntegration, isEnabled = true))
+    verify(mockAdminRepository, times(1)).setFeatureFlag(any[FeatureFlagName](), anyBoolean())
   }
 
   "When set fails in the repo returns false" in {
-    val flagName = arbitrary[FeatureFlagName].sample.getOrElse(OnlinePaymentIntegration)
+    when(mockAdminRepository.setFeatureFlag(any(), any())).thenReturn(Future.successful(false))
 
-    when(adminRepository.getFeatureFlags).thenReturn(Future.successful(List.empty))
-    when(adminRepository.setFeatureFlags(any())).thenReturn(Future.successful(()))
+    await(service.set(OnlinePaymentIntegration, enabled = true)) mustBe false
+  }
 
-    service.set(flagName, enabled = true).futureValue mustBe false
+  "When get works return feature the requested flag" in {
+    when(mockAdminRepository.getFeatureFlag(any())).thenReturn(Future.successful(Some(flag())))
+
+    await(service.get(OnlinePaymentIntegration)) mustBe flag()
+  }
+
+  "When get fails return feature the requested flag with value false" in {
+    when(mockAdminRepository.getFeatureFlag(any())).thenReturn(Future.successful(None))
+
+    await(service.get(OnlinePaymentIntegration)) mustBe flag(false)
   }
 
   "When getAll is called returns all of the flags from the repo" in {
-    when(adminRepository.getFeatureFlags).thenReturn(Future.successful(List.empty))
+    when(mockAdminRepository.getFeatureFlags).thenReturn(Future.successful(List(flag())))
 
-    service.getAll.futureValue mustBe List(FeatureFlag(OnlinePaymentIntegration, isEnabled = false))
+    await(service.getAll) mustBe List(FeatureFlag(OnlinePaymentIntegration, isEnabled = true))
+  }
+
+  "When getAll is called and repo is empty returns all of the flags as false" in {
+    await(service.getAll) mustBe List(FeatureFlag(OnlinePaymentIntegration, isEnabled = false))
+  }
+
+  "When setAll is called return successful Unit" in {
+    when(mockAdminRepository.setFeatureFlags(any())).thenReturn(Future.successful(()))
+
+    await(service.setAll(Map(flag().name -> flag().isEnabled))) mustBe((): Unit)
   }
 }

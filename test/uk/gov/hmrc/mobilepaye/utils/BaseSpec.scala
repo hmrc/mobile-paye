@@ -16,19 +16,15 @@
 
 package uk.gov.hmrc.mobilepaye.utils
 
-import akka.Done
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import org.scalatest.{Matchers, WordSpecLike}
-import play.api.cache.AsyncCacheApi
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mobilepaye.MobilePayeTestData
 import uk.gov.hmrc.mobilepaye.mocks.{AuditMock, AuthorisationMock, ShutteringMock}
 
-import scala.concurrent.duration.Duration
-import scala.concurrent.{ExecutionContext, Future}
-import scala.reflect.ClassTag
+import scala.concurrent.ExecutionContext
 
 trait BaseSpec
     extends WordSpecLike
@@ -45,17 +41,4 @@ trait BaseSpec
   implicit lazy val materializer: ActorMaterializer = ActorMaterializer()
 
   val acceptHeader: (String, String) = "Accept" -> "application/vnd.hmrc.1.0+json"
-
-  // A cache that doesn't cache
-  val mockCacheApi: AsyncCacheApi = new AsyncCacheApi {
-    override def set(key: String, value: Any, expiration: Duration): Future[Done] = ???
-
-    override def remove(key: String): Future[Done] = Future.successful(Done)
-
-    override def getOrElseUpdate[A](key: String, expiration: Duration)(orElse: => Future[A])(implicit evidence$1: ClassTag[A]): Future[A] = orElse
-
-    override def get[T](key: String)(implicit evidence$2: ClassTag[T]): Future[Option[T]] = ???
-
-    override def removeAll(): Future[Done] = ???
-  }
 }

@@ -38,7 +38,7 @@ import uk.gov.hmrc.mobilepaye.domain.admin.OnlinePaymentIntegration
 import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, FeatureFlagName}
 import uk.gov.hmrc.mobilepaye.repository.admin.AdminRepository
 import uk.gov.hmrc.mobilepaye.services.admin.FeatureFlagService
-import uk.gov.hmrc.mobilepaye.utils.BaseSpec
+import uk.gov.hmrc.mobilepaye.utils.{BaseSpec, MockAsyncCacheApi}
 
 import scala.concurrent.Future
 import scala.reflect.ClassTag
@@ -61,6 +61,8 @@ class FeatureFlagControllerSpec
   val mockAdminRepository: AdminRepository = mock[AdminRepository]
 
   val mockFeatureFlagService: FeatureFlagService = mock[FeatureFlagService]
+
+  val mockCacheApi: MockAsyncCacheApi = new MockAsyncCacheApi()
 
   val flags: List[FeatureFlag] =
     List(FeatureFlag(OnlinePaymentIntegration, isEnabled = true))

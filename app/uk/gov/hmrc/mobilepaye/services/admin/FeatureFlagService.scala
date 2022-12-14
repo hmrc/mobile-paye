@@ -28,62 +28,63 @@ import scala.concurrent.{ExecutionContext, Future}
 class FeatureFlagService @Inject()(
   adminRepository: AdminRepository,
   cache: AsyncCacheApi
-)(implicit
-  ec: ExecutionContext
+)(
+  implicit ec: ExecutionContext
 ) {
   val cacheValidFor: FiniteDuration =
     Duration(2, Seconds)
 
   private val allFeatureFlagsCacheKey = "*$*$allFeatureFlags*$*$"
 
-  def getAll: Future[Seq[FeatureFlag]] =
-    cache.getOrElseUpdate(allFeatureFlagsCacheKey, cacheValidFor) {
-      adminRepository
-        .getFeatureFlags
-        .map {
-          flagsFromMongo =>
-            FeatureFlagName
-              .flags
-              .foldLeft(flagsFromMongo) {
-                (featureFlags, missingFlag) =>
-                  if (featureFlags.map(_.name).contains(missingFlag))
-                    featureFlags
-                  else
-                    FeatureFlag(name = missingFlag, isEnabled = false) :: featureFlags
-              }.reverse
+  def getAll: Future[List[FeatureFlag]] =
+    cache
+      .getOrElseUpdate(allFeatureFlagsCacheKey, cacheValidFor) {
+        adminRepository
+          .getFeatureFlags
+          .map {
+            flagsFromMongo =>
+              FeatureFlagName
+                .flags
+                .foldLeft(flagsFromMongo) {
+                  (featureFlags, missingFlag) =>
+                    if (featureFlags.map(_.name).contains(missingFlag))
+                      featureFlags
+                    else
+                      FeatureFlag(name = missingFlag, isEnabled = false) :: featureFlags
+                }.reverse
+          }
       }
-    }
 
   def setAll(flags: Map[FeatureFlagName, Boolean]): Future[Unit] =
     Future
-      .sequence(flags.keys.map(flag => cache.remove(flag.toString)))
-      .flatMap {
+      .sequence(
+        flags.keys.map(flag => cache.remove(flag.toString))
+      ) flatMap {
         _ =>
           cache.remove(allFeatureFlagsCacheKey)
           adminRepository.setFeatureFlags(flags)
-      }
-      .map {
+      } map {
         _ =>
-          //blocking thread to let time to other containers to update their cache
+          //blocking thread to allow other containers to update their cache
           Thread.sleep(5000)
           ()
       }
 
   def set(flagName: FeatureFlagName, enabled: Boolean): Future[Boolean] =
     for {
-      _      <- cache.remove(flagName.toString)
-      _      <- cache.remove(allFeatureFlagsCacheKey)
+      _ <- cache.remove(flagName.toString)
+      _ <- cache.remove(allFeatureFlagsCacheKey)
       result <- adminRepository.setFeatureFlag(flagName, enabled)
-      //blocking thread to let time to other containers to update their cache
-      _      <- Future.successful(Thread.sleep(5000))
+      //blocking thread to allow other containers to update their cache
+      _ <- Future.successful(Thread.sleep(5000))
     } yield result
 
-  def get(name: FeatureFlagName): Future[FeatureFlag] =
+  def get(flagName: FeatureFlagName): Future[FeatureFlag] =
     cache
-      .getOrElseUpdate(name.toString, cacheValidFor) {
+      .getOrElseUpdate(flagName.toString, cacheValidFor) {
         adminRepository
-          .getFeatureFlag(name)
-          .map(_.getOrElse(FeatureFlag(name = name, isEnabled = false)))
+          .getFeatureFlag(flagName)
+          .map(_.getOrElse(FeatureFlag(name = flagName, isEnabled = false)))
       }
 
 }

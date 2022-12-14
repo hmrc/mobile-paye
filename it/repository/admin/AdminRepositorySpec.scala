@@ -6,9 +6,7 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Helpers.running
-import uk.gov.hmrc.mobilepaye.domain.admin.FeatureFlag
-import uk.gov.hmrc.mobilepaye.domain.admin.FeatureFlag.Enabled
-import uk.gov.hmrc.mobilepaye.domain.admin.OnlinePaymentIntegration
+import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, OnlinePaymentIntegration}
 import uk.gov.hmrc.mobilepaye.repository.admin.AdminRepository
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -30,12 +28,19 @@ class AdminRepositorySpec
 
         repo.collection.drop()
 
-        val data: Option[Seq[FeatureFlag]] =
-          Some(Seq(Enabled(OnlinePaymentIntegration)))
+        val flag: FeatureFlag =
+          FeatureFlag(
+            name        = OnlinePaymentIntegration,
+            isEnabled   = true,
+            description = Some("Enable/disable online payment integration")
+          )
+
+        val data: List[FeatureFlag] =
+          List(flag)
 
         whenReady(
           repo
-            .setFeatureFlags(data.get)
+            .setFeatureFlags(Map(flag.name -> flag.isEnabled))
             .flatMap(_ => repo.getFeatureFlags)
         ) {
             result =>

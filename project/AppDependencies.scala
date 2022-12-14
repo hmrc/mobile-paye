@@ -36,7 +36,7 @@ object AppDependencies {
   )
 
   trait TestDependencies {
-    lazy val scope: String        = "test"
+    lazy val scope: String        = "test, it"
     lazy val test:  Seq[ModuleID] = ???
   }
 
@@ -63,8 +63,9 @@ object AppDependencies {
         override lazy val scope: String = "it"
 
         override lazy val test: Seq[ModuleID] = testCommon(scope) ++ Seq(
-            "com.github.tomakehurst" % "wiremock" % wireMockVersion % scope
-          )
+          "org.mockito"            % "mockito-scala_2.12" % mockitoVersion  % scope,
+          "com.github.tomakehurst" % "wiremock"           % wireMockVersion % scope
+        )
       }.test
   }
 
