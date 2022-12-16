@@ -16,30 +16,20 @@
 
 package uk.gov.hmrc.mobilepaye.domain
 
-import org.joda.time.DateTime
-import play.api.libs.functional.syntax.{unlift, _}
-import play.api.libs.json.{OFormat, OWrites, Reads, _}
+import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
+import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
+
+import java.time.LocalDateTime
 
 case class P800Cache(
   nino:      Nino,
-  createdAt: DateTime = new DateTime())
+  createdAt: LocalDateTime = LocalDateTime.now())
 
 object P800Cache {
 
-  private implicit val dateFormat = ReactiveMongoFormats.dateTimeFormats
+  implicit val dateFormat: Format[LocalDateTime] = MongoJavatimeFormats.localDateTimeFormat
 
-  def defaultReads: Reads[P800Cache] =
-    (__ \ "nino")
-      .read[Nino]
-      .and((__ \ "createdAt").read[DateTime])(P800Cache.apply(_, _))
-
-  def defaultWrites: OWrites[P800Cache] =
-    (__ \ "nino")
-      .write[Nino]
-      .and((__ \ "createdAt").write[DateTime])(unlift(P800Cache.unapply))
-
-  implicit val format: OFormat[P800Cache] = OFormat(defaultReads, defaultWrites)
+  implicit val format: Format[P800Cache] = Json.format[P800Cache]
 
 }

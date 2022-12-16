@@ -6,6 +6,7 @@
       "taxCode": "1250L",
       "payrollNumber": "EMP0000001",
       "amount": 4143,
+      "payeNumber": "P12345",
       "link": "/",
       "updateIncomeLink": "/",
       "payments": []
@@ -19,5 +20,9 @@
   "addMissingEmployerLink": "/",
   "addMissingPensionLink": "/",
   "addMissingIncomeLink": "/",
-  "previousTaxYearLink": "/"
+  "addMissingBenefitLink": "/",
+  "addMissingCompanyCarLink": "/",
+  "previousTaxYearLink": "/",
+  "updateEstimatedIncomeLink": "/",
+  "updateEmployerLink": "/"
 }

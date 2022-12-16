@@ -18,16 +18,19 @@ package uk.gov.hmrc.mobilepaye.utils
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import org.scalatest.{Matchers, WordSpecLike}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
+import play.api.{Configuration, Environment}
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mobilepaye.MobilePayeTestData
+import uk.gov.hmrc.mobilepaye.config.MobilePayeConfig
 import uk.gov.hmrc.mobilepaye.mocks.{AuditMock, AuthorisationMock, ShutteringMock}
 
 import scala.concurrent.ExecutionContext
 
 trait BaseSpec
-    extends WordSpecLike
+    extends AnyWordSpecLike
     with Matchers
     with FutureAwaits
     with DefaultAwaitTimeout
@@ -39,6 +42,10 @@ trait BaseSpec
   implicit lazy val hc:           HeaderCarrier     = HeaderCarrier()
   implicit lazy val system:       ActorSystem       = ActorSystem()
   implicit lazy val materializer: ActorMaterializer = ActorMaterializer()
+
+  private lazy val env           = Environment.simple()
+  private lazy val configuration = Configuration.load(env)
+  implicit lazy val appConfig    = new MobilePayeConfig(configuration)
 
   val acceptHeader: (String, String) = "Accept" -> "application/vnd.hmrc.1.0+json"
 }

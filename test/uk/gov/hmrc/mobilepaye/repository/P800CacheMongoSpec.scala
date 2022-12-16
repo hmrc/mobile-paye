@@ -16,41 +16,26 @@
 
 package uk.gov.hmrc.mobilepaye.repository
 
-import org.scalatest.{Matchers, WordSpec}
-import org.mockito.MockitoSugar
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.libs.json.{JsObject, Json}
-import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mobilepaye.domain.P800Cache
+import uk.gov.hmrc.mobilepaye.utils.BaseSpec
+import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 import uk.gov.hmrc.serviceResponse.Response
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
-class P800CacheMongoSpec
-    extends WordSpec
-    with Matchers
-    with GuiceOneAppPerSuite
-    with MockitoSugar
-    with P800CacheMongoSetup {
-  val nino: Nino = Nino("CS700100A")
+class P800CacheMongoSpec extends BaseSpec with DefaultPlayMongoRepositorySupport[P800Cache] {
+
+  override lazy val repository = new P800CacheMongo(mongoComponent, appConfig)
 
   "P800CacheMongo" should {
+    "add new record" in {
 
-    "add new record" in new P800CacheMongoWithInsert(
-      false,
-      Some(
-        Json
-          .toJson(
-            P800Cache(nino)
-          )
-          .as[JsObject]
-      )
-    ) {
+      repository.collection.drop()
 
       val result: Response[P800Cache] =
         Await.result(
-          p800CacheMongo.add(
+          repository.add(
             P800Cache(nino)
           ),
           500.millis
@@ -59,26 +44,23 @@ class P800CacheMongoSpec
       result.right.get.nino shouldBe nino
     }
 
-    "add but Error" in new P800CacheMongoWithInsert(
-      true,
-      Some(
-        Json
-          .toJson(
-            P800Cache(nino)
-          )
-          .as[JsObject]
-      )
-    ) {
+    "find stored record" in {
 
-      val result: Response[P800Cache] =
+      repository.collection.drop()
+
+      repository.add(
+        P800Cache(nino)
+      )
+
+      val result: Seq[P800Cache] =
         Await.result(
-          p800CacheMongo.add(
-            P800Cache(nino)
+          repository.selectByNino(
+            nino
           ),
           500.millis
         )
 
-      result.left.get.message shouldBe "Unexpected error while writing a document."
+      result.head.nino shouldBe nino
 
     }
   }

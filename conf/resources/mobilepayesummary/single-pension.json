@@ -5,6 +5,7 @@
       "name": "HIGHWIRE RETURNS LTD",
       "taxCode": "BR",
       "amount": 4200,
+      "payeNumber": "P12345",
       "link": "/",
       "payments": []
     }
@@ -17,5 +18,9 @@
   "addMissingEmployerLink": "/",
   "addMissingPensionLink": "/",
   "addMissingIncomeLink": "/",
-  "previousTaxYearLink": "/"
+  "addMissingBenefitLink": "/",
+  "addMissingCompanyCarLink": "/",
+  "previousTaxYearLink": "/",
+  "updateEstimatedIncomeLink": "/",
+  "updateEmployerLink": "/"
 }
