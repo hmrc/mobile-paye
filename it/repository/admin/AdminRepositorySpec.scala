@@ -75,7 +75,6 @@ class AdminRepositorySpec
 
         whenReady(
           for {
-            _   <- repo.collection.drop().toFuture()
             _   <- repo.setFeatureFlags(Map(OnlinePaymentIntegration -> true, OnlinePaymentIntegration -> false))
             res <- repo.collection.find(Filters.equal("name", OnlinePaymentIntegration.toString)).toFuture()
           } yield res
