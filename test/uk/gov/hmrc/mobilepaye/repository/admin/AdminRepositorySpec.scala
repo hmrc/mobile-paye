@@ -77,6 +77,18 @@ class AdminRepositorySpec
     }
   }
 
+  "setFeatureFlags" should {
+    "not create duplicates" in {
+      val result = (for {
+        _      <- repository.setFeatureFlags(Map(OnlinePaymentIntegration -> true, OnlinePaymentIntegration -> false))
+        result <- find(Filters.equal("name", OnlinePaymentIntegration.toString))
+      } yield result).futureValue
+
+      result.length shouldBe 1
+      result.head.isEnabled shouldBe false
+    }
+  }
+
   "getAllFeatureFlags" should {
     "get a list of all the feature toggles" in {
       val allFlags: Seq[FeatureFlag] = (for {

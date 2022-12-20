@@ -73,6 +73,32 @@ class AdminRepositorySpec
       }
     }
 
+    "setFeatureFlags must replace a record not create a new one" in {
+      val app = new GuiceApplicationBuilder().build()
+
+      running(app) {
+        val repo = app.injector.instanceOf[AdminRepository]
+
+        whenReady(
+          repo
+            .collection
+            .drop()
+            .toFuture()
+            .flatMap(
+              _ =>
+                for {
+                  _   <- repo.setFeatureFlags(Map(OnlinePaymentIntegration -> true, OnlinePaymentIntegration -> false))
+                  res <- repo.collection.find(Filters.equal("name", OnlinePaymentIntegration.toString)).toFuture()
+                } yield res
+            )
+        ) {
+          result =>
+            result.length mustBe 1
+            result.head.isEnabled mustBe false
+        }
+      }
+    }
+
     "getAllFeatureFlags must get a list of all the feature toggles" in {
       val app = new GuiceApplicationBuilder().build()
 
