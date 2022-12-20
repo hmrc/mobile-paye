@@ -26,7 +26,7 @@ import play.api.cache.AsyncCacheApi
 import play.api.http.Status.OK
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.JsBoolean
+import play.api.libs.json.{JsBoolean, Json}
 import play.api.mvc.{AnyContentAsEmpty, ControllerComponents}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -34,8 +34,7 @@ import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.internalauth.client.Predicate.Permission
 import uk.gov.hmrc.internalauth.client._
 import uk.gov.hmrc.internalauth.client.test.{BackendAuthComponentsStub, StubBehaviour}
-import uk.gov.hmrc.mobilepaye.domain.admin.OnlinePaymentIntegration
-import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, FeatureFlagName}
+import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, OnlinePaymentIntegration}
 import uk.gov.hmrc.mobilepaye.repository.admin.AdminRepository
 import uk.gov.hmrc.mobilepaye.services.admin.FeatureFlagService
 import uk.gov.hmrc.mobilepaye.utils.{BaseSpec, MockAsyncCacheApi}
@@ -111,6 +110,47 @@ class FeatureFlagControllerSpec
         val result = route(app, request).head
 
         status(result) shouldBe OK
+      }
+    }
+
+    "return NO_CONTENT for putAll" in {
+      val app = application.build()
+
+      when(mockStubBehaviour.stubAuth[Unit](meq(Some(permission)), any()))
+        .thenReturn(Future.successful(()))
+
+      when(mockFeatureFlagService.setAll(any()))
+        .thenReturn(Future.successful((): Unit))
+
+      running(app) {
+        val request =
+          fakeRequest(PUT, routes.FeatureFlagController.putAll.url)
+            .withHeaders("Authorization" -> "some-token")
+            .withJsonBody(Json.toJson(flags))
+
+        val result = route(app, request).head
+
+        status(result) shouldBe NO_CONTENT
+      }
+    }
+
+    "return NO_CONTENT for putAll with no body" in {
+      val app = application.build()
+
+      when(mockStubBehaviour.stubAuth[Unit](meq(Some(permission)), any()))
+        .thenReturn(Future.successful(()))
+
+      when(mockFeatureFlagService.setAll(any()))
+        .thenReturn(Future.successful((): Unit))
+
+      running(app) {
+        val request =
+          fakeRequest(PUT, routes.FeatureFlagController.putAll.url)
+            .withHeaders("Authorization" -> "some-token")
+
+        val result = route(app, request).head
+
+        status(result) shouldBe NO_CONTENT
       }
     }
 
