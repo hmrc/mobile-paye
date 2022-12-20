@@ -21,9 +21,6 @@ import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 import uk.gov.hmrc.serviceResponse.Response
 
-import scala.concurrent.Await
-import scala.concurrent.duration._
-
 class P800CacheMongoSpec extends BaseSpec with DefaultPlayMongoRepositorySupport[P800Cache] {
 
   override lazy val repository = new P800CacheMongo(mongoComponent, appConfig)
@@ -32,32 +29,19 @@ class P800CacheMongoSpec extends BaseSpec with DefaultPlayMongoRepositorySupport
     "add new record" in {
 
       val result: Response[P800Cache] =
-        Await.result(
-          repository.add(
-            P800Cache(nino)
-          ),
-          500.millis
-        )
+        repository.add(P800Cache(nino)).futureValue
 
       result.right.get.nino shouldBe nino
     }
 
     "find stored record" in {
 
-      repository.add(
-        P800Cache(nino)
-      )
+      repository.add(P800Cache(nino)).futureValue
 
       val result: Seq[P800Cache] =
-        Await.result(
-          repository.selectByNino(
-            nino
-          ),
-          500.millis
-        )
+        repository.selectByNino(nino).futureValue
 
       result.head.nino shouldBe nino
-
     }
   }
 
