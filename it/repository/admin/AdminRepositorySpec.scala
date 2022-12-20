@@ -53,18 +53,12 @@ class AdminRepositorySpec
         val repo = app.injector.instanceOf[AdminRepository]
 
         whenReady(
-          repo
-            .collection
-            .drop()
-            .toFuture()
-            .flatMap(
-              _ =>
-                for {
-                  _   <- repo.setFeatureFlag(OnlinePaymentIntegration, enabled = true)
-                  _   <- repo.setFeatureFlag(OnlinePaymentIntegration, enabled = false)
-                  res <- repo.collection.find(Filters.equal("name", OnlinePaymentIntegration.toString)).toFuture()
-                } yield res
-            )
+          for {
+            _   <- repo.collection.drop().toFuture()
+            _   <- repo.setFeatureFlag(OnlinePaymentIntegration, enabled = true)
+            _   <- repo.setFeatureFlag(OnlinePaymentIntegration, enabled = false)
+            res <- repo.collection.find(Filters.equal("name", OnlinePaymentIntegration.toString)).toFuture()
+          } yield res
         ) {
           result =>
             result.length mustBe 1
@@ -80,17 +74,11 @@ class AdminRepositorySpec
         val repo = app.injector.instanceOf[AdminRepository]
 
         whenReady(
-          repo
-            .collection
-            .drop()
-            .toFuture()
-            .flatMap(
-              _ =>
-                for {
-                  _   <- repo.setFeatureFlags(Map(OnlinePaymentIntegration -> true, OnlinePaymentIntegration -> false))
-                  res <- repo.collection.find(Filters.equal("name", OnlinePaymentIntegration.toString)).toFuture()
-                } yield res
-            )
+          for {
+            _   <- repo.collection.drop().toFuture()
+            _   <- repo.setFeatureFlags(Map(OnlinePaymentIntegration -> true, OnlinePaymentIntegration -> false))
+            res <- repo.collection.find(Filters.equal("name", OnlinePaymentIntegration.toString)).toFuture()
+          } yield res
         ) {
           result =>
             result.length mustBe 1
@@ -106,17 +94,11 @@ class AdminRepositorySpec
         val repo = app.injector.instanceOf[AdminRepository]
 
         whenReady(
-          repo
-            .collection
-            .drop()
-            .toFuture()
-            .flatMap(
-              _ =>
-                for {
-                  _   <- repo.setFeatureFlag(OnlinePaymentIntegration, enabled = true)
-                  res <- repo.getFeatureFlags
-                } yield res
-            )
+          for {
+            _   <- repo.collection.drop().toFuture()
+            _   <- repo.setFeatureFlag(OnlinePaymentIntegration, enabled = true)
+            res <- repo.getFeatureFlags
+          } yield res
         ) {
           result =>
             result mustBe List(
