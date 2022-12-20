@@ -31,8 +31,6 @@ class P800CacheMongoSpec extends BaseSpec with DefaultPlayMongoRepositorySupport
   "P800CacheMongo" should {
     "add new record" in {
 
-      repository.collection.drop()
-
       val result: Response[P800Cache] =
         Await.result(
           repository.add(
@@ -45,8 +43,6 @@ class P800CacheMongoSpec extends BaseSpec with DefaultPlayMongoRepositorySupport
     }
 
     "find stored record" in {
-
-      repository.collection.drop()
 
       repository.add(
         P800Cache(nino)

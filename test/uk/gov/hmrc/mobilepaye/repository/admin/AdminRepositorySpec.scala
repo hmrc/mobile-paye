@@ -17,62 +17,19 @@
 package uk.gov.hmrc.mobilepaye.repository.admin
 
 import org.mongodb.scala.MongoWriteException
-import org.mongodb.scala.bson.BsonDocument
 import org.mongodb.scala.model.Filters
-import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.Application
-import play.api.cache.AsyncCacheApi
-import play.api.inject.bind
-import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, FeatureFlagName, OnlinePaymentIntegration}
-import uk.gov.hmrc.mobilepaye.utils.{BaseSpec, MockAsyncCacheApi}
+import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
 import scala.concurrent.Future
 
 class AdminRepositorySpec
   extends BaseSpec
-    with GuiceOneAppPerSuite
     with DefaultPlayMongoRepositorySupport[FeatureFlag] {
 
-  override protected lazy val optSchema: Option[BsonDocument] =
-    Some(BsonDocument(
-      """{
-        "bsonType": "object",
-        "required": [
-          "_id",
-          "name",
-          "isEnabled"
-        ],
-        "properties": {
-          "_id": {
-            "bsonType": "objectId"
-          },
-          "name": {
-            "bsonType": "string"
-          },
-          "isEnabled": {
-            "bsonType": "bool"
-          },
-          "description": {
-            "bsonType": "string"
-          }
-        }
-      }"""
-    ))
-
-  val mockCacheApi: MockAsyncCacheApi =
-    new MockAsyncCacheApi()
-
-  def application: Application =
-    new GuiceApplicationBuilder()
-      .overrides(bind[AsyncCacheApi].toInstance(mockCacheApi))
-      .configure(Map("mongodb.uri" -> mongoUri))
-      .build()
-
-  lazy val repository: AdminRepository =
-    application.injector.instanceOf[AdminRepository]
+  override lazy val repository: AdminRepository =
+    new AdminRepository(mongoComponent)
 
   def insertRecord(
     flag: FeatureFlagName = OnlinePaymentIntegration,
@@ -82,16 +39,11 @@ class AdminRepositorySpec
       FeatureFlag(flag, enabled, flag.description)
     ).map(_.wasAcknowledged())
 
-  override def beforeEach(): Unit = {
-    dropCollection()
-    super.beforeEach()
-  }
-
   "getFlag" should {
     "return None if there is no record" in {
       val result = repository.getFeatureFlag(OnlinePaymentIntegration).futureValue
 
-      result mustBe None
+      result shouldBe None
     }
   }
 
@@ -102,7 +54,7 @@ class AdminRepositorySpec
         result <- repository.getFeatureFlag(name = OnlinePaymentIntegration)
       } yield result).futureValue
 
-      result mustBe Some(
+      result shouldBe Some(
         FeatureFlag(
           name        = OnlinePaymentIntegration,
           isEnabled   = true,
@@ -120,8 +72,8 @@ class AdminRepositorySpec
         result <- find(Filters.equal("name", OnlinePaymentIntegration.toString))
       } yield result).futureValue
 
-      result.length mustBe 1
-      result.head.isEnabled mustBe false
+      result.length shouldBe 1
+      result.head.isEnabled shouldBe false
     }
   }
 
@@ -132,7 +84,7 @@ class AdminRepositorySpec
         result <- repository.getFeatureFlags
       } yield result).futureValue
 
-      allFlags mustBe List(
+      allFlags shouldBe List(
         FeatureFlag(
           name        = OnlinePaymentIntegration,
           isEnabled   = true,
@@ -151,8 +103,8 @@ class AdminRepositorySpec
         } yield true)
       }
 
-      result.getCode mustBe 11000
-      result.getError.getMessage mustBe
+      result.getCode shouldBe 11000
+      result.getError.getMessage shouldBe
         s"""E11000 duplicate key error collection: test-AdminRepositorySpec.admin-feature-flags index: name dup key: { name: "$OnlinePaymentIntegration" }"""
     }
   }

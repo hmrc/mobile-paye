@@ -48,4 +48,5 @@ trait BaseSpec
   implicit lazy val appConfig    = new MobilePayeConfig(configuration)
 
   val acceptHeader: (String, String) = "Accept" -> "application/vnd.hmrc.1.0+json"
+
 }
