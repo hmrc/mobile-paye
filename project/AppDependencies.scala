@@ -1,4 +1,5 @@
 import sbt._
+import play.sbt.PlayImport.ehcache
 
 object AppDependencies {
 
@@ -14,23 +15,25 @@ object AppDependencies {
   private val wireMockVersion      = "2.20.0"
   private val scalaMockVersion     = "4.1.0"
   private val scalaTestPlusVersion = "5.1.0"
-  private val hmrcMongoVersion     = "0.68.0"
+  private val hmrcMongoVersion     = "0.73.0"
   private val mockitoVersion       = "1.16.46"
   private val refinedVersion       = "0.9.4"
   private val flexmarkAllVersion   = "0.36.8"
 
   val compile: Seq[ModuleID] = Seq(
     ws,
-    "uk.gov.hmrc"       %% "bootstrap-backend-play-28" % play28Bootstrap,
-    "uk.gov.hmrc"       %% "domain"                    % domainVersion,
-    "uk.gov.hmrc"       %% "play-hmrc-api"             % playHmrcVersion,
-    "uk.gov.hmrc"       %% "tax-year"                  % taxYearVersion,
-    "uk.gov.hmrc.mongo" %% "hmrc-mongo-play-28"        % hmrcMongoVersion,
-    "eu.timepit"        %% "refined"                   % refinedVersion
+    "uk.gov.hmrc"       %% "bootstrap-backend-play-28"    % play28Bootstrap,
+    "uk.gov.hmrc"       %% "domain"                       % domainVersion,
+    "uk.gov.hmrc"       %% "play-hmrc-api"                % playHmrcVersion,
+    "uk.gov.hmrc"       %% "tax-year"                     % taxYearVersion,
+    "uk.gov.hmrc.mongo" %% "hmrc-mongo-play-28"           % hmrcMongoVersion,
+    "eu.timepit"        %% "refined"                      % refinedVersion,
+    "uk.gov.hmrc"       %% "internal-auth-client-play-28" % "1.2.0",
+    ehcache
   )
 
   trait TestDependencies {
-    lazy val scope: String        = "test"
+    lazy val scope: String        = "test, it"
     lazy val test:  Seq[ModuleID] = ???
   }
 
@@ -54,8 +57,9 @@ object AppDependencies {
         override lazy val scope: String = "it"
 
         override lazy val test: Seq[ModuleID] = testCommon(scope) ++ Seq(
-            "com.github.tomakehurst" % "wiremock" % wireMockVersion % scope
-          )
+          "org.mockito"            % "mockito-scala_2.12" % mockitoVersion  % scope,
+          "com.github.tomakehurst" % "wiremock"           % wireMockVersion % scope
+        )
       }.test
   }
 

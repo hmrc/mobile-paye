@@ -1,16 +1,20 @@
 package utils
 
+import org.mockito.MockitoSugar.mock
+
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
 import java.util.Base64
 import org.scalatestplus.play.WsScalaTestClient
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
-import play.api.Application
+import play.api.inject.bind
+import play.api.{Application, inject}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.ws.{WSClient, WSResponse}
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import uk.gov.hmrc.mobilepaye.MobilePayeTestData
+import uk.gov.hmrc.mobilepaye.services.admin.FeatureFlagService
 
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDateTime, ZoneId}
@@ -56,7 +60,15 @@ abstract class BaseISpec
   private def base64Encode(s: String): String =
     Base64.getEncoder.encodeToString(s.getBytes("UTF-8"))
 
-  protected def appBuilder: GuiceApplicationBuilder = new GuiceApplicationBuilder().configure(config)
+  val mockFeatureFlagService: FeatureFlagService =
+    mock[FeatureFlagService]
+
+  protected def appBuilder: GuiceApplicationBuilder =
+    new GuiceApplicationBuilder()
+      .overrides(
+        bind[FeatureFlagService].toInstance(mockFeatureFlagService)
+      )
+      .configure(config)
 
   protected implicit lazy val wsClient: WSClient = app.injector.instanceOf[WSClient]
 }

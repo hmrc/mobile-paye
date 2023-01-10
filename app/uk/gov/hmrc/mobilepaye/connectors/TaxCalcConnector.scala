@@ -23,21 +23,25 @@ import uk.gov.hmrc.mobilepaye.domain.taxcalc.TaxYearReconciliation
 
 import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.mobilepaye.domain.admin.OnlinePaymentIntegration
+import uk.gov.hmrc.mobilepaye.services.admin.FeatureFlagService
 
 @Singleton
 class TaxCalcConnector @Inject() (
-  httpGet:                            CoreGet,
-  @Named("taxcalc") baseUrl:          String,
-  @Named("with-taxcalc") withTaxCalc: Boolean
-)(implicit ec:                        ExecutionContext) {
+  httpGet:                   CoreGet,
+  @Named("taxcalc") baseUrl: String,
+  featureFlagService:        FeatureFlagService
+)(implicit ec:               ExecutionContext) {
 
   def getTaxReconciliations(nino: Nino)(implicit hc: HeaderCarrier): Future[Option[List[TaxYearReconciliation]]] = {
     val url = baseUrl + s"/taxcalc/${nino.nino}/reconciliations"
-
-    if (withTaxCalc) {
-      httpGet.GET[Option[List[TaxYearReconciliation]]](url).recover {
-        case _: Throwable => None
-      }
-    } else Future.successful(None)
+    featureFlagService.get(OnlinePaymentIntegration) flatMap {
+      onlinePaymentIntegration =>
+        if (onlinePaymentIntegration.isEnabled) {
+          httpGet.GET[Option[List[TaxYearReconciliation]]](url).recover {
+            case _: Throwable => None
+          }
+        } else Future.successful(None)
+    }
   }
 }

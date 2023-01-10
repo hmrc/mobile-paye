@@ -1,12 +1,14 @@
-import java.time.LocalDate
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.WSResponse
 import play.api.test.Injecting
 import stubs.AuthStub._
+import stubs.ShutteringStub._
 import stubs.TaiStub._
 import stubs.TaxCalcStub._
-import stubs.ShutteringStub._
 import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, OnlinePaymentIntegration}
 import uk.gov.hmrc.mobilepaye.config.MobilePayeConfig
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status.{Overpaid, Underpaid}
@@ -17,7 +19,9 @@ import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.mongo.test.{CleanMongoCollectionSupport, PlayMongoRepositorySupport}
 import utils.BaseISpec
 
+import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.util.Random
 
 class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMongoRepositorySupport[P800Cache] {
@@ -32,6 +36,11 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
   lazy val urlWithCurrentYearAsCurrent =
     s"/nino/$nino/tax-year/current/summary?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0"
 
+  override def beforeEach(): Unit = {
+    when(mockFeatureFlagService.get(any()))
+      .thenReturn(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = false)))
+    super.beforeEach()
+  }
   implicit def ninoToString(nino: Nino): String = nino.toString()
 
   def dropDb = dropCollection()
@@ -281,6 +290,9 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     }
 
     "return OK with P800Repayments for Overpaid tax and accepted RepaymentStatus" in {
+      when(mockFeatureFlagService.get(any()))
+        .thenReturn(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = true)))
+
       stubForShutteringDisabled
       dropDb
       List(Refund, PaymentProcessing, PaymentPaid, ChequeSent)
@@ -350,6 +362,9 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     }
 
     "return OK with P800Repayments for some other date format" in {
+      when(mockFeatureFlagService.get(any()))
+        .thenReturn(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = true)))
+
       stubForShutteringDisabled
       dropDb
       val time = LocalDate.now
@@ -467,6 +482,9 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
   }
 
   "return OK and a P800 when datePaid is less than 6 weeks ago" in {
+    when(mockFeatureFlagService.get(any()))
+      .thenReturn(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = true)))
+
     stubForShutteringDisabled
     dropDb
     grantAccess(nino)
@@ -487,6 +505,9 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
   }
 
   "return OK and a P800 when datePaid is not present" in {
+    when(mockFeatureFlagService.get(any()))
+      .thenReturn(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = true)))
+
     stubForShutteringDisabled
     dropDb
     grantAccess(nino)
@@ -569,6 +590,9 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
   }
 
   "return OK and a P800 with link when status is refund" in {
+    when(mockFeatureFlagService.get(any()))
+      .thenReturn(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = true)))
+
     stubForShutteringDisabled
     dropDb
     grantAccess(nino)
@@ -590,6 +614,9 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
   }
 
   "Do not call taxcalc for P800 repayments if no repayment was found on a call less than 1 day ago" in {
+    when(mockFeatureFlagService.get(any()))
+      .thenReturn(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = true)))
+
     stubForShutteringDisabled
     dropDb
     grantAccess(nino)
@@ -612,6 +639,9 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
   }
 
   "Call taxcalc for P800 repayments if a repayment was found on a call less than 1 day ago" in {
+    when(mockFeatureFlagService.get(any()))
+      .thenReturn(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = true)))
+
     stubForShutteringDisabled
     dropDb
     grantAccess(nino)

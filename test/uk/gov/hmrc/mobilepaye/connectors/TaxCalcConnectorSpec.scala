@@ -16,24 +16,33 @@
 
 package uk.gov.hmrc.mobilepaye.connectors
 
+import org.scalamock.handlers.CallHandler6
 import uk.gov.hmrc.http._
+import uk.gov.hmrc.mobilepaye.domain.admin.OnlinePaymentIntegration
+import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, FeatureFlagName}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.TaxYearReconciliation
+import uk.gov.hmrc.mobilepaye.services.admin.FeatureFlagService
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class TaxCalcConnectorSpec extends BaseSpec {
-  val mockCoreGet: CoreGet          = mock[CoreGet]
-  val serviceUrl:  String           = "tax-calc-url"
-  val connector:   TaxCalcConnector = new TaxCalcConnector(mockCoreGet, serviceUrl, withTaxCalc = true)
+  val mockCoreGet: CoreGet                       = mock[CoreGet]
+  val serviceUrl: String                         = "tax-calc-url"
+  val mockFeatureFlagService: FeatureFlagService = mock[FeatureFlagService]
+  val connector: TaxCalcConnector                = new TaxCalcConnector(mockCoreGet, serviceUrl, mockFeatureFlagService)
 
-  def mockTaxCalcGet[T](f: Future[T]) =
+  def mockTaxCalcGet[T](f: Future[T]): CallHandler6[String, Seq[(String, String)], Seq[(String, String)], HttpReads[T], HeaderCarrier, ExecutionContext, Future[T]] =
     (mockCoreGet
       .GET(_: String, _: Seq[(String, String)], _: Seq[(String, String)])(_: HttpReads[T],
                                                                           _: HeaderCarrier,
                                                                           _: ExecutionContext))
       .expects(s"$serviceUrl/taxcalc/${nino.value}/reconciliations", *, *, *, *, *)
       .returning(f)
+
+  (mockFeatureFlagService.get(_: FeatureFlagName))
+    .expects(OnlinePaymentIntegration)
+    .returning(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = true)))
 
   "getTaxReconciliations" should {
     "not fail for some Throwable" in {

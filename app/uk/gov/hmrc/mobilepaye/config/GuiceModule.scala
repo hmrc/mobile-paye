@@ -25,7 +25,6 @@ import uk.gov.hmrc.mobilepaye.controllers.api.ApiAccess
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.http.HttpClient
-import uk.gov.hmrc.mongo.MongoComponent
 
 import scala.collection.JavaConverters._
 
@@ -58,9 +57,6 @@ class GuiceModule(
     bindConfigStringSeq("scopes")
     bind(classOf[String]).annotatedWith(named("tai")).toInstance(servicesConfig.baseUrl("tai"))
     bind(classOf[String]).annotatedWith(named("taxcalc")).toInstance(servicesConfig.baseUrl("taxcalc"))
-    bind(classOf[Boolean])
-      .annotatedWith(named("with-taxcalc"))
-      .toInstance(servicesConfig.getBoolean("mobilePaye.feature-flags.taxcalc"))
     bind(classOf[String])
       .annotatedWith(named("mobile-shuttering"))
       .toInstance(servicesConfig.baseUrl("mobile-shuttering"))
