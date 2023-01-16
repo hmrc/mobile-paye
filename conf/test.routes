@@ -1,0 +1,1 @@
+PUT        /setFlag/:flagName/:isEnabled        uk.gov.hmrc.mobilepaye.controllers.test.TestController.setFlag(flagName: FeatureFlagName, isEnabled: Boolean)
