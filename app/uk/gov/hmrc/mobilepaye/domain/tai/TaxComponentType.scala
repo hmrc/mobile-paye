@@ -368,9 +368,44 @@ object TaxComponentType {
 
 object BenefitComponentType {
 
-  implicit val formatBenefitTaxComponentType = new Format[BenefitComponentType] {
-    override def reads(json: JsValue): JsSuccess[BenefitComponentType] = ???
+  private val benefitComponentTypeMap: Map[String, BenefitComponentType] = Map(
+    "BenefitInKind"                                        -> BenefitInKind,
+    "CarFuelBenefit"                                       -> CarFuelBenefit,
+    "MedicalInsurance"                                     -> MedicalInsurance,
+    "CarBenefit"                                           -> CarBenefit,
+    "Telephone"                                            -> Telephone,
+    "ServiceBenefit"                                       -> ServiceBenefit,
+    "TaxableExpensesBenefit"                               -> TaxableExpensesBenefit,
+    "VanBenefit"                                           -> VanBenefit,
+    "VanFuelBenefit"                                       -> VanFuelBenefit,
+    "BeneficialLoan"                                       -> BeneficialLoan,
+    "Accommodation"                                        -> Accommodation,
+    "Assets"                                               -> Assets,
+    "AssetTransfer"                                        -> AssetTransfer,
+    "EducationalServices"                                  -> EducationalServices,
+    "Entertaining"                                         -> Entertaining,
+    "Expenses"                                             -> Expenses,
+    "Mileage"                                              -> Mileage,
+    "NonQualifyingRelocationExpenses"                      -> NonQualifyingRelocationExpenses,
+    "NurseryPlaces"                                        -> NurseryPlaces,
+    "OtherItems"                                           -> OtherItems,
+    "PaymentsOnEmployeesBehalf"                            -> PaymentsOnEmployeesBehalf,
+    "PersonalIncidentalExpenses"                           -> PersonalIncidentalExpenses,
+    "QualifyingRelocationExpenses"                         -> QualifyingRelocationExpenses,
+    "EmployerProvidedProfessionalSubscription"             -> EmployerProvidedProfessionalSubscription,
+    "IncomeTaxPaidButNotDeductedFromDirectorsRemuneration" -> IncomeTaxPaidButNotDeductedFromDirectorsRemuneration,
+    "TravelAndSubsistence"                                 -> TravelAndSubsistence,
+    "VouchersAndCreditCards"                               -> VouchersAndCreditCards,
+    "NonCashBenefit"                                       -> NonCashBenefit,
+    "EmployerProvidedServices"                             -> EmployerProvidedServices
+  )
 
+  implicit val formatBenefitTaxComponentType = new Format[BenefitComponentType] {
+
+    override def reads(json: JsValue): JsSuccess[BenefitComponentType] = JsSuccess(
+      benefitComponentTypeMap.getOrElse(json.as[String],
+                                        throw new IllegalArgumentException("Invalid Benefit component type"))
+    )
     override def writes(benefitComponentType: BenefitComponentType) = JsString(benefitComponentType.toString)
   }
 }

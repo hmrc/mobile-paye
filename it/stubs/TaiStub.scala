@@ -116,7 +116,7 @@ object TaiStub {
     taxAccountSummary: TaxAccountSummary,
     cyPlusone:         Boolean = false
   ): StubMapping = {
-    val taxYear = if(cyPlusone) TaxYear.current.currentYear + 1 else TaxYear.current.currentYear
+    val taxYear = if (cyPlusone) TaxYear.current.currentYear + 1 else TaxYear.current.currentYear
     stubFor(
       get(urlEqualTo(s"/tai/$nino/tax-account/$taxYear/summary"))
         .willReturn(
@@ -131,7 +131,38 @@ object TaiStub {
     )
   }
 
+  def taxAccountSummaryNotFound(
+    nino:      String,
+    cyPlusone: Boolean = false
+  ): StubMapping = {
+    val taxYear = if (cyPlusone) TaxYear.current.currentYear + 1 else TaxYear.current.currentYear
+    stubFor(
+      get(urlEqualTo(s"/tai/$nino/tax-account/$taxYear/summary"))
+        .willReturn(
+          aResponse()
+            .withStatus(404)
+        )
+    )
+  }
+
   def taxAccountSummaryNotCalled(nino: String): Unit =
     verify(0, getRequestedFor(urlEqualTo(s"/tai/$nino/tax-account/${TaxYear.current.currentYear}/summary")))
+
+  def stubForBenefits(
+    nino:               String,
+    employmentBenefits: Benefits
+  ): StubMapping =
+    stubFor(
+      get(urlEqualTo(s"/tai/$nino/tax-account/${TaxYear.current.currentYear}/benefits"))
+        .willReturn(
+          aResponse()
+            .withStatus(200)
+            .withBody(s"""
+                         |{
+                         |  "data": ${Json.toJson(employmentBenefits)}
+                         |}
+          """.stripMargin)
+        )
+    )
 
 }

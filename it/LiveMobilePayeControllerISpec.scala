@@ -10,10 +10,11 @@ import stubs.TaxCalcStub._
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, OnlinePaymentIntegration}
 import uk.gov.hmrc.mobilepaye.config.MobilePayeConfig
+import uk.gov.hmrc.mobilepaye.domain.tai.{CarBenefit, MedicalInsurance}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status.{Overpaid, Underpaid}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus._
-import uk.gov.hmrc.mobilepaye.domain.{MobilePayeResponse, P800Cache, P800Repayment, Shuttering}
+import uk.gov.hmrc.mobilepaye.domain.{MobilePayeResponse, OtherBenefits, P800Cache, P800Repayment, Shuttering}
 import uk.gov.hmrc.mobilepaye.repository.P800CacheMongo
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.mongo.test.{CleanMongoCollectionSupport, PlayMongoRepositorySupport}
@@ -56,6 +57,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryIsFound(nino, taxAccountSummary, cyPlusone = true)
       taxCalcNoResponse(nino, currentTaxYear)
+      stubForBenefits(nino, noBenefits)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
       response.status shouldBe 200
@@ -71,7 +73,9 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForEmployments(nino, employmentIncomeSource)
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxAccountSummaryNotFound(nino, cyPlusone = true)
       taxCalcNoResponse(nino, currentTaxYear)
+      stubForBenefits(nino, noBenefits)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
       response.status shouldBe 200
@@ -87,7 +91,9 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       personalDetailsAreFound(nino, person)
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxAccountSummaryNotFound(nino, cyPlusone = true)
       taxCalcNoResponse(nino, currentTaxYear)
+      stubForBenefits(nino, noBenefits)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
       response.status shouldBe 200
@@ -104,7 +110,9 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForEmployments(nino, Seq.empty)
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxAccountSummaryNotFound(nino, cyPlusone = true)
       taxCalcNoResponse(nino, currentTaxYear)
+      stubForBenefits(nino, noBenefits)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
       response.status                                  shouldBe 200
@@ -119,7 +127,9 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForEmployments(nino, employmentIncomeSource)
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxAccountSummaryNotFound(nino, cyPlusone = true)
       taxCalcNoResponse(nino, currentTaxYear)
+      stubForBenefits(nino, noBenefits)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
       response.status                                  shouldBe 200
@@ -134,7 +144,9 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForPensions(nino, pensionIncomeSource)
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome.copy(otherNonTaxCodeIncomes = Nil))
       taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxAccountSummaryNotFound(nino, cyPlusone = true)
       taxCalcNoResponse(nino, currentTaxYear)
+      stubForBenefits(nino, noBenefits)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
       response.status                                  shouldBe 200
@@ -218,9 +230,11 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       personalDetailsAreFound(nino, person)
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxAccountSummaryNotFound(nino, cyPlusone = true)
       stubForPensions(nino, pensionIncomeSource)
       stubForEmployments(nino, employmentIncomeSource)
       taxCalcNoResponse(nino, currentTaxYear)
+      stubForBenefits(nino, noBenefits)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status                                  shouldBe 200
@@ -235,7 +249,9 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForEmployments(nino, employmentIncomeSource)
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxAccountSummaryNotFound(nino, cyPlusone = true)
       taxCalcNoResponse(nino, currentTaxYear)
+      stubForBenefits(nino, noBenefits)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status shouldBe 200
@@ -252,7 +268,9 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForEmployments(nino, Seq.empty)
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxAccountSummaryNotFound(nino, cyPlusone = true)
       taxCalcNoResponse(nino, currentTaxYear)
+      stubForBenefits(nino, noBenefits)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status                                  shouldBe 200
@@ -267,7 +285,9 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForEmployments(nino, employmentIncomeSource)
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxAccountSummaryNotFound(nino, cyPlusone = true)
       taxCalcNoResponse(nino, currentTaxYear)
+      stubForBenefits(nino, noBenefits)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status                                  shouldBe 200
@@ -282,7 +302,9 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForEmployments(nino, employmentIncomeSource)
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome.copy(otherNonTaxCodeIncomes = Nil))
       taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxAccountSummaryNotFound(nino, cyPlusone = true)
       taxCalcNoResponse(nino, currentTaxYear)
+      stubForBenefits(nino, noBenefits)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status                                  shouldBe 200
@@ -306,7 +328,9 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
           stubForEmployments(nino, employmentIncomeSource)
           nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
           taxAccountSummaryIsFound(nino, taxAccountSummary)
+          taxAccountSummaryNotFound(nino, cyPlusone = true)
           taxCalcValidResponse(nino, currentTaxYear - 1, amount, Overpaid, repaymentStatus, time)
+          stubForBenefits(nino, noBenefits)
 
           val expectedRepayment: Option[P800Repayment] =
             repayment(P800Status.Overpaid, repaymentStatus, currentTaxYear, amount, time)
@@ -332,7 +356,9 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
           stubForEmployments(nino, employmentIncomeSource)
           nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
           taxAccountSummaryIsFound(nino, taxAccountSummary)
+          taxAccountSummaryNotFound(nino, cyPlusone = true)
           taxCalcValidResponse(nino, currentTaxYear, amount, Underpaid, repaymentStatus, time)
+          stubForBenefits(nino, noBenefits)
 
           val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
           response.status                               shouldBe 200
@@ -353,7 +379,9 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
           stubForEmployments(nino, employmentIncomeSource)
           nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
           taxAccountSummaryIsFound(nino, taxAccountSummary)
+          taxAccountSummaryNotFound(nino, cyPlusone = true)
           taxCalcValidResponse(nino, currentTaxYear, amount, Overpaid, repaymentStatus, time)
+          stubForBenefits(nino, noBenefits)
 
           val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
           response.status                               shouldBe 200
@@ -375,7 +403,9 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForPensions(nino, pensionIncomeSource)
       stubForEmployments(nino, employmentIncomeSource)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxAccountSummaryNotFound(nino, cyPlusone = true)
       taxCalcWithInstantDate(nino, currentTaxYear, time)
+      stubForBenefits(nino, noBenefits)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status                                         shouldBe 200
@@ -431,6 +461,49 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       taxCalcCalled(nino, currentTaxYear)
     }
 
+    "return OK and a full valid MobilePayeResponse json ith employment benefit info" in {
+      stubForShutteringDisabled
+      grantAccess(nino)
+      personalDetailsAreFound(nino, person)
+      nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+      taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxAccountSummaryNotFound(nino, cyPlusone = true)
+      stubForPensions(nino, pensionIncomeSource)
+      stubForEmployments(nino, employmentIncomeSource)
+      taxCalcNoResponse(nino, currentTaxYear)
+      stubForBenefits(nino, allBenefits)
+
+      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
+      response.status shouldBe 200
+
+      val result = Json.parse(response.body).as[MobilePayeResponse]
+
+      val employment1 = result.employments.get.head
+      val employment2 = result.employments.get.last
+      employment1.employmentBenefits.get.benefits.size shouldBe 3
+      employment1.employmentBenefits.get.benefits
+        .filter(_.benefitType.toString == CarBenefit.toString)
+        .head
+        .amount shouldBe BigDecimal(20000)
+      employment1.employmentBenefits.get.benefits
+        .filter(_.benefitType.toString == MedicalInsurance.toString)
+        .head
+        .amount shouldBe BigDecimal(650)
+      employment1.employmentBenefits.get.benefits
+        .filter(_.benefitType.toString == OtherBenefits.toString)
+        .head
+        .amount                                        shouldBe BigDecimal(450)
+      employment2.employmentBenefits.get.benefits.size shouldBe 2
+      employment2.employmentBenefits.get.benefits
+        .filter(_.benefitType.toString == MedicalInsurance.toString)
+        .head
+        .amount shouldBe BigDecimal(350)
+      employment2.employmentBenefits.get.benefits
+        .filter(_.benefitType.toString == OtherBenefits.toString)
+        .head
+        .amount shouldBe BigDecimal(100)
+    }
+
   }
 
   "return matching payloads when called with the current year as int and as 'current' " in {
@@ -439,9 +512,11 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     personalDetailsAreFound(nino, person)
     nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
     taxAccountSummaryIsFound(nino, taxAccountSummary)
+    taxAccountSummaryNotFound(nino, cyPlusone = true)
     stubForPensions(nino, pensionIncomeSource)
     stubForEmployments(nino, employmentIncomeSource)
     taxCalcNoResponse(nino, currentTaxYear)
+    stubForBenefits(nino, noBenefits)
 
     val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
     response.status shouldBe 200
@@ -457,9 +532,11 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     personalDetailsAreFound(nino, person)
     nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
     taxAccountSummaryIsFound(nino, taxAccountSummary)
+    taxAccountSummaryNotFound(nino, cyPlusone = true)
     stubForPensions(nino, pensionIncomeSource)
     stubForEmployments(nino, employmentIncomeSource)
     taxCalcWithNoP800(nino, currentTaxYear, LocalDate.now)
+    stubForBenefits(nino, noBenefits)
 
     val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
     response.status                                  shouldBe 200
@@ -472,9 +549,11 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     personalDetailsAreFound(nino, person)
     nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
     taxAccountSummaryIsFound(nino, taxAccountSummary)
+    taxAccountSummaryNotFound(nino, cyPlusone = true)
     stubForPensions(nino, pensionIncomeSource)
     stubForEmployments(nino, employmentIncomeSource)
     taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now.minusWeeks(6).minusDays(1))
+    stubForBenefits(nino, noBenefits)
 
     val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
     response.status                                  shouldBe 200
@@ -491,9 +570,11 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     personalDetailsAreFound(nino, person)
     nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
     taxAccountSummaryIsFound(nino, taxAccountSummary)
+    taxAccountSummaryNotFound(nino, cyPlusone = true)
     stubForPensions(nino, pensionIncomeSource)
     stubForEmployments(nino, employmentIncomeSource)
     taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now.minusWeeks(6))
+    stubForBenefits(nino, noBenefits)
 
     val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
     response.status                                         shouldBe 200
@@ -514,9 +595,11 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     personalDetailsAreFound(nino, person)
     nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
     taxAccountSummaryIsFound(nino, taxAccountSummary)
+    taxAccountSummaryNotFound(nino, cyPlusone = true)
     stubForPensions(nino, pensionIncomeSource)
     stubForEmployments(nino, employmentIncomeSource)
     taxCalcWithNoDate(nino, currentTaxYear)
+    stubForBenefits(nino, noBenefits)
 
     val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
     response.status                                         shouldBe 200
@@ -533,9 +616,11 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     personalDetailsAreFound(nino, person)
     nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
     taxAccountSummaryIsFound(nino, taxAccountSummary)
+    taxAccountSummaryNotFound(nino, cyPlusone = true)
     stubForPensions(nino, pensionIncomeSource)
     stubForEmployments(nino, employmentIncomeSource)
     taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoType = "underpaid")
+    stubForBenefits(nino, noBenefits)
 
     val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
     response.status                                  shouldBe 200
@@ -548,9 +633,11 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     personalDetailsAreFound(nino, person)
     nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
     taxAccountSummaryIsFound(nino, taxAccountSummary)
+    taxAccountSummaryNotFound(nino, cyPlusone = true)
     stubForPensions(nino, pensionIncomeSource)
     stubForEmployments(nino, employmentIncomeSource)
     taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoType = "balanced")
+    stubForBenefits(nino, noBenefits)
 
     val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
     response.status                                  shouldBe 200
@@ -564,9 +651,11 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     personalDetailsAreFound(nino, person)
     nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
     taxAccountSummaryIsFound(nino, taxAccountSummary)
+    taxAccountSummaryNotFound(nino, cyPlusone = true)
     stubForPensions(nino, pensionIncomeSource)
     stubForEmployments(nino, employmentIncomeSource)
     taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoStatus = "sa_user")
+    stubForBenefits(nino, noBenefits)
 
     val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
     response.status                                  shouldBe 200
@@ -580,9 +669,11 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     personalDetailsAreFound(nino, person)
     nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
     taxAccountSummaryIsFound(nino, taxAccountSummary)
+    taxAccountSummaryNotFound(nino, cyPlusone = true)
     stubForPensions(nino, pensionIncomeSource)
     stubForEmployments(nino, employmentIncomeSource)
     taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoStatus = "unable_to_claim")
+    stubForBenefits(nino, noBenefits)
 
     val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
     response.status                                  shouldBe 200
@@ -599,9 +690,11 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     personalDetailsAreFound(nino, person)
     nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
     taxAccountSummaryIsFound(nino, taxAccountSummary)
+    taxAccountSummaryNotFound(nino, cyPlusone = true)
     stubForPensions(nino, pensionIncomeSource)
     stubForEmployments(nino, employmentIncomeSource)
     taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoStatus = "refund")
+    stubForBenefits(nino, noBenefits)
 
     val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
     response.status                                         shouldBe 200
@@ -623,9 +716,11 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     personalDetailsAreFound(nino, person)
     nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
     taxAccountSummaryIsFound(nino, taxAccountSummary)
+    taxAccountSummaryNotFound(nino, cyPlusone = true)
     stubForPensions(nino, pensionIncomeSource)
     stubForEmployments(nino, employmentIncomeSource)
     taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoType = "underpaid")
+    stubForBenefits(nino, noBenefits)
 
     val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
     response.status                                  shouldBe 200
@@ -648,9 +743,11 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     personalDetailsAreFound(nino, person)
     nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
     taxAccountSummaryIsFound(nino, taxAccountSummary)
+    taxAccountSummaryNotFound(nino, cyPlusone = true)
     stubForPensions(nino, pensionIncomeSource)
     stubForEmployments(nino, employmentIncomeSource)
     taxCalcWithNoDate(nino, currentTaxYear)
+    stubForBenefits(nino, noBenefits)
 
     val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
     response.status                                         shouldBe 200
@@ -677,7 +774,9 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     stubForEmployments(nino, employmentIncomeSource)
     nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
     taxAccountSummaryIsFound(nino, taxAccountSummary)
+    taxAccountSummaryNotFound(nino, cyPlusone = true)
     taxCalcNoResponse(nino, currentTaxYear)
+    stubForBenefits(nino, noBenefits)
 
     val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
     response.status shouldBe 200

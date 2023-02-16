@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.mobilepaye.domain.tai
 
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{Format, JsString, JsSuccess, JsValue, Json}
 
 case class Employment(
   payrollNumber:  Option[String],

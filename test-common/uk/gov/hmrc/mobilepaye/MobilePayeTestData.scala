@@ -19,7 +19,7 @@ package uk.gov.hmrc.mobilepaye
 import java.time.LocalDate
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mobilepaye.domain.{IncomeSource, MobilePayeResponse, MobilePayeResponseAudit, OtherIncome, OtherIncomeAudit, P800Repayment, PayeIncome, PayeIncomeAudit}
-import uk.gov.hmrc.mobilepaye.domain.tai.{Payment, _}
+import uk.gov.hmrc.mobilepaye.domain.tai._
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus.{ChequeSent, PaymentPaid}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.{P800Status, P800Summary, RepaymentStatus}
 import uk.gov.hmrc.time.TaxYear
@@ -76,6 +76,19 @@ trait MobilePayeTestData {
   val taiEmployment5: Employment = taiEmployment2.copy(
     annualAccounts = Seq(AnnualAccount(Seq.empty))
   )
+
+  val noBenefits: Benefits = Benefits(Seq.empty, Seq.empty)
+
+  val otherBenefits: Seq[GenericBenefit] = Seq(
+    GenericBenefit(MedicalInsurance, Some(3), BigDecimal(650)),
+    GenericBenefit(MedicalInsurance, Some(4), BigDecimal(350)),
+    GenericBenefit(Telephone, Some(4), BigDecimal(100)),
+    GenericBenefit(Expenses, Some(3), BigDecimal(200)),
+    GenericBenefit(Mileage, Some(3), BigDecimal(250))
+  )
+
+  val companyCarBenefits: Seq[CompanyCarBenefit] = Seq(CompanyCarBenefit(3, BigDecimal(20000), Seq.empty), CompanyCarBenefit(5, BigDecimal(15000), Seq.empty))
+  val allBenefits: Benefits = Benefits(companyCarBenefits, otherBenefits)
 
   val employmentIncomeSource: Seq[IncomeSource] =
     Seq(IncomeSource(taxCodeIncome, taiEmployment), IncomeSource(taxCodeIncome2, taiEmployment2))

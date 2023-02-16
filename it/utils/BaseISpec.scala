@@ -32,7 +32,7 @@ abstract class BaseISpec
 
   override implicit lazy val app: Application = appBuilder.build()
 
-  protected val acceptJsonHeader: (String, String) = "Accept" -> "application/vnd.hmrc.1.0+json"
+  protected val acceptJsonHeader:        (String, String) = "Accept"        -> "application/vnd.hmrc.1.0+json"
   protected val authorisationJsonHeader: (String, String) = "AUTHORIZATION" -> "Bearer 123"
 
   def config: Map[String, Any] =
@@ -43,7 +43,7 @@ abstract class BaseISpec
       "microservice.services.taxcalc.port"           -> wireMockPort,
       "microservice.services.mobile-shuttering.port" -> wireMockPort,
       "microservice.services.mobile-shuttering.port" -> wireMockPort,
-      "mongodb.uri" -> "mongodb://localhost:27017/test-mobile-paye",
+      "mongodb.uri"                                  -> "mongodb://localhost:27017/test-mobile-paye",
       "incomeTaxComparisonPeriod.scotland.startDate" -> LocalDateTime
         .now(ZoneId.of("Europe/London"))
         .minusDays(10)
@@ -51,7 +51,8 @@ abstract class BaseISpec
       "incomeTaxComparisonPeriod.scotland.endDate" -> LocalDateTime
         .now(ZoneId.of("Europe/London"))
         .plusDays(10)
-        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd\'T\'HH:mm:ss"))
+        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd\'T\'HH:mm:ss")),
+      "p800CacheEnabled" -> true
     )
 
   def getRequestWithAuthHeaders(url: String): Future[WSResponse] =
