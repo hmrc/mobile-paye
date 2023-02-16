@@ -85,15 +85,17 @@ class MobilePayeService @Inject() (
       incomeSourcePension:    Seq[IncomeSource],
       nonTaxCodeIncomes:      NonTaxCodeIncome,
       taxAccountSummary:      TaxAccountSummary,
-      p800Summary:            Option[P800Summary]
+      p800Summary:            Option[P800Summary],
+      employmentBenefits:      Benefits
     ): MobilePayeResponse = {
 
       def buildPayeIncomes(
         incomes:    Seq[IncomeSource],
-        employment: Boolean = false
+        employment: Boolean = false,
+        employmentBenefits: Option[Benefits] = None
       ): Option[Seq[PayeIncome]] =
         incomes.map { inc =>
-          PayeIncome.fromIncomeSource(inc, employment)
+          PayeIncome.fromIncomeSource(inc, employment, employmentBenefits)
         } match {
           case Nil => None
           case epi => Some(epi)
@@ -133,7 +135,7 @@ class MobilePayeService @Inject() (
       // $COVERAGE-ON$
 
       val employmentPayeIncomes: Option[Seq[PayeIncome]] =
-        buildPayeIncomes(incomeSourceEmployment, employment = true)
+        buildPayeIncomes(incomeSourceEmployment, employment = true, Some(employmentBenefits))
       val pensionPayeIncomes: Option[Seq[PayeIncome]] = buildPayeIncomes(incomeSourcePension)
 
       val taxFreeAmount: Option[BigDecimal] = Option(taxAccountSummary.taxFreeAmount.setScale(0, RoundingMode.FLOOR))
@@ -164,12 +166,14 @@ class MobilePayeService @Inject() (
       tcComparisonPeriodActive <- cyPlus1InfoCheck(taxCodeIncomesEmployment)
       cy1InfoAvailable <- if (tcComparisonPeriodActive) taiConnector.getCYPlusOneAccountSummary(nino, taxYear)
                          else Future successful false
+      employmentBenefits <- taiConnector.getBenefits(nino, taxYear)
       mobilePayeResponse: MobilePayeResponse = buildMobilePayeResponse(
         taxCodeIncomesEmployment,
         taxCodeIncomesPension,
         nonTaxCodeIncomes,
         taxAccountSummary,
-        getP800Summary(reconciliations, taxYear)
+        getP800Summary(reconciliations, taxYear),
+        employmentBenefits
       )
     } yield {
       if (cy1InfoAvailable) mobilePayeResponse.copy(taxCodeLocation = getTaxCodeLocation(taxCodeIncomesEmployment))

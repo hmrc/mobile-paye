@@ -19,7 +19,7 @@ package uk.gov.hmrc.mobilepaye.services
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, InternalServerException, UnauthorizedException}
 import uk.gov.hmrc.mobilepaye.connectors.{TaiConnector, TaxCalcConnector}
-import uk.gov.hmrc.mobilepaye.domain.{IncomeSource, MobilePayeResponse, P800Cache}
+import uk.gov.hmrc.mobilepaye.domain.{IncomeSource, MobilePayeResponse, OtherBenefits, P800Cache, PayeIncome}
 import uk.gov.hmrc.mobilepaye.domain.tai._
 import uk.gov.hmrc.mobilepaye.repository.P800CacheMongo
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
@@ -82,12 +82,19 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       .expects(*, *, *, *)
       .returning(f)
 
+  def mockGetBenefits(f: Future[Benefits]) =
+    (mockTaiConnector
+      .getBenefits(_: Nino, _: Int)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *, *, *)
+      .returning(f)
+
   "getMobilePayeResponse" should {
     "return full MobilePayeResponse when all data is available" in {
       mockMatchingTaxCode(Future.successful(employmentIncomeSource))
       mockMatchingTaxCode(Future.successful(pensionIncomeSource))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockGetBenefits(Future.successful((noBenefits)))
       mockP800Summary()
 
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
@@ -101,6 +108,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockCYPlusOneAccountSummary(Future successful true)
+      mockGetBenefits(Future.successful((noBenefits)))
       mockP800Summary()
 
       val service = new MobilePayeService(mockTaiConnector,
@@ -126,6 +134,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockCYPlusOneAccountSummary(Future successful true)
+      mockGetBenefits(Future.successful((noBenefits)))
       mockP800Summary()
 
       val service = new MobilePayeService(mockTaiConnector,
@@ -151,6 +160,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockCYPlusOneAccountSummary(Future successful true)
+      mockGetBenefits(Future.successful((noBenefits)))
       mockP800Summary()
 
       val service = new MobilePayeService(mockTaiConnector,
@@ -174,6 +184,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       mockMatchingTaxCode(Future.successful(pensionIncomeSource))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockGetBenefits(Future.successful((noBenefits)))
       mockP800Summary()
 
       val service = new MobilePayeService(mockTaiConnector,
@@ -197,6 +208,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       mockMatchingTaxCode(Future.successful(pensionIncomeSource))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithoutUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockGetBenefits(Future.successful((noBenefits)))
       mockP800Summary()
 
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
@@ -209,6 +221,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       mockMatchingTaxCode(Future.successful(pensionIncomeSource))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockGetBenefits(Future.successful((noBenefits)))
       mockP800Summary()
 
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
@@ -221,6 +234,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       mockMatchingTaxCode(Future.successful(Seq.empty[IncomeSource]))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockGetBenefits(Future.successful((noBenefits)))
       mockP800Summary()
 
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
@@ -235,6 +249,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
         Future.successful(nonTaxCodeIncomeWithoutUntaxedInterest.copy(otherNonTaxCodeIncomes = Nil))
       )
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockGetBenefits(Future.successful((noBenefits)))
       mockP800Summary()
 
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
@@ -247,6 +262,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       mockMatchingTaxCode(Future.successful(pensionIncomeSource))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockGetBenefits(Future.successful((noBenefits)))
       mockP800Summary()
 
       val result         = await(service.getMobilePayeResponse(nino, currentTaxYear))
@@ -269,6 +285,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       mockMatchingTaxCode(Future.successful(pensionIncomeSource))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockGetBenefits(Future.successful((noBenefits)))
       mockP800Summary()
 
       val result         = await(service.getMobilePayeResponse(nino, currentTaxYear))
@@ -290,6 +307,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       mockMatchingTaxCode(Future.successful(pensionIncomeSourceNoPension))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockGetBenefits(Future.successful((noBenefits)))
       mockP800Summary()
 
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
@@ -304,11 +322,49 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       mockMatchingTaxCode(Future.successful(pensionIncomeSource))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockGetBenefits(Future.successful((noBenefits)))
       mockP800Summary()
 
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
 
       result.pensions.get.head.latestPayment shouldBe None
+    }
+
+    "return full MobilePayeResponse with employment benefits data totalled correctly" in {
+      mockMatchingTaxCode(Future.successful(employmentIncomeSource))
+      mockMatchingTaxCode(Future.successful(pensionIncomeSource))
+      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
+      mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockGetBenefits(Future.successful((allBenefits)))
+      mockP800Summary()
+
+      val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
+
+      val employment1 = result.employments.get.head
+      val employment2 = result.employments.get.last
+      employment1.employmentBenefits.get.benefits.size shouldBe 3
+      employment1.employmentBenefits.get.benefits
+        .filter(_.benefitType.toString == CarBenefit.toString)
+        .head
+        .amount shouldBe BigDecimal(20000)
+      employment1.employmentBenefits.get.benefits
+        .filter(_.benefitType.toString == MedicalInsurance.toString)
+        .head
+        .amount shouldBe BigDecimal(650)
+      employment1.employmentBenefits.get.benefits
+        .filter(_.benefitType.toString == OtherBenefits.toString)
+        .head
+        .amount                                        shouldBe BigDecimal(450)
+      employment2.employmentBenefits.get.benefits.size shouldBe 2
+      employment2.employmentBenefits.get.benefits
+        .filter(_.benefitType.toString == MedicalInsurance.toString)
+        .head
+        .amount shouldBe BigDecimal(350)
+      employment2.employmentBenefits.get.benefits
+        .filter(_.benefitType.toString == OtherBenefits.toString)
+        .head
+        .amount shouldBe BigDecimal(100)
+
     }
 
     "throw UnauthorizedException when receiving UnauthorizedException from taiConnector" in {

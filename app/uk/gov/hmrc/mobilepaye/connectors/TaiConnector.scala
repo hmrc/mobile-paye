@@ -101,4 +101,13 @@ class TaiConnector @Inject() (
         case _: NotFoundException => Seq.empty[IncomeSource]
         case e => throw e
       }
+
+  def getBenefits(
+    nino:        Nino,
+    taxYear:     Int
+  )(implicit hc: HeaderCarrier,
+    ex:          ExecutionContext
+  ): Future[Benefits] = http.GET[JsValue](url(nino, s"tax-account/$taxYear/benefits")).map { json =>
+    (json \ "data").as[Benefits]
+  }
 }

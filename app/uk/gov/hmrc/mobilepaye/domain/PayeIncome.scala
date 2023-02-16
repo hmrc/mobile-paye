@@ -17,27 +17,29 @@
 package uk.gov.hmrc.mobilepaye.domain
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.mobilepaye.domain.tai.Payment
+import uk.gov.hmrc.mobilepaye.domain.tai.{Benefits, GenericBenefit, Payment}
 
 import java.time.LocalDate
 import scala.math.BigDecimal.RoundingMode
 
 case class PayeIncome(
-  name:             String,
-  payrollNumber:    Option[String] = None,
-  taxCode:          String,
-  amount:           BigDecimal,
-  payeNumber:       String,
-  link:             String,
-  updateIncomeLink: Option[String],
-  latestPayment:    Option[LatestPayment],
-  payments:         Option[Seq[Payment]])
+  name:               String,
+  payrollNumber:      Option[String] = None,
+  taxCode:            String,
+  amount:             BigDecimal,
+  payeNumber:         String,
+  link:               String,
+  updateIncomeLink:   Option[String],
+  latestPayment:      Option[LatestPayment],
+  payments:           Option[Seq[Payment]],
+  employmentBenefits: Option[EmploymentBenefits])
 
 object PayeIncome {
 
   def fromIncomeSource(
-    incomeSource: IncomeSource,
-    employment:   Boolean
+    incomeSource:       IncomeSource,
+    employment:         Boolean,
+    employmentBenefits: Option[Benefits] = None
   ): PayeIncome =
     PayeIncome(
       name          = incomeSource.taxCodeIncome.name,
@@ -60,7 +62,10 @@ object PayeIncome {
           )
         else None,
       if (incomeSource.employment.annualAccounts.headOption.map(_.payments).getOrElse(Seq.empty).isEmpty) None
-      else incomeSource.employment.annualAccounts.headOption.map(_.payments)
+      else incomeSource.employment.annualAccounts.headOption.map(_.payments),
+      employmentBenefits.flatMap(
+        buildEmploymentBenefits(_, incomeSource.taxCodeIncome.employmentId)
+      )
     )
 
   private def buildLatestPayment(
@@ -86,6 +91,29 @@ object PayeIncome {
         None
       }
     )
+
+  private def buildEmploymentBenefits(
+    benefits: Benefits,
+    empId:    Option[Int]
+  ): Option[EmploymentBenefits] = {
+    val carBenefit =
+      empId.map(empId => benefits.companyCarBenefits.filter(_.employmentSeqNo == empId)).getOrElse(Seq.empty)
+    val employerBenefits = empId.map(empId => benefits.otherBenefits.filter(_.employmentId.contains(empId)))
+    val medicalInsurance =
+      employerBenefits.getOrElse(Seq.empty).filter(_.benefitType.toString == MedicalInsurance.toString)
+    val otherBenefits =
+      employerBenefits.getOrElse(Seq.empty).filter(_.benefitType.toString != MedicalInsurance.toString)
+    val employmentBenefits = EmploymentBenefits(
+      Seq(
+        Benefit(CarBenefit, carBenefit.map(_.grossAmount).sum),
+        Benefit(MedicalInsurance, medicalInsurance.map(_.amount).sum),
+        Benefit(OtherBenefits, otherBenefits.map(_.amount).sum)
+      ).filter(_.amount > 0)
+    )
+
+    if (employmentBenefits.benefits.isEmpty) None else Some(employmentBenefits)
+
+  }
 
   implicit val format: OFormat[PayeIncome] = Json.format[PayeIncome]
 }

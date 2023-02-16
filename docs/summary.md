@@ -37,7 +37,7 @@ The Mobile Paye response
       "link": "/",
       "updateIncomeLink": "/",
       "latestPayment": {
-        "date":   "2021-08-28",
+        "date": "2021-08-28",
         "amount": 1575,
         "taxAmount": 315,
         "nationalInsuranceAmount": 189,
@@ -72,7 +72,26 @@ The Mobile Paye response
           "taxAmount": 256,
           "nationalInsuranceAmount": 127
         }
-      ]
+      ],
+      "employmentBenefits": {
+        "benefits": [
+          {
+            "benefitType": "CarBenefit",
+            "amount": 20000
+          },
+          {
+            "benefitType": "MedicalInsurance",
+            "amount": 650
+          },
+          {
+            "benefitType": "OtherBenefits",
+            "amount": 450
+          }
+        ],
+        "changeCarBenefitLink": "/",
+        "changeMedicalBenefitLink": "/",
+        "changeOtherBenefitLink": "/"
+      }
     },
     {
       "name": "EASTWOOD CHARTER SCHOOL (7601)",
@@ -101,7 +120,22 @@ The Mobile Paye response
           "taxAmount": 250,
           "nationalInsuranceAmount": 140
         }
-      ]
+      ],
+      "employmentBenefits": {
+        "benefits": [
+          {
+            "benefitType": "MedicalInsurance",
+            "amount": 350
+          },
+          {
+            "benefitType": "OtherBenefits",
+            "amount": 100
+          }
+        ],
+        "changeCarBenefitLink": "/",
+        "changeMedicalBenefitLink": "/",
+        "changeOtherBenefitLink": "/"
+      }
     },
     {
       "name": "TESCO",
@@ -110,7 +144,7 @@ The Mobile Paye response
       "link": "/",
       "updateIncomeLink": "/",
       "latestPayment": {
-        "date":   "2021-08-30",
+        "date": "2021-08-30",
         "amount": 475,
         "taxAmount": 315,
         "nationalInsuranceAmount": 189,
