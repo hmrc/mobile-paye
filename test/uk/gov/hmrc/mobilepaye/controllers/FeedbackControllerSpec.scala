@@ -28,7 +28,7 @@ import uk.gov.hmrc.mobilepaye.mocks.AuthorisationNoNinoMock
 import uk.gov.hmrc.mobilepaye.services.MobilePayeService
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 class FeedbackControllerSpec extends BaseSpec with AuthorisationNoNinoMock{
 
@@ -45,10 +45,10 @@ class FeedbackControllerSpec extends BaseSpec with AuthorisationNoNinoMock{
       confLevel = 200
     )
 
-  def mockPostMobilePayeFeedback(f: Future[HttpResponse]): CallHandler3[Feedback, HeaderCarrier, ExecutionContext, Future[HttpResponse]] =
+  def mockPostMobilePayeFeedback(f: Future[HttpResponse]): CallHandler2[Feedback, HeaderCarrier, Future[HttpResponse]] =
     (mockMobilePayeService
-      .postFeedback(_: Feedback)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(*, *, *)
+      .postFeedback(_: Feedback)(_: HeaderCarrier))
+      .expects(*, *)
       .returning(f)
 
   "postFeedback" should {
