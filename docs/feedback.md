@@ -1,7 +1,7 @@
 The Mobile Paye feedback request
 ----
 
-### POST feedback to the mobile-feedback service which will then be sent to splunk
+POST the feedback object from the app to the mobile-feedback service
 
 * **URL**
 
@@ -13,7 +13,7 @@ The Mobile Paye feedback request
 
 * **Body**
 
-To hit the endpoint a feedback model must be provided. The fields are optional so not all need to be included.
+To hit the endpoint a feedback model must also be provided. The fields are optional so not all need to be included.
 
 ```json
 { 
