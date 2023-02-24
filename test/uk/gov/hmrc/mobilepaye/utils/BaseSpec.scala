@@ -25,7 +25,7 @@ import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mobilepaye.MobilePayeTestData
 import uk.gov.hmrc.mobilepaye.config.MobilePayeConfig
-import uk.gov.hmrc.mobilepaye.mocks.{AuditMock, AuthorisationMock, ShutteringMock}
+import uk.gov.hmrc.mobilepaye.mocks.{AuditMock, AuthorisationMock, AuthorisationNoNinoMock, ShutteringMock}
 
 import scala.concurrent.ExecutionContext
 

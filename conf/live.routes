@@ -2,3 +2,5 @@
 GET        /nino/:nino/tax-year/current/summary         uk.gov.hmrc.mobilepaye.controllers.LiveMobilePayeController.getPayeSummary(nino: uk.gov.hmrc.domain.Nino, journeyId: JourneyId, taxYear: Int = TaxYear.current.currentYear)
 
 GET        /nino/:nino/tax-year/:taxYear/summary        uk.gov.hmrc.mobilepaye.controllers.LiveMobilePayeController.getPayeSummary(nino: uk.gov.hmrc.domain.Nino, journeyId: JourneyId, taxYear: Int)
+
+POST      /feedback                                     uk.gov.hmrc.mobilepaye.controllers.FeedbackController.postFeedback()

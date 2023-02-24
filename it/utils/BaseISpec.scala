@@ -1,7 +1,6 @@
 package utils
 
 import org.mockito.MockitoSugar.mock
-
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
@@ -9,8 +8,9 @@ import java.util.Base64
 import org.scalatestplus.play.WsScalaTestClient
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.inject.bind
-import play.api.{Application, inject}
+import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.json.JsValue
 import play.api.libs.ws.{WSClient, WSResponse}
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import uk.gov.hmrc.mobilepaye.MobilePayeTestData
@@ -43,6 +43,7 @@ abstract class BaseISpec
       "microservice.services.taxcalc.port"           -> wireMockPort,
       "microservice.services.mobile-shuttering.port" -> wireMockPort,
       "microservice.services.mobile-shuttering.port" -> wireMockPort,
+      "microservice.services.mobile-feedback.port"   -> wireMockPort,
       "mongodb.uri"                                  -> "mongodb://localhost:27017/test-mobile-paye",
       "incomeTaxComparisonPeriod.scotland.startDate" -> LocalDateTime
         .now(ZoneId.of("Europe/London"))
@@ -57,6 +58,9 @@ abstract class BaseISpec
 
   def getRequestWithAuthHeaders(url: String): Future[WSResponse] =
     wsUrl(url).addHttpHeaders(acceptJsonHeader, authorisationJsonHeader).get()
+
+  def postRequestWithAuthHeaders(url: String, feedback: JsValue): Future[WSResponse] =
+    wsUrl(url).withHttpHeaders(acceptJsonHeader, authorisationJsonHeader).post(feedback)
 
   private def base64Encode(s: String): String =
     Base64.getEncoder.encodeToString(s.getBytes("UTF-8"))

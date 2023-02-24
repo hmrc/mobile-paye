@@ -108,4 +108,6 @@ trait AccessControl extends HeaderValidator with Authorisation {
           else block(request)
         } else Future.successful(Status(ErrorAcceptHeaderInvalid.httpStatusCode)(Json.toJson[ErrorResponse](ErrorAcceptHeaderInvalid)))
     }
+
+
 }
