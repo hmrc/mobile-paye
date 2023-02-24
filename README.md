@@ -15,9 +15,10 @@ Please note it is mandatory to supply an Accept HTTP header to all below service
 API
 ---
 
-| *Task* | *Supported Methods* | *Description* |
-|--------|----|----|
+| *Task*                                                 | *Supported Methods* | *Description*                                                                                  |
+|--------------------------------------------------------|-----|------------------------------------------------------------------------------------------------|
 | ```/mobile-paye/nino/:nino/tax-year/:taxYear/summary``` | GET | Fetch the Tax Credits Summary object for a given NINO for a given Tax Year. [More...](docs/summary.md)|
+| ```/mobile-paye/feedback```                            | POST | Send user feedback to mobile-feedback which will be sent to splunk. [More...](docs/feedback.md)|
 
 Shuttered
 ---------
