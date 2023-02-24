@@ -65,4 +65,41 @@ object AuthStub {
           """.stripMargin)
         )
     )
+
+  def grantAccessNoNino(confidenceLevel: Int = 200): StubMapping =
+    stubFor(
+      post(urlEqualTo("/auth/authorise"))
+        .atPriority(0)
+        .withRequestBody(
+          equalToJson(
+            s"""
+               |{
+               |  "authorise": [
+               |  {
+               |      "credentialStrength": "strong"
+               |      }, {
+               |      "confidenceLevel": $confidenceLevel
+               |    }
+               |    ],
+               |  "retrieve": [
+               |    "confidenceLevel"
+               |  ]
+               |}
+          """.stripMargin,
+            true,
+            false
+          )
+        )
+        .willReturn(
+          aResponse()
+            .withStatus(200)
+            .withBody(
+              s"""
+                 |{
+                 |  "confidenceLevel": $confidenceLevel
+
+                 |}
+          """.stripMargin)
+        )
+    )
 }

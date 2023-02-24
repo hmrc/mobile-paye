@@ -16,9 +16,11 @@
 
 package uk.gov.hmrc.mobilepaye
 
+import play.api.libs.json.{JsObject, Json}
+
 import java.time.LocalDate
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.mobilepaye.domain.{IncomeSource, MobilePayeResponse, MobilePayeResponseAudit, OtherIncome, OtherIncomeAudit, P800Repayment, PayeIncome, PayeIncomeAudit}
+import uk.gov.hmrc.mobilepaye.domain.{Feedback, IncomeSource, MobilePayeResponse, MobilePayeResponseAudit, OtherIncome, OtherIncomeAudit, P800Repayment, PayeIncome, PayeIncomeAudit}
 import uk.gov.hmrc.mobilepaye.domain.tai._
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus.{ChequeSent, PaymentPaid}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.{P800Status, P800Summary, RepaymentStatus}
@@ -180,4 +182,11 @@ trait MobilePayeTestData {
     taxFreeAmount      = Some(10000),
     estimatedTaxAmount = Some(250)
   )
+
+  val feedbackModel: Feedback = Feedback(Some(true), Some(5), Some("It was great"), Some(4))
+
+  val feedbackJson: JsObject = Json.obj("ableToDo" -> true,
+    "howEasyScore" -> 5,
+    "whyGiveScore" -> "It was great",
+    "howDoYouFeelScore" -> 4)
 }

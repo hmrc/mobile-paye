@@ -17,9 +17,9 @@
 package uk.gov.hmrc.mobilepaye.services
 
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, InternalServerException, UnauthorizedException}
-import uk.gov.hmrc.mobilepaye.connectors.{TaiConnector, TaxCalcConnector}
-import uk.gov.hmrc.mobilepaye.domain.{IncomeSource, MobilePayeResponse, OtherBenefits, P800Cache, PayeIncome}
+import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, HttpResponse, InternalServerException, UnauthorizedException}
+import uk.gov.hmrc.mobilepaye.connectors.{FeedbackConnector, TaiConnector, TaxCalcConnector}
+import uk.gov.hmrc.mobilepaye.domain.{Feedback, IncomeSource, MobilePayeResponse, OtherBenefits, P800Cache, PayeIncome}
 import uk.gov.hmrc.mobilepaye.domain.tai._
 import uk.gov.hmrc.mobilepaye.repository.P800CacheMongo
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
@@ -35,6 +35,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
 
   val mockTaiConnector:     TaiConnector      = mock[TaiConnector]
   val mockTaxCalcConnector: TaxCalcConnector  = mock[TaxCalcConnector]
+  val mockFeedbackConnector: FeedbackConnector = mock[FeedbackConnector]
   val p800CacheMongo:       P800CacheMongo    = repository
   val dateFormatter:        DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd\'T\'HH:mm:ss")
   val inactiveDate:         String            = "2020-02-01T00:00:00"
@@ -44,6 +45,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
   val service = new MobilePayeService(mockTaiConnector,
                                       mockTaxCalcConnector,
                                       p800CacheMongo,
+                                      mockFeedbackConnector,
                                       inactiveDate,
                                       inactiveDate,
                                       inactiveDate,
@@ -88,6 +90,12 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       .expects(*, *, *, *)
       .returning(f)
 
+  def mockPostFeedback(f: Future[HttpResponse]) =
+    (mockFeedbackConnector
+      .postFeedback(_: Feedback)(_: HeaderCarrier))
+      .expects(*,*)
+      .returning(f)
+
   "getMobilePayeResponse" should {
     "return full MobilePayeResponse when all data is available" in {
       mockMatchingTaxCode(Future.successful(employmentIncomeSource))
@@ -114,6 +122,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       val service = new MobilePayeService(mockTaiConnector,
                                           mockTaxCalcConnector,
                                           p800CacheMongo,
+                                          mockFeedbackConnector,
                                           inactiveDate,
                                           inactiveDate,
                                           activeStartDate,
@@ -140,6 +149,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       val service = new MobilePayeService(mockTaiConnector,
                                           mockTaxCalcConnector,
                                           p800CacheMongo,
+                                          mockFeedbackConnector,
                                           activeStartDate,
                                           activeEndDate,
                                           inactiveDate,
@@ -166,6 +176,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       val service = new MobilePayeService(mockTaiConnector,
                                           mockTaxCalcConnector,
                                           p800CacheMongo,
+                                          mockFeedbackConnector,
                                           inactiveDate,
                                           inactiveDate,
                                           inactiveDate,
@@ -190,6 +201,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       val service = new MobilePayeService(mockTaiConnector,
                                           mockTaxCalcConnector,
                                           p800CacheMongo,
+                                          mockFeedbackConnector,
                                           activeStartDate,
                                           activeEndDate,
                                           inactiveDate,
@@ -417,6 +429,22 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       result shouldBe MobilePayeResponse.empty
     }
 
+  }
+
+  "postFeedback" should {
+
+    "return a 201 No Content" when {
+
+      "a valid feedbackModel has been provided" in {
+        mockPostFeedback(Future.successful(HttpResponse.apply(204, "")))
+
+        val result = await(service.postFeedback(feedbackModel))
+
+        result.status shouldBe 204
+
+      }
+
+    }
   }
 
 }

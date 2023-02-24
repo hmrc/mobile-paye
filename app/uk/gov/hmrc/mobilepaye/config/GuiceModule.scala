@@ -60,7 +60,7 @@ class GuiceModule(
     bind(classOf[String])
       .annotatedWith(named("mobile-shuttering"))
       .toInstance(servicesConfig.baseUrl("mobile-shuttering"))
-
+    bind(classOf[String]).annotatedWith(named("mobile-feedback")).toInstance(servicesConfig.baseUrl("mobile-feedback"))
     bindConfigString("rUK.startDate", "incomeTaxComparisonPeriod.rUK.startDate")
     bindConfigString("rUK.endDate", "incomeTaxComparisonPeriod.rUK.endDate")
     bindConfigString("wales.startDate", "incomeTaxComparisonPeriod.wales.startDate")
