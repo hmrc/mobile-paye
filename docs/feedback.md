@@ -13,7 +13,7 @@ POST the feedback object from the app to the mobile-feedback service
 
 * **Body**
 
-To hit the endpoint a feedback model must also be provided. The fields are optional so not all need to be included.
+To hit the endpoint a feedback model must be provided. The fields are optional so not all need to be included.
 
 ```json
 { 
