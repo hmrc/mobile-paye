@@ -237,6 +237,15 @@ paths:
       summary: Post feedback from the mobile app
       description: This endpoint receives a feedback model to post to the mobile-feedback service.
       operationId: PostFeedback
+      parameters:
+        - name: journeyId
+          in: query
+          description: ''
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: string
       requestBody:
         required: true
         description: Post Feedback Request
@@ -245,7 +254,7 @@ paths:
             schema:
               $ref: '#/components/schemas/Feedback'
       responses:
-        '201':
+        '204':
           description: 'No Content'
       deprecated: false
       security:
