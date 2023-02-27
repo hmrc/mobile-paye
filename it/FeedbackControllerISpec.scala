@@ -8,7 +8,7 @@ import uk.gov.hmrc.mobilepaye.config.MobilePayeConfig
 class FeedbackControllerISpec extends BaseISpec with Injecting {
 
   val appConfig: MobilePayeConfig = MobilePayeConfig(app.configuration)
-  lazy val url = "/feedback"
+  lazy val url = "/feedback?journeyId=9bcb9c5a-0cfd-49e3-a935-58a28c386a42"
 
   "POST /feedback" should {
 

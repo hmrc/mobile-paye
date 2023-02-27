@@ -27,6 +27,7 @@ import uk.gov.hmrc.mobilepaye.domain.Feedback
 import uk.gov.hmrc.mobilepaye.mocks.AuthorisationNoNinoMock
 import uk.gov.hmrc.mobilepaye.services.MobilePayeService
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
+import eu.timepit.refined.auto._
 
 import scala.concurrent.Future
 
@@ -36,6 +37,7 @@ class FeedbackControllerSpec extends BaseSpec with AuthorisationNoNinoMock{
   val confidenceLevel: ConfidenceLevel = ConfidenceLevel.L200
   val mockMobilePayeService: MobilePayeService = mock[MobilePayeService]
   implicit val mockAuthConnector: AuthConnector = mock[AuthConnector]
+
 
   def controller =
     new FeedbackController(
@@ -57,7 +59,7 @@ class FeedbackControllerSpec extends BaseSpec with AuthorisationNoNinoMock{
       mockPostMobilePayeFeedback(Future.successful(HttpResponse.apply(204,"")))
       mockAuthorisationNoNinoGrantAccess(confidenceLevel)
 
-      val result = controller.postFeedback()(fakeRequest)
+      val result = controller.postFeedback("9bcb9c5a-0cfd-49e3-a935-58a28c386a42")(fakeRequest)
 
       status(result) shouldBe 204
     }
@@ -66,7 +68,7 @@ class FeedbackControllerSpec extends BaseSpec with AuthorisationNoNinoMock{
       mockAuthorisationNoNinoGrantAccess(confidenceLevel)
       mockPostMobilePayeFeedback(Future.failed(new InternalServerException("Internal Server Error")))
 
-      val result = controller.postFeedback()(fakeRequest)
+      val result = controller.postFeedback("9bcb9c5a-0cfd-49e3-a935-58a28c386a42")(fakeRequest)
 
       status(result) shouldBe 500
     }
@@ -74,7 +76,7 @@ class FeedbackControllerSpec extends BaseSpec with AuthorisationNoNinoMock{
     "return 401 for valid feedback model but low CL" in {
       mockAuthorisationNoNinoGrantAccess(L50)
 
-      val result = controller.postFeedback()(fakeRequest)
+      val result = controller.postFeedback("9bcb9c5a-0cfd-49e3-a935-58a28c386a42")(fakeRequest)
 
       status(result) shouldBe 401
     }
@@ -83,7 +85,7 @@ class FeedbackControllerSpec extends BaseSpec with AuthorisationNoNinoMock{
       mockAuthorisationNoNinoGrantAccess(confidenceLevel)
       mockPostMobilePayeFeedback(Future.failed(new BadRequestException("Bad Request")))
 
-      val result = controller.postFeedback()(fakeRequest)
+      val result = controller.postFeedback("9bcb9c5a-0cfd-49e3-a935-58a28c386a42")(fakeRequest)
 
       status(result) shouldBe 400
     }
@@ -92,7 +94,7 @@ class FeedbackControllerSpec extends BaseSpec with AuthorisationNoNinoMock{
       mockAuthorisationNoNinoGrantAccess(confidenceLevel)
       mockPostMobilePayeFeedback(Future.failed(UpstreamErrorResponse.apply("Upstream Exception",401)))
 
-      val result = controller.postFeedback()(fakeRequest)
+      val result = controller.postFeedback("9bcb9c5a-0cfd-49e3-a935-58a28c386a42")(fakeRequest)
 
       status(result) shouldBe 401
     }
@@ -101,7 +103,7 @@ class FeedbackControllerSpec extends BaseSpec with AuthorisationNoNinoMock{
       mockAuthorisationNoNinoGrantAccess(confidenceLevel)
       mockPostMobilePayeFeedback(Future.failed(new MissingBearerToken))
 
-      val result = controller.postFeedback()(fakeRequest)
+      val result = controller.postFeedback("9bcb9c5a-0cfd-49e3-a935-58a28c386a42")(fakeRequest)
 
       status(result) shouldBe 401
     }

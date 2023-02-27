@@ -22,9 +22,10 @@ import play.api.Logger
 import play.api.libs.json.JsValue
 import play.api.mvc.{Action, AnyContent, BodyParser, ControllerComponents}
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, HeaderNames}
 import uk.gov.hmrc.mobilepaye.controllers.action.AccessControlNoNino
 import uk.gov.hmrc.mobilepaye.domain.Feedback
+import uk.gov.hmrc.mobilepaye.domain.types.ModelTypes.JourneyId
 import uk.gov.hmrc.mobilepaye.services.MobilePayeService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendBaseController
 import uk.gov.hmrc.play.http.HeaderCarrierConverter.fromRequest
@@ -46,10 +47,10 @@ class FeedbackController @Inject()(override val authConnector: AuthConnector,
    val app: String = "Feedback Controller"
   override val logger: Logger = Logger(this.getClass)
 
-   def postFeedback(): Action[JsValue] =
+   def postFeedback(journeyId: JourneyId): Action[JsValue] =
     validateAcceptWithAuth(acceptHeaderValidationRules).async(parse.json) { implicit request =>
       implicit val hc: HeaderCarrier =
-        fromRequest(request)
+        fromRequest(request).withExtraHeaders(HeaderNames.xSessionId -> journeyId.value)
       errorWrapper {
         withJsonBody[Feedback] { feedbackModel =>
           mobilePayeService.postFeedback(feedbackModel)(hc).map { _ =>
