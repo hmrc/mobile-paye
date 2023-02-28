@@ -70,6 +70,9 @@ class GuiceModule(
     bind(classOf[Boolean])
       .annotatedWith(named("p800CacheEnabled"))
       .toInstance(servicesConfig.getBoolean("p800CacheEnabled"))
+    bind(classOf[Int])
+      .annotatedWith(named("numberOfPreviousYearsToShowIncomeTaxHistory"))
+      .toInstance(servicesConfig.getInt("numberOfPreviousYearsToShowIncomeTaxHistory"))
   }
 
   private def bindConfigStringSeq(path: String): Unit = {

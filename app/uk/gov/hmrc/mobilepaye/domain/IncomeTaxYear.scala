@@ -14,22 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.mobilepaye.domain.tai
+package uk.gov.hmrc.mobilepaye.domain
 
-import play.api.libs.json.{Format, JsError, JsNumber, JsResult, JsSuccess, JsValue, Json}
+import play.api.libs.json.{Format, JsError, JsNumber, JsResult, JsSuccess, JsValue, Json, OFormat}
 import uk.gov.hmrc.time.TaxYear
 
-case class AnnualAccount(
-  taxYear:  TaxYear,
-  payments: Seq[Payment]) {
+case class IncomeTaxYear(
+  taxYear: TaxYear,
+  incomes: Option[Seq[HistoricTaxCodeIncome]])
 
-  lazy val totalIncomeYearToDate: BigDecimal =
-    if (payments.isEmpty) 0 else payments.max.amountYearToDate
-
-  lazy val latestPayment: Option[Payment] = if (payments.isEmpty) None else Some(payments.max)
-}
-
-object AnnualAccount {
+object IncomeTaxYear {
 
   implicit val formatTaxYear: Format[TaxYear] = new Format[TaxYear] {
 
@@ -41,5 +35,5 @@ object AnnualAccount {
     override def writes(v: TaxYear): JsValue = JsNumber(v.startYear)
   }
 
-  implicit val format: Format[AnnualAccount] = Json.format[AnnualAccount]
+  implicit val format: OFormat[IncomeTaxYear] = Json.format[IncomeTaxYear]
 }

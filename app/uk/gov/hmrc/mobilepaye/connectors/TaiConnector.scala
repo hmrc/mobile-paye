@@ -110,4 +110,36 @@ class TaiConnector @Inject() (
   ): Future[Benefits] = http.GET[JsValue](url(nino, s"tax-account/$taxYear/benefits")).map { json =>
     (json \ "data").as[Benefits]
   }
+
+  def getTaxCodeIncomes(
+    nino:        Nino,
+    taxYear:     Int
+  )(implicit hc: HeaderCarrier,
+    ex:          ExecutionContext
+  ): Future[Seq[TaxCodeIncome]] =
+    http
+      .GET[JsValue](url(nino, s"tax-account/$taxYear/income/tax-code-incomes"))
+      .map { json =>
+        (json \ "data").as[Seq[TaxCodeIncome]]
+      }
+      .recover {
+        case _: NotFoundException => Seq.empty[TaxCodeIncome]
+        case e => throw e
+      }
+
+  def getEmployments(
+    nino:        Nino,
+    taxYear:     Int
+  )(implicit hc: HeaderCarrier,
+    ex:          ExecutionContext
+  ): Future[Seq[Employment]] =
+    http
+      .GET[JsValue](url(nino, s"employments/years/$taxYear"))
+      .map { json =>
+        (json \ "data").as[Seq[Employment]]
+      }
+      .recover {
+        case _: NotFoundException => Seq.empty[Employment]
+        case e => throw e
+      }
 }

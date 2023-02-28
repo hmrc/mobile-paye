@@ -57,16 +57,33 @@ trait MobilePayeTestData {
     Payment(LocalDate.now().minusDays(20), 50, 20, 10, 30, 5, 2)
   )
 
-  val annualAccount:  AnnualAccount = AnnualAccount(payments)
-  val annualAccount2: AnnualAccount = AnnualAccount(payments2)
+  val annualAccount:  AnnualAccount = AnnualAccount(TaxYear(LocalDate.now().getYear), payments)
+  val annualAccount2: AnnualAccount = AnnualAccount(TaxYear(LocalDate.now().getYear), payments2)
 
-  val taiEmployment: Employment = Employment(Some("ABC123"), 3, "P12345", Seq(annualAccount))
+  val taiEmployment: Employment =
+    Employment("TESCO",
+               Some("ABC123"),
+               3,
+               "P12345",
+               LocalDate.now().minusYears(4),
+               None,
+               Seq(annualAccount),
+               "TAX121232")
 
   val taiEmployment2: Employment = Employment(
+    name           = "ASDA",
     payrollNumber  = Some("DEF456"),
     sequenceNumber = 4,
     payeNumber     = "P54321",
-    annualAccounts = Seq(AnnualAccount(Seq(Payment(LocalDate.now().minusDays(63), 50, 20, 10, 30, 5, 2))))
+    startDate      = LocalDate.now().minusYears(6),
+    endDate        = Some(LocalDate.now().minusYears(4)),
+    annualAccounts = Seq(
+      AnnualAccount(TaxYear(LocalDate.now().minusYears(5).getYear),
+                    Seq(Payment(LocalDate.now().minusDays(63), 50, 20, 10, 30, 5, 2))),
+      AnnualAccount(TaxYear(LocalDate.now().minusYears(6).getYear),
+                    Seq(Payment(LocalDate.now().minusDays(63), 50, 20, 10, 30, 5, 2)))
+    ),
+    taxDistrictNumber = "TAX121232"
   )
 
   val taiEmployment3: Employment =
@@ -76,7 +93,7 @@ trait MobilePayeTestData {
     taiEmployment3.copy(annualAccounts = Seq(annualAccount2))
 
   val taiEmployment5: Employment = taiEmployment2.copy(
-    annualAccounts = Seq(AnnualAccount(Seq.empty))
+    annualAccounts = Seq(AnnualAccount(TaxYear(LocalDate.now().getYear), Seq.empty))
   )
 
   val noBenefits: Benefits = Benefits(Seq.empty, Seq.empty)
@@ -89,7 +106,8 @@ trait MobilePayeTestData {
     GenericBenefit(Mileage, Some(3), BigDecimal(250))
   )
 
-  val companyCarBenefits: Seq[CompanyCarBenefit] = Seq(CompanyCarBenefit(3, BigDecimal(20000), Seq.empty), CompanyCarBenefit(5, BigDecimal(15000), Seq.empty))
+  val companyCarBenefits: Seq[CompanyCarBenefit] =
+    Seq(CompanyCarBenefit(3, BigDecimal(20000), Seq.empty), CompanyCarBenefit(5, BigDecimal(15000), Seq.empty))
   val allBenefits: Benefits = Benefits(companyCarBenefits, otherBenefits)
 
   val employmentIncomeSource: Seq[IncomeSource] =
