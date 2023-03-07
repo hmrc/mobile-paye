@@ -14,7 +14,7 @@ servers:
     description: Production
     variables: {}
 paths:
-  /mobile-paye/nino/{nino}/tax-year/{taxYear}/summary:
+  /nino/{nino}/tax-year/{taxYear}/summary:
     get:
       tags:
         - mobile-paye
@@ -230,7 +230,7 @@ paths:
       security:
         - userRestricted:
             - read:native-apps-api-orchestration
-  /mobile-paye/feedback:
+  /feedback:
     post:
       tags:
         - mobile-paye
