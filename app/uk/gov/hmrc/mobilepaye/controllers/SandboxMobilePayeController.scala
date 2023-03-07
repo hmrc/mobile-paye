@@ -37,7 +37,7 @@ class SandboxMobilePayeController @Inject() (
     extends MobilePayeController
     with FileResource {
 
-  override val app: String = "Sandbox-Paye-Controller"
+  override val app:    String = "Sandbox-Paye-Controller"
   override val logger: Logger = Logger(this.getClass)
   private final val WebServerIsDown = new Status(521)
 
@@ -71,6 +71,24 @@ class SandboxMobilePayeController @Inject() (
       })
     }
 
+  override def parser: BodyParser[AnyContent] = controllerComponents.parsers.anyContent
+
+  override def getTaxIncomeHistory(
+    nino:      Nino,
+    journeyId: JourneyId
+  ): Action[AnyContent] = validateAccept(acceptHeaderValidationRules).async { implicit request =>
+    Future.successful(
+      Ok(
+        toJson(
+          Json.parse(
+            findResource("/resources/mobilepayesummary/income-tax-history-response.json")
+              .getOrElse(throw new IllegalArgumentException("Resource not found!"))
+          )
+        )
+      )
+    )
+  }
+
   private def readData(resource: String): JsValue =
     toJson(
       Json
@@ -82,6 +100,4 @@ class SandboxMobilePayeController @Inject() (
         )
         .as[MobilePayeResponse]
     )
-
-  override def parser: BodyParser[AnyContent] = controllerComponents.parsers.anyContent
 }

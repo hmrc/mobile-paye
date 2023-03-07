@@ -27,8 +27,8 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.mobilepaye.connectors.ShutteringConnector
 import uk.gov.hmrc.mobilepaye.domain.tai.Person
-import uk.gov.hmrc.mobilepaye.domain.{MobilePayeResponse, Shuttering}
-import uk.gov.hmrc.mobilepaye.services.MobilePayeService
+import uk.gov.hmrc.mobilepaye.domain.{IncomeTaxYear, MobilePayeResponse, Shuttering}
+import uk.gov.hmrc.mobilepaye.services.{IncomeTaxHistoryService, MobilePayeService}
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import eu.timepit.refined.auto._
@@ -39,8 +39,9 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
 
   val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withHeaders(acceptHeader)
   val "9bcb9c5a-0cfd-49e3-a935-58a28c386a42" = "9bcb9c5a-0cfd-49e3-a935-58a28c386a42"
-  val grantAccessWithCL200:  GrantAccess       = Some(nino.toString()) and L200
-  val mockMobilePayeService: MobilePayeService = mock[MobilePayeService]
+  val grantAccessWithCL200:        GrantAccess             = Some(nino.toString()) and L200
+  val mockMobilePayeService:       MobilePayeService       = mock[MobilePayeService]
+  val mockIncomeTaxHistoryService: IncomeTaxHistoryService = mock[IncomeTaxHistoryService]
 
   implicit val mockAuditConnector:      AuditConnector      = mock[AuditConnector]
   implicit val mockAuthConnector:       AuthConnector       = mock[AuthConnector]
@@ -57,7 +58,8 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       stubControllerComponents(),
       mockAuditConnector,
       "mobile-paye",
-      mockShutteringConnector
+      mockShutteringConnector,
+      mockIncomeTaxHistoryService
     )
 
   def mockGetMobilePayeResponse(f: Future[MobilePayeResponse]) =
@@ -69,6 +71,12 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
   def mockGetPerson(f: Future[Person]) =
     (mockMobilePayeService.getPerson(_: Nino)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(f)
 
+  def mockGetIncomeTaxHistoryYearsList(f: Future[List[IncomeTaxYear]]) =
+    (mockIncomeTaxHistoryService
+      .getIncomeTaxHistoryYearsList(_: Nino)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *, *)
+      .returning(f)
+
   "getPayeSummary" should {
     "return 200 and full paye summary data for valid authorised nino" in {
       mockShutteringResponse(notShuttered)
@@ -76,8 +84,6 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       mockGetMobilePayeResponse(Future.successful(fullMobilePayeResponse))
       mockAuthorisationGrantAccess(grantAccessWithCL200)
       mockAudit(nino, fullMobilePayeAudit, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42")
-
-      println("Expected: " + Json.prettyPrint(Json.toJson(fullMobilePayeAudit)))
 
       val result = controller.getPayeSummary(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42", currentTaxYear)(fakeRequest)
 
@@ -240,6 +246,74 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       (jsonBody \ "shuttered").as[Boolean] shouldBe true
       (jsonBody \ "title").as[String]      shouldBe "Shuttered"
       (jsonBody \ "message").as[String]    shouldBe "PAYE is currently not available"
+    }
+  }
+
+  "getIncomeTaxHistory" should {
+    "return 200 and full income tax history" in {
+      mockShutteringResponse(notShuttered)
+      mockAuthorisationGrantAccess(grantAccessWithCL200)
+      mockGetIncomeTaxHistoryYearsList(Future successful fullIncomeTaxHistoryList)
+
+      val result = controller.getTaxIncomeHistory(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42")(fakeRequest)
+
+      status(result)        shouldBe 200
+      contentAsJson(result) shouldBe Json.toJson(fullIncomeTaxHistoryList)
+    }
+
+    "return 500 when IncomeTaxService throws an InternalServerException" in {
+      mockShutteringResponse(notShuttered)
+      mockAuthorisationGrantAccess(grantAccessWithCL200)
+      mockGetIncomeTaxHistoryYearsList(Future.failed(new InternalServerException("Internal Server Error")))
+
+      val result = controller.getTaxIncomeHistory(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42")(fakeRequest)
+
+      status(result) shouldBe 500
+    }
+
+    "return 401 for valid nino and user but low CL" in {
+      mockAuthorisationGrantAccess(Some(nino.toString()) and L50)
+
+      val result = controller.getTaxIncomeHistory(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42")(fakeRequest)
+
+      status(result) shouldBe 401
+    }
+
+    "return 406 for missing accept header" in {
+      val result = controller.getTaxIncomeHistory(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42")(FakeRequest("GET", "/"))
+
+      status(result) shouldBe 406
+    }
+
+    "return 403 for valid nino for authorised user but for a different nino" in {
+      mockAuthorisationGrantAccess(grantAccessWithCL200)
+
+      val result =
+        controller.getTaxIncomeHistory(Nino("CS100700A"), "9bcb9c5a-0cfd-49e3-a935-58a28c386a42")(fakeRequest)
+
+      status(result) shouldBe 403
+    }
+
+    "return 404 when handling NotFoundException" in {
+      mockShutteringResponse(notShuttered)
+      mockAuthorisationGrantAccess(grantAccessWithCL200)
+      mockGetIncomeTaxHistoryYearsList(Future.failed(new NotFoundException("Not Found Exception")))
+
+      val result = controller.getTaxIncomeHistory(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42")(fakeRequest)
+
+      status(result) shouldBe 404
+    }
+
+    "return 521 when shuttered" in {
+      mockShutteringResponse(shuttered)
+      mockAuthorisationGrantAccess(grantAccessWithCL200)
+      val result = controller.getTaxIncomeHistory(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42")(fakeRequest)
+
+      status(result) shouldBe 521
+      val jsonBody = contentAsJson(result)
+      (jsonBody \ "shuttered").as[Boolean] shouldBe true
+      (jsonBody \ "title").as[String] shouldBe "Shuttered"
+      (jsonBody \ "message").as[String] shouldBe "PAYE is currently not available"
     }
   }
 }

@@ -128,7 +128,7 @@ class TaiConnectorSpec extends BaseSpec {
                       |{
                       |  "data": [{
                       |    "taxCodeIncome": ${Json.toJson(taxCodeIncome)},
-                      |    "employment": ${Json.toJson(taiEmployment)}
+                      |    "employment": ${Json.toJson(taiEmployment())}
                       |  },
                       |  {
                       |    "taxCodeIncome": ${Json.toJson(taxCodeIncome2)},

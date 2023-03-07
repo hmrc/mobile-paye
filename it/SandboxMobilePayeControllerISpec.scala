@@ -18,16 +18,17 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
 
     "return OK and default paye data with no SANDBOX-CONTROL" in {
       val response = await(request.addHttpHeaders(mobileHeader).get())
-      response.status                                shouldBe 200
-      (response.json \ "taxYear").as[Int]            shouldBe TaxYear.current.currentYear
-      (response.json \\ "employments").isEmpty       shouldBe false
-      (response.json \\ "repayment").isEmpty         shouldBe false
-      (response.json \\ "pensions").isEmpty          shouldBe false
-      (response.json \\ "otherIncomes").isEmpty      shouldBe false
-      (response.json \ "taxFreeAmount").as[Int]      shouldBe 12500
-      (response.json \ "estimatedTaxAmount").as[Int] shouldBe 1578
+      response.status                                                                 shouldBe 200
+      (response.json \ "taxYear").as[Int]                                             shouldBe TaxYear.current.currentYear
+      (response.json \\ "employments").isEmpty                                        shouldBe false
+      (response.json \\ "repayment").isEmpty                                          shouldBe false
+      (response.json \\ "pensions").isEmpty                                           shouldBe false
+      (response.json \\ "otherIncomes").isEmpty                                       shouldBe false
+      (response.json \ "taxFreeAmount").as[Int]                                       shouldBe 12500
+      (response.json \ "estimatedTaxAmount").as[Int]                                  shouldBe 1578
       (response.json \ "employments" \ 0 \ "latestPayment" \ "amount").as[BigDecimal] shouldBe BigDecimal(1575)
-      (response.json \ "employments" \ 0 \ "latestPayment" \ "date").as[String] shouldBe LocalDate.now().plusDays(2).toString
+      (response.json \ "employments" \ 0 \ "latestPayment" \ "date")
+        .as[String] shouldBe LocalDate.now().plusDays(2).toString
 
     }
 
@@ -280,6 +281,23 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
           .get()
       )
       response.status shouldBe 400
+    }
+  }
+
+  s"GET sandbox/nino/$nino/tax-income-history" should {
+    val request: WSRequest = wsUrl(
+      s"/nino/$nino/income-tax-history?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0"
+    ).addHttpHeaders(acceptJsonHeader)
+
+    "return OK and default income tax history data with no SANDBOX-CONTROL" in {
+      val response = await(request.addHttpHeaders(mobileHeader).get())
+      response.status                         shouldBe 200
+      (response.json \ 0 \ "taxYear").as[Int] shouldBe TaxYear.current.currentYear
+      (response.json \ 1 \ "taxYear").as[Int] shouldBe TaxYear.current.currentYear - 1
+      (response.json \ 2 \ "taxYear").as[Int] shouldBe TaxYear.current.currentYear - 2
+      (response.json \ 3 \ "taxYear").as[Int] shouldBe TaxYear.current.currentYear - 3
+      (response.json \ 4 \ "taxYear").as[Int] shouldBe TaxYear.current.currentYear - 4
+
     }
   }
 

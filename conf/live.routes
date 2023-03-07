@@ -3,6 +3,6 @@ GET        /nino/:nino/tax-year/current/summary         uk.gov.hmrc.mobilepaye.c
 
 GET        /nino/:nino/tax-year/:taxYear/summary        uk.gov.hmrc.mobilepaye.controllers.LiveMobilePayeController.getPayeSummary(nino: uk.gov.hmrc.domain.Nino, journeyId: JourneyId, taxYear: Int)
 
-GET        /nino/:nino/tax-income-history               uk.gov.hmrc.mobilepaye.controllers.LiveMobilePayeController.getTaxIncomeHistory(nino: uk.gov.hmrc.domain.Nino, journeyId: JourneyId)
+GET        /nino/:nino/income-tax-history               uk.gov.hmrc.mobilepaye.controllers.LiveMobilePayeController.getTaxIncomeHistory(nino: uk.gov.hmrc.domain.Nino, journeyId: JourneyId)
 
 POST       /feedback                                     uk.gov.hmrc.mobilepaye.controllers.FeedbackController.postFeedback(journeyId: JourneyId)

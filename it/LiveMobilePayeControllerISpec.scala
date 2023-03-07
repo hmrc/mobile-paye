@@ -8,16 +8,18 @@ import stubs.ShutteringStub._
 import stubs.TaiStub._
 import stubs.TaxCalcStub._
 import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.http.NotFoundException
 import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, OnlinePaymentIntegration}
 import uk.gov.hmrc.mobilepaye.config.MobilePayeConfig
 import uk.gov.hmrc.mobilepaye.domain.tai.{CarBenefit, MedicalInsurance}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status.{Overpaid, Underpaid}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus._
-import uk.gov.hmrc.mobilepaye.domain.{MobilePayeResponse, OtherBenefits, P800Cache, P800Repayment, Shuttering}
+import uk.gov.hmrc.mobilepaye.domain.{IncomeTaxYear, MobilePayeResponse, OtherBenefits, P800Cache, P800Repayment, Shuttering}
 import uk.gov.hmrc.mobilepaye.repository.P800CacheMongo
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.mongo.test.{CleanMongoCollectionSupport, PlayMongoRepositorySupport}
+import uk.gov.hmrc.time.TaxYear
 import utils.BaseISpec
 
 import java.time.LocalDate
@@ -37,6 +39,9 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
   lazy val urlWithCurrentYearAsCurrent =
     s"/nino/$nino/tax-year/current/summary?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0"
 
+  lazy val incomeTaxHistoryUrl =
+    s"/nino/$nino/income-tax-history?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0"
+
   override def beforeEach(): Unit = {
     when(mockFeatureFlagService.get(any()))
       .thenReturn(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = false)))
@@ -52,7 +57,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
       stubForPensions(nino, pensionIncomeSource)
-      stubForEmployments(nino, employmentIncomeSource)
+      stubForEmploymentIncome(nino, employmentIncomeSource)
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryIsFound(nino, taxAccountSummary, cyPlusone = true)
@@ -70,7 +75,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
       stubForPensions(nino, pensionIncomeSource)
-      stubForEmployments(nino, employmentIncomeSource)
+      stubForEmploymentIncome(nino, employmentIncomeSource)
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryNotFound(nino, cyPlusone = true)
@@ -87,7 +92,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForShutteringDisabled
       grantAccess(nino)
       stubForPensions(nino, pensionIncomeSource)
-      stubForEmployments(nino, employmentIncomeSource)
+      stubForEmploymentIncome(nino, employmentIncomeSource)
       personalDetailsAreFound(nino, person)
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
@@ -107,7 +112,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
       stubForPensions(nino, pensionIncomeSource)
-      stubForEmployments(nino, Seq.empty)
+      stubForEmploymentIncome(nino, Seq.empty)
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryNotFound(nino, cyPlusone = true)
@@ -124,7 +129,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
       stubForPensions(nino, Seq.empty)
-      stubForEmployments(nino, employmentIncomeSource)
+      stubForEmploymentIncome(nino, employmentIncomeSource)
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryNotFound(nino, cyPlusone = true)
@@ -140,7 +145,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForShutteringDisabled
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
-      stubForEmployments(nino, employmentIncomeSource)
+      stubForEmploymentIncome(nino, employmentIncomeSource)
       stubForPensions(nino, pensionIncomeSource)
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome.copy(otherNonTaxCodeIncomes = Nil))
       taxAccountSummaryIsFound(nino, taxAccountSummary)
@@ -161,7 +166,6 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
       response.status shouldBe 410
 
-      taxCodeIncomeNotCalled(nino)
       employmentsNotCalled(nino)
       pensionsNotCalled(nino)
       nonTaxCodeIncomeNotCalled(nino)
@@ -177,7 +181,6 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
       response.status shouldBe 423
 
-      taxCodeIncomeNotCalled(nino)
       employmentsNotCalled(nino)
       pensionsNotCalled(nino)
       nonTaxCodeIncomeNotCalled(nino)
@@ -192,7 +195,6 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
       response.status shouldBe 423
-      taxCodeIncomeNotCalled(nino)
       employmentsNotCalled(nino)
       pensionsNotCalled(nino)
       nonTaxCodeIncomeNotCalled(nino)
@@ -232,7 +234,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryNotFound(nino, cyPlusone = true)
       stubForPensions(nino, pensionIncomeSource)
-      stubForEmployments(nino, employmentIncomeSource)
+      stubForEmploymentIncome(nino, employmentIncomeSource)
       taxCalcNoResponse(nino, currentTaxYear)
       stubForBenefits(nino, noBenefits)
 
@@ -246,7 +248,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
       stubForPensions(nino, pensionIncomeSource)
-      stubForEmployments(nino, employmentIncomeSource)
+      stubForEmploymentIncome(nino, employmentIncomeSource)
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryNotFound(nino, cyPlusone = true)
@@ -265,7 +267,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
       stubForPensions(nino, pensionIncomeSource)
-      stubForEmployments(nino, Seq.empty)
+      stubForEmploymentIncome(nino, Seq.empty)
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryNotFound(nino, cyPlusone = true)
@@ -282,7 +284,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
       stubForPensions(nino, Seq.empty)
-      stubForEmployments(nino, employmentIncomeSource)
+      stubForEmploymentIncome(nino, employmentIncomeSource)
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryNotFound(nino, cyPlusone = true)
@@ -299,7 +301,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
       stubForPensions(nino, pensionIncomeSource)
-      stubForEmployments(nino, employmentIncomeSource)
+      stubForEmploymentIncome(nino, employmentIncomeSource)
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome.copy(otherNonTaxCodeIncomes = Nil))
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryNotFound(nino, cyPlusone = true)
@@ -325,7 +327,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
           grantAccess(nino)
           personalDetailsAreFound(nino, person)
           stubForPensions(nino, pensionIncomeSource)
-          stubForEmployments(nino, employmentIncomeSource)
+          stubForEmploymentIncome(nino, employmentIncomeSource)
           nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
           taxAccountSummaryIsFound(nino, taxAccountSummary)
           taxAccountSummaryNotFound(nino, cyPlusone = true)
@@ -353,7 +355,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
           grantAccess(nino)
           personalDetailsAreFound(nino, person)
           stubForPensions(nino, pensionIncomeSource)
-          stubForEmployments(nino, employmentIncomeSource)
+          stubForEmploymentIncome(nino, employmentIncomeSource)
           nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
           taxAccountSummaryIsFound(nino, taxAccountSummary)
           taxAccountSummaryNotFound(nino, cyPlusone = true)
@@ -376,7 +378,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
           grantAccess(nino)
           personalDetailsAreFound(nino, person)
           stubForPensions(nino, pensionIncomeSource)
-          stubForEmployments(nino, employmentIncomeSource)
+          stubForEmploymentIncome(nino, employmentIncomeSource)
           nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
           taxAccountSummaryIsFound(nino, taxAccountSummary)
           taxAccountSummaryNotFound(nino, cyPlusone = true)
@@ -401,7 +403,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       personalDetailsAreFound(nino, person)
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       stubForPensions(nino, pensionIncomeSource)
-      stubForEmployments(nino, employmentIncomeSource)
+      stubForEmploymentIncome(nino, employmentIncomeSource)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryNotFound(nino, cyPlusone = true)
       taxCalcWithInstantDate(nino, currentTaxYear, time)
@@ -424,7 +426,6 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status shouldBe 410
 
-      taxCodeIncomeNotCalled(nino)
       nonTaxCodeIncomeNotCalled(nino)
       taxAccountSummaryNotCalled(nino)
       taxCalcCalled(nino, currentTaxYear)
@@ -438,7 +439,6 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status shouldBe 423
 
-      taxCodeIncomeNotCalled(nino)
       employmentsNotCalled(nino)
       pensionsNotCalled(nino)
       nonTaxCodeIncomeNotCalled(nino)
@@ -453,7 +453,6 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status shouldBe 423
-      taxCodeIncomeNotCalled(nino)
       employmentsNotCalled(nino)
       pensionsNotCalled(nino)
       nonTaxCodeIncomeNotCalled(nino)
@@ -469,7 +468,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryNotFound(nino, cyPlusone = true)
       stubForPensions(nino, pensionIncomeSource)
-      stubForEmployments(nino, employmentIncomeSource)
+      stubForEmploymentIncome(nino, employmentIncomeSource)
       taxCalcNoResponse(nino, currentTaxYear)
       stubForBenefits(nino, allBenefits)
 
@@ -514,7 +513,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     taxAccountSummaryIsFound(nino, taxAccountSummary)
     taxAccountSummaryNotFound(nino, cyPlusone = true)
     stubForPensions(nino, pensionIncomeSource)
-    stubForEmployments(nino, employmentIncomeSource)
+    stubForEmploymentIncome(nino, employmentIncomeSource)
     taxCalcNoResponse(nino, currentTaxYear)
     stubForBenefits(nino, noBenefits)
 
@@ -534,7 +533,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     taxAccountSummaryIsFound(nino, taxAccountSummary)
     taxAccountSummaryNotFound(nino, cyPlusone = true)
     stubForPensions(nino, pensionIncomeSource)
-    stubForEmployments(nino, employmentIncomeSource)
+    stubForEmploymentIncome(nino, employmentIncomeSource)
     taxCalcWithNoP800(nino, currentTaxYear, LocalDate.now)
     stubForBenefits(nino, noBenefits)
 
@@ -551,7 +550,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     taxAccountSummaryIsFound(nino, taxAccountSummary)
     taxAccountSummaryNotFound(nino, cyPlusone = true)
     stubForPensions(nino, pensionIncomeSource)
-    stubForEmployments(nino, employmentIncomeSource)
+    stubForEmploymentIncome(nino, employmentIncomeSource)
     taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now.minusWeeks(6).minusDays(1))
     stubForBenefits(nino, noBenefits)
 
@@ -572,7 +571,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     taxAccountSummaryIsFound(nino, taxAccountSummary)
     taxAccountSummaryNotFound(nino, cyPlusone = true)
     stubForPensions(nino, pensionIncomeSource)
-    stubForEmployments(nino, employmentIncomeSource)
+    stubForEmploymentIncome(nino, employmentIncomeSource)
     taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now.minusWeeks(6))
     stubForBenefits(nino, noBenefits)
 
@@ -597,7 +596,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     taxAccountSummaryIsFound(nino, taxAccountSummary)
     taxAccountSummaryNotFound(nino, cyPlusone = true)
     stubForPensions(nino, pensionIncomeSource)
-    stubForEmployments(nino, employmentIncomeSource)
+    stubForEmploymentIncome(nino, employmentIncomeSource)
     taxCalcWithNoDate(nino, currentTaxYear)
     stubForBenefits(nino, noBenefits)
 
@@ -618,7 +617,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     taxAccountSummaryIsFound(nino, taxAccountSummary)
     taxAccountSummaryNotFound(nino, cyPlusone = true)
     stubForPensions(nino, pensionIncomeSource)
-    stubForEmployments(nino, employmentIncomeSource)
+    stubForEmploymentIncome(nino, employmentIncomeSource)
     taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoType = "underpaid")
     stubForBenefits(nino, noBenefits)
 
@@ -635,7 +634,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     taxAccountSummaryIsFound(nino, taxAccountSummary)
     taxAccountSummaryNotFound(nino, cyPlusone = true)
     stubForPensions(nino, pensionIncomeSource)
-    stubForEmployments(nino, employmentIncomeSource)
+    stubForEmploymentIncome(nino, employmentIncomeSource)
     taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoType = "balanced")
     stubForBenefits(nino, noBenefits)
 
@@ -653,7 +652,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     taxAccountSummaryIsFound(nino, taxAccountSummary)
     taxAccountSummaryNotFound(nino, cyPlusone = true)
     stubForPensions(nino, pensionIncomeSource)
-    stubForEmployments(nino, employmentIncomeSource)
+    stubForEmploymentIncome(nino, employmentIncomeSource)
     taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoStatus = "sa_user")
     stubForBenefits(nino, noBenefits)
 
@@ -671,7 +670,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     taxAccountSummaryIsFound(nino, taxAccountSummary)
     taxAccountSummaryNotFound(nino, cyPlusone = true)
     stubForPensions(nino, pensionIncomeSource)
-    stubForEmployments(nino, employmentIncomeSource)
+    stubForEmploymentIncome(nino, employmentIncomeSource)
     taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoStatus = "unable_to_claim")
     stubForBenefits(nino, noBenefits)
 
@@ -692,7 +691,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     taxAccountSummaryIsFound(nino, taxAccountSummary)
     taxAccountSummaryNotFound(nino, cyPlusone = true)
     stubForPensions(nino, pensionIncomeSource)
-    stubForEmployments(nino, employmentIncomeSource)
+    stubForEmploymentIncome(nino, employmentIncomeSource)
     taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoStatus = "refund")
     stubForBenefits(nino, noBenefits)
 
@@ -718,7 +717,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     taxAccountSummaryIsFound(nino, taxAccountSummary)
     taxAccountSummaryNotFound(nino, cyPlusone = true)
     stubForPensions(nino, pensionIncomeSource)
-    stubForEmployments(nino, employmentIncomeSource)
+    stubForEmploymentIncome(nino, employmentIncomeSource)
     taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoType = "underpaid")
     stubForBenefits(nino, noBenefits)
 
@@ -745,7 +744,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     taxAccountSummaryIsFound(nino, taxAccountSummary)
     taxAccountSummaryNotFound(nino, cyPlusone = true)
     stubForPensions(nino, pensionIncomeSource)
-    stubForEmployments(nino, employmentIncomeSource)
+    stubForEmploymentIncome(nino, employmentIncomeSource)
     taxCalcWithNoDate(nino, currentTaxYear)
     stubForBenefits(nino, noBenefits)
 
@@ -771,7 +770,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     grantAccess(nino)
     personalDetailsAreFound(nino, person)
     stubForPensions(nino, pensionIncomeSource)
-    stubForEmployments(nino, employmentIncomeSource)
+    stubForEmploymentIncome(nino, employmentIncomeSource)
     nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
     taxAccountSummaryIsFound(nino, taxAccountSummary)
     taxAccountSummaryNotFound(nino, cyPlusone = true)
@@ -782,6 +781,46 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     response.status shouldBe 200
     response.body   shouldBe Json.toJson(fullMobilePayeResponse).toString()
 
+  }
+
+  s"GET /nino/$nino/income-tax-history" should {
+
+    "return OK and a full valid income tax history json" in {
+      stubForShutteringDisabled
+      grantAccess(nino)
+      personalDetailsAreFound(nino, person)
+      stubForTaxCodeIncomes(nino, TaxYear.current.startYear, Seq(taxCodeIncome))
+      stubForTaxCodeIncomes(nino, TaxYear.current.startYear - 1, Seq(taxCodeIncome, taxCodeIncome2))
+      stubForTaxCodeIncomes(nino, TaxYear.current.startYear - 2, Seq(taxCodeIncome, taxCodeIncome2))
+      stubForTaxCodeIncomes(nino, TaxYear.current.startYear - 3, Seq(taxCodeIncome2, taxCodeIncome3))
+      stubForTaxCodeIncomes(nino, TaxYear.current.startYear - 4, Seq(taxCodeIncome2, taxCodeIncome3))
+      stubForEmployments(nino, TaxYear.current.startYear, Seq(taiEmployment(TaxYear.current.startYear)))
+      stubForEmployments(nino, TaxYear.current.startYear - 1, Seq(taiEmployment(TaxYear.current.startYear - 1)))
+      stubForEmployments(nino,
+                         TaxYear.current.startYear - 2,
+                         Seq(taiEmployment(TaxYear.current.startYear - 2), taiEmployment2))
+      stubForEmployments(nino, TaxYear.current.startYear - 3, Seq(taiEmployment2))
+      stubForEmployments(nino, TaxYear.current.startYear - 4, Seq(taiEmployment2, taiEmployment3))
+
+      val response = await(getRequestWithAuthHeaders(incomeTaxHistoryUrl))
+      response.status                                   shouldBe 200
+      Json.parse(response.body).as[List[IncomeTaxYear]] shouldBe fullIncomeTaxHistoryList
+    }
+
+    "return OK and a empty valid income tax history json" in {
+      stubForShutteringDisabled
+      grantAccess(nino)
+      personalDetailsAreFound(nino, person)
+      stubForTaxCodeIncomes(nino, TaxYear.current.startYear, Seq.empty)
+      stubForTaxCodeIncomes(nino, TaxYear.current.startYear - 1, Seq.empty)
+      stubForTaxCodeIncomes(nino, TaxYear.current.startYear - 2, Seq.empty)
+      stubForTaxCodeIncomes(nino, TaxYear.current.startYear - 3, Seq.empty)
+      stubForTaxCodeIncomes(nino, TaxYear.current.startYear - 4, Seq.empty)
+
+      val response = await(getRequestWithAuthHeaders(incomeTaxHistoryUrl))
+      response.status                                   shouldBe 200
+      Json.parse(response.body).as[List[IncomeTaxYear]] shouldBe emptyIncomeTaxHistoryList
+    }
   }
 
 }
@@ -805,7 +844,6 @@ class LiveMobilePayeControllerShutteredISpec extends BaseISpec {
       shuttering.title     shouldBe Some("Shuttered")
       shuttering.message   shouldBe Some("PAYE is currently not available")
 
-      taxCodeIncomeNotCalled(nino)
       nonTaxCodeIncomeNotCalled(nino)
       employmentsNotCalled(nino)
       pensionsNotCalled(nino)

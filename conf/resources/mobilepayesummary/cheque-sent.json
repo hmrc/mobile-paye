@@ -1,70 +1,22 @@
-[ {
-  "taxYear" : 2022,
-  "incomeTaxHistory" : [ {
-    "name" : "TESCO",
-    "payrollNumber" : "ABC123",
-    "startDate" : "2019-02-27",
-    "taxCode" : "S1150L",
-    "isPension" : false
-  }, {
-    "name" : "ASDA",
-    "payrollNumber" : "DEF456",
-    "startDate" : "2017-02-27",
-    "endDate" : "2019-02-27",
-    "taxCode" : "S1150L",
-    "isPension" : false
-  } ]
-}, {
-  "taxYear" : 2021,
-  "incomeTaxHistory" : [ {
-    "name" : "TESCO",
-    "payrollNumber" : "ABC123",
-    "startDate" : "2019-02-27",
-    "taxCode" : "S1150L",
-    "isPension" : false
-  }, {
-    "name" : "ASDA",
-    "payrollNumber" : "DEF456",
-    "startDate" : "2017-02-27",
-    "endDate" : "2019-02-27",
-    "taxCode" : "S1150L",
-    "isPension" : false
-  } ]
-}, {
-  "taxYear" : 2020,
-  "incomeTaxHistory" : [ ]
-}, {
-  "taxYear" : 2019,
-  "incomeTaxHistory" : [ {
-    "name" : "TESCO",
-    "payrollNumber" : "ABC123",
-    "startDate" : "2019-02-27",
-    "taxCode" : "S1150L",
-    "isPension" : false
-  }, {
-    "name" : "ASDA",
-    "payrollNumber" : "DEF456",
-    "startDate" : "2017-02-27",
-    "endDate" : "2019-02-27",
-    "taxCode" : "S1150L",
-    "isPension" : false
-  } ]
-}, {
-  "taxYear" : 2018,
-  "incomeTaxHistory" : [ {
-    "name" : "TESCO",
-    "payrollNumber" : "ABC123",
-    "startDate" : "2019-02-27",
-    "taxCode" : "S1150L",
-    "isPension" : false
-  }, {
-    "name" : "ASDA",
-    "payrollNumber" : "DEF456",
-    "startDate" : "2017-02-27",
-    "endDate" : "2019-02-27",
-    "amount" : 50,
-    "taxAmount" : 20,
-    "taxCode" : "S1150L",
-    "isPension" : false
-  } ]
-} ]
+{
+  "taxYear": <TAX_YEAR>,
+  "repayment": {
+    "amount": 1000,
+    "paymentStatus": "cheque_sent",
+    "datePaid": "2018-01-02",
+    "taxYear": 2018
+  },
+  "taxFreeAmount": 12500,
+  "taxFreeAmountLink": "/",
+  "estimatedTaxAmount": 1578,
+  "estimatedTaxAmountLink": "/",
+  "understandYourTaxCodeLink": "/",
+  "addMissingEmployerLink": "/",
+  "addMissingPensionLink": "/",
+  "addMissingIncomeLink": "/",
+  "addMissingBenefitLink": "/",
+  "addMissingCompanyCarLink": "/",
+  "previousTaxYearLink": "/",
+  "updateEstimatedIncomeLink": "/",
+  "updateEmployerLink": "/"
+}

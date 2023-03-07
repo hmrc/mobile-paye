@@ -32,11 +32,13 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class IncomeTaxHistoryService @Inject() (
   taiConnector:                                                                TaiConnector,
-  @Named("numberOfPreviousYearsToShowIncomeTaxHistory") IncomeTaxHistoryYears: Int
-)(implicit hc:                                                                 HeaderCarrier,
-  ec:                                                                          ExecutionContext) {
+  @Named("numberOfPreviousYearsToShowIncomeTaxHistory") IncomeTaxHistoryYears: Int) {
 
-  def getIncomeTaxHistoryYearsList(nino: Nino): Future[List[IncomeTaxYear]] = {
+  def getIncomeTaxHistoryYearsList(
+    nino:        Nino
+  )(implicit hc: HeaderCarrier,
+    ec:          ExecutionContext
+  ): Future[List[IncomeTaxYear]] = {
     val currentTaxYear: TaxYear = getCurrentTaxYear
     val taxYears: List[TaxYear] =
       Range(currentTaxYear.startYear, (currentTaxYear.startYear - IncomeTaxHistoryYears), -1)
@@ -99,7 +101,6 @@ class IncomeTaxHistoryService @Inject() (
   private def fetchLastPayment(
     employment: Employment,
     taxYear:    TaxYear
-  ) =
-    employment.annualAccounts.find(_.taxYear.startYear == taxYear.startYear).flatMap(_.payments.lastOption)
+  ) = employment.annualAccounts.find(_.taxYear.startYear == taxYear.startYear).map(_.payments.max)
 
 }
