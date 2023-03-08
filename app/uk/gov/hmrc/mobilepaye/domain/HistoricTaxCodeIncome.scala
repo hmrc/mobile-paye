@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.mobilepaye.domain.tai
+package uk.gov.hmrc.mobilepaye.domain
 
-import play.api.libs.json.{Format, JsString, JsSuccess, JsValue, Json}
+import play.api.libs.json.{Json, OFormat}
 
 import java.time.LocalDate
 
-case class Employment(
-  name:              String,
-  payrollNumber:     Option[String],
-  sequenceNumber:    Int,
-  payeNumber:        String,
-  startDate:         LocalDate,
-  endDate:           Option[LocalDate],
-  annualAccounts:    Seq[AnnualAccount],
-  taxDistrictNumber: String)
+case class HistoricTaxCodeIncome(
+  name:          String,
+  payrollNumber: String,
+  startDate:     LocalDate,
+  endDate:       Option[LocalDate],
+  amount:        Option[BigDecimal],
+  taxAmount:     Option[BigDecimal],
+  taxCode:       Option[String],
+  isPension:     Boolean = false)
 
-object Employment {
-  implicit val employmentFormats: Format[Employment] = Json.format[Employment]
+object HistoricTaxCodeIncome {
+  implicit val format: OFormat[HistoricTaxCodeIncome] = Json.format[HistoricTaxCodeIncome]
 }

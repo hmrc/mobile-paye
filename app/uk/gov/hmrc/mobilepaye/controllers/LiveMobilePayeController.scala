@@ -30,7 +30,7 @@ import uk.gov.hmrc.mobilepaye.connectors.ShutteringConnector
 import uk.gov.hmrc.mobilepaye.controllers.action.AccessControl
 import uk.gov.hmrc.mobilepaye.domain.types.ModelTypes.JourneyId
 import uk.gov.hmrc.mobilepaye.domain.{MobilePayeResponse, MobilePayeResponseAudit}
-import uk.gov.hmrc.mobilepaye.services.MobilePayeService
+import uk.gov.hmrc.mobilepaye.services.{IncomeTaxHistoryService, MobilePayeService}
 import uk.gov.hmrc.play.audit.AuditExtensions.auditHeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
@@ -47,6 +47,11 @@ trait MobilePayeController extends BackendBaseController with HeaderValidator wi
     journeyId: JourneyId,
     taxYear:   Int
   ): Action[AnyContent]
+
+  def getTaxIncomeHistory(
+    nino:      Nino,
+    journeyId: JourneyId
+  ): Action[AnyContent]
 }
 
 @Singleton
@@ -57,7 +62,8 @@ class LiveMobilePayeController @Inject() (
   val controllerComponents:                                     ControllerComponents,
   val auditConnector:                                           AuditConnector,
   @Named("appName") override val appName:                       String,
-  shutteringConnector:                                          ShutteringConnector
+  shutteringConnector:                                          ShutteringConnector,
+  incomeTaxHistoryService:                                      IncomeTaxHistoryService
 )(implicit val executionContext:                                ExecutionContext)
     extends MobilePayeController
     with AccessControl
@@ -101,6 +107,24 @@ class LiveMobilePayeController @Inject() (
         }
       }
     }
+
+  override def getTaxIncomeHistory(
+    nino:      Nino,
+    journeyId: JourneyId
+  ): Action[AnyContent] = validateAcceptWithAuth(acceptHeaderValidationRules, Option(nino)).async { implicit request =>
+    implicit val hc: HeaderCarrier =
+      fromRequest(request).withExtraHeaders(HeaderNames.xSessionId -> journeyId.value)
+    shutteringConnector.getShutteringStatus(journeyId).flatMap { shuttered =>
+      withShuttering(shuttered) {
+        errorWrapper {
+          incomeTaxHistoryService.getIncomeTaxHistoryYearsList(nino).map { incomeTaxHistory =>
+            Ok(Json.toJson(incomeTaxHistory))
+          }
+        }
+
+      }
+    }
+  }
 
   private def sendAuditEvent(
     nino:        Nino,

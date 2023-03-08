@@ -5,14 +5,14 @@ info:
     ### What is this API for?
 
     Expose PAYE data in a pre-agreed format for HMRC Mobile App developers.
-  contact: {}
+  contact: { }
   version: '1.0'
 servers:
   - url: https://test-api.service.hmrc.gov.uk/mobile-paye
     description: Sandbox
   - url: https://api.service.hmrc.gov.uk/mobile-paye
     description: Production
-    variables: {}
+    variables: { }
 paths:
   /nino/{nino}/tax-year/{taxYear}/summary:
     get:
@@ -50,7 +50,7 @@ paths:
       responses:
         '200':
           description: ''
-          headers: {}
+          headers: { }
           content:
             application/json:
               schema:
@@ -256,6 +256,82 @@ paths:
       responses:
         '204':
           description: 'No Content'
+      deprecated: false
+      security:
+        - userRestricted:
+            - read:native-apps-api-orchestration
+  /nino/{nino}/income-tax-history:
+    get:
+      tags:
+        - mobile-paye
+      summary: Get income tax history for given NINO
+      description: This endpoint retrieves the income tax history associated with a user for the past 5 years
+      operationId: Getincometaxhistory
+      parameters:
+        - name: nino
+          in: path
+          description: The NINO for the individual.
+          required: true
+          style: simple
+          schema:
+            type: string
+            example: NS123456B
+        - name: journeyId
+          in: query
+          description: ''
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          headers: { }
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/IncomeTaxHistoryResponse'
+                  - example:
+                      - taxYear: 2023
+                        incomes:
+                          - name: SAINSBURY'S PLC
+                            payrollNumber: EMP0000001
+                            startDate: 01-08-2022
+                            amount: 14143
+                            taxAmount: 1135
+                            taxCode: 1185L
+                            isPension: false
+                      - taxYear: 2022
+                        incomes:
+                          - name: SAINSBURY'S PLC
+                            payrollNumber: EMP0000001
+                            startDate: 01-08-2022
+                            amount: 14143
+                            taxAmount: 1135
+                            taxCode: 1185L
+                            isPension: false
+                          - name: TESCO LTD
+                            payrollNumber: TS1234321
+                            startDate: 11-09-2020
+                            endDate: 16-07-22
+                            amount: 11250
+                            taxAmount: 1235
+                            taxCode: 1185L
+                            isPension: false
+                      - taxYear: 2020
+                        incomes:
+                          - name: TESCO LTD
+                            payrollNumber: TS1234321
+                            startDate: 11-09-2020
+                            endDate: 16-07-22
+                            amount: 10000
+                            taxAmount: 1345
+                            taxCode: 1145L
+                            isPension: false
+                      - taxYear: 2019
+                      - taxYear: 2018
       deprecated: false
       security:
         - userRestricted:
@@ -688,6 +764,61 @@ components:
         howEasyScore: 5
         whyGiveScore: "It was great"
         howDoYouFeelScore: 4
+    IncomeTaxHistoryResponse:
+      title: IncomeTaxHistoryResponse
+      type: array
+      items:
+        $ref: '#/components/schemas/IncomeTaxYear'
+      description: ''
+    IncomeTaxYear:
+      title: IncomeTaxYear
+      required:
+        - taxYear
+      type: object
+      properties:
+        taxYear:
+          type: integer
+          format: int32
+        incomes:
+          type: array
+          items:
+            $ref: '#/components/schemas/HistoricTaxCodeIncome'
+          description: ''
+    HistoricTaxCodeIncome:
+      title: HistoricTaxCodeIncome
+      required:
+        - name
+        - payrollNumber
+        - startDate
+        - isPension
+      type: object
+      properties:
+        name:
+          type: string
+        payrollNumber:
+          type: string
+        startDate:
+          type: string
+        endDate:
+          type: string
+        amount:
+          type: integer
+          format: int32
+        taxAmount:
+          type: integer
+          format: int32
+        taxCode:
+          type: string
+        isPension:
+          type: boolean
+      example:
+        name: "TESCO"
+        payrollNumber: "P123123"
+        startDate: "01-01-2023"
+        amount: 12000
+        taxAmount: 1000
+        taxCode: 1250L
+        isPension: false
 tags:
   - name: mobile-paye
     description: ''
