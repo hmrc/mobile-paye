@@ -23,6 +23,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mobilepaye.connectors.TaiConnector
 import uk.gov.hmrc.mobilepaye.domain.{HistoricTaxCodeIncome, IncomeTaxYear}
 import uk.gov.hmrc.mobilepaye.domain.tai.{Employment, Payment, PensionIncome, TaxCodeIncome}
+import uk.gov.hmrc.mongo.play.json.Codecs.logger
 import uk.gov.hmrc.time.TaxYear
 
 import java.time.{LocalDate, ZoneId}
@@ -48,6 +49,7 @@ class IncomeTaxHistoryService @Inject() (
     taxYears traverse (taxYear => {
       getIncomeTaxYear(nino, taxYear).recover {
         case e: Exception =>
+          logger.info(s"Couldn't get taxYear info for $taxYear due to: \n$e")
           IncomeTaxYear(taxYear, None)
       }
     })
@@ -101,6 +103,6 @@ class IncomeTaxHistoryService @Inject() (
   private def fetchLastPayment(
     employment: Employment,
     taxYear:    TaxYear
-  ) = employment.annualAccounts.find(_.taxYear.startYear == taxYear.startYear).map(_.payments.max)
+  ) = employment.annualAccounts.find(_.taxYear.startYear == taxYear.startYear).flatMap(_.payments.lastOption)
 
 }

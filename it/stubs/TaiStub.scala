@@ -189,7 +189,9 @@ object TaiStub {
             .withStatus(200)
             .withBody(s"""
                          |{
-                         |  "data": ${Json.toJson(employments)}
+                         |  "data": {
+                         |    "employments": ${Json.toJson(employments)}
+                         |  }
                          |}
           """.stripMargin)
         )

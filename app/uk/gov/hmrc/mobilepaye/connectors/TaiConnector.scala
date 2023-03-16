@@ -19,7 +19,7 @@ package uk.gov.hmrc.mobilepaye.connectors
 import com.google.inject.name.Named
 import com.google.inject.{Inject, Singleton}
 import play.api.Logger
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.mobilepaye.domain._
@@ -136,7 +136,7 @@ class TaiConnector @Inject() (
     http
       .GET[JsValue](url(nino, s"employments/years/$taxYear"))
       .map { json =>
-        (json \ "data").as[Seq[Employment]]
+        (json \ "data" \ "employments").as[Seq[Employment]]
       }
       .recover {
         case _: NotFoundException => Seq.empty[Employment]
