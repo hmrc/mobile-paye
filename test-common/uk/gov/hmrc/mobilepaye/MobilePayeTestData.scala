@@ -222,8 +222,8 @@ trait MobilePayeTestData {
     payrollNumber = taiEmployment().payrollNumber.get,
     startDate     = taiEmployment().startDate,
     endDate       = None,
-    amount        = taiEmployment().annualAccounts.head.latestPayment.map(_.amountYearToDate),
-    taxAmount     = taiEmployment().annualAccounts.head.latestPayment.map(_.taxAmountYearToDate),
+    amount        = taiEmployment().annualAccounts.head.payments.lastOption.map(_.amountYearToDate),
+    taxAmount     = taiEmployment().annualAccounts.head.payments.lastOption.map(_.taxAmountYearToDate),
     taxCode       = Some(taxCodeIncome.taxCode)
   )
 

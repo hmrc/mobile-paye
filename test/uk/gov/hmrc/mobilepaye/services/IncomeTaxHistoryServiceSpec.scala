@@ -74,7 +74,7 @@ class IncomeTaxHistoryServiceSpec extends BaseSpec {
       response.head.incomes.get.size               shouldBe 2
       response.head.incomes.get.head.name          shouldBe "TESCO"
       response.head.incomes.get.head.startDate     shouldBe LocalDate.now().minusYears(4)
-      response.head.incomes.get.head.amount.get    shouldBe 100
+      response.head.incomes.get.head.amount.get    shouldBe 50
       response.head.incomes.get.head.taxAmount.get shouldBe 20
       response.head.incomes.get.head.taxCode.get   shouldBe "S1150L"
       response.head.incomes.get.head.isPension     shouldBe false
