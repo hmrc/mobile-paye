@@ -197,4 +197,17 @@ object TaiStub {
         )
     )
 
+  def stubForTaxCodeChangeExists(
+    nino:       String,
+    hasChanged: Boolean = false
+  ): StubMapping =
+    stubFor(
+      get(urlEqualTo(s"/tai/$nino/tax-account/tax-code-change/exists"))
+        .willReturn(
+          aResponse()
+            .withStatus(200)
+            .withBody(hasChanged.toString)
+        )
+    )
+
 }

@@ -212,6 +212,8 @@ paths:
                       - name: UNTAXED INTEREST INCOME
                         amount: 9301
                         link: /check-income-tax/income/bank-building-society-savings
+                    taxCodeChange:
+                      hasChanged: false
                     taxFreeAmount: 11850
                     taxFreeAmountLink: /check-income-tax/tax-free-allowance
                     estimatedTaxAmount: 618
@@ -488,6 +490,7 @@ components:
         - pensions
         - repayment
         - otherIncomes
+        - taxCodeChange
         - taxFreeAmount
         - taxFreeAmountLink
         - estimatedTaxAmount
@@ -524,6 +527,8 @@ components:
           items:
             $ref: '#/components/schemas/OtherIncome'
           description: ''
+        taxCodeChange:
+          $ref: '#/components/schemas/TaxCodeChange'
         taxFreeAmount:
           type: integer
           format: int32
@@ -624,6 +629,8 @@ components:
           - name: UNTAXED INTEREST INCOME
             amount: 9301
             link: /check-income-tax/income/bank-building-society-savings
+        taxCodeChange:
+          hasChanged: false
         taxFreeAmount: 11850
         taxFreeAmountLink: /check-income-tax/tax-free-allowance
         estimatedTaxAmount: 618
@@ -819,6 +826,14 @@ components:
         taxAmount: 1000
         taxCode: 1250L
         isPension: false
+    TaxCodeChange:
+      title: TaxCodeChange
+      type: object
+      properties:
+        hasChanged:
+          type: boolean
+      example:
+        hasChanged: false
 tags:
   - name: mobile-paye
     description: ''

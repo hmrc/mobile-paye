@@ -34,7 +34,9 @@ class TaiConnectorSpec extends BaseSpec {
     f:   Future[T]
   ) =
     (mockCoreGet
-      .GET(_: String, _: Seq[(String, String)], _: Seq[(String, String)])(_: HttpReads[T], _: HeaderCarrier, _: ExecutionContext))
+      .GET(_: String, _: Seq[(String, String)], _: Seq[(String, String)])(_: HttpReads[T],
+                                                                          _: HeaderCarrier,
+                                                                          _: ExecutionContext))
       .expects(s"$serviceUrl/tai/${nino.value}/$url", *, *, *, *, *)
       .returning(f)
 
@@ -244,6 +246,33 @@ class TaiConnectorSpec extends BaseSpec {
 
       intercept[InternalServerException] {
         await(connector.getTaxAccountSummary(nino, currentTaxYear))
+      }
+    }
+  }
+
+  "Tax Code Change Exists - GET /tai/:nino/tax-account/tax-code-change/exists" should {
+    "return a valid response when receiving a valid 200 response for an authorised user" in {
+
+      mockTaiGet(s"tax-account/tax-code-change/exists", Future.successful(Json.toJson(false)))
+
+      val result = await(connector.getTaxCodeChangeExists(nino))
+      result shouldBe false
+    }
+
+    "throw UnauthorisedException for valid nino but unauthorized user" in {
+      mockTaiGet(s"tax-account/tax-code-change/exists", Future.failed(new UnauthorizedException("Unauthorized")))
+
+      intercept[UnauthorizedException] {
+        await(connector.getTaxCodeChangeExists(nino))
+      }
+    }
+
+    "throw InternalServerErrorException for valid nino for authorised user when receiving a 500 response from tai" in {
+      mockTaiGet(s"tax-account/tax-code-change/exists",
+                 Future.failed(new InternalServerException("Internal Server Error")))
+
+      intercept[InternalServerException] {
+        await(connector.getTaxCodeChangeExists(nino))
       }
     }
   }

@@ -23,7 +23,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.mobilepaye.connectors.{FeedbackConnector, TaiConnector, TaxCalcConnector}
 import uk.gov.hmrc.mobilepaye.domain.tai._
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.{P800Summary, TaxYearReconciliation}
-import uk.gov.hmrc.mobilepaye.domain.{Feedback, IncomeSource, MobilePayeResponse, OtherIncome, P800Cache, P800Repayment, PayeIncome}
+import uk.gov.hmrc.mobilepaye.domain.{Feedback, IncomeSource, MobilePayeResponse, OtherIncome, P800Cache, P800Repayment, PayeIncome, TaxCodeChange}
 import uk.gov.hmrc.mobilepaye.repository.P800CacheMongo
 
 import java.time.{LocalDateTime, ZoneId}
@@ -87,12 +87,13 @@ class MobilePayeService @Inject() (
       nonTaxCodeIncomes:      NonTaxCodeIncome,
       taxAccountSummary:      TaxAccountSummary,
       p800Summary:            Option[P800Summary],
-      employmentBenefits:      Benefits
+      employmentBenefits:     Benefits,
+      taxCodeChange:          TaxCodeChange
     ): MobilePayeResponse = {
 
       def buildPayeIncomes(
-        incomes:    Seq[IncomeSource],
-        employment: Boolean = false,
+        incomes:            Seq[IncomeSource],
+        employment:         Boolean = false,
         employmentBenefits: Option[Benefits] = None
       ): Option[Seq[PayeIncome]] =
         incomes.map { inc =>
@@ -151,6 +152,7 @@ class MobilePayeService @Inject() (
         repayment          = repayment,
         pensions           = pensionPayeIncomes,
         otherIncomes       = otherNonTaxCodeIncomes,
+        taxCodeChange      = Some(taxCodeChange),
         taxFreeAmount      = taxFreeAmount,
         estimatedTaxAmount = estimatedTaxAmount
       )
@@ -167,14 +169,16 @@ class MobilePayeService @Inject() (
       tcComparisonPeriodActive <- cyPlus1InfoCheck(taxCodeIncomesEmployment)
       cy1InfoAvailable <- if (tcComparisonPeriodActive) taiConnector.getCYPlusOneAccountSummary(nino, taxYear)
                          else Future successful false
-      employmentBenefits <- taiConnector.getBenefits(nino, taxYear)
+      employmentBenefits  <- taiConnector.getBenefits(nino, taxYear)
+      taxCodeChangeExists <- taiConnector.getTaxCodeChangeExists(nino)
       mobilePayeResponse: MobilePayeResponse = buildMobilePayeResponse(
         taxCodeIncomesEmployment,
         taxCodeIncomesPension,
         nonTaxCodeIncomes,
         taxAccountSummary,
         getP800Summary(reconciliations, taxYear),
-        employmentBenefits
+        employmentBenefits,
+        TaxCodeChange(taxCodeChangeExists)
       )
     } yield {
       if (cy1InfoAvailable) mobilePayeResponse.copy(taxCodeLocation = getTaxCodeLocation(taxCodeIncomesEmployment))
@@ -248,8 +252,7 @@ class MobilePayeService @Inject() (
     } else None
   }
 
-  def postFeedback(feedback: Feedback)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+  def postFeedback(feedback: Feedback)(implicit hc: HeaderCarrier): Future[HttpResponse] =
     feedbackConnector.postFeedback(feedback)
-  }
 
 }

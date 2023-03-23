@@ -142,4 +142,17 @@ class TaiConnector @Inject() (
         case _: NotFoundException => Seq.empty[Employment]
         case e => throw e
       }
+
+  def getTaxCodeChangeExists(
+    nino:        Nino
+  )(implicit hc: HeaderCarrier,
+    ex:          ExecutionContext
+  ): Future[Boolean] =
+    http
+      .GET[JsValue](url(nino, s"tax-account/tax-code-change/exists"))
+      .map(_.as[Boolean])
+      .recover {
+        case _: NotFoundException => false
+        case e => throw e
+      }
 }
