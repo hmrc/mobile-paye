@@ -181,6 +181,9 @@ The Mobile Paye response
       "link": "/"
     }
   ],
+  "taxCodeChange": {
+    "hasChanged": false
+  },
   "taxFreeAmount": 11850,
   "taxFreeAmountLink": "/",
   "estimatedTaxAmount": 618,
@@ -250,7 +253,24 @@ The Mobile Paye response
         }
       ]
     }
-  ]
+  ],
+  "taxCodeChange": {
+    "hasChanged": false
+  },
+  "taxFreeAmount": 11850,
+  "taxFreeAmountLink": "/",
+  "estimatedTaxAmount": 618,
+  "estimatedTaxAmountLink": "/",
+  "understandYourTaxCodeLink": "/",
+  "addMissingEmployerLink": "/",
+  "addMissingPensionLink": "/",
+  "addMissingIncomeLink": "/",
+  "addMissingBenefitLink": "/",
+  "addMissingCompanyCarLink": "/",
+  "previousTaxYearLink": "/",
+  "updateEstimatedIncomeLink": "/",
+  "currentYearPlusOneLink": "/",
+  "taxCodeLocation": "rUK"
 }
 ```
 
@@ -269,6 +289,9 @@ The Mobile Paye response
       "link": "/"
     }
   ],
+  "taxCodeChange": {
+    "hasChanged": false
+  },
   "taxFreeAmount": 11850,
   "taxFreeAmountLink": "/",
   "estimatedTaxAmount": 618,
@@ -303,6 +326,9 @@ The Mobile Paye response
       "link": "/"
     }
   ],
+  "taxCodeChange": {
+    "hasChanged": false
+  },
   "taxFreeAmount": 11850,
   "taxFreeAmountLink": "/",
   "estimatedTaxAmount": 618,
@@ -324,6 +350,9 @@ The Mobile Paye response
 ```json
 {
   "taxYear": 2018,
+  "taxCodeChange": {
+    "hasChanged": false
+  },
   "taxFreeAmount": 11850,
   "taxFreeAmountLink": "/",
   "estimatedTaxAmount": 618,
@@ -345,6 +374,9 @@ The Mobile Paye response
 ```json
 {
   "taxYear": 2018,
+  "taxCodeChange": {
+    "hasChanged": false
+  },
   "addMissingEmployerLink": "/",
   "addMissingPensionLink": "/",
   "addMissingIncomeLink": "/",

@@ -33,14 +33,14 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
 
   override lazy val repository = new P800CacheMongo(mongoComponent, appConfig)
 
-  val mockTaiConnector:     TaiConnector      = mock[TaiConnector]
-  val mockTaxCalcConnector: TaxCalcConnector  = mock[TaxCalcConnector]
+  val mockTaiConnector:      TaiConnector      = mock[TaiConnector]
+  val mockTaxCalcConnector:  TaxCalcConnector  = mock[TaxCalcConnector]
   val mockFeedbackConnector: FeedbackConnector = mock[FeedbackConnector]
-  val p800CacheMongo:       P800CacheMongo    = repository
-  val dateFormatter:        DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd\'T\'HH:mm:ss")
-  val inactiveDate:         String            = "2020-02-01T00:00:00"
-  val activeStartDate:      String            = LocalDateTime.now(ZoneId.of("Europe/London")).minusDays(10).format(dateFormatter)
-  val activeEndDate:        String            = LocalDateTime.now(ZoneId.of("Europe/London")).plusDays(10).format(dateFormatter)
+  val p800CacheMongo:        P800CacheMongo    = repository
+  val dateFormatter:         DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd\'T\'HH:mm:ss")
+  val inactiveDate:          String            = "2020-02-01T00:00:00"
+  val activeStartDate:       String            = LocalDateTime.now(ZoneId.of("Europe/London")).minusDays(10).format(dateFormatter)
+  val activeEndDate:         String            = LocalDateTime.now(ZoneId.of("Europe/London")).plusDays(10).format(dateFormatter)
 
   val service = new MobilePayeService(mockTaiConnector,
                                       mockTaxCalcConnector,
@@ -93,7 +93,13 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
   def mockPostFeedback(f: Future[HttpResponse]) =
     (mockFeedbackConnector
       .postFeedback(_: Feedback)(_: HeaderCarrier))
-      .expects(*,*)
+      .expects(*, *)
+      .returning(f)
+
+  def mockGetTaxCodeChangeExists(f: Future[Boolean]) =
+    (mockTaiConnector
+      .getTaxCodeChangeExists(_: Nino)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *, *)
       .returning(f)
 
   "getMobilePayeResponse" should {
@@ -103,6 +109,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockGetBenefits(Future.successful((noBenefits)))
+      mockGetTaxCodeChangeExists(Future.successful(false))
       mockP800Summary()
 
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
@@ -117,6 +124,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockCYPlusOneAccountSummary(Future successful true)
       mockGetBenefits(Future.successful((noBenefits)))
+      mockGetTaxCodeChangeExists(Future.successful(false))
       mockP800Summary()
 
       val service = new MobilePayeService(mockTaiConnector,
@@ -144,6 +152,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockCYPlusOneAccountSummary(Future successful true)
       mockGetBenefits(Future.successful((noBenefits)))
+      mockGetTaxCodeChangeExists(Future.successful(false))
       mockP800Summary()
 
       val service = new MobilePayeService(mockTaiConnector,
@@ -171,6 +180,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockCYPlusOneAccountSummary(Future successful true)
       mockGetBenefits(Future.successful((noBenefits)))
+      mockGetTaxCodeChangeExists(Future.successful(false))
       mockP800Summary()
 
       val service = new MobilePayeService(mockTaiConnector,
@@ -196,6 +206,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockGetBenefits(Future.successful((noBenefits)))
+      mockGetTaxCodeChangeExists(Future.successful(false))
       mockP800Summary()
 
       val service = new MobilePayeService(mockTaiConnector,
@@ -221,6 +232,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithoutUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockGetBenefits(Future.successful((noBenefits)))
+      mockGetTaxCodeChangeExists(Future.successful(false))
       mockP800Summary()
 
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
@@ -234,6 +246,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockGetBenefits(Future.successful((noBenefits)))
+      mockGetTaxCodeChangeExists(Future.successful(false))
       mockP800Summary()
 
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
@@ -247,6 +260,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockGetBenefits(Future.successful((noBenefits)))
+      mockGetTaxCodeChangeExists(Future.successful(false))
       mockP800Summary()
 
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
@@ -262,6 +276,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       )
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockGetBenefits(Future.successful((noBenefits)))
+      mockGetTaxCodeChangeExists(Future.successful(false))
       mockP800Summary()
 
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
@@ -275,6 +290,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockGetBenefits(Future.successful((noBenefits)))
+      mockGetTaxCodeChangeExists(Future.successful(false))
       mockP800Summary()
 
       val result         = await(service.getMobilePayeResponse(nino, currentTaxYear))
@@ -298,6 +314,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockGetBenefits(Future.successful((noBenefits)))
+      mockGetTaxCodeChangeExists(Future.successful(false))
       mockP800Summary()
 
       val result         = await(service.getMobilePayeResponse(nino, currentTaxYear))
@@ -320,6 +337,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockGetBenefits(Future.successful((noBenefits)))
+      mockGetTaxCodeChangeExists(Future.successful(false))
       mockP800Summary()
 
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
@@ -335,6 +353,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockGetBenefits(Future.successful((noBenefits)))
+      mockGetTaxCodeChangeExists(Future.successful(false))
       mockP800Summary()
 
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
@@ -348,6 +367,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockGetBenefits(Future.successful((allBenefits)))
+      mockGetTaxCodeChangeExists(Future.successful(false))
       mockP800Summary()
 
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))

@@ -20,7 +20,7 @@ import play.api.libs.json.{JsObject, Json}
 
 import java.time.LocalDate
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.mobilepaye.domain.{Feedback, HistoricTaxCodeIncome, IncomeSource, IncomeTaxYear, MobilePayeResponse, MobilePayeResponseAudit, OtherIncome, OtherIncomeAudit, P800Repayment, PayeIncome, PayeIncomeAudit}
+import uk.gov.hmrc.mobilepaye.domain.{Feedback, HistoricTaxCodeIncome, IncomeSource, IncomeTaxYear, MobilePayeResponse, MobilePayeResponseAudit, OtherIncome, OtherIncomeAudit, P800Repayment, PayeIncome, PayeIncomeAudit, TaxCodeChange}
 import uk.gov.hmrc.mobilepaye.domain.tai._
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus.{ChequeSent, PaymentPaid}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.{P800Status, P800Summary, RepaymentStatus}
@@ -173,6 +173,7 @@ trait MobilePayeTestData {
     repayment              = None,
     pensions               = Some(pensions),
     otherIncomes           = Some(otherIncomes),
+    taxCodeChange          = Some(TaxCodeChange(false)),
     taxFreeAmount          = Some(10000),
     estimatedTaxAmount     = Some(250),
     previousTaxYearLink    = s"/check-income-tax/income-tax-history",
@@ -185,6 +186,7 @@ trait MobilePayeTestData {
     repayment           = None,
     pensions            = Some(pensions),
     otherIncomes        = Some(otherIncomes),
+    taxCodeChange       = Some(TaxCodeChange(false)),
     taxFreeAmount       = Some(10000),
     estimatedTaxAmount  = Some(250),
     previousTaxYearLink = s"/check-income-tax/income-tax-history",
