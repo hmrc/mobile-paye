@@ -312,8 +312,8 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       status(result) shouldBe 521
       val jsonBody = contentAsJson(result)
       (jsonBody \ "shuttered").as[Boolean] shouldBe true
-      (jsonBody \ "title").as[String] shouldBe "Shuttered"
-      (jsonBody \ "message").as[String] shouldBe "PAYE is currently not available"
+      (jsonBody \ "title").as[String]      shouldBe "Shuttered"
+      (jsonBody \ "message").as[String]    shouldBe "PAYE is currently not available"
     }
   }
 }

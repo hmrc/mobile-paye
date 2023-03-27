@@ -62,7 +62,7 @@ object PayeIncome {
           )
         else None,
       if (incomeSource.employment.annualAccounts.headOption.map(_.payments).getOrElse(Seq.empty).isEmpty) None
-      else incomeSource.employment.annualAccounts.headOption.map(_.payments),
+      else incomeSource.employment.annualAccounts.headOption.map(_.payments.sorted(Payment.dateOrdering.reverse)),
       employmentBenefits.flatMap(
         buildEmploymentBenefits(_, incomeSource.taxCodeIncome.employmentId)
       )
