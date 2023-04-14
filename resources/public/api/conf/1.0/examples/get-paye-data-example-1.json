@@ -1,109 +1,119 @@
 {
-  "taxYear": 2018,
+  "taxYear": 2022,
   "employments": [
     {
-      "name": "SAINSBURY'S PLC",
-      "taxCode": "1185L",
-      "payrollNumber": "EMP0000001",
-      "amount": 4143,
-      "payeNumber": "P12345",
+      "name": "SAINSBURYS",
+      "payrollNumber": "TEST",
+      "taxCode": "K4453X",
+      "amount": 50000,
+      "payeNumber": "A100",
       "link": "/check-income-tax/income-details/1",
-      "updateIncomeLink": "/",
-      "latestPayment": {
-        "date": "2021-08-28",
-        "amount": 1575,
-        "taxAmount": 315,
-        "nationalInsuranceAmount": 189,
-        "amountYearToDate": 6201,
-        "taxAmountYearToDate": 1180,
-        "nationalInsuranceAmountYearToDate": 657,
-        "link": "/",
-        "futurePayment": true
-      },
+      "updateIncomeLink": "/check-income-tax/update-income/load/1",
       "payments": [
         {
-          "date": "2021-07-28",
-          "amountYearToDate": 4636,
-          "taxAmountYearToDate": 865,
-          "nationalInsuranceAmountYearToDate": 468,
-          "amount": 1600,
-          "taxAmount": 320,
-          "nationalInsuranceAmount": 195
+          "date": "2017-02-28",
+          "amountYearToDate": 50000,
+          "taxAmountYearToDate": 24000,
+          "nationalInsuranceAmountYearToDate": 2280,
+          "amount": 35000,
+          "taxAmount": 20250,
+          "nationalInsuranceAmount": 480
         },
         {
-          "date": "2021-06-28",
-          "amountYearToDate": 3036,
-          "taxAmountYearToDate": 545,
-          "nationalInsuranceAmountYearToDate": 273,
-          "amount": 1566,
-          "taxAmount": 289,
-          "nationalInsuranceAmount": 146
+          "date": "2016-10-31",
+          "amountYearToDate": 15000,
+          "taxAmountYearToDate": 4250,
+          "nationalInsuranceAmountYearToDate": 1800,
+          "amount": 4000,
+          "taxAmount": 1000,
+          "nationalInsuranceAmount": 480
         },
         {
-          "date": "2021-05-28",
-          "amountYearToDate": 1470,
-          "taxAmountYearToDate": 256,
-          "nationalInsuranceAmountYearToDate": 127,
-          "amount": 1470,
-          "taxAmount": 256,
-          "nationalInsuranceAmount": 127
+          "date": "2016-07-31",
+          "amountYearToDate": 11000,
+          "taxAmountYearToDate": 3250,
+          "nationalInsuranceAmountYearToDate": 1320,
+          "amount": 6000,
+          "taxAmount": 1750,
+          "nationalInsuranceAmount": 720
+        },
+        {
+          "date": "2016-04-30",
+          "amountYearToDate": 5000,
+          "taxAmountYearToDate": 1000,
+          "nationalInsuranceAmountYearToDate": 600,
+          "amount": 5000,
+          "taxAmount": 1000,
+          "nationalInsuranceAmount": 600
         }
-      ]
-    },
-    {
-      "name": "TESCO",
-      "taxCode": "BR",
-      "amount": 5101,
-      "payeNumber": "P12345",
-      "link": "/check-income-tax/income-details/2"
+      ],
+      "employmentBenefits": {
+        "benefits": [
+          {
+            "benefitType": "CarBenefit",
+            "amount": 100
+          },
+          {
+            "benefitType": "MedicalInsurance",
+            "amount": 100
+          },
+          {
+            "benefitType": "OtherBenefits",
+            "amount": 14600
+          }
+        ],
+        "changeCarBenefitLink": "/paye/company-car/details",
+        "changeMedicalBenefitLink": "/paye/benefits/medical-benefit",
+        "changeOtherBenefitLink": "/digital-forms/form/tell-us-about-company-benefits/draft/guide"
+      }
     }
   ],
   "pensions": [
     {
-      "name": "HIGHWIRE RETURNS LTD",
-      "taxCode": "BR",
-      "amount": 4200,
-      "payeNumber": "P12345",
-      "link": "/check-income-tax/income-details/12"
-    },
-    {
-      "name": "AVIVA (2410)",
-      "payrollNumber": "AB752BR",
-      "taxCode": "BR",
-      "amount": 5690,
-      "payeNumber": "P12345",
-      "link": "/check-income-tax/income-details/3"
+      "name": "AVIVA PENSIONS",
+      "payrollNumber": "64765",
+      "taxCode": "D0",
+      "amount": 50000,
+      "payeNumber": "AZ00070",
+      "link": "/check-income-tax/income-details/2"
     }
   ],
-  "repayment": {
-    "amount": 854.23,
-    "paymentStatus": "REFUND",
-    "taxYear": 2018,
-    "claimRefundLink": "/tax-you-paid/2018-2019/paid-too-much"
-  },
   "otherIncomes": [
     {
-      "name": "NON CODED INCOME",
-      "amount": 22500
+      "name": "JOB SEEKERS ALLOWANCE",
+      "amount": 100
     },
     {
-      "name": "UNTAXED INTEREST INCOME",
-      "amount": 9301,
-      "link": "/check-income-tax/income/bank-building-society-savings"
+      "name": "OTHER INCOME EARNED",
+      "amount": 100
+    },
+    {
+      "name": "PROFIT",
+      "amount": 100
+    },
+    {
+      "name": "NON CODED INCOME",
+      "amount": 100
+    },
+    {
+      "name": "STATE PENSION",
+      "amount": 9225
     }
   ],
-  "taxFreeAmount": 11850,
+  "taxCodeChange": {
+    "hasChanged": false
+  },
+  "taxFreeAmount": -45769,
   "taxFreeAmountLink": "/check-income-tax/tax-free-allowance",
-  "estimatedTaxAmount": 618,
+  "estimatedTaxAmount": 51224,
   "estimatedTaxAmountLink": "/check-income-tax/paye-income-tax-estimate",
   "understandYourTaxCodeLink": "/check-income-tax/tax-codes",
   "addMissingEmployerLink": "/check-income-tax/add-employment/employment-name",
   "addMissingPensionLink": "/check-income-tax/add-pension-provider/name",
-  "addMissingIncomeLink": "/digital-forms/form//tell-us-about-other-income/draft/guide",
+  "addMissingIncomeLink": "/digital-forms/form/tell-us-about-other-income/draft/guide",
   "addMissingBenefitLink": "/digital-forms/form/tell-us-about-company-benefits/draft/guide",
   "addMissingCompanyCarLink": "/paye/company-car/do-you-pay-towards-car/",
-  "previousTaxYearLink": "/check-income-tax/historic-paye/2017",
-  "updateEstimatedIncomeLink": "/check-income-tax/check-income-tax/update-income/start",
-  "currentYearPlusOneLink": "/check-income-tax/income-tax-comparison",
-  "taxCodeLocation": "rUK"
+  "previousTaxYearLink": "/check-income-tax/income-tax-history",
+  "updateEstimatedIncomeLink": "/check-income-tax/update-income/start",
+  "updateEmployerLink": "/check-income-tax/update-remove-employment/decision-page"
 }

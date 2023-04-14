@@ -8,7 +8,6 @@ import stubs.ShutteringStub._
 import stubs.TaiStub._
 import stubs.TaxCalcStub._
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.NotFoundException
 import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, OnlinePaymentIntegration}
 import uk.gov.hmrc.mobilepaye.config.MobilePayeConfig
 import uk.gov.hmrc.mobilepaye.domain.tai.{CarBenefit, MedicalInsurance}
@@ -18,7 +17,7 @@ import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus._
 import uk.gov.hmrc.mobilepaye.domain.{IncomeTaxYear, MobilePayeResponse, OtherBenefits, P800Cache, P800Repayment, Shuttering}
 import uk.gov.hmrc.mobilepaye.repository.P800CacheMongo
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
-import uk.gov.hmrc.mongo.test.{CleanMongoCollectionSupport, PlayMongoRepositorySupport}
+import uk.gov.hmrc.mongo.test.PlayMongoRepositorySupport
 import uk.gov.hmrc.time.TaxYear
 import utils.BaseISpec
 
