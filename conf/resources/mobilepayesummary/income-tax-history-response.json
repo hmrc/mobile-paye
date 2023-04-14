@@ -1,17 +1,17 @@
 [
   {
-    "taxYear": 2022
+    "taxYear": <TAX_YEAR>
   },
   {
-    "taxYear": 2021
+    "taxYear": <TAX_YEAR-1>
   },
   {
-    "taxYear": 2020
+    "taxYear": <TAX_YEAR-2>
   },
   {
-    "taxYear": 2019
+    "taxYear": <TAX_YEAR-3>
   },
   {
-    "taxYear": 2018
+    "taxYear": <TAX_YEAR-4>
   }
 ]

@@ -43,7 +43,8 @@ class MobilePayeService @Inject() (
   @Named("wales.endDate") walesComparisonEndDate:           String,
   @Named("scotland.startDate") scotlandComparisonStartDate: String,
   @Named("scotland.endDate") scotlandComparisonEndDate:     String,
-  @Named("p800CacheEnabled") p800CacheEnabled:              Boolean) {
+  @Named("p800CacheEnabled") p800CacheEnabled:              Boolean,
+  @Named("taxCodeChangeEnabled") taxCodeChangeEnabled:      Boolean) {
 
   private val NpsTaxAccountNoEmploymentsCurrentYear = "no employments recorded for current tax year"
   private val NpsTaxAccountDataAbsentMsg            = "cannot complete a coding calculation without a primary employment"
@@ -169,8 +170,9 @@ class MobilePayeService @Inject() (
       tcComparisonPeriodActive <- cyPlus1InfoCheck(taxCodeIncomesEmployment)
       cy1InfoAvailable <- if (tcComparisonPeriodActive) taiConnector.getCYPlusOneAccountSummary(nino, taxYear)
                          else Future successful false
-      employmentBenefits  <- taiConnector.getBenefits(nino, taxYear)
-      taxCodeChangeExists <- taiConnector.getTaxCodeChangeExists(nino)
+      employmentBenefits <- taiConnector.getBenefits(nino, taxYear)
+      taxCodeChangeExists <- if (taxCodeChangeEnabled) taiConnector.getTaxCodeChangeExists(nino)
+                            else Future successful false
       mobilePayeResponse: MobilePayeResponse = buildMobilePayeResponse(
         taxCodeIncomesEmployment,
         taxCodeIncomesPension,

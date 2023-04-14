@@ -83,6 +83,11 @@ class SandboxMobilePayeController @Inject() (
           Json.parse(
             findResource("/resources/mobilepayesummary/income-tax-history-response.json")
               .getOrElse(throw new IllegalArgumentException("Resource not found!"))
+              .replace("<TAX_YEAR>", TaxYear.current.currentYear.toString)
+              .replace("<TAX_YEAR-1>", TaxYear.current.back(1).currentYear.toString)
+              .replace("<TAX_YEAR-2>", TaxYear.current.back(2).currentYear.toString)
+              .replace("<TAX_YEAR-3>", TaxYear.current.back(3).currentYear.toString)
+              .replace("<TAX_YEAR-4>", TaxYear.current.back(4).currentYear.toString)
           )
         )
       )

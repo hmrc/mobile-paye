@@ -199,7 +199,7 @@ object TaiStub {
 
   def stubForTaxCodeChangeExists(
     nino:       String,
-    hasChanged: Boolean = false
+    hasChanged: Boolean = true
   ): StubMapping =
     stubFor(
       get(urlEqualTo(s"/tai/$nino/tax-account/tax-code-change/exists"))

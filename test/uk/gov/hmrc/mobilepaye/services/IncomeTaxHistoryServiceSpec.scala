@@ -16,18 +16,15 @@
 
 package uk.gov.hmrc.mobilepaye.services
 
-import play.api.libs.json.Json
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, InternalServerException, NotFoundException, UnauthorizedException}
-import uk.gov.hmrc.mobilepaye.connectors.{TaiConnector, TaxCalcConnector}
+import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
+import uk.gov.hmrc.mobilepaye.connectors.TaiConnector
 import uk.gov.hmrc.mobilepaye.domain.tai._
-import uk.gov.hmrc.mobilepaye.domain.{IncomeSource, IncomeTaxYear, MobilePayeResponse, OtherBenefits, P800Cache}
-import uk.gov.hmrc.mobilepaye.repository.P800CacheMongo
+import uk.gov.hmrc.mobilepaye.domain.IncomeTaxYear
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
-import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
+import uk.gov.hmrc.time.TaxYear
 
-import java.time.format.DateTimeFormatter
-import java.time.{LocalDate, LocalDateTime, ZoneId}
+import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
 
 class IncomeTaxHistoryServiceSpec extends BaseSpec {
@@ -57,20 +54,30 @@ class IncomeTaxHistoryServiceSpec extends BaseSpec {
   "getIncomeTaxHistory" should {
     "return full IncomeTaxHistory when all data is available" in {
 
-      mockTaxCodeIncomes(Future successful Seq(taxCodeIncome, taxCodeIncome2, taxCodeIncome3), 2022)
-      mockTaxCodeIncomes(Future successful Seq(taxCodeIncome, taxCodeIncome2, taxCodeIncome3), 2021)
-      mockTaxCodeIncomes(Future successful Seq(taxCodeIncome, taxCodeIncome2, taxCodeIncome3), 2020)
-      mockTaxCodeIncomes(Future successful Seq(taxCodeIncome, taxCodeIncome2, taxCodeIncome3), 2019)
-      mockTaxCodeIncomes(Future successful Seq(taxCodeIncome, taxCodeIncome2, taxCodeIncome3), 2018)
-      mockEmployments(Future successful Seq(taiEmployment(2022), taiEmployment2), 2022)
-      mockEmployments(Future successful Seq(taiEmployment(2021), taiEmployment2), 2021)
-      mockEmployments(Future successful Seq(taiEmployment(2020), taiEmployment2), 2020)
-      mockEmployments(Future successful Seq(taiEmployment(2019), taiEmployment2), 2019)
-      mockEmployments(Future successful Seq(taiEmployment(2018), taiEmployment2), 2018)
+      mockTaxCodeIncomes(Future successful Seq(taxCodeIncome, taxCodeIncome2, taxCodeIncome3),
+                         TaxYear.current.startYear)
+      mockTaxCodeIncomes(Future successful Seq(taxCodeIncome, taxCodeIncome2, taxCodeIncome3),
+                         TaxYear.current.startYear - 1)
+      mockTaxCodeIncomes(Future successful Seq(taxCodeIncome, taxCodeIncome2, taxCodeIncome3),
+                         TaxYear.current.startYear - 2)
+      mockTaxCodeIncomes(Future successful Seq(taxCodeIncome, taxCodeIncome2, taxCodeIncome3),
+                         TaxYear.current.startYear - 3)
+      mockTaxCodeIncomes(Future successful Seq(taxCodeIncome, taxCodeIncome2, taxCodeIncome3),
+                         TaxYear.current.startYear - 4)
+      mockEmployments(Future successful Seq(taiEmployment(TaxYear.current.startYear), taiEmployment2),
+                      TaxYear.current.startYear)
+      mockEmployments(Future successful Seq(taiEmployment(TaxYear.current.startYear - 1), taiEmployment2),
+                      TaxYear.current.startYear - 1)
+      mockEmployments(Future successful Seq(taiEmployment(TaxYear.current.startYear - 2), taiEmployment2),
+                      TaxYear.current.startYear - 2)
+      mockEmployments(Future successful Seq(taiEmployment(TaxYear.current.startYear - 3), taiEmployment2),
+                      TaxYear.current.startYear - 3)
+      mockEmployments(Future successful Seq(taiEmployment(TaxYear.current.startYear - 4), taiEmployment2),
+                      TaxYear.current.startYear - 4)
 
       val response: Seq[IncomeTaxYear] = await(service.getIncomeTaxHistoryYearsList(nino))
       response.size                                shouldBe 5
-      response.head.taxYear.startYear              shouldBe 2022
+      response.head.taxYear.startYear              shouldBe TaxYear.current.startYear
       response.head.incomes.get.size               shouldBe 2
       response.head.incomes.get.head.name          shouldBe "TESCO"
       response.head.incomes.get.head.startDate     shouldBe LocalDate.now().minusYears(4)
@@ -83,11 +90,11 @@ class IncomeTaxHistoryServiceSpec extends BaseSpec {
 
     "return no income data when none available and do not call employment endpoint" in {
 
-      mockTaxCodeIncomes(Future failed new NotFoundException("Not Found"), 2022)
-      mockTaxCodeIncomes(Future failed new NotFoundException("Not Found"), 2021)
-      mockTaxCodeIncomes(Future failed new NotFoundException("Not Found"), 2020)
-      mockTaxCodeIncomes(Future failed new NotFoundException("Not Found"), 2019)
-      mockTaxCodeIncomes(Future failed new NotFoundException("Not Found"), 2018)
+      mockTaxCodeIncomes(Future failed new NotFoundException("Not Found"), TaxYear.current.startYear)
+      mockTaxCodeIncomes(Future failed new NotFoundException("Not Found"), TaxYear.current.startYear - 1)
+      mockTaxCodeIncomes(Future failed new NotFoundException("Not Found"), TaxYear.current.startYear - 2)
+      mockTaxCodeIncomes(Future failed new NotFoundException("Not Found"), TaxYear.current.startYear - 3)
+      mockTaxCodeIncomes(Future failed new NotFoundException("Not Found"), TaxYear.current.startYear - 4)
 
       val response = await(service.getIncomeTaxHistoryYearsList(nino))
       response.size                   shouldBe 5
@@ -101,13 +108,15 @@ class IncomeTaxHistoryServiceSpec extends BaseSpec {
 
     "return no income data when call fails for that year" in {
 
-      mockTaxCodeIncomes(Future successful Seq(taxCodeIncome, taxCodeIncome2, taxCodeIncome3), 2022)
-      mockTaxCodeIncomes(Future successful Seq(taxCodeIncome, taxCodeIncome2, taxCodeIncome3), 2021)
-      mockTaxCodeIncomes(Future failed new Exception("Unexpected Exception"), 2020)
-      mockTaxCodeIncomes(Future failed new Exception("Unexpected Exception"), 2019)
-      mockTaxCodeIncomes(Future failed new Exception("Unexpected Exception"), 2018)
-      mockEmployments(Future successful Seq(taiEmployment(2022), taiEmployment2), 2022)
-      mockEmployments(Future successful Seq(taiEmployment(2021), taiEmployment2), 2021)
+      mockTaxCodeIncomes(Future successful Seq(taxCodeIncome, taxCodeIncome2, taxCodeIncome3),
+                         TaxYear.current.startYear)
+      mockTaxCodeIncomes(Future successful Seq(taxCodeIncome, taxCodeIncome2, taxCodeIncome3),
+                         TaxYear.current.startYear - 1)
+      mockTaxCodeIncomes(Future failed new Exception("Unexpected Exception"), TaxYear.current.startYear - 2)
+      mockTaxCodeIncomes(Future failed new Exception("Unexpected Exception"), TaxYear.current.startYear - 3)
+      mockTaxCodeIncomes(Future failed new Exception("Unexpected Exception"), TaxYear.current.startYear - 4)
+      mockEmployments(Future successful Seq(taiEmployment(2022), taiEmployment2), TaxYear.current.startYear)
+      mockEmployments(Future successful Seq(taiEmployment(2021), taiEmployment2), TaxYear.current.startYear - 1)
 
       val response = await(service.getIncomeTaxHistoryYearsList(nino))
       response.size                   shouldBe 5
@@ -123,10 +132,12 @@ class IncomeTaxHistoryServiceSpec extends BaseSpec {
 
       val service = new IncomeTaxHistoryService(mockTaiConnector, 2)
 
-      mockTaxCodeIncomes(Future successful Seq(taxCodeIncome, taxCodeIncome2, taxCodeIncome3), 2022)
-      mockTaxCodeIncomes(Future successful Seq(taxCodeIncome, taxCodeIncome2, taxCodeIncome3), 2021)
-      mockEmployments(Future successful Seq(taiEmployment(2022), taiEmployment2), 2022)
-      mockEmployments(Future successful Seq(taiEmployment(2021), taiEmployment2), 2021)
+      mockTaxCodeIncomes(Future successful Seq(taxCodeIncome, taxCodeIncome2, taxCodeIncome3),
+                         TaxYear.current.startYear)
+      mockTaxCodeIncomes(Future successful Seq(taxCodeIncome, taxCodeIncome2, taxCodeIncome3),
+                         TaxYear.current.startYear - 1)
+      mockEmployments(Future successful Seq(taiEmployment(2022), taiEmployment2), TaxYear.current.startYear)
+      mockEmployments(Future successful Seq(taiEmployment(2021), taiEmployment2), TaxYear.current.startYear - 1)
 
       val response = await(service.getIncomeTaxHistoryYearsList(nino))
       response.size                   shouldBe 2
