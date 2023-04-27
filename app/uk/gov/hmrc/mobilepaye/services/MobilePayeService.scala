@@ -84,6 +84,7 @@ class MobilePayeService @Inject() (
 
     def buildMobilePayeResponse(
       incomeSourceEmployment: Seq[IncomeSource],
+      previousEmployments:    Seq[IncomeSource],
       incomeSourcePension:    Seq[IncomeSource],
       nonTaxCodeIncomes:      NonTaxCodeIncome,
       taxAccountSummary:      TaxAccountSummary,
@@ -139,6 +140,8 @@ class MobilePayeService @Inject() (
 
       val employmentPayeIncomes: Option[Seq[PayeIncome]] =
         buildPayeIncomes(incomeSourceEmployment, employment = true, Some(employmentBenefits))
+      val previousEmploymentPayeIncomes: Option[Seq[PayeIncome]] =
+        buildPayeIncomes(previousEmployments, employment = true)
       val pensionPayeIncomes: Option[Seq[PayeIncome]] = buildPayeIncomes(incomeSourcePension)
 
       val taxFreeAmount: Option[BigDecimal] = Option(taxAccountSummary.taxFreeAmount.setScale(0, RoundingMode.FLOOR))
@@ -148,20 +151,22 @@ class MobilePayeService @Inject() (
       val repayment: Option[P800Repayment] = getAndCacheP800RepaymentCheck(p800Summary)
 
       MobilePayeResponse(
-        taxYear            = Some(taxYear),
-        employments        = employmentPayeIncomes,
-        repayment          = repayment,
-        pensions           = pensionPayeIncomes,
-        otherIncomes       = otherNonTaxCodeIncomes,
-        taxCodeChange      = Some(taxCodeChange),
-        taxFreeAmount      = taxFreeAmount,
-        estimatedTaxAmount = estimatedTaxAmount
+        taxYear             = Some(taxYear),
+        employments         = employmentPayeIncomes,
+        previousEmployments = previousEmploymentPayeIncomes,
+        repayment           = repayment,
+        pensions            = pensionPayeIncomes,
+        otherIncomes        = otherNonTaxCodeIncomes,
+        taxCodeChange       = Some(taxCodeChange),
+        taxFreeAmount       = taxFreeAmount,
+        estimatedTaxAmount  = estimatedTaxAmount
       )
     }
 
     (for {
       taxCodeIncomesEmployment <- taiConnector
                                    .getMatchingTaxCodeIncomes(nino, taxYear, EmploymentIncome.toString, Live.toString)
+      previousEmployments <- getPreviousEmployments(nino, taxYear)
       taxCodeIncomesPension <- taiConnector
                                 .getMatchingTaxCodeIncomes(nino, taxYear, PensionIncome.toString, Live.toString)
       nonTaxCodeIncomes        <- taiConnector.getNonTaxCodeIncome(nino, taxYear)
@@ -175,6 +180,7 @@ class MobilePayeService @Inject() (
                             else Future successful false
       mobilePayeResponse: MobilePayeResponse = buildMobilePayeResponse(
         taxCodeIncomesEmployment,
+        previousEmployments,
         taxCodeIncomesPension,
         nonTaxCodeIncomes,
         taxAccountSummary,
@@ -256,5 +262,35 @@ class MobilePayeService @Inject() (
 
   def postFeedback(feedback: Feedback)(implicit hc: HeaderCarrier): Future[HttpResponse] =
     feedbackConnector.postFeedback(feedback)
+
+  private def getPreviousEmployments(
+    nino:        Nino,
+    taxYear:     Int
+  )(implicit hc: HeaderCarrier,
+    ec:          ExecutionContext
+  ): Future[Seq[IncomeSource]] =
+    for {
+      notLiveEmployments <- taiConnector
+                             .getMatchingTaxCodeIncomes(nino, taxYear, EmploymentIncome.toString, NotLive.toString)
+      ceasedEmployments <- taiConnector
+                            .getMatchingTaxCodeIncomes(nino, taxYear, EmploymentIncome.toString, Ceased.toString)
+      potentiallyCeasedEmployments <- taiConnector.getMatchingTaxCodeIncomes(nino,
+                                                                             taxYear,
+                                                                             EmploymentIncome.toString,
+                                                                             PotentiallyCeased.toString)
+    } yield {
+      logger.info(s"Not Live Employment count: ${notLiveEmployments.size} Total number of payments: ${notLiveEmployments
+        .flatMap(_.employment.annualAccounts.map(_.payments.size))
+        .sum}")
+      logger.info(s"Ceased Employment count: ${ceasedEmployments.size} Total number of payments: ${ceasedEmployments
+        .flatMap(_.employment.annualAccounts.map(_.payments.size))
+        .sum}")
+      logger.info(
+        s"Potentially Ceased Employment count: ${potentiallyCeasedEmployments.size} Total number of payments: ${potentiallyCeasedEmployments
+          .flatMap(_.employment.annualAccounts.map(_.payments.size))
+          .sum}"
+      )
+      notLiveEmployments ++ ceasedEmployments ++ potentiallyCeasedEmployments
+    }
 
 }

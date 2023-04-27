@@ -17,13 +17,14 @@
 package uk.gov.hmrc.mobilepaye.domain
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.mobilepaye.domain.tai.{Benefits, GenericBenefit, Payment}
+import uk.gov.hmrc.mobilepaye.domain.tai.{Benefits, GenericBenefit, Payment, TaxCodeIncomeStatus}
 
 import java.time.LocalDate
 import scala.math.BigDecimal.RoundingMode
 
 case class PayeIncome(
   name:               String,
+  status:             TaxCodeIncomeStatus,
   payrollNumber:      Option[String] = None,
   taxCode:            String,
   amount:             BigDecimal,
@@ -43,6 +44,7 @@ object PayeIncome {
   ): PayeIncome =
     PayeIncome(
       name          = incomeSource.taxCodeIncome.name,
+      status        = incomeSource.taxCodeIncome.status,
       payrollNumber = incomeSource.employment.payrollNumber,
       taxCode       = incomeSource.taxCodeIncome.taxCode,
       amount        = incomeSource.taxCodeIncome.amount.setScale(0, RoundingMode.FLOOR),

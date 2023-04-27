@@ -37,19 +37,23 @@ object TaiStub {
 
   def stubForEmploymentIncome(
     nino:        String,
-    employments: Seq[IncomeSource]
+    employments: Seq[IncomeSource] = Seq.empty,
+    status:      TaxCodeIncomeStatus = Live
   ): StubMapping =
     stubFor(
-      get(urlEqualTo(s"/tai/$nino/tax-account/year/${TaxYear.current.currentYear}/income/EmploymentIncome/status/Live"))
-        .willReturn(
-          aResponse()
-            .withStatus(200)
-            .withBody(s"""
-                         |{
-                         |  "data": ${Json.toJson(employments)}
-                         |}
+      get(
+        urlEqualTo(s"/tai/$nino/tax-account/year/${TaxYear.current.currentYear}/income/EmploymentIncome/status/$status")
+      ).willReturn(
+        aResponse()
+          .withStatus(200)
+          .withBody(s"""
+                       |{
+                       |  "data": ${Json.toJson(
+                         employments.map(emp => emp.copy(taxCodeIncome = emp.taxCodeIncome.copy(status = status)))
+                       )}
+                       |}
           """.stripMargin)
-        )
+      )
     )
 
   def employmentsNotCalled(nino: String): Unit =

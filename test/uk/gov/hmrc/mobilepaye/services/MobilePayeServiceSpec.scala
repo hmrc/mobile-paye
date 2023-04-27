@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.mobilepaye.services
 
+import play.api.libs.json.Json
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, HttpResponse, InternalServerException, UnauthorizedException}
 import uk.gov.hmrc.mobilepaye.connectors.{FeedbackConnector, TaiConnector, TaxCalcConnector}
@@ -55,10 +56,28 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
                                       true,
                                       true)
 
-  def mockMatchingTaxCode(f: Future[Seq[IncomeSource]]) =
+  def mockMatchingTaxCodeLive(f: Future[Seq[IncomeSource]]) =
     (mockTaiConnector
       .getMatchingTaxCodeIncomes(_: Nino, _: Int, _: String, _: String)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(*, *, *, *, *, *)
+      .expects(*, *, *, "Live", *, *)
+      .returning(f)
+
+  def mockMatchingTaxCodeCeased(f: Future[Seq[IncomeSource]]) =
+    (mockTaiConnector
+      .getMatchingTaxCodeIncomes(_: Nino, _: Int, _: String, _: String)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *, *, "Ceased", *, *)
+      .returning(f)
+
+  def mockMatchingTaxCodePotentiallyCeased(f: Future[Seq[IncomeSource]]) =
+    (mockTaiConnector
+      .getMatchingTaxCodeIncomes(_: Nino, _: Int, _: String, _: String)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *, *, "PotentiallyCeased", *, *)
+      .returning(f)
+
+  def mockMatchingTaxCodeNotLive(f: Future[Seq[IncomeSource]]) =
+    (mockTaiConnector
+      .getMatchingTaxCodeIncomes(_: Nino, _: Int, _: String, _: String)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *, *, "NotLive", *, *)
       .returning(f)
 
   def mockNonTaxCodeIncomes(f: Future[NonTaxCodeIncome]) =
@@ -105,8 +124,11 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
 
   "getMobilePayeResponse" should {
     "return full MobilePayeResponse when all data is available" in {
-      mockMatchingTaxCode(Future.successful(employmentIncomeSource))
-      mockMatchingTaxCode(Future.successful(pensionIncomeSource))
+      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource))
+      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
+      mockMatchingTaxCodeCeased(Future successful employmentIncomeSource)
+      mockMatchingTaxCodePotentiallyCeased(Future successful employmentIncomeSource)
+      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockGetBenefits(Future.successful((noBenefits)))
@@ -115,12 +137,15 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
 
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
 
-      result shouldBe fullMobilePayeResponse
+      result shouldBe fullMobilePayeResponse.copy(previousEmployments = Some((employments ++ employments)))
     }
 
     "return full MobilePayeResponse with tax comparison link during Welsh active period" in {
-      mockMatchingTaxCode(Future.successful(employmentIncomeSourceWelsh))
-      mockMatchingTaxCode(Future.successful(pensionIncomeSource))
+      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSourceWelsh))
+      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
+      mockMatchingTaxCodeCeased(Future successful Seq.empty)
+      mockMatchingTaxCodePotentiallyCeased(Future successful Seq.empty)
+      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockCYPlusOneAccountSummary(Future successful true)
@@ -148,8 +173,11 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
     }
 
     "return full MobilePayeResponse with tax comparison link during UK active period" in {
-      mockMatchingTaxCode(Future.successful(employmentIncomeSourceUK))
-      mockMatchingTaxCode(Future.successful(pensionIncomeSource))
+      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSourceUK))
+      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
+      mockMatchingTaxCodeCeased(Future successful Seq.empty)
+      mockMatchingTaxCodePotentiallyCeased(Future successful Seq.empty)
+      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockCYPlusOneAccountSummary(Future successful true)
@@ -177,8 +205,11 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
     }
 
     "return full MobilePayeResponse with tax comparison link during Scottish active period" in {
-      mockMatchingTaxCode(Future.successful(employmentIncomeSource))
-      mockMatchingTaxCode(Future.successful(pensionIncomeSource))
+      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource))
+      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
+      mockMatchingTaxCodeCeased(Future successful Seq.empty)
+      mockMatchingTaxCodePotentiallyCeased(Future successful Seq.empty)
+      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockCYPlusOneAccountSummary(Future successful true)
@@ -205,8 +236,11 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
     }
 
     "return full MobilePayeResponse with no tax comparison link if not in active period" in {
-      mockMatchingTaxCode(Future.successful(employmentIncomeSourceWelsh))
-      mockMatchingTaxCode(Future.successful(pensionIncomeSource))
+      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSourceWelsh))
+      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
+      mockMatchingTaxCodeCeased(Future successful Seq.empty)
+      mockMatchingTaxCodePotentiallyCeased(Future successful Seq.empty)
+      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockGetBenefits(Future.successful((noBenefits)))
@@ -232,8 +266,11 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
     }
 
     "return MobilePayeResponse with no untaxed interest" in {
-      mockMatchingTaxCode(Future.successful(employmentIncomeSource))
-      mockMatchingTaxCode(Future.successful(pensionIncomeSource))
+      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource))
+      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
+      mockMatchingTaxCodeCeased(Future successful Seq.empty)
+      mockMatchingTaxCodePotentiallyCeased(Future successful Seq.empty)
+      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithoutUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockGetBenefits(Future.successful((noBenefits)))
@@ -246,8 +283,11 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
     }
 
     "return MobilePayeResponse with no employments when employment data is missing" in {
-      mockMatchingTaxCode(Future.successful(Seq.empty[IncomeSource]))
-      mockMatchingTaxCode(Future.successful(pensionIncomeSource))
+      mockMatchingTaxCodeLive(Future.successful(Seq.empty[IncomeSource]))
+      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
+      mockMatchingTaxCodeCeased(Future successful Seq.empty)
+      mockMatchingTaxCodePotentiallyCeased(Future successful Seq.empty)
+      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockGetBenefits(Future.successful((noBenefits)))
@@ -260,8 +300,11 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
     }
 
     "return MobilePayeResponse with no pensions when pension data is missing" in {
-      mockMatchingTaxCode(Future.successful(employmentIncomeSource))
-      mockMatchingTaxCode(Future.successful(Seq.empty[IncomeSource]))
+      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource))
+      mockMatchingTaxCodeLive(Future.successful(Seq.empty[IncomeSource]))
+      mockMatchingTaxCodeCeased(Future successful Seq.empty)
+      mockMatchingTaxCodePotentiallyCeased(Future successful Seq.empty)
+      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockGetBenefits(Future.successful((noBenefits)))
@@ -274,8 +317,11 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
     }
 
     "return MobilePayeResponse with no otherIncomes when OtherIncome data is missing" in {
-      mockMatchingTaxCode(Future.successful(employmentIncomeSource))
-      mockMatchingTaxCode(Future.successful(pensionIncomeSource))
+      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource))
+      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
+      mockMatchingTaxCodeCeased(Future successful Seq.empty)
+      mockMatchingTaxCodePotentiallyCeased(Future successful Seq.empty)
+      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
       mockNonTaxCodeIncomes(
         Future.successful(nonTaxCodeIncomeWithoutUntaxedInterest.copy(otherNonTaxCodeIncomes = Nil))
       )
@@ -290,8 +336,11 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
     }
 
     "return MobilePayeResponse with correct employment latestPayments" in {
-      mockMatchingTaxCode(Future.successful(employmentIncomeSource))
-      mockMatchingTaxCode(Future.successful(pensionIncomeSource))
+      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource))
+      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
+      mockMatchingTaxCodeCeased(Future successful Seq.empty)
+      mockMatchingTaxCodePotentiallyCeased(Future successful Seq.empty)
+      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockGetBenefits(Future.successful((noBenefits)))
@@ -314,8 +363,11 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
     }
 
     "return MobilePayeResponse with correct employment latestPayments and previousPayments" in {
-      mockMatchingTaxCode(Future.successful(employmentIncomeSource2))
-      mockMatchingTaxCode(Future.successful(pensionIncomeSource))
+      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource2))
+      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
+      mockMatchingTaxCodeCeased(Future successful Seq.empty)
+      mockMatchingTaxCodePotentiallyCeased(Future successful Seq.empty)
+      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockGetBenefits(Future.successful((noBenefits)))
@@ -337,8 +389,11 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
     }
 
     "return MobilePayeResponse with no payments node for employment with no payments" in {
-      mockMatchingTaxCode(Future.successful(employmentIncomeSourceNoPayments))
-      mockMatchingTaxCode(Future.successful(pensionIncomeSourceNoPension))
+      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSourceNoPayments))
+      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSourceNoPension))
+      mockMatchingTaxCodeCeased(Future successful Seq.empty)
+      mockMatchingTaxCodePotentiallyCeased(Future successful Seq.empty)
+      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockGetBenefits(Future.successful((noBenefits)))
@@ -353,8 +408,11 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
     }
 
     "return MobilePayeResponse with no latestPayment for pension" in {
-      mockMatchingTaxCode(Future.successful(employmentIncomeSource))
-      mockMatchingTaxCode(Future.successful(pensionIncomeSource))
+      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource))
+      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
+      mockMatchingTaxCodeCeased(Future successful Seq.empty)
+      mockMatchingTaxCodePotentiallyCeased(Future successful Seq.empty)
+      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockGetBenefits(Future.successful((noBenefits)))
@@ -367,8 +425,11 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
     }
 
     "return full MobilePayeResponse with employment benefits data totalled correctly" in {
-      mockMatchingTaxCode(Future.successful(employmentIncomeSource))
-      mockMatchingTaxCode(Future.successful(pensionIncomeSource))
+      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource))
+      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
+      mockMatchingTaxCodeCeased(Future successful Seq.empty)
+      mockMatchingTaxCodePotentiallyCeased(Future successful Seq.empty)
+      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockGetBenefits(Future.successful((allBenefits)))
@@ -405,8 +466,11 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
     }
 
     "return tax code change as false if flag disabled" in {
-      mockMatchingTaxCode(Future.successful(employmentIncomeSource))
-      mockMatchingTaxCode(Future.successful(pensionIncomeSource))
+      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource))
+      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
+      mockMatchingTaxCodeCeased(Future successful Seq.empty)
+      mockMatchingTaxCodePotentiallyCeased(Future successful Seq.empty)
+      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockGetBenefits(Future.successful((noBenefits)))
@@ -431,7 +495,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
     }
 
     "throw UnauthorizedException when receiving UnauthorizedException from taiConnector" in {
-      mockMatchingTaxCode(Future.failed(new UnauthorizedException("Unauthorized")))
+      mockMatchingTaxCodeLive(Future.failed(new UnauthorizedException("Unauthorized")))
 
       intercept[UnauthorizedException] {
         await(service.getMobilePayeResponse(nino, currentTaxYear))
@@ -439,7 +503,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
     }
 
     "throw ForbiddenException when receiving ForbiddenException from taiConnector" in {
-      mockMatchingTaxCode(Future.failed(new ForbiddenException("Forbidden")))
+      mockMatchingTaxCodeLive(Future.failed(new ForbiddenException("Forbidden")))
 
       intercept[ForbiddenException] {
         await(service.getMobilePayeResponse(nino, currentTaxYear))
@@ -447,7 +511,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
     }
 
     "throw InternalServerError when receiving InternalServerError from taiConnector" in {
-      mockMatchingTaxCode(Future.failed(new InternalServerException("Internal Server Error")))
+      mockMatchingTaxCodeLive(Future.failed(new InternalServerException("Internal Server Error")))
 
       intercept[InternalServerException] {
         await(service.getMobilePayeResponse(nino, currentTaxYear))
@@ -455,7 +519,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
     }
 
     "return an empty MobilePayeResponse when an exception is thrown that contains 'no employments recorded for current tax year'" in {
-      mockMatchingTaxCode(Future.failed(new Exception("no employments recorded for current tax year")))
+      mockMatchingTaxCodeLive(Future.failed(new Exception("no employments recorded for current tax year")))
 
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
 
@@ -463,7 +527,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
     }
 
     "return an empty MobilePayeResponse when an exception is thrown from NPS that contains 'cannot complete a coding calculation without a primary employment'" in {
-      mockMatchingTaxCode(
+      mockMatchingTaxCodeLive(
         Future.failed(new Exception("cannot complete a coding calculation without a primary employment"))
       )
 
@@ -473,7 +537,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
     }
 
     "return an empty MobilePayeResponse when an exception is thrown from NPS that contains 'no employments recorded for this individual'" in {
-      mockMatchingTaxCode(Future.failed(new Exception("no employments recorded for this individual")))
+      mockMatchingTaxCodeLive(Future.failed(new Exception("no employments recorded for this individual")))
 
       val result = await(service.getMobilePayeResponse(nino, currentTaxYear))
 

@@ -31,7 +31,7 @@ trait MobilePayeTestData {
   val endOfTaxYear:   Int = TaxYear.current.finishYear
 
   val nino:           Nino          = Nino("CS700100A")
-  val taxCodeIncome:  TaxCodeIncome = TaxCodeIncome(EmploymentIncome, Some(3), "The Best Shop Ltd", 1000, "S1150L")
+  val taxCodeIncome:  TaxCodeIncome = TaxCodeIncome(EmploymentIncome, Live, Some(3), "The Best Shop Ltd", 1000, "S1150L")
   val taxCodeIncome2: TaxCodeIncome = taxCodeIncome.copy(name = "The Worst Shop Ltd", employmentId = Some(4))
 
   val taxCodeIncome3: TaxCodeIncome =
@@ -170,6 +170,7 @@ trait MobilePayeTestData {
   val fullMobilePayeResponse: MobilePayeResponse = MobilePayeResponse(
     taxYear                = Some(TaxYear.current.currentYear),
     employments            = Some(employments),
+    previousEmployments    = None,
     repayment              = None,
     pensions               = Some(pensions),
     otherIncomes           = Some(otherIncomes),
@@ -183,6 +184,7 @@ trait MobilePayeTestData {
   val fullMobilePayeResponseWithCY1Link: MobilePayeResponse = MobilePayeResponse(
     taxYear             = Some(TaxYear.current.currentYear),
     employments         = Some(employments),
+    previousEmployments = None,
     repayment           = None,
     pensions            = Some(pensions),
     otherIncomes        = Some(otherIncomes),
