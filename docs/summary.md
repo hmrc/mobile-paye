@@ -153,6 +153,108 @@ The Mobile Paye response
       }
     }
   ],
+  "previousEmployments": [
+    {
+      "name": "ALDI PLC",
+      "status": "Ceased",
+      "taxCode": "1250L",
+      "payrollNumber": "EMP0000001",
+      "amount": 18900,
+      "payeNumber": "P12345",
+      "link": "/",
+      "updateIncomeLink": "/",
+      "latestPayment": {
+        "date": "2020-07-28",
+        "amount": 1575,
+        "taxAmount": 315,
+        "nationalInsuranceAmount": 189,
+        "amountYearToDate": 6201,
+        "taxAmountYearToDate": 1180,
+        "nationalInsuranceAmountYearToDate": 657,
+        "link": "/",
+        "futurePayment": true
+      },
+      "payments": [
+        {
+          "date": "2020-07-28",
+          "amountYearToDate": 4636,
+          "taxAmountYearToDate": 865,
+          "nationalInsuranceAmountYearToDate": 468,
+          "amount": 1600,
+          "taxAmount": 320,
+          "nationalInsuranceAmount": 195
+        },
+        {
+          "date": "2020-06-28",
+          "amountYearToDate": 3036,
+          "taxAmountYearToDate": 545,
+          "nationalInsuranceAmountYearToDate": 273,
+          "amount": 1566,
+          "taxAmount": 289,
+          "nationalInsuranceAmount": 146
+        },
+        {
+          "date": "2020-05-28",
+          "amountYearToDate": 1470,
+          "taxAmountYearToDate": 256,
+          "nationalInsuranceAmountYearToDate": 127,
+          "amount": 1470,
+          "taxAmount": 256,
+          "nationalInsuranceAmount": 127
+        }
+      ]
+    },
+    {
+      "name": "Lidl PLC",
+      "status": "PotentiallyCeased",
+      "taxCode": "1250L",
+      "payrollNumber": "EMP0000001",
+      "amount": 18900,
+      "payeNumber": "P12345",
+      "link": "/",
+      "updateIncomeLink": "/",
+      "latestPayment": {
+        "date": "2020-07-28",
+        "amount": 1575,
+        "taxAmount": 315,
+        "nationalInsuranceAmount": 189,
+        "amountYearToDate": 6201,
+        "taxAmountYearToDate": 1180,
+        "nationalInsuranceAmountYearToDate": 657,
+        "link": "/",
+        "futurePayment": true
+      },
+      "payments": [
+        {
+          "date": "2020-07-28",
+          "amountYearToDate": 4636,
+          "taxAmountYearToDate": 865,
+          "nationalInsuranceAmountYearToDate": 468,
+          "amount": 1600,
+          "taxAmount": 320,
+          "nationalInsuranceAmount": 195
+        },
+        {
+          "date": "2020-06-28",
+          "amountYearToDate": 3036,
+          "taxAmountYearToDate": 545,
+          "nationalInsuranceAmountYearToDate": 273,
+          "amount": 1566,
+          "taxAmount": 289,
+          "nationalInsuranceAmount": 146
+        },
+        {
+          "date": "2020-05-28",
+          "amountYearToDate": 1470,
+          "taxAmountYearToDate": 256,
+          "nationalInsuranceAmountYearToDate": 127,
+          "amount": 1470,
+          "taxAmount": 256,
+          "nationalInsuranceAmount": 127
+        }
+      ]
+    }
+  ],
   "pensions": [
     {
       "name": "HIGHWIRE RETURNS LTD",

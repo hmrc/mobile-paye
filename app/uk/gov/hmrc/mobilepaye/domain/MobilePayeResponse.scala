@@ -22,6 +22,7 @@ import uk.gov.hmrc.time.TaxYear
 case class MobilePayeResponse(
   taxYear:                   Option[Int],
   employments:               Option[Seq[PayeIncome]],
+  previousEmployments:       Option[Seq[PayeIncome]],
   pensions:                  Option[Seq[PayeIncome]],
   repayment:                 Option[P800Repayment],
   otherIncomes:              Option[Seq[OtherIncome]],
@@ -34,7 +35,7 @@ case class MobilePayeResponse(
   addMissingEmployerLink:    String = "/check-income-tax/add-employment/employment-name",
   addMissingPensionLink:     String = "/check-income-tax/add-pension-provider/name",
   addMissingIncomeLink:      String = "/digital-forms/form/tell-us-about-other-income/draft/guide",
-  addMissingBenefitLink:      String = "/digital-forms/form/tell-us-about-company-benefits/draft/guide",
+  addMissingBenefitLink:     String = "/digital-forms/form/tell-us-about-company-benefits/draft/guide",
   addMissingCompanyCarLink:  String = "/paye/company-car/do-you-pay-towards-car/",
   previousTaxYearLink:       String = "/check-income-tax/income-tax-history",
   updateEstimatedIncomeLink: String = "/check-income-tax/update-income/start",
@@ -48,6 +49,7 @@ object MobilePayeResponse {
     MobilePayeResponse(
       taxYear                   = Option(TaxYear.current.currentYear),
       employments               = None,
+      previousEmployments       = None,
       pensions                  = None,
       repayment                 = None,
       otherIncomes              = None,

@@ -3,6 +3,7 @@
   "employments": [
     {
       "name": "SAINSBURY'S PLC",
+      "status": "Live",
       "taxCode": "1250L",
       "payrollNumber": "EMP0000001",
       "amount": 4143,

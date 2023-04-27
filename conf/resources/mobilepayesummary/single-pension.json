@@ -3,6 +3,7 @@
   "pensions": [
     {
       "name": "HIGHWIRE RETURNS LTD",
+      "status": "Live",
       "taxCode": "BR",
       "amount": 4200,
       "payeNumber": "P12345",
