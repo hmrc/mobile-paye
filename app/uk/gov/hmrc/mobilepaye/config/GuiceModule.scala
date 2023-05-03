@@ -76,6 +76,9 @@ class GuiceModule(
     bind(classOf[Boolean])
       .annotatedWith(named("taxCodeChangeEnabled"))
       .toInstance(servicesConfig.getBoolean("taxCodeChangeEnabled"))
+    bind(classOf[Boolean])
+      .annotatedWith(named("previousEmploymentsEnabled"))
+      .toInstance(servicesConfig.getBoolean("previousEmploymentsEnabled"))
   }
 
   private def bindConfigStringSeq(path: String): Unit = {
