@@ -71,12 +71,25 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       response.status shouldBe 200
       response.body shouldBe Json
         .toJson(
-          fullMobilePayeResponseWithCY1Link.copy(previousEmployments = Some(
-            (employments.map(_.copy(status = NotLive))) ++
-            employments.map(_.copy(status  = Ceased)) ++
-            employments.map(_.copy(status  = PotentiallyCeased))
-          )
-          )
+          fullMobilePayeResponseWithCY1Link
+            .copy(previousEmployments = Some(
+              employments.map(emp =>
+                emp.copy(status           = NotLive,
+                         link             = s"/check-income-tax/your-income-calculation-details/${emp.link.last}",
+                         updateIncomeLink = None)
+              ) ++
+              employments.map(emp =>
+                emp.copy(status           = Ceased,
+                         link             = s"/check-income-tax/your-income-calculation-details/${emp.link.last}",
+                         updateIncomeLink = None)
+              ) ++
+              employments.map(emp =>
+                emp.copy(status           = PotentiallyCeased,
+                         link             = s"/check-income-tax/your-income-calculation-details/${emp.link.last}",
+                         updateIncomeLink = None)
+              )
+            )
+            )
         )
         .toString()
 

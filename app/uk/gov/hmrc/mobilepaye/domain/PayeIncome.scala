@@ -17,7 +17,7 @@
 package uk.gov.hmrc.mobilepaye.domain
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.mobilepaye.domain.tai.{Benefits, GenericBenefit, Payment, TaxCodeIncomeStatus}
+import uk.gov.hmrc.mobilepaye.domain.tai.{Benefits, GenericBenefit, Live, Payment, TaxCodeIncomeStatus}
 
 import java.time.LocalDate
 import scala.math.BigDecimal.RoundingMode
@@ -50,8 +50,12 @@ object PayeIncome {
       amount        = incomeSource.taxCodeIncome.amount.setScale(0, RoundingMode.FLOOR),
       payeNumber    = incomeSource.employment.payeNumber,
       link =
-        s"/check-income-tax/income-details/${incomeSource.taxCodeIncome.employmentId.getOrElse(throw new Exception("Employment ID not found"))}",
-      updateIncomeLink = if (employment)
+        if (incomeSource.taxCodeIncome.status.equals(Live))
+          s"/check-income-tax/income-details/${incomeSource.taxCodeIncome.employmentId.getOrElse(throw new Exception("Employment ID not found"))}"
+        else
+          s"/check-income-tax/your-income-calculation-details/${incomeSource.taxCodeIncome.employmentId
+            .getOrElse(throw new Exception("Employment ID not found"))}",
+      updateIncomeLink = if (employment && incomeSource.taxCodeIncome.status.equals(Live))
         Option(
           s"/check-income-tax/update-income/load/${incomeSource.taxCodeIncome.employmentId.getOrElse(throw new Exception("Employment ID not found"))}"
         )

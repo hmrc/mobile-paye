@@ -33,18 +33,19 @@ import scala.math.BigDecimal.RoundingMode
 
 @Singleton
 class MobilePayeService @Inject() (
-  taiConnector:                                             TaiConnector,
-  taxCalcConnector:                                         TaxCalcConnector,
-  p800CacheMongo:                                           P800CacheMongo,
-  feedbackConnector:                                        FeedbackConnector,
-  @Named("rUK.startDate") rUKComparisonStartDate:           String,
-  @Named("rUK.endDate") rUKComparisonEndDate:               String,
-  @Named("wales.startDate") walesComparisonStartDate:       String,
-  @Named("wales.endDate") walesComparisonEndDate:           String,
-  @Named("scotland.startDate") scotlandComparisonStartDate: String,
-  @Named("scotland.endDate") scotlandComparisonEndDate:     String,
-  @Named("p800CacheEnabled") p800CacheEnabled:              Boolean,
-  @Named("taxCodeChangeEnabled") taxCodeChangeEnabled:      Boolean) {
+  taiConnector:                                                    TaiConnector,
+  taxCalcConnector:                                                TaxCalcConnector,
+  p800CacheMongo:                                                  P800CacheMongo,
+  feedbackConnector:                                               FeedbackConnector,
+  @Named("rUK.startDate") rUKComparisonStartDate:                  String,
+  @Named("rUK.endDate") rUKComparisonEndDate:                      String,
+  @Named("wales.startDate") walesComparisonStartDate:              String,
+  @Named("wales.endDate") walesComparisonEndDate:                  String,
+  @Named("scotland.startDate") scotlandComparisonStartDate:        String,
+  @Named("scotland.endDate") scotlandComparisonEndDate:            String,
+  @Named("p800CacheEnabled") p800CacheEnabled:                     Boolean,
+  @Named("taxCodeChangeEnabled") taxCodeChangeEnabled:             Boolean,
+  @Named("previousEmploymentsEnabled") previousEmploymentsEnabled: Boolean) {
 
   private val NpsTaxAccountNoEmploymentsCurrentYear = "no employments recorded for current tax year"
   private val NpsTaxAccountDataAbsentMsg            = "cannot complete a coding calculation without a primary employment"
@@ -268,8 +269,8 @@ class MobilePayeService @Inject() (
     taxYear:     Int
   )(implicit hc: HeaderCarrier,
     ec:          ExecutionContext
-  ): Future[Seq[IncomeSource]] =
-    for {
+  ): Future[Seq[IncomeSource]] = {
+    val prevEmployments = for {
       notLiveEmployments <- taiConnector
                              .getMatchingTaxCodeIncomes(nino, taxYear, EmploymentIncome.toString, NotLive.toString)
       ceasedEmployments <- taiConnector
@@ -292,5 +293,8 @@ class MobilePayeService @Inject() (
       )
       notLiveEmployments ++ ceasedEmployments ++ potentiallyCeasedEmployments
     }
+    if (previousEmploymentsEnabled) prevEmployments
+    else Future successful Seq.empty
+  }
 
 }
