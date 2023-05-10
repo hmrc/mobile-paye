@@ -57,9 +57,9 @@ object AppDependencies {
         override lazy val scope: String = "it"
 
         override lazy val test: Seq[ModuleID] = testCommon(scope) ++ Seq(
-          "org.mockito"            % "mockito-scala_2.12" % mockitoVersion  % scope,
-          "com.github.tomakehurst" % "wiremock"           % wireMockVersion % scope
-        )
+            "org.mockito"            % "mockito-scala_2.12" % mockitoVersion  % scope,
+            "com.github.tomakehurst" % "wiremock"           % wireMockVersion % scope
+          )
       }.test
   }
 
@@ -68,7 +68,8 @@ object AppDependencies {
     "com.typesafe.play"      %% "play-test"               % PlayVersion.current  % scope,
     "org.scalatestplus.play" %% "scalatestplus-play"      % scalaTestPlusVersion % scope,
     "com.vladsch.flexmark"   % "flexmark-all"             % flexmarkAllVersion   % scope,
-    "uk.gov.hmrc.mongo"      %% "hmrc-mongo-test-play-28" % hmrcMongoVersion     % scope
+    "uk.gov.hmrc.mongo"      %% "hmrc-mongo-test-play-28" % hmrcMongoVersion     % scope,
+    "uk.gov.hmrc"            %% "bootstrap-test-play-28"  % play28Bootstrap      % scope
   )
 
   def apply(): Seq[ModuleID] = compile ++ Test() ++ IntegrationTest()
