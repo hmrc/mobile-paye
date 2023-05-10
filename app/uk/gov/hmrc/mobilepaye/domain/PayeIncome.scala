@@ -33,7 +33,8 @@ case class PayeIncome(
   updateIncomeLink:   Option[String],
   latestPayment:      Option[LatestPayment],
   payments:           Option[Seq[Payment]],
-  employmentBenefits: Option[EmploymentBenefits])
+  employmentBenefits: Option[EmploymentBenefits],
+  endDate:            Option[LocalDate])
 
 object PayeIncome {
 
@@ -71,7 +72,8 @@ object PayeIncome {
       else incomeSource.employment.annualAccounts.headOption.map(_.payments.sorted(Payment.dateOrdering.reverse)),
       employmentBenefits.flatMap(
         buildEmploymentBenefits(_, incomeSource.taxCodeIncome.employmentId)
-      )
+      ),
+      endDate = incomeSource.employment.endDate
     )
 
   private def buildLatestPayment(

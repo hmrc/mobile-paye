@@ -1,17 +1,75 @@
 [
   {
-    "taxYear": <TAX_YEAR>
+    "taxYear": <TAX_YEAR>,
+    "incomes": [
+      {
+        "name": "Supermarket plc",
+        "payrollNumber": "9282SUPER22",
+        "startDate": "2020-07-10",
+        "amount": 1575,
+        "taxAmount": 105.35,
+        "taxCode": "1275L",
+        "isPension": false
+      }
+    ]
   },
   {
-    "taxYear": <TAX_YEAR-1>
+    "taxYear": <TAX_YEAR-1>,
+    "incomes": [
+      {
+        "name": "Supermarket plc",
+        "payrollNumber": "9282SUPER22",
+        "startDate": "2020-07-10",
+        "amount": 18100,
+        "taxAmount": 1104.20,
+        "taxCode": "1275L",
+        "isPension": false
+      }
+    ]
   },
   {
-    "taxYear": <TAX_YEAR-2>
+    "taxYear": <TAX_YEAR-2>,
+    "incomes": [
+      {
+        "name": "Supermarket plc",
+        "payrollNumber": "9282SUPER22",
+        "startDate": "2020-07-10",
+        "amount": 13200,
+        "taxAmount": 753.12,
+        "taxCode": "1275L",
+        "isPension": false
+      },
+      {
+        "name": "HJP Trade",
+        "payrollNumber": "1212TRADE12",
+        "startDate": "2019-05-25",
+        "endDate": "2020-07-05",
+        "amount": 5336,
+        "taxAmount": 239.28,
+        "taxCode": "1275L",
+        "isPension": false
+      }
+    ]
   },
   {
-    "taxYear": <TAX_YEAR-3>
+    "taxYear": <TAX_YEAR-3>,
+    "incomes": [
+      {
+        "name": "HJP Trade",
+        "payrollNumber": "1212TRADE12",
+        "startDate": "2019-05-25",
+        "endDate": "2020-07-05",
+        "amount": 16098,
+        "taxAmount": 717.80,
+        "taxCode": "1275L",
+        "isPension": false
+      }
+    ]
   },
   {
     "taxYear": <TAX_YEAR-4>
+  },
+  {
+    "taxYear": <TAX_YEAR-5>
   }
 ]

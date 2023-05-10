@@ -88,6 +88,7 @@ class SandboxMobilePayeController @Inject() (
               .replace("<TAX_YEAR-2>", TaxYear.current.back(2).currentYear.toString)
               .replace("<TAX_YEAR-3>", TaxYear.current.back(3).currentYear.toString)
               .replace("<TAX_YEAR-4>", TaxYear.current.back(4).currentYear.toString)
+              .replace("<TAX_YEAR-5>", TaxYear.current.back(5).currentYear.toString)
           )
         )
       )

@@ -1,7 +1,7 @@
 import play.api.libs.json.Json
 import play.api.libs.ws.WSRequest
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus.{ChequeSent, PaymentPaid, PaymentProcessing, Refund}
-import uk.gov.hmrc.mobilepaye.domain.{MobilePayeResponse, Shuttering}
+import uk.gov.hmrc.mobilepaye.domain.{HistoricTaxCodeIncome, MobilePayeResponse, Shuttering}
 import uk.gov.hmrc.time.TaxYear
 import utils.BaseISpec
 
@@ -291,13 +291,19 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
 
     "return OK and default income tax history data with no SANDBOX-CONTROL" in {
       val response = await(request.addHttpHeaders(mobileHeader).get())
-      response.status                         shouldBe 200
-      (response.json \ 0 \ "taxYear").as[Int] shouldBe TaxYear.current.currentYear
-      (response.json \ 1 \ "taxYear").as[Int] shouldBe TaxYear.current.currentYear - 1
-      (response.json \ 2 \ "taxYear").as[Int] shouldBe TaxYear.current.currentYear - 2
-      (response.json \ 3 \ "taxYear").as[Int] shouldBe TaxYear.current.currentYear - 3
-      (response.json \ 4 \ "taxYear").as[Int] shouldBe TaxYear.current.currentYear - 4
-
+      response.status                                                     shouldBe 200
+      (response.json \ 0 \ "taxYear").as[Int]                             shouldBe TaxYear.current.currentYear
+      (response.json \ 0 \ "incomes").as[Seq[HistoricTaxCodeIncome]].size shouldBe 1
+      (response.json \ 1 \ "taxYear").as[Int]                             shouldBe TaxYear.current.currentYear - 1
+      (response.json \ 1 \ "incomes").as[Seq[HistoricTaxCodeIncome]].size shouldBe 1
+      (response.json \ 2 \ "taxYear").as[Int]                             shouldBe TaxYear.current.currentYear - 2
+      (response.json \ 2 \ "incomes").as[Seq[HistoricTaxCodeIncome]].size shouldBe 2
+      (response.json \ 3 \ "taxYear").as[Int]                             shouldBe TaxYear.current.currentYear - 3
+      (response.json \ 3 \ "incomes").as[Seq[HistoricTaxCodeIncome]].size shouldBe 1
+      (response.json \ 4 \ "taxYear").as[Int]                             shouldBe TaxYear.current.currentYear - 4
+      (response.json \ 4 \ "incomes").isDefined                           shouldBe false
+      (response.json \ 5 \ "taxYear").as[Int]                             shouldBe TaxYear.current.currentYear - 5
+      (response.json \ 5 \ "incomes").isDefined                           shouldBe false
     }
   }
 
