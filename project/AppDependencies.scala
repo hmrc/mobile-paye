@@ -6,6 +6,7 @@ object AppDependencies {
   import play.core.PlayVersion
   import play.sbt.PlayImport._
 
+  private val play28Bootstrap = "5.24.0"
   private val playHmrcVersion = "7.0.0-play-28"
   private val domainVersion   = "8.1.0-play-28"
   private val taxYearVersion  = "3.0.0"
