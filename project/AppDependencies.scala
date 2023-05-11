@@ -6,7 +6,6 @@ object AppDependencies {
   import play.core.PlayVersion
   import play.sbt.PlayImport._
 
-  private val play28Bootstrap = "5.24.0"
   private val playHmrcVersion = "7.0.0-play-28"
   private val domainVersion   = "8.1.0-play-28"
   private val taxYearVersion  = "3.0.0"
@@ -22,7 +21,6 @@ object AppDependencies {
 
   val compile: Seq[ModuleID] = Seq(
     ws,
-    "uk.gov.hmrc"       %% "bootstrap-backend-play-28"    % play28Bootstrap,
     "uk.gov.hmrc"       %% "domain"                       % domainVersion,
     "uk.gov.hmrc"       %% "play-hmrc-api"                % playHmrcVersion,
     "uk.gov.hmrc"       %% "tax-year"                     % taxYearVersion,
