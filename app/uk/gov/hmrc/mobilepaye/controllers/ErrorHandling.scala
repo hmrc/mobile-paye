@@ -53,6 +53,8 @@ class NinoNotFoundOnAccount extends GrantAccessException("Unauthorised! NINO not
 
 class AccountWithLowCL extends GrantAccessException("Unauthorised! Account with low CL!")
 
+case object ErrorTooManyRequests extends ErrorResponse(429,"TOO_MANY_REQUESTS","Too many requests have been made to mobile paye please try again later")
+
 trait ErrorHandling {
   self: BackendBaseController =>
   val app: String
@@ -69,6 +71,10 @@ trait ErrorHandling {
       case _: BadRequestException =>
         log("BadRequest!")
         Status(ErrorBadRequest.httpStatusCode)(toJson[ErrorResponse](ErrorBadRequest))
+
+      case ex: Upstream4xxResponse if ex.upstreamResponseCode == 429 =>
+        log("Too Many Requests!")
+        Status(ErrorTooManyRequests.httpStatusCode)(toJson[ErrorResponse](ErrorTooManyRequests))
 
       case ex: Upstream4xxResponse if ex.upstreamResponseCode == 401 =>
         log("Upstream service returned 401")

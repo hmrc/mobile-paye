@@ -474,6 +474,16 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       taxCalcCalled(nino, currentTaxYear)
     }
 
+    "return TOO_MANY_REQUESTS when the TAI returns a 429" in {
+      stubForShutteringDisabled
+      grantAccess(nino)
+      personalTooManyRequests(nino)
+
+      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
+      response.status shouldBe 429
+
+    }
+
     "return OK and a full valid MobilePayeResponse json ith employment benefit info" in {
       stubForShutteringDisabled
       grantAccess(nino)

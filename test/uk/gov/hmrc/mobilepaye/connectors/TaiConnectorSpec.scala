@@ -71,6 +71,14 @@ class TaiConnectorSpec extends BaseSpec {
       }
     }
 
+    "throw TooManyRequestsExcpetion for valid nino for authorised user but for a different nino" in {
+      mockTaiGet("person",Future.failed(new TooManyRequestException("TOO_MANY_REQUESTS")))
+
+      intercept[TooManyRequestException]{
+        await(connector.getPerson(nino))
+      }
+    }
+
     "throw InternalServerException for valid nino for authorised user when receiving a 500 response from tai" in {
       mockTaiGet("person", Future.failed(new InternalServerException("Internal Server Error")))
 
