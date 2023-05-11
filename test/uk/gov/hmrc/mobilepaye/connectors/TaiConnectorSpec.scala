@@ -78,6 +78,14 @@ class TaiConnectorSpec extends BaseSpec {
         await(connector.getPerson(nino))
       }
     }
+
+    "throw TooManyRequests Exception for valid nino for authorised user when receiving a 429 response from tai" in {
+      mockTaiGet("person", Future.failed(new TooManyRequestException("TOO_MANY_REQUESTS")))
+
+      intercept[TooManyRequestException]{
+        await(connector.getPerson(nino))
+      }
+    }
   }
 
   "Non Tax Code Incomes - GET /tai/:nino/tax-account/:year/income" should {

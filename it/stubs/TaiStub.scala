@@ -18,6 +18,15 @@ object TaiStub {
         )
     )
 
+  def personalTooManyRequests(nino: String): StubMapping =
+    stubFor(
+      get(urlEqualTo(s"/tai/$nino/person"))
+        .willReturn(
+          aResponse()
+            .withStatus(429)
+        )
+    )
+
   def personalDetailsAreFound(
     nino:   String,
     person: Person
