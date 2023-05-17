@@ -931,6 +931,8 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     stubForTaxCodeChangeExists(nino)
 
     val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
+
+    println(Json.prettyPrint(response.json))
     response.status shouldBe 200
     response.body shouldBe Json
       .toJson(fullMobilePayeResponse)
