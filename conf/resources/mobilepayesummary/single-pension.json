@@ -6,7 +6,7 @@
       "status": "Live",
       "taxCode": "BR",
       "amount": 4200,
-      "payeNumber": "P12345",
+      "payeNumber": "123/P12345",
       "link": "/",
       "payments": []
     }

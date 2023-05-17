@@ -49,7 +49,7 @@ object PayeIncome {
       payrollNumber = incomeSource.employment.payrollNumber,
       taxCode       = incomeSource.taxCodeIncome.taxCode,
       amount        = incomeSource.taxCodeIncome.amount.setScale(0, RoundingMode.FLOOR),
-      payeNumber    = incomeSource.employment.payeNumber,
+      payeNumber    = s"${incomeSource.employment.taxDistrictNumber}/${incomeSource.employment.payeNumber}",
       link =
         if (incomeSource.taxCodeIncome.status.equals(Live))
           s"/check-income-tax/income-details/${incomeSource.taxCodeIncome.employmentId.getOrElse(throw new Exception("Employment ID not found"))}"

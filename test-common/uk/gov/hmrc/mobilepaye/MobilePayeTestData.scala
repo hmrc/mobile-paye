@@ -69,7 +69,7 @@ trait MobilePayeTestData {
                LocalDate.now().minusYears(4),
                None,
                Seq(annualAccount(taxYear)),
-               "TAX121232")
+               "123")
 
   val taiEmployment2: Employment = Employment(
     name           = "ASDA",
@@ -84,7 +84,7 @@ trait MobilePayeTestData {
       AnnualAccount(TaxYear(TaxYear.current.back(5).currentYear),
                     Seq(Payment(LocalDate.now().minusDays(63), 50, 20, 10, 30, 5, 2)))
     ),
-    taxDistrictNumber = "TAX121232"
+    taxDistrictNumber = "123"
   )
 
   val taiEmployment3: Employment =
