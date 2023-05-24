@@ -322,7 +322,7 @@ paths:
                             taxAmount: 1235
                             taxCode: 1185L
                             isPension: false
-                      - taxYear: 2020
+                      - taxYear: 2021
                         incomes:
                           - name: TESCO LTD
                             payrollNumber: TS1234321
@@ -332,6 +332,7 @@ paths:
                             taxAmount: 1345
                             taxCode: 1145L
                             isPension: false
+                      - taxYear: 2020
                       - taxYear: 2019
                       - taxYear: 2018
       deprecated: false
