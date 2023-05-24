@@ -94,6 +94,9 @@ Fetch the income tax history for a user.
   },
   {
     "taxYear": 2018
+  },
+  {
+    "taxYear": 2017
   }
 ]
 ```
