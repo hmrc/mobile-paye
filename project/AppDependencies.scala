@@ -28,6 +28,7 @@ object AppDependencies {
     "uk.gov.hmrc.mongo" %% "hmrc-mongo-play-28"           % hmrcMongoVersion,
     "eu.timepit"        %% "refined"                      % refinedVersion,
     "uk.gov.hmrc"       %% "internal-auth-client-play-28" % "1.2.0",
+    "ai.x"              %% "play-json-extensions"         % "0.42.0",
     ehcache
   )
 
