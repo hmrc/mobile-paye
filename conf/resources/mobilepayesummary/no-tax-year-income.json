@@ -7,5 +7,6 @@
   "addMissingCompanyCarLink": "/",
   "previousTaxYearLink": "/",
   "updateEstimatedIncomeLink": "/",
-  "updateEmployerLink": "/"
+  "updateEmployerLink": "/",
+  "incomeTaxHistoricPayeUrl": "/"
 }
