@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.mobilepaye.domain
 
+import ai.x.play.json.Encoders.encoder
+import ai.x.play.json.Jsonx
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.time.TaxYear
 
@@ -35,13 +37,14 @@ case class MobilePayeResponse(
   addMissingEmployerLink:    String = "/check-income-tax/add-employment/employment-name",
   addMissingPensionLink:     String = "/check-income-tax/add-pension-provider/name",
   addMissingIncomeLink:      String = "/digital-forms/form/tell-us-about-other-income/draft/guide",
-  addMissingBenefitLink:     String = "/digital-forms/form/tell-us-about-company-benefits/draft/guide",
+  addMissingBenefitLink:      String =  "/digital-forms/form/tell-us-about-company-benefits/draft/guide",
   addMissingCompanyCarLink:  String = "/paye/company-car/do-you-pay-towards-car/",
   previousTaxYearLink:       String = "/check-income-tax/income-tax-history",
   updateEstimatedIncomeLink: String = "/check-income-tax/update-income/start",
   updateEmployerLink:        String = "/check-income-tax/update-remove-employment/decision-page",
   currentYearPlusOneLink:    Option[String] = Some("/check-income-tax/income-tax-comparison"),
-  taxCodeLocation:           Option[String] = None)
+  taxCodeLocation:           Option[String] = None,
+  incomeTaxHistoricPayeUrl:  String = "/check-income-tax/historic-paye/")
 
 object MobilePayeResponse {
 
@@ -62,5 +65,5 @@ object MobilePayeResponse {
       currentYearPlusOneLink    = None
     )
 
-  implicit val format: OFormat[MobilePayeResponse] = Json.format[MobilePayeResponse]
+  implicit val format: OFormat[MobilePayeResponse] = Jsonx.formatCaseClass
 }
