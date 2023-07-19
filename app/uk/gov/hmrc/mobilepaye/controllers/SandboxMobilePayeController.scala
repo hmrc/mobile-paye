@@ -106,4 +106,6 @@ class SandboxMobilePayeController @Inject() (
         )
         .as[MobilePayeResponse]
     )
+
+  override def getPreviousYearPayeSummary(nino: Nino, journeyId: JourneyId, taxYear: Int): Action[AnyContent] = ???
 }

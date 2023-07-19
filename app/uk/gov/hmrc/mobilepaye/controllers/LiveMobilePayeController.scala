@@ -52,6 +52,12 @@ trait MobilePayeController extends BackendBaseController with HeaderValidator wi
     nino:      Nino,
     journeyId: JourneyId
   ): Action[AnyContent]
+
+  def getPreviousYearPayeSummary(
+    nino:      Nino,
+    journeyId: JourneyId,
+    taxYear:   Int
+  ): Action[AnyContent]
 }
 
 @Singleton
@@ -125,6 +131,23 @@ class LiveMobilePayeController @Inject() (
       }
     }
   }
+
+  override def getPreviousYearPayeSummary(
+    nino:      Nino,
+    journeyId: JourneyId,
+    taxYear:   Int
+  ): Action[AnyContent] =
+    validateAcceptWithAuth(acceptHeaderValidationRules, Option(nino)).async { implicit request =>
+      implicit val hc: HeaderCarrier =
+        fromRequest(request).withExtraHeaders(HeaderNames.xSessionId -> journeyId.value)
+      shutteringConnector.getShutteringStatus(journeyId).flatMap { shuttered =>
+        withShuttering(shuttered) {
+          errorWrapper {
+            ???
+          }
+        }
+      }
+    }
 
   private def sendAuditEvent(
     nino:        Nino,

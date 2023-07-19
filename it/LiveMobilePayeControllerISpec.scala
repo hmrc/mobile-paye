@@ -59,13 +59,11 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForEmploymentIncome(nino, employmentIncomeSource)
       stubForEmploymentIncome(
         nino,
-        employmentIncomeSource.map(incSrc =>
+        employmentIncomeSource ++ employmentIncomeSource.map(incSrc =>
           incSrc.copy(employment = incSrc.employment.copy(endDate = Some(LocalDate.of(2022, 2, 1))))
         ),
-        status = Ceased
+        status = NotLive
       )
-      stubForEmploymentIncome(nino, employmentIncomeSource, status = PotentiallyCeased)
-      stubForEmploymentIncome(nino, employmentIncomeSource, status = NotLive)
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryIsFound(nino, taxAccountSummary, cyPlusone = true)
@@ -85,15 +83,10 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
                          updateIncomeLink = None)
               ) ++
               employments.map(emp =>
-                emp.copy(status           = Ceased,
+                emp.copy(status           = NotLive,
                          link             = s"/check-income-tax/your-income-calculation-details/${emp.link.last}",
                          updateIncomeLink = None,
                          endDate          = Some(LocalDate.of(2022, 2, 1)))
-              ) ++
-              employments.map(emp =>
-                emp.copy(status           = PotentiallyCeased,
-                         link             = s"/check-income-tax/your-income-calculation-details/${emp.link.last}",
-                         updateIncomeLink = None)
               )
             )
             )
