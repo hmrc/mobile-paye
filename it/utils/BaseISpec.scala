@@ -53,7 +53,9 @@ abstract class BaseISpec
         .now(ZoneId.of("Europe/London"))
         .plusDays(10)
         .format(DateTimeFormatter.ofPattern("yyyy-MM-dd\'T\'HH:mm:ss")),
-      "p800CacheEnabled" -> true
+      "p800CacheEnabled" -> false,
+      "numberOfPreviousYearsToShowPayeSummary" -> 1
+
     )
 
   def getRequestWithAuthHeaders(url: String): Future[WSResponse] =

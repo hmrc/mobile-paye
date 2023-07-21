@@ -27,11 +27,12 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.mobilepaye.connectors.ShutteringConnector
 import uk.gov.hmrc.mobilepaye.domain.tai.Person
-import uk.gov.hmrc.mobilepaye.domain.{IncomeTaxYear, MobilePayeResponse, Shuttering}
+import uk.gov.hmrc.mobilepaye.domain.{IncomeTaxYear, MobilePayePreviousYearSummaryResponse, MobilePayeSummaryResponse, Shuttering}
 import uk.gov.hmrc.mobilepaye.services.{IncomeTaxHistoryService, MobilePayeService}
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import eu.timepit.refined.auto._
+import uk.gov.hmrc.time.TaxYear
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -62,9 +63,9 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       mockIncomeTaxHistoryService
     )
 
-  def mockGetMobilePayeResponse(f: Future[MobilePayeResponse]) =
+  def mockGetMobilePayeResponse(f: Future[MobilePayeSummaryResponse]) =
     (mockMobilePayeService
-      .getMobilePayeResponse(_: Nino, _: Int)(_: HeaderCarrier, _: ExecutionContext))
+      .getMobilePayeSummaryResponse(_: Nino, _: Int)(_: HeaderCarrier, _: ExecutionContext))
       .expects(*, *, *, *)
       .returning(f)
 
@@ -75,6 +76,12 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
     (mockIncomeTaxHistoryService
       .getIncomeTaxHistoryYearsList(_: Nino)(_: HeaderCarrier, _: ExecutionContext))
       .expects(*, *, *)
+      .returning(f)
+
+  def mockGetMobilePayePreviousYearResponse(f: Future[MobilePayePreviousYearSummaryResponse]) =
+    (mockMobilePayeService
+      .getMobilePayePreviousYearSummaryResponse(_: Nino, _: Int)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *, *, *)
       .returning(f)
 
   "getPayeSummary" should {
@@ -249,6 +256,173 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
     }
   }
 
+  "getPreviousYearPayeSummary" should {
+    "return 200 and previous year's paye summary data for valid authorised nino" in {
+      mockShutteringResponse(notShuttered)
+      mockGetMobilePayePreviousYearResponse(
+        Future.successful(fullMobilePayePreviousYearResponse())
+      )
+      mockAuthorisationGrantAccess(grantAccessWithCL200)
+
+      val result = controller.getPreviousYearPayeSummary(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42", previousTaxYear)(
+        fakeRequest
+      )
+
+      status(result)        shouldBe 200
+      contentAsJson(result) shouldBe Json.toJson(fullMobilePayePreviousYearResponse())
+    }
+
+    "return 200 and paye summary data with no employment data for valid authorised nino" in {
+      mockShutteringResponse(notShuttered)
+      mockGetMobilePayePreviousYearResponse(
+        Future.successful(fullMobilePayePreviousYearResponse().copy(employments = None))
+      )
+      mockAuthorisationGrantAccess(grantAccessWithCL200)
+
+      val result = controller.getPreviousYearPayeSummary(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42", previousTaxYear)(
+        fakeRequest
+      )
+
+      status(result)        shouldBe 200
+      contentAsJson(result) shouldBe Json.toJson(fullMobilePayePreviousYearResponse().copy(employments = None))
+    }
+
+    "return 200 and paye summary data with no pensions data for valid authorised nino" in {
+      mockShutteringResponse(notShuttered)
+      mockGetMobilePayePreviousYearResponse(
+        Future.successful(fullMobilePayePreviousYearResponse().copy(pensions = None))
+      )
+      mockAuthorisationGrantAccess(grantAccessWithCL200)
+
+      val result = controller.getPreviousYearPayeSummary(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42", previousTaxYear)(
+        fakeRequest
+      )
+
+      status(result)        shouldBe 200
+      contentAsJson(result) shouldBe Json.toJson(fullMobilePayePreviousYearResponse().copy(pensions = None))
+    }
+
+    "return 200 and paye summary data with no other income data for valid authorised nino" in {
+      mockShutteringResponse(notShuttered)
+      mockGetMobilePayePreviousYearResponse(
+        Future.successful(fullMobilePayePreviousYearResponse().copy(otherIncomes = None))
+      )
+      mockAuthorisationGrantAccess(grantAccessWithCL200)
+
+      val result = controller.getPreviousYearPayeSummary(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42", previousTaxYear)(
+        fakeRequest
+      )
+
+      status(result)        shouldBe 200
+      contentAsJson(result) shouldBe Json.toJson(fullMobilePayePreviousYearResponse().copy(otherIncomes = None))
+    }
+
+    "return 500 when MobilePayeService throws an InternalServerException" in {
+      mockShutteringResponse(notShuttered)
+      mockAuthorisationGrantAccess(grantAccessWithCL200)
+      mockGetMobilePayePreviousYearResponse(Future.failed(new InternalServerException("Internal Server Error")))
+
+      val result = controller.getPreviousYearPayeSummary(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42", previousTaxYear)(
+        fakeRequest
+      )
+
+      status(result) shouldBe 500
+    }
+
+    "return 401 for valid nino and user but low CL" in {
+      mockAuthorisationGrantAccess(Some(nino.toString()) and L50)
+
+      val result = controller.getPreviousYearPayeSummary(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42", previousTaxYear)(
+        fakeRequest
+      )
+
+      status(result) shouldBe 401
+    }
+
+    "return 406 for missing accept header" in {
+      val result =
+        controller.getPreviousYearPayeSummary(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42", previousTaxYear)(
+          FakeRequest("GET", "/")
+        )
+
+      status(result) shouldBe 406
+    }
+
+    "return 403 for valid nino for authorised user but for a different nino" in {
+      mockAuthorisationGrantAccess(grantAccessWithCL200)
+
+      val result = controller.getPreviousYearPayeSummary(Nino("CS100700A"),
+                                                         "9bcb9c5a-0cfd-49e3-a935-58a28c386a42",
+                                                         previousTaxYear)(
+        fakeRequest
+      )
+
+      status(result) shouldBe 403
+    }
+
+    "return 404 when handling NotFoundException" in {
+      mockShutteringResponse(notShuttered)
+      mockAuthorisationGrantAccess(grantAccessWithCL200)
+      mockGetMobilePayePreviousYearResponse(Future.failed(new NotFoundException("Not Found Exception")))
+
+      val result = controller.getPreviousYearPayeSummary(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42", previousTaxYear)(
+        fakeRequest
+      )
+
+      status(result) shouldBe 404
+    }
+
+    "return 400 when handling BadRequestException" in {
+      mockShutteringResponse(notShuttered)
+      mockAuthorisationGrantAccess(grantAccessWithCL200)
+      mockGetMobilePayePreviousYearResponse(Future.failed(new BadRequestException("Bad Request Exception")))
+
+      val result = controller.getPreviousYearPayeSummary(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42", previousTaxYear)(
+        fakeRequest
+      )
+
+      status(result) shouldBe 400
+    }
+
+    "return 401 when handling 401 Upstream4xxResponse" in {
+      mockShutteringResponse(notShuttered)
+      mockAuthorisationGrantAccess(grantAccessWithCL200)
+      mockGetMobilePayePreviousYearResponse(Future.failed(Upstream4xxResponse("Upstream Exception", 401, 401)))
+
+      val result = controller.getPreviousYearPayeSummary(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42", previousTaxYear)(
+        fakeRequest
+      )
+
+      status(result) shouldBe 401
+    }
+
+    "return 401 when handling AuthorisationException" in {
+      mockShutteringResponse(notShuttered)
+      mockAuthorisationGrantAccess(grantAccessWithCL200)
+      mockGetMobilePayePreviousYearResponse(Future.failed(new MissingBearerToken))
+
+      val result = controller.getPreviousYearPayeSummary(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42", previousTaxYear)(
+        fakeRequest
+      )
+
+      status(result) shouldBe 401
+    }
+
+    "return 521 when shuttered" in {
+      mockShutteringResponse(shuttered)
+      mockAuthorisationGrantAccess(grantAccessWithCL200)
+      val result = controller.getPreviousYearPayeSummary(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42", previousTaxYear)(
+        fakeRequest
+      )
+
+      status(result) shouldBe 521
+      val jsonBody = contentAsJson(result)
+      (jsonBody \ "shuttered").as[Boolean] shouldBe true
+      (jsonBody \ "title").as[String]      shouldBe "Shuttered"
+      (jsonBody \ "message").as[String]    shouldBe "PAYE is currently not available"
+    }
+  }
+
   "getIncomeTaxHistory" should {
     "return 200 and full income tax history" in {
       mockShutteringResponse(notShuttered)
@@ -312,8 +486,8 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       status(result) shouldBe 521
       val jsonBody = contentAsJson(result)
       (jsonBody \ "shuttered").as[Boolean] shouldBe true
-      (jsonBody \ "title").as[String] shouldBe "Shuttered"
-      (jsonBody \ "message").as[String] shouldBe "PAYE is currently not available"
+      (jsonBody \ "title").as[String]      shouldBe "Shuttered"
+      (jsonBody \ "message").as[String]    shouldBe "PAYE is currently not available"
     }
   }
 }

@@ -104,8 +104,14 @@ class SandboxMobilePayeController @Inject() (
             .replace("<TAX_YEAR>", TaxYear.current.currentYear.toString)
             .replace("<PAYMENT_DATE>", LocalDate.now().plusDays(2).toString)
         )
-        .as[MobilePayeResponse]
+        .as[MobilePayeSummaryResponse]
     )
 
-  override def getPreviousYearPayeSummary(nino: Nino, journeyId: JourneyId, taxYear: Int): Action[AnyContent] = ???
+  override def getPreviousYearPayeSummary(
+    nino:      Nino,
+    journeyId: JourneyId,
+    taxYear:   Int
+  ): Action[AnyContent] = validateAccept(acceptHeaderValidationRules).async { implicit request =>
+    Future successful NotFound(Json.toJson("No Data found"))
+  }
 }

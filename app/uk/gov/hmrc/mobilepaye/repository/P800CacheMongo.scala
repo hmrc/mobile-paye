@@ -56,8 +56,7 @@ class P800CacheMongo @Inject() (
                      .background(false)
                      .name("nino")
                      .unique(true))
-      ),
-      replaceIndexes = true
+      )
     ) {
 
   def add(p800Cache: P800Cache): ServiceResponse[P800Cache] =
