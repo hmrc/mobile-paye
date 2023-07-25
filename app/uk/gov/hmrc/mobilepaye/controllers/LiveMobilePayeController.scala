@@ -29,7 +29,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HeaderNames}
 import uk.gov.hmrc.mobilepaye.connectors.ShutteringConnector
 import uk.gov.hmrc.mobilepaye.controllers.action.AccessControl
 import uk.gov.hmrc.mobilepaye.domain.types.ModelTypes.JourneyId
-import uk.gov.hmrc.mobilepaye.domain.{MobilePayeResponse, MobilePayeResponseAudit}
+import uk.gov.hmrc.mobilepaye.domain.{MobilePayeSummaryResponse, MobilePayeSummaryResponseAudit}
 import uk.gov.hmrc.mobilepaye.services.{IncomeTaxHistoryService, MobilePayeService}
 import uk.gov.hmrc.play.audit.AuditExtensions.auditHeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
@@ -51,6 +51,12 @@ trait MobilePayeController extends BackendBaseController with HeaderValidator wi
   def getTaxIncomeHistory(
     nino:      Nino,
     journeyId: JourneyId
+  ): Action[AnyContent]
+
+  def getPreviousYearPayeSummary(
+    nino:      Nino,
+    journeyId: JourneyId,
+    taxYear:   Int
   ): Action[AnyContent]
 }
 
@@ -92,7 +98,7 @@ class LiveMobilePayeController @Inject() (
                 logger.info("Locked! User is locked due to manual correspondence indicator flag being set")
                 Future.successful(Locked)
               } else {
-                mobilePayeService.getMobilePayeResponse(nino, taxYear).map { mpr =>
+                mobilePayeService.getMobilePayeSummaryResponse(nino, taxYear).map { mpr =>
                   sendAuditEvent(
                     nino,
                     mpr,
@@ -126,9 +132,29 @@ class LiveMobilePayeController @Inject() (
     }
   }
 
+  override def getPreviousYearPayeSummary(
+    nino:      Nino,
+    journeyId: JourneyId,
+    taxYear:   Int
+  ): Action[AnyContent] =
+    validateAcceptWithAuth(acceptHeaderValidationRules, Option(nino)).async { implicit request =>
+      implicit val hc: HeaderCarrier =
+        fromRequest(request).withExtraHeaders(HeaderNames.xSessionId -> journeyId.value)
+      shutteringConnector.getShutteringStatus(journeyId).flatMap { shuttered =>
+        withShuttering(shuttered) {
+          errorWrapper {
+            mobilePayeService.getMobilePayePreviousYearSummaryResponse(nino, taxYear).map {
+              mobilePayePreviousYearSummaryResponse =>
+                Ok(Json.toJson(mobilePayePreviousYearSummaryResponse))
+            }
+          }
+        }
+      }
+    }
+
   private def sendAuditEvent(
     nino:        Nino,
-    response:    MobilePayeResponse,
+    response:    MobilePayeSummaryResponse,
     path:        String,
     journeyId:   JourneyId
   )(implicit hc: HeaderCarrier
@@ -140,7 +166,7 @@ class LiveMobilePayeController @Inject() (
       detail = obj(
         "nino"      -> nino.value,
         "journeyId" -> journeyId.value,
-        "data"      -> MobilePayeResponseAudit.fromResponse(response)
+        "data"      -> MobilePayeSummaryResponseAudit.fromResponse(response)
       )
     )
   )

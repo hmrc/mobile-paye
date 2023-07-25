@@ -19,12 +19,13 @@ package uk.gov.hmrc.mobilepaye.services
 import com.google.inject.{Inject, Singleton}
 import play.api.Logger
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException}
 import uk.gov.hmrc.mobilepaye.connectors.{FeedbackConnector, TaiConnector, TaxCalcConnector}
 import uk.gov.hmrc.mobilepaye.domain.tai._
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.{P800Summary, TaxYearReconciliation}
-import uk.gov.hmrc.mobilepaye.domain.{Feedback, IncomeSource, MobilePayeResponse, OtherIncome, P800Cache, P800Repayment, PayeIncome, TaxCodeChange}
+import uk.gov.hmrc.mobilepaye.domain.{Feedback, IncomeSource, MobilePayePreviousYearSummaryResponse, MobilePayeSummaryResponse, OtherIncome, P800Cache, P800Repayment, PayeIncome, TaxCodeChange}
 import uk.gov.hmrc.mobilepaye.repository.P800CacheMongo
+import uk.gov.hmrc.time.TaxYear
 
 import java.time.{LocalDateTime, ZoneId}
 import javax.inject.Named
@@ -33,137 +34,32 @@ import scala.math.BigDecimal.RoundingMode
 
 @Singleton
 class MobilePayeService @Inject() (
-  taiConnector:                                                    TaiConnector,
-  taxCalcConnector:                                                TaxCalcConnector,
-  p800CacheMongo:                                                  P800CacheMongo,
-  feedbackConnector:                                               FeedbackConnector,
-  @Named("rUK.startDate") rUKComparisonStartDate:                  String,
-  @Named("rUK.endDate") rUKComparisonEndDate:                      String,
-  @Named("wales.startDate") walesComparisonStartDate:              String,
-  @Named("wales.endDate") walesComparisonEndDate:                  String,
-  @Named("scotland.startDate") scotlandComparisonStartDate:        String,
-  @Named("scotland.endDate") scotlandComparisonEndDate:            String,
-  @Named("p800CacheEnabled") p800CacheEnabled:                     Boolean,
-  @Named("taxCodeChangeEnabled") taxCodeChangeEnabled:             Boolean,
-  @Named("previousEmploymentsEnabled") previousEmploymentsEnabled: Boolean) {
+  taiConnector:                                                                  TaiConnector,
+  taxCalcConnector:                                                              TaxCalcConnector,
+  p800CacheMongo:                                                                P800CacheMongo,
+  feedbackConnector:                                                             FeedbackConnector,
+  @Named("rUK.startDate") rUKComparisonStartDate:                                String,
+  @Named("rUK.endDate") rUKComparisonEndDate:                                    String,
+  @Named("wales.startDate") walesComparisonStartDate:                            String,
+  @Named("wales.endDate") walesComparisonEndDate:                                String,
+  @Named("scotland.startDate") scotlandComparisonStartDate:                      String,
+  @Named("scotland.endDate") scotlandComparisonEndDate:                          String,
+  @Named("p800CacheEnabled") p800CacheEnabled:                                   Boolean,
+  @Named("taxCodeChangeEnabled") taxCodeChangeEnabled:                           Boolean,
+  @Named("previousEmploymentsEnabled") previousEmploymentsEnabled:               Boolean,
+  @Named("numberOfPreviousYearsToShowPayeSummary") previousYearPayeSummaryYears: Int) {
 
   private val NpsTaxAccountNoEmploymentsCurrentYear = "no employments recorded for current tax year"
   private val NpsTaxAccountDataAbsentMsg            = "cannot complete a coding calculation without a primary employment"
   private val NpsTaxAccountNoEmploymentsRecorded    = "no employments recorded for this individual"
   val logger: Logger = Logger(this.getClass)
 
-  def getMobilePayeResponse(
+  def getMobilePayeSummaryResponse(
     nino:        Nino,
     taxYear:     Int
   )(implicit hc: HeaderCarrier,
     ec:          ExecutionContext
-  ): Future[MobilePayeResponse] = {
-
-    def knownException(
-      ex:   Throwable,
-      nino: Nino
-    ): Boolean = {
-      val known = ex.getMessage.toLowerCase().contains(NpsTaxAccountNoEmploymentsCurrentYear) ||
-        ex.getMessage.toLowerCase().contains(NpsTaxAccountDataAbsentMsg) ||
-        ex.getMessage.toLowerCase().contains(NpsTaxAccountNoEmploymentsRecorded)
-      logger.info(s"[HMA-2505] - Tai exception (known: $known) for ${nino.nino} - " + ex.getMessage.toLowerCase())
-      known
-    }
-
-    def getAndCacheP800RepaymentCheck(p800Summary: Option[P800Summary]): Option[P800Repayment] = {
-      val repayment = p800Summary.flatMap(summary => P800Summary.toP800Repayment(summary, taxYear))
-      repayment match {
-        case None => {
-          if (p800CacheEnabled) {
-            p800CacheMongo.add(P800Cache(nino))
-          }
-          None
-        }
-        case _ => repayment
-      }
-    }
-
-    def buildMobilePayeResponse(
-      incomeSourceEmployment: Seq[IncomeSource],
-      previousEmployments:    Seq[IncomeSource],
-      incomeSourcePension:    Seq[IncomeSource],
-      nonTaxCodeIncomes:      NonTaxCodeIncome,
-      taxAccountSummary:      TaxAccountSummary,
-      p800Summary:            Option[P800Summary],
-      employmentBenefits:     Benefits,
-      taxCodeChange:          TaxCodeChange
-    ): MobilePayeResponse = {
-
-      def buildPayeIncomes(
-        incomes:            Seq[IncomeSource],
-        employment:         Boolean = false,
-        employmentBenefits: Option[Benefits] = None
-      ): Option[Seq[PayeIncome]] =
-        incomes.map { inc =>
-          PayeIncome.fromIncomeSource(inc, employment, employmentBenefits)
-        } match {
-          case Nil => None
-          case epi => Some(epi)
-        }
-
-      val otherNonTaxCodeIncomes: Option[Seq[OtherIncome]] = nonTaxCodeIncomes.otherNonTaxCodeIncomes
-        .filter(_.incomeComponentType != BankOrBuildingSocietyInterest)
-        .map(income =>
-          OtherIncome.withMaybeLink(
-            name   = income.getFormattedIncomeComponentType,
-            amount = income.amount.setScale(0, RoundingMode.FLOOR)
-          )
-        ) match {
-        case Nil => None
-        case oi  => Some(oi)
-      }
-
-      // $COVERAGE-OFF$
-      //TODO We may need to use this in the future still but as part of HMA-546 to remediate a live issue this is unused until the underlying issue with untaxed interest is resolved.
-      val untaxedInterest: Option[OtherIncome] = nonTaxCodeIncomes.untaxedInterest match {
-        case Some(income) =>
-          Some(
-            OtherIncome.withMaybeLink(
-              name   = income.getFormattedIncomeComponentType,
-              amount = income.amount.setScale(0, RoundingMode.FLOOR)
-            )
-          )
-        case None => None
-      }
-
-      val otherIncomes: Option[Seq[OtherIncome]] = (otherNonTaxCodeIncomes, untaxedInterest) match {
-        case (Some(x), Some(y)) => Some(Seq(y) ++ x)
-        case (Some(x), _)       => Some(x)
-        case (_, Some(y))       => Some(Seq(y))
-        case _                  => None
-      }
-      // $COVERAGE-ON$
-
-      val employmentPayeIncomes: Option[Seq[PayeIncome]] =
-        buildPayeIncomes(incomeSourceEmployment, employment = true, Some(employmentBenefits))
-      val previousEmploymentPayeIncomes: Option[Seq[PayeIncome]] =
-        buildPayeIncomes(previousEmployments, employment = true)
-      val pensionPayeIncomes: Option[Seq[PayeIncome]] = buildPayeIncomes(incomeSourcePension)
-
-      val taxFreeAmount: Option[BigDecimal] = Option(taxAccountSummary.taxFreeAmount.setScale(0, RoundingMode.FLOOR))
-      val estimatedTaxAmount: Option[BigDecimal] = Option(
-        taxAccountSummary.totalEstimatedTax.setScale(0, RoundingMode.FLOOR)
-      )
-      val repayment: Option[P800Repayment] = getAndCacheP800RepaymentCheck(p800Summary)
-
-      MobilePayeResponse(
-        taxYear             = Some(taxYear),
-        employments         = employmentPayeIncomes,
-        previousEmployments = previousEmploymentPayeIncomes,
-        repayment           = repayment,
-        pensions            = pensionPayeIncomes,
-        otherIncomes        = otherNonTaxCodeIncomes,
-        taxCodeChange       = Some(taxCodeChange),
-        taxFreeAmount       = taxFreeAmount,
-        estimatedTaxAmount  = estimatedTaxAmount
-      )
-    }
-
+  ): Future[MobilePayeSummaryResponse] =
     (for {
       taxCodeIncomesEmployment <- taiConnector
                                    .getMatchingTaxCodeIncomes(nino, taxYear, EmploymentIncome.toString, Live.toString)
@@ -179,7 +75,9 @@ class MobilePayeService @Inject() (
       employmentBenefits <- taiConnector.getBenefits(nino, taxYear)
       taxCodeChangeExists <- if (taxCodeChangeEnabled) taiConnector.getTaxCodeChangeExists(nino)
                             else Future successful false
-      mobilePayeResponse: MobilePayeResponse = buildMobilePayeResponse(
+      mobilePayeResponse: MobilePayeSummaryResponse = buildMobilePayeResponse(
+        nino,
+        taxYear,
         taxCodeIncomesEmployment,
         previousEmployments,
         taxCodeIncomesPension,
@@ -187,16 +85,56 @@ class MobilePayeService @Inject() (
         taxAccountSummary,
         getP800Summary(reconciliations, taxYear),
         employmentBenefits,
-        TaxCodeChange(taxCodeChangeExists)
+        Some(TaxCodeChange(taxCodeChangeExists))
       )
     } yield {
       if (cy1InfoAvailable) mobilePayeResponse.copy(taxCodeLocation = getTaxCodeLocation(taxCodeIncomesEmployment))
       else mobilePayeResponse.copy(currentYearPlusOneLink           = None)
     }) recover {
-      case ex if knownException(ex, nino) => MobilePayeResponse.empty
+      case ex if knownException(ex, nino) => MobilePayeSummaryResponse.empty
       case ex                             => throw ex
     }
-  }
+
+  def getMobilePayePreviousYearSummaryResponse(
+    nino:        Nino,
+    taxYear:     Int
+  )(implicit hc: HeaderCarrier,
+    ec:          ExecutionContext
+  ): Future[MobilePayePreviousYearSummaryResponse] =
+    if (taxYear < TaxYear.current.currentYear - previousYearPayeSummaryYears) {
+      logger.warn(
+        s"Tax Year requested ($taxYear) is older than the current limit of $previousYearPayeSummaryYears years"
+      )
+      throw new NotFoundException("No data available")
+    } else
+      (for {
+        taxCodeIncomesEmployment <- taiConnector
+                                     .getMatchingTaxCodeIncomes(nino, taxYear, EmploymentIncome.toString, Live.toString)
+        previousEmployments <- getPreviousEmployments(nino, taxYear)
+        taxCodeIncomesPension <- taiConnector
+                                  .getMatchingTaxCodeIncomes(nino, taxYear, PensionIncome.toString, Live.toString)
+        nonTaxCodeIncomes  <- taiConnector.getNonTaxCodeIncome(nino, taxYear)
+        taxAccountSummary  <- taiConnector.getTaxAccountSummary(nino, taxYear)
+        employmentBenefits <- taiConnector.getBenefits(nino, taxYear)
+        mobilePayeResponse: MobilePayeSummaryResponse = buildMobilePayeResponse(
+          nino,
+          taxYear,
+          taxCodeIncomesEmployment,
+          previousEmployments,
+          taxCodeIncomesPension,
+          nonTaxCodeIncomes,
+          taxAccountSummary,
+          None,
+          employmentBenefits,
+          None
+        )
+      } yield {
+        MobilePayePreviousYearSummaryResponse.fromPayeSummaryResponse(mobilePayeResponse)
+      }) recover {
+        case ex =>
+          logger.warn(s"Error retrieving previous PAYE summary info: ${ex.printStackTrace()}")
+          throw new NotFoundException(ex.getMessage)
+      }
 
   def getPerson(
     nino:        Nino
@@ -204,7 +142,7 @@ class MobilePayeService @Inject() (
     ec:          ExecutionContext
   ): Future[Person] = taiConnector.getPerson(nino)
 
-  def getP800Summary(
+  private def getP800Summary(
     reconciliations: Option[List[TaxYearReconciliation]],
     taxYear:         Int
   ): Option[P800Summary] = {
@@ -216,7 +154,7 @@ class MobilePayeService @Inject() (
     }
   }
 
-  def getTaxYearReconciliationsForP800(
+  private def getTaxYearReconciliationsForP800(
     nino:        Nino
   )(implicit hc: HeaderCarrier,
     ec:          ExecutionContext
@@ -227,6 +165,96 @@ class MobilePayeService @Inject() (
         if (recordFound.isEmpty) taxCalcConnector.getTaxReconciliations(nino) else Future.successful(None)
       )
     } else taxCalcConnector.getTaxReconciliations(nino)
+
+  private def knownException(
+    ex:   Throwable,
+    nino: Nino
+  ): Boolean = {
+    val known = ex.getMessage.toLowerCase().contains(NpsTaxAccountNoEmploymentsCurrentYear) ||
+      ex.getMessage.toLowerCase().contains(NpsTaxAccountDataAbsentMsg) ||
+      ex.getMessage.toLowerCase().contains(NpsTaxAccountNoEmploymentsRecorded)
+    logger.info(s"[HMA-2505] - Tai exception (known: $known) for ${nino.nino} - " + ex.getMessage.toLowerCase())
+    known
+  }
+
+  private def getAndCacheP800RepaymentCheck(
+    nino:        Nino,
+    taxYear:     Int,
+    p800Summary: Option[P800Summary]
+  ): Option[P800Repayment] = {
+    val repayment = p800Summary.flatMap(summary => P800Summary.toP800Repayment(summary, taxYear))
+    repayment match {
+      case None => {
+        if (p800CacheEnabled) {
+          p800CacheMongo.add(P800Cache(nino))
+        }
+        None
+      }
+      case _ => repayment
+    }
+  }
+
+  private def buildMobilePayeResponse(
+    nino:                   Nino,
+    taxYear:                Int,
+    incomeSourceEmployment: Seq[IncomeSource],
+    previousEmployments:    Seq[IncomeSource],
+    incomeSourcePension:    Seq[IncomeSource],
+    nonTaxCodeIncomes:      NonTaxCodeIncome,
+    taxAccountSummary:      TaxAccountSummary,
+    p800Summary:            Option[P800Summary],
+    employmentBenefits:     Benefits,
+    taxCodeChange:          Option[TaxCodeChange]
+  ): MobilePayeSummaryResponse = {
+
+    val otherNonTaxCodeIncomes: Option[Seq[OtherIncome]] = nonTaxCodeIncomes.otherNonTaxCodeIncomes
+      .filter(_.incomeComponentType != BankOrBuildingSocietyInterest)
+      .map(income =>
+        OtherIncome.withMaybeLink(
+          name   = income.getFormattedIncomeComponentType,
+          amount = income.amount.setScale(0, RoundingMode.FLOOR)
+        )
+      ) match {
+      case Nil => None
+      case oi  => Some(oi)
+    }
+
+    val employmentPayeIncomes: Option[Seq[PayeIncome]] =
+      buildPayeIncomes(incomeSourceEmployment, employment = true, Some(employmentBenefits))
+    val previousEmploymentPayeIncomes: Option[Seq[PayeIncome]] =
+      buildPayeIncomes(previousEmployments, employment = true)
+    val pensionPayeIncomes: Option[Seq[PayeIncome]] = buildPayeIncomes(incomeSourcePension)
+
+    val taxFreeAmount: Option[BigDecimal] = Option(taxAccountSummary.taxFreeAmount.setScale(0, RoundingMode.FLOOR))
+    val estimatedTaxAmount: Option[BigDecimal] = Option(
+      taxAccountSummary.totalEstimatedTax.setScale(0, RoundingMode.FLOOR)
+    )
+    val repayment: Option[P800Repayment] = getAndCacheP800RepaymentCheck(nino, taxYear, p800Summary)
+
+    MobilePayeSummaryResponse(
+      taxYear             = Some(taxYear),
+      employments         = employmentPayeIncomes,
+      previousEmployments = previousEmploymentPayeIncomes,
+      repayment           = repayment,
+      pensions            = pensionPayeIncomes,
+      otherIncomes        = otherNonTaxCodeIncomes,
+      taxCodeChange       = taxCodeChange,
+      taxFreeAmount       = taxFreeAmount,
+      estimatedTaxAmount  = estimatedTaxAmount
+    )
+  }
+
+  def buildPayeIncomes(
+    incomes:            Seq[IncomeSource],
+    employment:         Boolean = false,
+    employmentBenefits: Option[Benefits] = None
+  ): Option[Seq[PayeIncome]] =
+    incomes.map { inc =>
+      PayeIncome.fromIncomeSource(inc, employment, employmentBenefits)
+    } match {
+      case Nil => None
+      case epi => Some(epi)
+    }
 
   private def cyPlus1InfoCheck(employments: Seq[IncomeSource]): Future[Boolean] =
     getTaxCodeLocation(employments) match {
@@ -269,32 +297,10 @@ class MobilePayeService @Inject() (
     taxYear:     Int
   )(implicit hc: HeaderCarrier,
     ec:          ExecutionContext
-  ): Future[Seq[IncomeSource]] = {
-    val prevEmployments = for {
-      notLiveEmployments <- taiConnector
-                             .getMatchingTaxCodeIncomes(nino, taxYear, EmploymentIncome.toString, NotLive.toString)
-      ceasedEmployments <- taiConnector
-                            .getMatchingTaxCodeIncomes(nino, taxYear, EmploymentIncome.toString, Ceased.toString)
-      potentiallyCeasedEmployments <- taiConnector.getMatchingTaxCodeIncomes(nino,
-                                                                             taxYear,
-                                                                             EmploymentIncome.toString,
-                                                                             PotentiallyCeased.toString)
-    } yield {
-      logger.info(s"Not Live Employment count: ${notLiveEmployments.size} Total number of payments: ${notLiveEmployments
-        .flatMap(_.employment.annualAccounts.map(_.payments.size))
-        .sum}")
-      logger.info(s"Ceased Employment count: ${ceasedEmployments.size} Total number of payments: ${ceasedEmployments
-        .flatMap(_.employment.annualAccounts.map(_.payments.size))
-        .sum}")
-      logger.info(
-        s"Potentially Ceased Employment count: ${potentiallyCeasedEmployments.size} Total number of payments: ${potentiallyCeasedEmployments
-          .flatMap(_.employment.annualAccounts.map(_.payments.size))
-          .sum}"
-      )
-      notLiveEmployments ++ ceasedEmployments ++ potentiallyCeasedEmployments
-    }
-    if (previousEmploymentsEnabled) prevEmployments
+  ): Future[Seq[IncomeSource]] =
+    if (previousEmploymentsEnabled)
+      taiConnector
+        .getMatchingTaxCodeIncomes(nino, taxYear, EmploymentIncome.toString, NotLive.toString)
     else Future successful Seq.empty
-  }
 
 }

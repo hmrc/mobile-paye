@@ -18,7 +18,7 @@ package uk.gov.hmrc.mobilepaye.domain
 
 import play.api.libs.json.{Json, OFormat}
 
-case class MobilePayeResponseAudit(
+case class MobilePayeSummaryResponseAudit(
   taxYear:            Option[Int],
   employments:        Option[Seq[PayeIncomeAudit]],
   pensions:           Option[Seq[PayeIncomeAudit]],
@@ -27,10 +27,10 @@ case class MobilePayeResponseAudit(
   taxFreeAmount:      Option[BigDecimal],
   estimatedTaxAmount: Option[BigDecimal])
 
-object MobilePayeResponseAudit {
+object MobilePayeSummaryResponseAudit {
 
-  def fromResponse(response: MobilePayeResponse): MobilePayeResponseAudit =
-    MobilePayeResponseAudit(
+  def fromResponse(response: MobilePayeSummaryResponse): MobilePayeSummaryResponseAudit =
+    MobilePayeSummaryResponseAudit(
       taxYear            = response.taxYear,
       employments        = response.employments.map(emps => emps.map(PayeIncomeAudit.fromPayeIncome)),
       pensions           = response.pensions.map(pens => pens.map(PayeIncomeAudit.fromPayeIncome)),
@@ -40,5 +40,5 @@ object MobilePayeResponseAudit {
       estimatedTaxAmount = response.estimatedTaxAmount
     )
 
-  implicit val format: OFormat[MobilePayeResponseAudit] = Json.format[MobilePayeResponseAudit]
+  implicit val format: OFormat[MobilePayeSummaryResponseAudit] = Json.format[MobilePayeSummaryResponseAudit]
 }

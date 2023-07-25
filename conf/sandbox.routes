@@ -2,4 +2,6 @@ GET        /nino/:nino/tax-year/current/summary         uk.gov.hmrc.mobilepaye.c
 
 GET        /nino/:nino/tax-year/:taxYear/summary        uk.gov.hmrc.mobilepaye.controllers.SandboxMobilePayeController.getPayeSummary(nino: uk.gov.hmrc.domain.Nino, journeyId: JourneyId, taxYear: Int)
 
+GET        /nino/:nino/previous-tax-year/:taxYear/summary uk.gov.hmrc.mobilepaye.controllers.SandboxMobilePayeController.getPreviousYearPayeSummary(nino: uk.gov.hmrc.domain.Nino, journeyId: JourneyId, taxYear: Int)
+
 GET        /nino/:nino/income-tax-history               uk.gov.hmrc.mobilepaye.controllers.SandboxMobilePayeController.getTaxIncomeHistory(nino: uk.gov.hmrc.domain.Nino, journeyId: JourneyId)

@@ -21,7 +21,7 @@ import ai.x.play.json.Jsonx
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.time.TaxYear
 
-case class MobilePayeResponse(
+case class MobilePayeSummaryResponse(
   taxYear:                   Option[Int],
   employments:               Option[Seq[PayeIncome]],
   previousEmployments:       Option[Seq[PayeIncome]],
@@ -46,10 +46,10 @@ case class MobilePayeResponse(
   taxCodeLocation:           Option[String] = None,
   incomeTaxHistoricPayeUrl:  String = "/check-income-tax/historic-paye/")
 
-object MobilePayeResponse {
+object MobilePayeSummaryResponse {
 
-  def empty: MobilePayeResponse =
-    MobilePayeResponse(
+  def empty: MobilePayeSummaryResponse =
+    MobilePayeSummaryResponse(
       taxYear                   = Option(TaxYear.current.currentYear),
       employments               = None,
       previousEmployments       = None,
@@ -65,5 +65,5 @@ object MobilePayeResponse {
       currentYearPlusOneLink    = None
     )
 
-  implicit val format: OFormat[MobilePayeResponse] = Jsonx.formatCaseClass
+  implicit val format: OFormat[MobilePayeSummaryResponse] = Jsonx.formatCaseClass
 }

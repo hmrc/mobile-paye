@@ -20,7 +20,7 @@ import play.api.libs.json.{JsObject, Json}
 
 import java.time.LocalDate
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.mobilepaye.domain.{Feedback, HistoricTaxCodeIncome, IncomeSource, IncomeTaxYear, MobilePayeResponse, MobilePayeResponseAudit, OtherIncome, OtherIncomeAudit, P800Repayment, PayeIncome, PayeIncomeAudit, TaxCodeChange}
+import uk.gov.hmrc.mobilepaye.domain.{Feedback, HistoricTaxCodeIncome, IncomeSource, IncomeTaxYear, MobilePayePreviousYearSummaryResponse, MobilePayeSummaryResponse, MobilePayeSummaryResponseAudit, OtherIncome, OtherIncomeAudit, P800Repayment, PayeIncome, PayeIncomeAudit, TaxCodeChange}
 import uk.gov.hmrc.mobilepaye.domain.tai._
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus.{ChequeSent, PaymentPaid}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.{P800Status, P800Summary, RepaymentStatus}
@@ -29,6 +29,7 @@ import uk.gov.hmrc.time.TaxYear
 trait MobilePayeTestData {
   val currentTaxYear: Int = TaxYear.current.startYear
   val endOfTaxYear:   Int = TaxYear.current.finishYear
+  val previousTaxYear:   Int =  currentTaxYear - 1
 
   val nino:           Nino          = Nino("CS700100A")
   val taxCodeIncome:  TaxCodeIncome = TaxCodeIncome(EmploymentIncome, Live, Some(3), "The Best Shop Ltd", 1000, "S1150L")
@@ -167,7 +168,7 @@ trait MobilePayeTestData {
 
   val otherIncomes: Seq[OtherIncome] = Seq(otherIncome)
 
-  val fullMobilePayeResponse: MobilePayeResponse = MobilePayeResponse(
+  val fullMobilePayeResponse: MobilePayeSummaryResponse = MobilePayeSummaryResponse(
     taxYear                = Some(TaxYear.current.currentYear),
     employments            = Some(employments),
     previousEmployments    = None,
@@ -181,7 +182,7 @@ trait MobilePayeTestData {
     currentYearPlusOneLink = None
   )
 
-  val fullMobilePayeResponseWithCY1Link: MobilePayeResponse = MobilePayeResponse(
+  val fullMobilePayeResponseWithCY1Link: MobilePayeSummaryResponse = MobilePayeSummaryResponse(
     taxYear             = Some(TaxYear.current.currentYear),
     employments         = Some(employments),
     previousEmployments = None,
@@ -195,7 +196,7 @@ trait MobilePayeTestData {
     taxCodeLocation     = Some("Scottish")
   )
 
-  val fullMobilePayeAudit: MobilePayeResponseAudit = MobilePayeResponseAudit(
+  val fullMobilePayeAudit: MobilePayeSummaryResponseAudit = MobilePayeSummaryResponseAudit(
     taxYear = Some(TaxYear.current.currentYear),
     employments =
       Some(employments.map(employment => PayeIncomeAudit.fromPayeIncome(employment.copy(payrollNumber = None)))),
@@ -266,4 +267,15 @@ trait MobilePayeTestData {
       IncomeTaxYear(TaxYear.current.back(5), None)
     )
   }
+
+  def fullMobilePayePreviousYearResponse(taxYear: Int = previousTaxYear): MobilePayePreviousYearSummaryResponse =
+    MobilePayePreviousYearSummaryResponse(
+      taxYear             = Some(taxYear),
+      employments         = Some(employments),
+      previousEmployments = Some(employments),
+      pensions            = Some(pensions),
+      otherIncomes        = Some(otherIncomes),
+      taxFreeAmount       = Some(10000),
+      estimatedTaxAmount  = Some(250)
+    )
 }
