@@ -1083,6 +1083,8 @@ class LiveMobilePayeControllerp800CacheEnabledISpec extends BaseISpec with Injec
       response.status                                         shouldBe 200
       Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
 
+      Thread.sleep(2000)
+
       val response2 = await(
         getRequestWithAuthHeaders(
           s"/nino/$nino/tax-year/current/summary?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0"
