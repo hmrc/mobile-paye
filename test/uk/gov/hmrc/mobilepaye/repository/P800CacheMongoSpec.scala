@@ -28,13 +28,19 @@ class P800CacheMongoSpec extends BaseSpec with DefaultPlayMongoRepositorySupport
   "P800CacheMongo" should {
     "add new record" in {
 
+      repository.collection.drop
+
       val result: Response[P800Cache] =
         repository.add(P800Cache(nino)).futureValue
 
       result.right.get.nino shouldBe nino
+
+      repository.collection.drop
     }
 
     "find stored record" in {
+
+      repository.collection.drop
 
       repository.add(P800Cache(nino)).futureValue
 
@@ -42,6 +48,8 @@ class P800CacheMongoSpec extends BaseSpec with DefaultPlayMongoRepositorySupport
         repository.selectByNino(nino).futureValue
 
       result.head.nino shouldBe nino
+
+      repository.collection.drop
     }
   }
 

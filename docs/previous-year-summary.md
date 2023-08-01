@@ -283,23 +283,8 @@ Fetch the MobilePayeResponse object.
       "link": "/"
     }
   ],
-  "taxCodeChange": {
-    "hasChanged": false
-  },
   "taxFreeAmount": 11850,
-  "taxFreeAmountLink": "/",
-  "estimatedTaxAmount": 618,
-  "estimatedTaxAmountLink": "/",
-  "understandYourTaxCodeLink": "/",
-  "addMissingEmployerLink": "/",
-  "addMissingPensionLink": "/",
-  "addMissingIncomeLink": "/",
-  "addMissingBenefitLink": "/",
-  "addMissingCompanyCarLink": "/",
-  "previousTaxYearLink": "/",
-  "updateEstimatedIncomeLink": "/",
-  "currentYearPlusOneLink": "/",
-  "taxCodeLocation": "rUK"
+  "estimatedTaxAmount": 618
 }
 ```
 
@@ -356,23 +341,8 @@ Fetch the MobilePayeResponse object.
       ]
     }
   ],
-  "taxCodeChange": {
-    "hasChanged": false
-  },
   "taxFreeAmount": 11850,
-  "taxFreeAmountLink": "/",
-  "estimatedTaxAmount": 618,
-  "estimatedTaxAmountLink": "/",
-  "understandYourTaxCodeLink": "/",
-  "addMissingEmployerLink": "/",
-  "addMissingPensionLink": "/",
-  "addMissingIncomeLink": "/",
-  "addMissingBenefitLink": "/",
-  "addMissingCompanyCarLink": "/",
-  "previousTaxYearLink": "/",
-  "updateEstimatedIncomeLink": "/",
-  "currentYearPlusOneLink": "/",
-  "taxCodeLocation": "rUK"
+  "estimatedTaxAmount": 618
 }
 ```
 
@@ -391,23 +361,8 @@ Fetch the MobilePayeResponse object.
       "link": "/"
     }
   ],
-  "taxCodeChange": {
-    "hasChanged": false
-  },
   "taxFreeAmount": 11850,
-  "taxFreeAmountLink": "/",
-  "estimatedTaxAmount": 618,
-  "estimatedTaxAmountLink": "/",
-  "understandYourTaxCodeLink": "/",
-  "addMissingEmployerLink": "/",
-  "addMissingPensionLink": "/",
-  "addMissingIncomeLink": "/",
-  "addMissingBenefitLink": "/",
-  "addMissingCompanyCarLink": "/",
-  "previousTaxYearLink": "/",
-  "updateEstimatedIncomeLink": "/",
-  "currentYearPlusOneLink": "/",
-  "taxCodeLocation": "rUK"
+  "estimatedTaxAmount": 618
 }
 ```
 
@@ -428,72 +383,10 @@ Fetch the MobilePayeResponse object.
       "link": "/"
     }
   ],
-  "taxCodeChange": {
-    "hasChanged": false
-  },
   "taxFreeAmount": 11850,
-  "taxFreeAmountLink": "/",
-  "estimatedTaxAmount": 618,
-  "estimatedTaxAmountLink": "/",
-  "understandYourTaxCodeLink": "/",
-  "addMissingEmployerLink": "/",
-  "addMissingPensionLink": "/",
-  "addMissingIncomeLink": "/",
-  "addMissingBenefitLink": "/",
-  "addMissingCompanyCarLink": "/",
-  "previousTaxYearLink": "/",
-  "updateEstimatedIncomeLink": "/"
+  "estimatedTaxAmount": 618
 }
 ```
-
-* **Code:** 200 <br />
-  **Content:** Previous Income Only
-
-```json
-{
-  "taxYear": 2018,
-  "taxCodeChange": {
-    "hasChanged": false
-  },
-  "taxFreeAmount": 11850,
-  "taxFreeAmountLink": "/",
-  "estimatedTaxAmount": 618,
-  "estimatedTaxAmountLink": "/",
-  "understandYourTaxCodeLink": "/",
-  "addMissingEmployerLink": "/",
-  "addMissingPensionLink": "/",
-  "addMissingIncomeLink": "/",
-  "addMissingBenefitLink": "/",
-  "addMissingCompanyCarLink": "/",
-  "previousTaxYearLink": "/",
-  "updateEstimatedIncomeLink": "/"
-}
-```
-
-* **Code:** 200 <br />
-  **Content:** No Live Incomes
-
-```json
-{
-  "taxYear": 2018,
-  "taxCodeChange": {
-    "hasChanged": false
-  },
-  "addMissingEmployerLink": "/",
-  "addMissingPensionLink": "/",
-  "addMissingIncomeLink": "/",
-  "addMissingBenefitLink": "/",
-  "addMissingCompanyCarLink": "/",
-  "previousTaxYearLink": "/",
-  "updateEstimatedIncomeLink": "/"
-}
-```
-
-* **Code:** 410 <br />
-  **Note:** Person is deceased <br />
-
-* **Code:** 423 <br />
-  **Note:** Person data is corrupt <br />
 
 * **Error Responses:**
 
