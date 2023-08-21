@@ -37,14 +37,15 @@ abstract class BaseISpec
 
   def config: Map[String, Any] =
     Map[String, Any](
-      "auditing.enabled"                             -> false,
-      "microservice.services.auth.port"              -> wireMockPort,
-      "microservice.services.tai.port"               -> wireMockPort,
-      "microservice.services.taxcalc.port"           -> wireMockPort,
-      "microservice.services.mobile-shuttering.port" -> wireMockPort,
-      "microservice.services.mobile-shuttering.port" -> wireMockPort,
-      "microservice.services.mobile-feedback.port"   -> wireMockPort,
-      "mongodb.uri"                                  -> "mongodb://localhost:27017/test-mobile-paye",
+      "auditing.enabled"                                    -> false,
+      "microservice.services.auth.port"                     -> wireMockPort,
+      "microservice.services.tai.port"                      -> wireMockPort,
+      "microservice.services.taxcalc.port"                  -> wireMockPort,
+      "microservice.services.mobile-simple-assessment.port" -> wireMockPort,
+      "microservice.services.mobile-shuttering.port"        -> wireMockPort,
+      "microservice.services.mobile-shuttering.port"        -> wireMockPort,
+      "microservice.services.mobile-feedback.port"          -> wireMockPort,
+      "mongodb.uri"                                         -> "mongodb://localhost:27017/test-mobile-paye",
       "incomeTaxComparisonPeriod.scotland.startDate" -> LocalDateTime
         .now(ZoneId.of("Europe/London"))
         .minusDays(10)
@@ -53,15 +54,17 @@ abstract class BaseISpec
         .now(ZoneId.of("Europe/London"))
         .plusDays(10)
         .format(DateTimeFormatter.ofPattern("yyyy-MM-dd\'T\'HH:mm:ss")),
-      "p800CacheEnabled" -> false,
+      "p800CacheEnabled"                       -> false,
       "numberOfPreviousYearsToShowPayeSummary" -> 1
-
     )
 
   def getRequestWithAuthHeaders(url: String): Future[WSResponse] =
     wsUrl(url).addHttpHeaders(acceptJsonHeader, authorisationJsonHeader).get()
 
-  def postRequestWithAuthHeaders(url: String, feedback: JsValue): Future[WSResponse] =
+  def postRequestWithAuthHeaders(
+    url:      String,
+    feedback: JsValue
+  ): Future[WSResponse] =
     wsUrl(url).withHttpHeaders(acceptJsonHeader, authorisationJsonHeader).post(feedback)
 
   private def base64Encode(s: String): String =

@@ -98,7 +98,7 @@ class LiveMobilePayeController @Inject() (
                 logger.info("Locked! User is locked due to manual correspondence indicator flag being set")
                 Future.successful(Locked)
               } else {
-                mobilePayeService.getMobilePayeSummaryResponse(nino, taxYear).map { mpr =>
+                mobilePayeService.getMobilePayeSummaryResponse(nino, taxYear, journeyId).map { mpr =>
                   sendAuditEvent(
                     nino,
                     mpr,

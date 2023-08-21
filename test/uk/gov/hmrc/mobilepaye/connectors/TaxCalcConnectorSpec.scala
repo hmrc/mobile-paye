@@ -32,7 +32,7 @@ class TaxCalcConnectorSpec extends BaseSpec {
   val mockFeatureFlagService: FeatureFlagService = mock[FeatureFlagService]
   val connector: TaxCalcConnector                = new TaxCalcConnector(mockCoreGet, serviceUrl, mockFeatureFlagService)
 
-  def mockTaxCalcGet[T](f: Future[T]): CallHandler6[String, Seq[(String, String)], Seq[(String, String)], HttpReads[T], HeaderCarrier, ExecutionContext, Future[T]] =
+  def mockTaxCalcGet[T](f: Future[T]) =
     (mockCoreGet
       .GET(_: String, _: Seq[(String, String)], _: Seq[(String, String)])(_: HttpReads[T],
                                                                           _: HeaderCarrier,

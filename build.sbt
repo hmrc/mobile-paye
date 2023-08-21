@@ -1,6 +1,5 @@
 import play.sbt.PlayImport.PlayKeys._
 import sbt.Tests.{Group, SubProcess}
-import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 
 val appName: String = "mobile-paye"
 
@@ -16,7 +15,6 @@ lazy val microservice = Project(appName, file("."))
   .disablePlugins(JUnitXmlReportPlugin)
   .configs(IntegrationTest)
   .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
-  .settings(publishingSettings: _*)
   .settings(
     routesImport ++= Seq(
       "uk.gov.hmrc.domain._",

@@ -712,6 +712,8 @@ components:
           description: ''
         taxCodeChange:
           $ref: '#/components/schemas/TaxCodeChange'
+        simpleAssessment:
+          $ref: '#/components/schemas/SimpleAssessment'
         taxFreeAmount:
           type: integer
           format: int32
@@ -814,6 +816,35 @@ components:
             link: /check-income-tax/income/bank-building-society-savings
         taxCodeChange:
           hasChanged: false
+        simpleAssessment:
+          taxYears:
+            - taxYear: 2021
+              reconciliations:
+                - reconciliationId: 1
+                  reconciliationStatus: UNDERPAID
+                  cumulativeAmount: 200
+                  taxLiabilityAmount: 300
+                  taxPaidAmount: 100
+                  reconciliationTimeStamp: 2022-07-30 12:34:56
+                  p800Status: ISSUED
+                  p800Reasons:
+                    - reasonType: UNDERPAYMENT
+                      reasonCode: 45
+                      estimatedAmount: 175
+                      actualAmount: 185
+                  businessReason: P302
+                  eligibility: true
+                  totalAmountOwed: 400
+                  chargeReference: XQ004100001540
+                  dueDate: 2023-01-31
+                  dunningLock: false
+                  receivableStatus: OUTSTANDING
+                  receipts:
+                    - receiptAmount: 100
+                      receiptDate: 2022-08-02
+                      receiptMethod: RECEIVED FROM ETMP
+                      receiptStatus: ALLOCATED
+                      allocatedAmount: 100
         taxFreeAmount: 11850
         taxFreeAmountLink: /check-income-tax/tax-free-allowance
         estimatedTaxAmount: 618
@@ -1119,6 +1150,127 @@ components:
           type: boolean
       example:
         hasChanged: false
+    SimpleAssessment:
+      title: SimpleAssessment
+      type: object
+      properties:
+        taxYears:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaxYearReconciliation'
+          description: ''
+    TaxYearReconciliation:
+      title: TaxYearReconciliation
+      type: object
+      properties:
+        taxYear:
+          type: integer
+        reconciliations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Reconciliation'
+          description: ''
+    Reconciliation:
+      title: Reconciliation
+      required:
+        - reconciliationId
+        - cumulativeAmount
+        - taxLiabilityAmount
+        - taxPaidAmount
+        - businessReason
+        - eligibility
+        - totalAmountOwed
+        - receivableStatus
+      type: object
+      properties:
+        reconciliationId:
+          type: integer
+        reconciliationStatus:
+          type: string
+        cumulativeAmount:
+          type: number
+        taxLiabilityAmount:
+          type: number
+        taxPaidAmount:
+          type: number
+        reconciliationTimeStamp:
+          type: string
+        p800Status:
+          type: string
+        collectionMethod:
+          type: integer
+        previousReconciliationId:
+          type: integer
+        nextReconciliationId:
+          type: integer
+        multiYearRecIndicator:
+          type: boolean
+        p800Reasons:
+          type: array
+          items:
+            $ref: '#/components/schemas/Reason'
+        businessReason:
+          type: string
+        eligibility:
+          type: boolean
+        totalAmountOwed:
+          type: number
+        chargeReference:
+          type: string
+        dueDate:
+          type: string
+        dunningLock:
+          type: boolean
+        receivableStatus:
+          type: string
+        receipts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Receipts'
+    Reason:
+      title: Reason
+      required:
+        - reasonType
+        - reasonCode
+      type: object
+      properties:
+        reasonType:
+          type: string
+        reasonCode:
+          type: integer
+        estimatedAmount:
+          type: number
+        actualAmount:
+          type: number
+      example:
+          reasonType: UNDERPAYMENT
+          reasonCode: 45
+          estimatedAmount: 175
+          actualAmount: 185
+    Receipts:
+      title: Receipts
+      type: object
+      properties:
+        receiptAmount:
+          type: number
+        receiptDate:
+          type: string
+        receiptMethod:
+          type: string
+        receiptStatus:
+          type: string
+        taxYearCodedOut:
+          type: string
+        allocatedAmount:
+          type: number
+        promiseToPayRef:
+          type: string
+      example:
+          receiptAmount: 100
+          receiptDate: 2022-08-02
+          receiptMethod: RECEIVED FROM ETMP
+          receiptStatus: ALLOCATED
+          allocatedAmount: 100
 tags:
   - name: mobile-paye
     description: ''

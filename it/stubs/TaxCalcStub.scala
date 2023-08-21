@@ -57,9 +57,9 @@ object TaxCalcStub {
   ): StubMapping = {
     val taxCalcResponse =
       s"""[{"taxYear": ${taxYear - 2},"reconciliation":{
-         |    "_type": "underpaid",
+         |    "_type": "balanced",
          |    "amount": 800,
-         |    "status": "part_paid"}},
+         |    "status": "sa_user"}},
          |{"taxYear": ${taxYear - 1},"reconciliation":{
          |    "_type": "$yearTwoType",
          |    "amount": 1000,

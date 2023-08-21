@@ -1,17 +1,19 @@
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
+import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.WSResponse
 import play.api.test.Injecting
 import stubs.AuthStub._
+import stubs.MobileSimpleAssessmentStub.stubSimpleAssessmentResponse
 import stubs.ShutteringStub._
 import stubs.TaiStub._
 import stubs.TaxCalcStub._
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, OnlinePaymentIntegration}
 import uk.gov.hmrc.mobilepaye.config.MobilePayeConfig
-import uk.gov.hmrc.mobilepaye.domain.tai.{CarBenefit, Ceased, MedicalInsurance, NotLive, PotentiallyCeased}
+import uk.gov.hmrc.mobilepaye.domain.tai.{CarBenefit, MedicalInsurance, NotLive}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status.{Overpaid, Underpaid}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus._
@@ -55,6 +57,9 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
 
   s"GET /nino/$nino/tax-year/$currentTaxYear/summary" should {
     "return OK and a full valid MobilePayeResponse json" in {
+      when(mockFeatureFlagService.get(any()))
+        .thenReturn(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = true)))
+
       stubForShutteringDisabled
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
@@ -70,28 +75,40 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryIsFound(nino, taxAccountSummary, cyPlusone = true)
-      taxCalcNoResponse(nino, currentTaxYear)
+      taxCalcWithNoDate(nino, currentTaxYear)
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
+      stubSimpleAssessmentResponse
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
       response.status shouldBe 200
       response.body shouldBe Json
         .toJson(
           fullMobilePayeResponseWithCY1Link
-            .copy(previousEmployments = Some(
-              employments.map(emp =>
-                emp.copy(status           = NotLive,
-                         link             = s"/check-income-tax/your-income-calculation-details/${emp.link.last}",
-                         updateIncomeLink = None)
-              ) ++
-              employments.map(emp =>
-                emp.copy(status           = NotLive,
-                         link             = s"/check-income-tax/your-income-calculation-details/${emp.link.last}",
-                         updateIncomeLink = None,
-                         endDate          = Some(LocalDate.of(2022, 2, 1)))
+            .copy(
+              previousEmployments = Some(
+                employments.map(emp =>
+                  emp.copy(status           = NotLive,
+                           link             = s"/check-income-tax/your-income-calculation-details/${emp.link.last}",
+                           updateIncomeLink = None)
+                ) ++
+                employments.map(emp =>
+                  emp.copy(status           = NotLive,
+                           link             = s"/check-income-tax/your-income-calculation-details/${emp.link.last}",
+                           updateIncomeLink = None,
+                           endDate          = Some(LocalDate.of(2022, 2, 1)))
+                )
+              ),
+              simpleAssessment = Some(fullMobileSimpleAssessmentResponse),
+              repayment = Some(
+                P800Repayment(
+                  amount          = Some(1000),
+                  paymentStatus   = Some(Refund),
+                  datePaid        = None,
+                  taxYear         = previousTaxYear,
+                  claimRefundLink = Some(s"/tax-you-paid/$previousTaxYear-$currentTaxYear/paid-too-much")
+                )
               )
-            )
             )
         )
         .toString()
@@ -1040,7 +1057,10 @@ class LiveMobilePayeControllerShutteredISpec extends BaseISpec {
 
 }
 
-class LiveMobilePayeControllerp800CacheEnabledISpec extends BaseISpec with Injecting with PlayMongoRepositorySupport[P800Cache] {
+class LiveMobilePayeControllerp800CacheEnabledISpec
+    extends BaseISpec
+    with Injecting
+    with PlayMongoRepositorySupport[P800Cache] {
 
   override lazy val repository: PlayMongoRepository[P800Cache] = app.injector.instanceOf[P800CacheMongo]
 
@@ -1050,6 +1070,8 @@ class LiveMobilePayeControllerp800CacheEnabledISpec extends BaseISpec with Injec
       "p800CacheEnabled" -> true
     )
   )
+
+  override implicit lazy val app: Application = appBuilder.build()
 
   implicit def ninoToString(nino: Nino): String = nino.toString()
 
@@ -1070,8 +1092,8 @@ class LiveMobilePayeControllerp800CacheEnabledISpec extends BaseISpec with Injec
       taxAccountSummaryNotFound(nino, cyPlusone = true)
       stubForPensions(nino, pensionIncomeSource)
       stubForEmploymentIncome(nino, employmentIncomeSource)
-      stubForEmploymentIncome(nino, status                                    = NotLive)
-      taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoType = "underpaid")
+      stubForEmploymentIncome(nino, status                                                  = NotLive)
+      taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now.minusYears(1), yearTwoType = "balanced")
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
 
@@ -1094,7 +1116,48 @@ class LiveMobilePayeControllerp800CacheEnabledISpec extends BaseISpec with Injec
       Json.parse(response2.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
 
       taxCalcCalled(nino, currentTaxYear, 1)
-      System.setProperty("p800CacheEnabled", "false")
+      dropCollection()
+    }
+
+    "Call taxcalc for P800 repayments if repayment was found on a call less than 1 day ago" in {
+
+      dropCollection()
+
+      when(mockFeatureFlagService.get(any()))
+        .thenReturn(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = true)))
+
+      stubForShutteringDisabled
+      grantAccess(nino)
+      personalDetailsAreFound(nino, person)
+      nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+      taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxAccountSummaryNotFound(nino, cyPlusone = true)
+      stubForPensions(nino, pensionIncomeSource)
+      stubForEmploymentIncome(nino, employmentIncomeSource)
+      stubForEmploymentIncome(nino, status = NotLive)
+      taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now.minusYears(1))
+      stubForBenefits(nino, noBenefits)
+      stubForTaxCodeChangeExists(nino)
+
+      val response = await(
+        getRequestWithAuthHeaders(
+          s"/nino/$nino/tax-year/current/summary?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0"
+        )
+      )
+      response.status                                         shouldBe 200
+      Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
+
+      Thread.sleep(2000)
+
+      val response2 = await(
+        getRequestWithAuthHeaders(
+          s"/nino/$nino/tax-year/current/summary?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0"
+        )
+      )
+      response2.status                                         shouldBe 200
+      Json.parse(response2.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
+
+      taxCalcCalled(nino, currentTaxYear, 2)
       dropCollection()
     }
   }
