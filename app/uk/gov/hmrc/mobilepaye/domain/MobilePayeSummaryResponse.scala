@@ -19,6 +19,7 @@ package uk.gov.hmrc.mobilepaye.domain
 import ai.x.play.json.Encoders.encoder
 import ai.x.play.json.Jsonx
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.mobilepaye.domain.simpleassessment.MobileSimpleAssessmentResponse
 import uk.gov.hmrc.time.TaxYear
 
 case class MobilePayeSummaryResponse(
@@ -29,6 +30,7 @@ case class MobilePayeSummaryResponse(
   repayment:                 Option[P800Repayment],
   otherIncomes:              Option[Seq[OtherIncome]],
   taxCodeChange:             Option[TaxCodeChange],
+  simpleAssessment:          Option[MobileSimpleAssessmentResponse],
   taxFreeAmount:             Option[BigDecimal],
   taxFreeAmountLink:         Option[String] = Some("/check-income-tax/tax-free-allowance"),
   estimatedTaxAmount:        Option[BigDecimal],
@@ -37,7 +39,7 @@ case class MobilePayeSummaryResponse(
   addMissingEmployerLink:    String = "/check-income-tax/add-employment/employment-name",
   addMissingPensionLink:     String = "/check-income-tax/add-pension-provider/name",
   addMissingIncomeLink:      String = "/digital-forms/form/tell-us-about-other-income/draft/guide",
-  addMissingBenefitLink:      String =  "/digital-forms/form/tell-us-about-company-benefits/draft/guide",
+  addMissingBenefitLink:     String = "/digital-forms/form/tell-us-about-company-benefits/draft/guide",
   addMissingCompanyCarLink:  String = "/paye/company-car/do-you-pay-towards-car/",
   previousTaxYearLink:       String = "/check-income-tax/income-tax-history",
   updateEstimatedIncomeLink: String = "/check-income-tax/update-income/start",
@@ -56,6 +58,7 @@ object MobilePayeSummaryResponse {
       pensions                  = None,
       repayment                 = None,
       otherIncomes              = None,
+      simpleAssessment          = None,
       taxCodeChange             = None,
       taxFreeAmount             = None,
       taxFreeAmountLink         = None,

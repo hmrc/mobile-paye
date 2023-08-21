@@ -32,6 +32,7 @@ import uk.gov.hmrc.mobilepaye.services.{IncomeTaxHistoryService, MobilePayeServi
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import eu.timepit.refined.auto._
+import uk.gov.hmrc.mobilepaye.domain.types.ModelTypes.JourneyId
 import uk.gov.hmrc.time.TaxYear
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -39,7 +40,6 @@ import scala.concurrent.{ExecutionContext, Future}
 class LiveMobilePayeControllerSpec extends BaseSpec {
 
   val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withHeaders(acceptHeader)
-  val "9bcb9c5a-0cfd-49e3-a935-58a28c386a42" = "9bcb9c5a-0cfd-49e3-a935-58a28c386a42"
   val grantAccessWithCL200:        GrantAccess             = Some(nino.toString()) and L200
   val mockMobilePayeService:       MobilePayeService       = mock[MobilePayeService]
   val mockIncomeTaxHistoryService: IncomeTaxHistoryService = mock[IncomeTaxHistoryService]
@@ -65,8 +65,8 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
 
   def mockGetMobilePayeResponse(f: Future[MobilePayeSummaryResponse]) =
     (mockMobilePayeService
-      .getMobilePayeSummaryResponse(_: Nino, _: Int)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(*, *, *, *)
+      .getMobilePayeSummaryResponse(_: Nino, _: Int, _: JourneyId)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *, *, *, *)
       .returning(f)
 
   def mockGetPerson(f: Future[Person]) =

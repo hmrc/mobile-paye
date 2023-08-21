@@ -20,16 +20,19 @@ import play.api.libs.json.{JsObject, Json}
 
 import java.time.LocalDate
 import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.mobilepaye.domain.simpleassessment.ReasonType.UNDERPAYMENT
+import uk.gov.hmrc.mobilepaye.domain.simpleassessment.{MobileSAReconciliation, MobileSATaxYearReconciliation, MobileSimpleAssessmentResponse, Reason, Receipts}
 import uk.gov.hmrc.mobilepaye.domain.{Feedback, HistoricTaxCodeIncome, IncomeSource, IncomeTaxYear, MobilePayePreviousYearSummaryResponse, MobilePayeSummaryResponse, MobilePayeSummaryResponseAudit, OtherIncome, OtherIncomeAudit, P800Repayment, PayeIncome, PayeIncomeAudit, TaxCodeChange}
 import uk.gov.hmrc.mobilepaye.domain.tai._
-import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus.{ChequeSent, PaymentPaid}
-import uk.gov.hmrc.mobilepaye.domain.taxcalc.{P800Status, P800Summary, RepaymentStatus}
+import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status.{NotSupported, Underpaid}
+import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus.{ChequeSent, PaymentDue, PaymentPaid, SaUser}
+import uk.gov.hmrc.mobilepaye.domain.taxcalc.{P800Status, P800Summary, RepaymentStatus, TaxYearReconciliation}
 import uk.gov.hmrc.time.TaxYear
 
 trait MobilePayeTestData {
-  val currentTaxYear: Int = TaxYear.current.startYear
-  val endOfTaxYear:   Int = TaxYear.current.finishYear
-  val previousTaxYear:   Int =  currentTaxYear - 1
+  val currentTaxYear:  Int = TaxYear.current.startYear
+  val endOfTaxYear:    Int = TaxYear.current.finishYear
+  val previousTaxYear: Int = currentTaxYear - 1
 
   val nino:           Nino          = Nino("CS700100A")
   val taxCodeIncome:  TaxCodeIncome = TaxCodeIncome(EmploymentIncome, Live, Some(3), "The Best Shop Ltd", 1000, "S1150L")
@@ -168,6 +171,116 @@ trait MobilePayeTestData {
 
   val otherIncomes: Seq[OtherIncome] = Seq(otherIncome)
 
+  val fullMobileSimpleAssessmentResponse: MobileSimpleAssessmentResponse = MobileSimpleAssessmentResponse(
+    List(
+      MobileSATaxYearReconciliation(
+        taxYear = previousTaxYear,
+        reconciliations = List(
+          MobileSAReconciliation(
+            reconciliationId         = 1,
+            reconciliationStatus     = Some("UNDERPAID"),
+            cumulativeAmount         = 200,
+            taxLiabilityAmount       = 300,
+            taxPaidAmount            = 100,
+            reconciliationTimeStamp  = Some(s"$previousTaxYear-07-30 12:34:56"),
+            p800Status               = Some("ISSUED"),
+            collectionMethod         = None,
+            previousReconciliationId = Some(2),
+            nextReconciliationId     = None,
+            multiYearRecIndicator    = None,
+            p800Reasons = Some(
+              List(
+                Reason(reasonType      = UNDERPAYMENT,
+                       reasonCode      = 45,
+                       estimatedAmount = Some(175),
+                       actualAmount    = Some(185))
+              )
+            ),
+            businessReason   = "P302",
+            eligibility      = true,
+            totalAmountOwed  = 400,
+            chargeReference  = Some("XQ004100001540"),
+            dueDate          = Some(s"${currentTaxYear + 1}-01-31"),
+            dunningLock      = None,
+            receivableStatus = "OUTSTANDING",
+            receipts = Some(
+              List(
+                Receipts(
+                  receiptAmount   = Some(100.00),
+                  receiptDate     = Some(s"$currentTaxYear-08-02"),
+                  receiptMethod   = Some("RECEIVED FROM ETMP"),
+                  receiptStatus   = Some("ALLOCATED"),
+                  taxYearCodedOut = None,
+                  allocatedAmount = Some(100.00),
+                  promiseToPayRef = None
+                )
+              )
+            )
+          )
+        )
+      ),
+      MobileSATaxYearReconciliation(
+        taxYear = previousTaxYear - 1,
+        reconciliations = List(
+          MobileSAReconciliation(
+            reconciliationId         = 2,
+            reconciliationStatus     = Some("UNDERPAID"),
+            cumulativeAmount         = 100,
+            taxLiabilityAmount       = 200,
+            taxPaidAmount            = 50,
+            reconciliationTimeStamp  = Some(s"${previousTaxYear - 1}-07-30 12:34:56"),
+            p800Status               = Some("ISSUED"),
+            collectionMethod         = None,
+            previousReconciliationId = None,
+            nextReconciliationId     = None,
+            multiYearRecIndicator    = None,
+            p800Reasons = Some(
+              List(
+                Reason(reasonType      = UNDERPAYMENT,
+                       reasonCode      = 45,
+                       estimatedAmount = Some(175),
+                       actualAmount    = Some(185))
+              )
+            ),
+            businessReason   = "P302",
+            eligibility      = true,
+            totalAmountOwed  = 300,
+            chargeReference  = Some("XQ004100001539"),
+            dueDate          = Some(s"${currentTaxYear + 1}-01-31"),
+            dunningLock      = None,
+            receivableStatus = "OUTSTANDING",
+            receipts = Some(
+              List(
+                Receipts(
+                  receiptAmount   = Some(150.00),
+                  receiptDate     = Some(s"$previousTaxYear-08-02"),
+                  receiptMethod   = Some("RECEIVED FROM ETMP"),
+                  receiptStatus   = Some("ALLOCATED"),
+                  taxYearCodedOut = None,
+                  allocatedAmount = Some(150.00),
+                  promiseToPayRef = None
+                )
+              )
+            )
+          )
+        )
+      )
+    )
+  )
+
+  val taxCalcTaxYearReconciliationResponse: List[TaxYearReconciliation] = {
+    List(
+      TaxYearReconciliation(
+        taxYear        = previousTaxYear,
+        reconciliation = P800Summary(_type = Underpaid, status = Some(PaymentDue), amount = Some(200), datePaid = None)
+      ),
+      TaxYearReconciliation(
+        taxYear = previousTaxYear - 1,
+        reconciliation = P800Summary(_type = NotSupported, status = Some(SaUser), amount = None, datePaid = None)
+      )
+    )
+  }
+
   val fullMobilePayeResponse: MobilePayeSummaryResponse = MobilePayeSummaryResponse(
     taxYear                = Some(TaxYear.current.currentYear),
     employments            = Some(employments),
@@ -175,6 +288,7 @@ trait MobilePayeTestData {
     repayment              = None,
     pensions               = Some(pensions),
     otherIncomes           = Some(otherIncomes),
+    simpleAssessment       = None,
     taxCodeChange          = Some(TaxCodeChange(true)),
     taxFreeAmount          = Some(10000),
     estimatedTaxAmount     = Some(250),
@@ -189,6 +303,7 @@ trait MobilePayeTestData {
     repayment           = None,
     pensions            = Some(pensions),
     otherIncomes        = Some(otherIncomes),
+    simpleAssessment    = None,
     taxCodeChange       = Some(TaxCodeChange(true)),
     taxFreeAmount       = Some(10000),
     estimatedTaxAmount  = Some(250),

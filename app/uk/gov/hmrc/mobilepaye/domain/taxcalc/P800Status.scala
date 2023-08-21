@@ -23,22 +23,21 @@ sealed trait P800Status
 object P800Status {
   case object Underpaid extends P800Status
   case object Overpaid extends P800Status
-  case object NotReconciled extends P800Status
   case object NotSupported extends P800Status
 
   implicit val format: Format[P800Status] = new Format[P800Status] {
 
     override def writes(o: P800Status): JsValue = o match {
-      case Underpaid     => JsString("underpaid")
-      case Overpaid      => JsString("overpaid")
-      case NotSupported  => JsString("not_supported")
+      case Underpaid    => JsString("underpaid")
+      case Overpaid     => JsString("overpaid")
+      case NotSupported => JsString("not_supported")
     }
 
     override def reads(json: JsValue): JsResult[P800Status] =
       json.validate[String].map {
-        case "underpaid"      => Underpaid
-        case "overpaid"       => Overpaid
-        case _                => NotSupported
+        case "underpaid" => Underpaid
+        case "overpaid"  => Overpaid
+        case _           => NotSupported
       }
   }
 }

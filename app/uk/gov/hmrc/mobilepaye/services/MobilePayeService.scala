@@ -20,9 +20,12 @@ import com.google.inject.{Inject, Singleton}
 import play.api.Logger
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException}
-import uk.gov.hmrc.mobilepaye.connectors.{FeedbackConnector, TaiConnector, TaxCalcConnector}
+import uk.gov.hmrc.mobilepaye.connectors.{FeedbackConnector, MobileSimpleAssessmentConnector, TaiConnector, TaxCalcConnector}
+import uk.gov.hmrc.mobilepaye.domain.simpleassessment.MobileSimpleAssessmentResponse
 import uk.gov.hmrc.mobilepaye.domain.tai._
+import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status.{NotSupported, Overpaid, Underpaid}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.{P800Summary, TaxYearReconciliation}
+import uk.gov.hmrc.mobilepaye.domain.types.ModelTypes.JourneyId
 import uk.gov.hmrc.mobilepaye.domain.{Feedback, IncomeSource, MobilePayePreviousYearSummaryResponse, MobilePayeSummaryResponse, OtherIncome, P800Cache, P800Repayment, PayeIncome, TaxCodeChange}
 import uk.gov.hmrc.mobilepaye.repository.P800CacheMongo
 import uk.gov.hmrc.time.TaxYear
@@ -38,6 +41,7 @@ class MobilePayeService @Inject() (
   taxCalcConnector:                                                              TaxCalcConnector,
   p800CacheMongo:                                                                P800CacheMongo,
   feedbackConnector:                                                             FeedbackConnector,
+  mobileSimpleAssessmentConnector:                                               MobileSimpleAssessmentConnector,
   @Named("rUK.startDate") rUKComparisonStartDate:                                String,
   @Named("rUK.endDate") rUKComparisonEndDate:                                    String,
   @Named("wales.startDate") walesComparisonStartDate:                            String,
@@ -56,7 +60,8 @@ class MobilePayeService @Inject() (
 
   def getMobilePayeSummaryResponse(
     nino:        Nino,
-    taxYear:     Int
+    taxYear:     Int,
+    journeyId:   JourneyId
   )(implicit hc: HeaderCarrier,
     ec:          ExecutionContext
   ): Future[MobilePayeSummaryResponse] =
@@ -75,8 +80,8 @@ class MobilePayeService @Inject() (
       employmentBenefits <- taiConnector.getBenefits(nino, taxYear)
       taxCodeChangeExists <- if (taxCodeChangeEnabled) taiConnector.getTaxCodeChangeExists(nino)
                             else Future successful false
+      simpleAssessment <- getSimpleAssessmentData(journeyId, reconciliations)
       mobilePayeResponse: MobilePayeSummaryResponse = buildMobilePayeResponse(
-        nino,
         taxYear,
         taxCodeIncomesEmployment,
         previousEmployments,
@@ -85,7 +90,8 @@ class MobilePayeService @Inject() (
         taxAccountSummary,
         getP800Summary(reconciliations, taxYear),
         employmentBenefits,
-        Some(TaxCodeChange(taxCodeChangeExists))
+        Some(TaxCodeChange(taxCodeChangeExists)),
+        simpleAssessment
       )
     } yield {
       if (cy1InfoAvailable) mobilePayeResponse.copy(taxCodeLocation = getTaxCodeLocation(taxCodeIncomesEmployment))
@@ -117,7 +123,6 @@ class MobilePayeService @Inject() (
         taxAccountSummary  <- taiConnector.getTaxAccountSummary(nino, taxYear)
         employmentBenefits <- taiConnector.getBenefits(nino, taxYear)
         mobilePayeResponse: MobilePayeSummaryResponse = buildMobilePayeResponse(
-          nino,
           taxYear,
           taxCodeIncomesEmployment,
           previousEmployments,
@@ -126,6 +131,7 @@ class MobilePayeService @Inject() (
           taxAccountSummary,
           None,
           employmentBenefits,
+          None,
           None
         )
       } yield {
@@ -160,11 +166,31 @@ class MobilePayeService @Inject() (
     ec:          ExecutionContext
   ): Future[Option[List[TaxYearReconciliation]]] =
     if (p800CacheEnabled) {
-      val cacheCheckResult = p800CacheMongo.selectByNino(nino)
-      cacheCheckResult.flatMap(recordFound =>
-        if (recordFound.isEmpty) taxCalcConnector.getTaxReconciliations(nino) else Future.successful(None)
-      )
-    } else taxCalcConnector.getTaxReconciliations(nino)
+      useCacheForP800Check(nino)
+    } else {
+      taxCalcConnector.getTaxReconciliations(nino)
+    }
+
+  private def useCacheForP800Check(
+    nino:        Nino
+  )(implicit hc: HeaderCarrier,
+    ec:          ExecutionContext
+  ) =
+    p800CacheMongo
+      .selectByNino(nino)
+      .flatMap { recordFound =>
+        if (recordFound.isEmpty) {
+          val taxYearRecs = taxCalcConnector.getTaxReconciliations(nino)
+          taxYearRecs.map { rec =>
+            if (!rec.getOrElse(List.empty).exists(_.reconciliation._type != NotSupported))
+            p800CacheMongo.add(P800Cache(nino))
+          }
+          taxYearRecs
+
+        } else {
+          Future.successful(None)
+        }
+      }
 
   private def knownException(
     ex:   Throwable,
@@ -177,25 +203,13 @@ class MobilePayeService @Inject() (
     known
   }
 
-  private def getAndCacheP800RepaymentCheck(
-    nino:        Nino,
+  private def getP800Repayment(
     taxYear:     Int,
     p800Summary: Option[P800Summary]
-  ): Option[P800Repayment] = {
-    val repayment = p800Summary.flatMap(summary => P800Summary.toP800Repayment(summary, taxYear))
-    repayment match {
-      case None => {
-        if (p800CacheEnabled) {
-          p800CacheMongo.add(P800Cache(nino))
-        }
-        None
-      }
-      case _ => repayment
-    }
-  }
+  ): Option[P800Repayment] =
+    p800Summary.flatMap(summary => P800Summary.toP800Repayment(summary, taxYear))
 
   private def buildMobilePayeResponse(
-    nino:                   Nino,
     taxYear:                Int,
     incomeSourceEmployment: Seq[IncomeSource],
     previousEmployments:    Seq[IncomeSource],
@@ -204,7 +218,8 @@ class MobilePayeService @Inject() (
     taxAccountSummary:      TaxAccountSummary,
     p800Summary:            Option[P800Summary],
     employmentBenefits:     Benefits,
-    taxCodeChange:          Option[TaxCodeChange]
+    taxCodeChange:          Option[TaxCodeChange],
+    simpleAssessment:       Option[MobileSimpleAssessmentResponse]
   ): MobilePayeSummaryResponse = {
 
     val otherNonTaxCodeIncomes: Option[Seq[OtherIncome]] = nonTaxCodeIncomes.otherNonTaxCodeIncomes
@@ -229,8 +244,8 @@ class MobilePayeService @Inject() (
     val estimatedTaxAmount: Option[BigDecimal] = Option(
       taxAccountSummary.totalEstimatedTax.setScale(0, RoundingMode.FLOOR)
     )
-    val repayment: Option[P800Repayment] = getAndCacheP800RepaymentCheck(nino, taxYear, p800Summary)
-
+    val repayment: Option[P800Repayment] =
+      if (p800Summary.exists(_._type == Overpaid)) getP800Repayment(taxYear, p800Summary) else None
     MobilePayeSummaryResponse(
       taxYear             = Some(taxYear),
       employments         = employmentPayeIncomes,
@@ -238,13 +253,14 @@ class MobilePayeService @Inject() (
       repayment           = repayment,
       pensions            = pensionPayeIncomes,
       otherIncomes        = otherNonTaxCodeIncomes,
+      simpleAssessment    = simpleAssessment,
       taxCodeChange       = taxCodeChange,
       taxFreeAmount       = taxFreeAmount,
       estimatedTaxAmount  = estimatedTaxAmount
     )
   }
 
-  def buildPayeIncomes(
+  private def buildPayeIncomes(
     incomes:            Seq[IncomeSource],
     employment:         Boolean = false,
     employmentBenefits: Option[Benefits] = None
@@ -302,5 +318,17 @@ class MobilePayeService @Inject() (
       taiConnector
         .getMatchingTaxCodeIncomes(nino, taxYear, EmploymentIncome.toString, NotLive.toString)
     else Future successful Seq.empty
+
+  private def getSimpleAssessmentData(
+    journeyId:       JourneyId,
+    reconciliations: Option[List[TaxYearReconciliation]]
+  )(implicit hc:     HeaderCarrier
+  ): Future[Option[MobileSimpleAssessmentResponse]] = {
+    val underpaidRecs = reconciliations
+      .map(taxYearReconList => taxYearReconList.filter(_.reconciliation._type == Underpaid))
+      .getOrElse(List.empty)
+    if (underpaidRecs.isEmpty) Future successful None
+    else mobileSimpleAssessmentConnector.getSimpleAssessmentLiabilities(journeyId)
+  }
 
 }

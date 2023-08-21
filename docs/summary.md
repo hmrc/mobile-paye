@@ -286,6 +286,85 @@ Fetch the MobilePayeResponse object.
   "taxCodeChange": {
     "hasChanged": false
   },
+  "simpleAssessment": {
+    "taxYears": [
+      {
+        "taxYear": 2022,
+        "reconciliations": [
+          {
+            "reconciliationId": 1,
+            "reconciliationStatus": "UNDERPAID",
+            "cumulativeAmount": 200,
+            "taxLiabilityAmount": 300,
+            "taxPaidAmount": 100,
+            "reconciliationTimeStamp": "2022-07-30 12:34:56",
+            "p800Status": "ISSUED",
+            "previousReconciliationId": 2,
+            "p800Reasons": [
+              {
+                "reasonType": "UNDERPAYMENT",
+                "reasonCode": 45,
+                "estimatedAmount": 175,
+                "actualAmount": 185
+              }
+            ],
+            "businessReason": "P302",
+            "eligibility": true,
+            "totalAmountOwed": 400,
+            "chargeReference": "XQ004100001540",
+            "dueDate": "2024-01-31",
+            "receivableStatus": "OUTSTANDING",
+            "receipts": [
+              {
+                "receiptAmount": 100,
+                "receiptDate": "2023-08-02",
+                "receiptMethod": "RECEIVED FROM ETMP",
+                "receiptStatus": "ALLOCATED",
+                "allocatedAmount": 100
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "taxYear": 2021,
+        "reconciliations": [
+          {
+            "reconciliationId": 2,
+            "reconciliationStatus": "UNDERPAID",
+            "cumulativeAmount": 100,
+            "taxLiabilityAmount": 200,
+            "taxPaidAmount": 50,
+            "reconciliationTimeStamp": "2021-07-30 12:34:56",
+            "p800Status": "ISSUED",
+            "p800Reasons": [
+              {
+                "reasonType": "UNDERPAYMENT",
+                "reasonCode": 45,
+                "estimatedAmount": 175,
+                "actualAmount": 185
+              }
+            ],
+            "businessReason": "P302",
+            "eligibility": true,
+            "totalAmountOwed": 300,
+            "chargeReference": "XQ004100001539",
+            "dueDate": "2024-01-31",
+            "receivableStatus": "OUTSTANDING",
+            "receipts": [
+              {
+                "receiptAmount": 150,
+                "receiptDate": "2022-08-02",
+                "receiptMethod": "RECEIVED FROM ETMP",
+                "receiptStatus": "ALLOCATED",
+                "allocatedAmount": 150
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
   "taxFreeAmount": 11850,
   "taxFreeAmountLink": "/",
   "estimatedTaxAmount": 618,
