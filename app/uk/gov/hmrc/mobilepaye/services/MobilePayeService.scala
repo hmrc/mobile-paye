@@ -222,6 +222,9 @@ class MobilePayeService @Inject() (
     simpleAssessment:       Option[MobileSimpleAssessmentResponse]
   ): MobilePayeSummaryResponse = {
 
+    logger.info(s"Number of employments received from TAI for tax year $taxYear: ${incomeSourceEmployment.size}")
+    logger.info(s"Number of previous employments received from TAI for tax year $taxYear: ${previousEmployments.size}")
+
     val otherNonTaxCodeIncomes: Option[Seq[OtherIncome]] = nonTaxCodeIncomes.otherNonTaxCodeIncomes
       .filter(_.incomeComponentType != BankOrBuildingSocietyInterest)
       .map(income =>
@@ -246,6 +249,10 @@ class MobilePayeService @Inject() (
     )
     val repayment: Option[P800Repayment] =
       if (p800Summary.exists(_._type == Overpaid)) getP800Repayment(taxYear, p800Summary) else None
+
+    logger.info(s"Number of employments sent to app for tax year $taxYear: ${employmentPayeIncomes.size}")
+    logger.info(s"Number of previous employments sent to ap for tax year $taxYear: ${previousEmploymentPayeIncomes.size}")
+
     MobilePayeSummaryResponse(
       taxYear             = Some(taxYear),
       employments         = employmentPayeIncomes,
