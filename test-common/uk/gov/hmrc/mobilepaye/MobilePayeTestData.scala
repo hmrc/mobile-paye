@@ -206,13 +206,14 @@ trait MobilePayeTestData {
             receipts = Some(
               List(
                 Receipts(
-                  receiptAmount   = Some(100.00),
-                  receiptDate     = Some(s"$currentTaxYear-08-02"),
-                  receiptMethod   = Some("RECEIVED FROM ETMP"),
-                  receiptStatus   = Some("ALLOCATED"),
-                  taxYearCodedOut = None,
-                  allocatedAmount = Some(100.00),
-                  promiseToPayRef = None
+                  receiptAmount      = Some(100.00),
+                  receiptDate        = Some(s"$currentTaxYear-08-02"),
+                  receiptMethod      = Some("RECEIVED FROM ETMP"),
+                  receiptStatus      = Some("ALLOCATED"),
+                  taxYearCodedOut    = None,
+                  allocatedAmount    = Some(100.00),
+                  promiseToPayRef    = None,
+                  receiptDescription = Some("PAID-ONLINE")
                 )
               )
             )
@@ -275,7 +276,7 @@ trait MobilePayeTestData {
         reconciliation = P800Summary(_type = Underpaid, status = Some(PaymentDue), amount = Some(200), datePaid = None)
       ),
       TaxYearReconciliation(
-        taxYear = previousTaxYear - 1,
+        taxYear        = previousTaxYear - 1,
         reconciliation = P800Summary(_type = NotSupported, status = Some(SaUser), amount = None, datePaid = None)
       )
     )

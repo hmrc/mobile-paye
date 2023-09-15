@@ -54,6 +54,7 @@ object MobileSimpleAssessmentStub {
                        |              "receiptDate": "$currentTaxYear-08-02",
                        |              "receiptMethod": "RECEIVED FROM ETMP",
                        |              "receiptStatus": "ALLOCATED",
+                       |              "receiptDescription": "PAID-ONLINE",
                        |              "allocatedAmount": 100
                        |            }
                        |          ]
