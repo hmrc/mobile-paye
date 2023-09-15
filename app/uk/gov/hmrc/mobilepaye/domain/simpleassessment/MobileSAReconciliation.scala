@@ -65,13 +65,14 @@ object ReasonType extends Enumeration {
 }
 
 case class Receipts(
-  receiptAmount:   Option[Double],
-  receiptDate:     Option[String],
-  receiptMethod:   Option[String] = None,
-  receiptStatus:   Option[String] = None,
-  taxYearCodedOut: Option[String] = None,
-  allocatedAmount: Option[Double] = None,
-  promiseToPayRef: Option[String] = None)
+  receiptAmount:      Option[Double],
+  receiptDate:        Option[String],
+  receiptMethod:      Option[String] = None,
+  receiptStatus:      Option[String] = None,
+  taxYearCodedOut:    Option[String] = None,
+  allocatedAmount:    Option[Double] = None,
+  promiseToPayRef:    Option[String] = None,
+  receiptDescription: Option[String] = None)
 
 object Receipts {
   implicit val formats: OFormat[Receipts] = Json.format[Receipts]

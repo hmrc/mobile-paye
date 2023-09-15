@@ -17,12 +17,12 @@
 package uk.gov.hmrc.mobilepaye.connectors
 
 import play.api.Logger
-import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.mobilepaye.domain.admin.OnlinePaymentIntegration
 import uk.gov.hmrc.mobilepaye.domain.simpleassessment.MobileSimpleAssessmentResponse
 import uk.gov.hmrc.mobilepaye.domain.types.ModelTypes.JourneyId
 import uk.gov.hmrc.mobilepaye.services.admin.FeatureFlagService
+import uk.gov.hmrc.http.HttpReads.Implicits._
 
 import javax.inject.{Inject, Named}
 import scala.concurrent.{ExecutionContext, Future}

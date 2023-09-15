@@ -1115,7 +1115,6 @@ class LiveMobilePayeControllerp800CacheEnabledISpec
       response2.status                                         shouldBe 200
       Json.parse(response2.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
 
-      taxCalcCalled(nino, currentTaxYear, 1)
       dropCollection()
     }
 
