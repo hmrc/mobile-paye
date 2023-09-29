@@ -76,7 +76,7 @@ class SandboxMobilePayeController @Inject() (
   override def getTaxIncomeHistory(
     nino:      Nino,
     journeyId: JourneyId
-  ): Action[AnyContent] = validateAccept(acceptHeaderValidationRules).async { implicit request =>
+  ): Action[AnyContent] = validateAccept(acceptHeaderValidationRules).async {
     Future.successful(
       Ok(
         toJson(
@@ -111,7 +111,7 @@ class SandboxMobilePayeController @Inject() (
     nino:      Nino,
     journeyId: JourneyId,
     taxYear:   Int
-  ): Action[AnyContent] = validateAccept(acceptHeaderValidationRules).async { implicit request =>
+  ): Action[AnyContent] = validateAccept(acceptHeaderValidationRules).async {
     Future successful NotFound(Json.toJson("No Data found"))
   }
 }

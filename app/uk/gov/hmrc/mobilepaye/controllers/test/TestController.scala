@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.mobilepaye.controllers.test
 
-import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.mobilepaye.domain.admin.FeatureFlagName
 import uk.gov.hmrc.mobilepaye.repository.admin.AdminRepository
@@ -33,7 +32,7 @@ class TestController @Inject() (
   def setFlag(
     flagName: FeatureFlagName,
     enabled:  Boolean
-  ): Action[AnyContent] = Action.async { implicit request =>
+  ): Action[AnyContent] = Action.async {
     adminRepo.setFeatureFlag(flagName, enabled).map {
       case true  => Created
       case false => NotFound

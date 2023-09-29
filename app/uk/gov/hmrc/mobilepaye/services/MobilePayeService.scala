@@ -19,16 +19,15 @@ package uk.gov.hmrc.mobilepaye.services
 import com.google.inject.{Inject, Singleton}
 import play.api.Logger
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.mobilepaye.connectors.{FeedbackConnector, MobileSimpleAssessmentConnector, TaiConnector, TaxCalcConnector}
 import uk.gov.hmrc.mobilepaye.domain.simpleassessment.MobileSimpleAssessmentResponse
 import uk.gov.hmrc.mobilepaye.domain.tai._
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status.{NotSupported, Overpaid, Underpaid}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.{P800Summary, TaxYearReconciliation}
 import uk.gov.hmrc.mobilepaye.domain.types.ModelTypes.JourneyId
-import uk.gov.hmrc.mobilepaye.domain.{Feedback, IncomeSource, MobilePayePreviousYearSummaryResponse, MobilePayeSummaryResponse, OtherIncome, P800Cache, P800Repayment, PayeIncome, TaxCodeChange}
+import uk.gov.hmrc.mobilepaye.domain.{Feedback, IncomeSource, MobilePayeSummaryResponse, OtherIncome, P800Cache, P800Repayment, PayeIncome, TaxCodeChange}
 import uk.gov.hmrc.mobilepaye.repository.P800CacheMongo
-import uk.gov.hmrc.time.TaxYear
 
 import java.time.{LocalDateTime, ZoneId}
 import javax.inject.Named
@@ -101,47 +100,6 @@ class MobilePayeService @Inject() (
       case ex                             => throw ex
     }
 
-  def getMobilePayePreviousYearSummaryResponse(
-    nino:        Nino,
-    taxYear:     Int
-  )(implicit hc: HeaderCarrier,
-    ec:          ExecutionContext
-  ): Future[MobilePayePreviousYearSummaryResponse] =
-    if (taxYear < TaxYear.current.currentYear - previousYearPayeSummaryYears) {
-      logger.warn(
-        s"Tax Year requested ($taxYear) is older than the current limit of $previousYearPayeSummaryYears years"
-      )
-      throw new NotFoundException("No data available")
-    } else
-      (for {
-        taxCodeIncomesEmployment <- taiConnector
-                                     .getMatchingTaxCodeIncomes(nino, taxYear, EmploymentIncome.toString, Live.toString)
-        previousEmployments <- getPreviousEmployments(nino, taxYear)
-        taxCodeIncomesPension <- taiConnector
-                                  .getMatchingTaxCodeIncomes(nino, taxYear, PensionIncome.toString, Live.toString)
-        nonTaxCodeIncomes  <- taiConnector.getNonTaxCodeIncome(nino, taxYear)
-        taxAccountSummary  <- taiConnector.getTaxAccountSummary(nino, taxYear)
-        employmentBenefits <- taiConnector.getBenefits(nino, taxYear)
-        mobilePayeResponse: MobilePayeSummaryResponse = buildMobilePayeResponse(
-          taxYear,
-          taxCodeIncomesEmployment,
-          previousEmployments,
-          taxCodeIncomesPension,
-          nonTaxCodeIncomes,
-          taxAccountSummary,
-          None,
-          employmentBenefits,
-          None,
-          None
-        )
-      } yield {
-        MobilePayePreviousYearSummaryResponse.fromPayeSummaryResponse(mobilePayeResponse)
-      }) recover {
-        case ex =>
-          logger.warn(s"Error retrieving previous PAYE summary info: ${ex.printStackTrace()}")
-          throw new NotFoundException(ex.getMessage)
-      }
-
   def getPerson(
     nino:        Nino
   )(implicit hc: HeaderCarrier,
@@ -183,7 +141,7 @@ class MobilePayeService @Inject() (
           val taxYearRecs = taxCalcConnector.getTaxReconciliations(nino)
           taxYearRecs.map { rec =>
             if (!rec.getOrElse(List.empty).exists(_.reconciliation._type != NotSupported))
-            p800CacheMongo.add(P800Cache(nino))
+              p800CacheMongo.add(P800Cache(nino))
           }
           taxYearRecs
 
@@ -251,7 +209,9 @@ class MobilePayeService @Inject() (
       if (p800Summary.exists(_._type == Overpaid)) getP800Repayment(taxYear, p800Summary) else None
 
     logger.info(s"Number of employments sent to app for tax year $taxYear: ${employmentPayeIncomes.size}")
-    logger.info(s"Number of previous employments sent to ap for tax year $taxYear: ${previousEmploymentPayeIncomes.size}")
+    logger.info(
+      s"Number of previous employments sent to ap for tax year $taxYear: ${previousEmploymentPayeIncomes.size}"
+    )
 
     MobilePayeSummaryResponse(
       taxYear             = Some(taxYear),

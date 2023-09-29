@@ -4,7 +4,6 @@ import org.mockito.MockitoSugar.mock
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 
-import java.util.Base64
 import org.scalatestplus.play.WsScalaTestClient
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.inject.bind
@@ -66,9 +65,6 @@ abstract class BaseISpec
     feedback: JsValue
   ): Future[WSResponse] =
     wsUrl(url).withHttpHeaders(acceptJsonHeader, authorisationJsonHeader).post(feedback)
-
-  private def base64Encode(s: String): String =
-    Base64.getEncoder.encodeToString(s.getBytes("UTF-8"))
 
   val mockFeatureFlagService: FeatureFlagService =
     mock[FeatureFlagService]

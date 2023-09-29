@@ -30,7 +30,7 @@ import uk.gov.hmrc.mobilepaye.connectors.ShutteringConnector
 import uk.gov.hmrc.mobilepaye.controllers.action.AccessControl
 import uk.gov.hmrc.mobilepaye.domain.types.ModelTypes.JourneyId
 import uk.gov.hmrc.mobilepaye.domain.{MobilePayeSummaryResponse, MobilePayeSummaryResponseAudit}
-import uk.gov.hmrc.mobilepaye.services.{IncomeTaxHistoryService, MobilePayeService}
+import uk.gov.hmrc.mobilepaye.services.{IncomeTaxHistoryService, MobilePayeService, PreviousYearSummaryService}
 import uk.gov.hmrc.play.audit.AuditExtensions.auditHeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
@@ -69,7 +69,8 @@ class LiveMobilePayeController @Inject() (
   val auditConnector:                                           AuditConnector,
   @Named("appName") override val appName:                       String,
   shutteringConnector:                                          ShutteringConnector,
-  incomeTaxHistoryService:                                      IncomeTaxHistoryService
+  incomeTaxHistoryService:                                      IncomeTaxHistoryService,
+  previousYearSummaryService:                                   PreviousYearSummaryService
 )(implicit val executionContext:                                ExecutionContext)
     extends MobilePayeController
     with AccessControl
@@ -143,7 +144,7 @@ class LiveMobilePayeController @Inject() (
       shutteringConnector.getShutteringStatus(journeyId).flatMap { shuttered =>
         withShuttering(shuttered) {
           errorWrapper {
-            mobilePayeService.getMobilePayePreviousYearSummaryResponse(nino, taxYear).map {
+            previousYearSummaryService.getMobilePayePreviousYearSummaryResponse(nino, taxYear).map {
               mobilePayePreviousYearSummaryResponse =>
                 Ok(Json.toJson(mobilePayePreviousYearSummaryResponse))
             }

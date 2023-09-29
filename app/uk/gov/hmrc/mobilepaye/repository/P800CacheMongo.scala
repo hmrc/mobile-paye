@@ -16,13 +16,9 @@
 
 package uk.gov.hmrc.mobilepaye.repository
 
-import org.bson.BsonDocument
-import org.mongodb.scala.bson.collection.immutable.Document
 import org.mongodb.scala.model.Filters.equal
 import org.mongodb.scala.model.{IndexModel, IndexOptions}
 import org.mongodb.scala.model.Indexes.ascending
-import org.mongodb.scala.result.DeleteResult
-import play.api.libs.json.Format
 
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.domain.Nino

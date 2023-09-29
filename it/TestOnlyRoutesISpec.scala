@@ -2,8 +2,6 @@ import play.api.libs.json.Json
 import play.api.libs.ws.WSRequest
 import utils.BaseISpec
 
-import java.io.File
-
 /**
   * Need two separate tests so that the servers can be run with different system
   * property settings for the router
