@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.mobilepaye.connectors
 
-import org.scalamock.handlers.CallHandler6
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.mobilepaye.domain.admin.OnlinePaymentIntegration
 import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, FeatureFlagName}

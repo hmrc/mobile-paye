@@ -67,28 +67,32 @@ trait MobilePayeTestData {
 
   def taiEmployment(taxYear: Int = LocalDate.now().getYear): Employment =
     Employment("TESCO",
+               Live,
                Some("ABC123"),
                3,
                "P12345",
                LocalDate.now().minusYears(4),
                None,
                Seq(annualAccount(taxYear)),
-               "123")
+               "123",
+               false)
 
   val taiEmployment2: Employment = Employment(
-    name           = "ASDA",
-    payrollNumber  = Some("DEF456"),
-    sequenceNumber = 4,
-    payeNumber     = "P54321",
-    startDate      = TaxYear.current.back(5).starts,
-    endDate        = Some(TaxYear.current.back(3).starts),
+    name             = "ASDA",
+    employmentStatus = Live,
+    payrollNumber    = Some("DEF456"),
+    sequenceNumber   = 4,
+    payeNumber       = "P54321",
+    startDate        = TaxYear.current.back(5).starts,
+    endDate          = Some(TaxYear.current.back(3).starts),
     annualAccounts = Seq(
       AnnualAccount(TaxYear(TaxYear.current.back(4).currentYear),
                     Seq(Payment(LocalDate.now().minusDays(63), 50, 20, 10, 30, 5, 2))),
       AnnualAccount(TaxYear(TaxYear.current.back(5).currentYear),
                     Seq(Payment(LocalDate.now().minusDays(63), 50, 20, 10, 30, 5, 2)))
     ),
-    taxDistrictNumber = "123"
+    taxDistrictNumber            = "123",
+    receivingOccupationalPension = false
   )
 
   val taiEmployment3: Employment =
@@ -386,12 +390,44 @@ trait MobilePayeTestData {
 
   def fullMobilePayePreviousYearResponse(taxYear: Int = previousTaxYear): MobilePayePreviousYearSummaryResponse =
     MobilePayePreviousYearSummaryResponse(
-      taxYear             = Some(taxYear),
-      employments         = Some(employments),
-      previousEmployments = Some(employments),
-      pensions            = Some(pensions),
-      otherIncomes        = Some(otherIncomes),
-      taxFreeAmount       = Some(10000),
-      estimatedTaxAmount  = Some(250)
+      taxYear = Some(taxYear),
+      employments =
+        Some(Seq(PayeIncome.fromEmployment(taiEmployment(TaxYear.current.previous.startYear), Some("1250L")))),
+      previousEmployments =
+        Some(Seq(PayeIncome.fromEmployment(taiEmployment2.copy(employmentStatus = Ceased), Some("1199L")))),
+      pensions = Some(
+        Seq(PayeIncome.fromEmployment(taiEmployment3.copy(name = "ALDI", receivingOccupationalPension = true), None))
+      ),
+      otherIncomes       = Some(otherIncomes),
+      taxFreeAmount      = Some(10000),
+      estimatedTaxAmount = Some(250)
     )
+
+  val taxCodeRecord = TaxCodeRecord(
+    taxCode          = "1250L",
+    startDate        = LocalDate.now().minusYears(2),
+    endDate          = LocalDate.now().minusYears(1),
+    employerName     = "TESCO",
+    pensionIndicator = false,
+    payrollNumber    = Some("1234"),
+    primary          = true
+  )
+
+  val taxCodeRecord2 = TaxCodeRecord(
+    taxCode          = "1199L",
+    startDate        = LocalDate.now().minusYears(2),
+    endDate          = LocalDate.now().minusYears(1),
+    employerName     = "ASDA",
+    pensionIndicator = false,
+    payrollNumber    = Some("4321"),
+    primary          = true
+  )
+
+  val employmentData: Seq[Employment] = Seq(
+    taiEmployment(TaxYear.current.previous.startYear),
+    taiEmployment2.copy(employmentStatus = Ceased),
+    taiEmployment3.copy(name             = "ALDI", receivingOccupationalPension = true)
+  )
+
+  val taxCodeData: Seq[TaxCodeRecord] = Seq(taxCodeRecord, taxCodeRecord2)
 }

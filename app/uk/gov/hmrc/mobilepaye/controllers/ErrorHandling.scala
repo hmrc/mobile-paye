@@ -62,7 +62,7 @@ trait ErrorHandling {
 
   def log(message: String): Unit = logger.info(s"$app $message")
 
-  def errorWrapper(func: => Future[mvc.Result])(implicit hc: HeaderCarrier): Future[Result] =
+  def errorWrapper(func: => Future[mvc.Result]): Future[Result] =
     func.recover {
       case _: NotFoundException =>
         log("Resource not found!")

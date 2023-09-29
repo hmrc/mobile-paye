@@ -19,7 +19,7 @@ package uk.gov.hmrc.mobilepaye.domain.taxcalc
 import java.time.LocalDate
 import play.api.libs.json._
 import uk.gov.hmrc.mobilepaye.domain.P800Repayment
-import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status.{Overpaid, Underpaid}
+import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status.Overpaid
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus.{Refund, SaUser, UnableToClaim}
 
 import scala.util.{Failure, Success, Try}

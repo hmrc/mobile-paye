@@ -28,21 +28,21 @@ import uk.gov.hmrc.http._
 import uk.gov.hmrc.mobilepaye.connectors.ShutteringConnector
 import uk.gov.hmrc.mobilepaye.domain.tai.Person
 import uk.gov.hmrc.mobilepaye.domain.{IncomeTaxYear, MobilePayePreviousYearSummaryResponse, MobilePayeSummaryResponse, Shuttering}
-import uk.gov.hmrc.mobilepaye.services.{IncomeTaxHistoryService, MobilePayeService}
+import uk.gov.hmrc.mobilepaye.services.{IncomeTaxHistoryService, MobilePayeService, PreviousYearSummaryService}
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import eu.timepit.refined.auto._
 import uk.gov.hmrc.mobilepaye.domain.types.ModelTypes.JourneyId
-import uk.gov.hmrc.time.TaxYear
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class LiveMobilePayeControllerSpec extends BaseSpec {
 
-  val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withHeaders(acceptHeader)
-  val grantAccessWithCL200:        GrantAccess             = Some(nino.toString()) and L200
-  val mockMobilePayeService:       MobilePayeService       = mock[MobilePayeService]
-  val mockIncomeTaxHistoryService: IncomeTaxHistoryService = mock[IncomeTaxHistoryService]
+  val fakeRequest:                    FakeRequest[AnyContentAsEmpty.type] = FakeRequest().withHeaders(acceptHeader)
+  val grantAccessWithCL200:           GrantAccess                         = Some(nino.toString()) and L200
+  val mockMobilePayeService:          MobilePayeService                   = mock[MobilePayeService]
+  val mockIncomeTaxHistoryService:    IncomeTaxHistoryService             = mock[IncomeTaxHistoryService]
+  val mockPreviousYearSummaryService: PreviousYearSummaryService          = mock[PreviousYearSummaryService]
 
   implicit val mockAuditConnector:      AuditConnector      = mock[AuditConnector]
   implicit val mockAuthConnector:       AuthConnector       = mock[AuthConnector]
@@ -60,7 +60,8 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       mockAuditConnector,
       "mobile-paye",
       mockShutteringConnector,
-      mockIncomeTaxHistoryService
+      mockIncomeTaxHistoryService,
+      mockPreviousYearSummaryService
     )
 
   def mockGetMobilePayeResponse(f: Future[MobilePayeSummaryResponse]) =
@@ -79,7 +80,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       .returning(f)
 
   def mockGetMobilePayePreviousYearResponse(f: Future[MobilePayePreviousYearSummaryResponse]) =
-    (mockMobilePayeService
+    (mockPreviousYearSummaryService
       .getMobilePayePreviousYearSummaryResponse(_: Nino, _: Int)(_: HeaderCarrier, _: ExecutionContext))
       .expects(*, *, *, *)
       .returning(f)

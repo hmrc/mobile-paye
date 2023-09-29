@@ -35,15 +35,6 @@ Fetch the MobilePayeResponse object.
       "amount": 4636,
       "payeNumber": "P12345",
       "link": "/",
-      "updateIncomeLink": "/",
-      "latestPayment": {
-        "date": "2021-08-28",
-        "amount": 1575,
-        "taxAmount": 315,
-        "nationalInsuranceAmount": 189,
-        "link": "/",
-        "futurePayment": true
-      },
       "payments": [
         {
           "date": "2021-07-28",
@@ -100,7 +91,6 @@ Fetch the MobilePayeResponse object.
       "amount": 5690,
       "payeNumber": "P54321",
       "link": "/",
-      "updateIncomeLink": "/",
       "payments": [
         {
           "date": "2021-05-28",
@@ -141,16 +131,7 @@ Fetch the MobilePayeResponse object.
       "name": "TESCO",
       "taxCode": "BR",
       "amount": 5101,
-      "link": "/",
-      "updateIncomeLink": "/",
-      "latestPayment": {
-        "date": "2021-08-30",
-        "amount": 475,
-        "taxAmount": 315,
-        "nationalInsuranceAmount": 189,
-        "link": "/",
-        "futurePayment": true
-      }
+      "link": "/"
     }
   ],
   "previousEmployments": [
@@ -162,18 +143,6 @@ Fetch the MobilePayeResponse object.
       "amount": 18900,
       "payeNumber": "P12345",
       "link": "/",
-      "updateIncomeLink": "/",
-      "latestPayment": {
-        "date": "2020-07-28",
-        "amount": 1575,
-        "taxAmount": 315,
-        "nationalInsuranceAmount": 189,
-        "amountYearToDate": 6201,
-        "taxAmountYearToDate": 1180,
-        "nationalInsuranceAmountYearToDate": 657,
-        "link": "/",
-        "futurePayment": true
-      },
       "payments": [
         {
           "date": "2020-07-28",
@@ -212,18 +181,6 @@ Fetch the MobilePayeResponse object.
       "amount": 18900,
       "payeNumber": "P12345",
       "link": "/",
-      "updateIncomeLink": "/",
-      "latestPayment": {
-        "date": "2020-07-28",
-        "amount": 1575,
-        "taxAmount": 315,
-        "nationalInsuranceAmount": 189,
-        "amountYearToDate": 6201,
-        "taxAmountYearToDate": 1180,
-        "nationalInsuranceAmountYearToDate": 657,
-        "link": "/",
-        "futurePayment": true
-      },
       "payments": [
         {
           "date": "2020-07-28",
@@ -301,15 +258,6 @@ Fetch the MobilePayeResponse object.
       "amount": 4143,
       "payeNumber": "P12345",
       "link": "/",
-      "updateIncomeLink": "/",
-      "latestPayment": {
-        "date":   "2021-08-28",
-        "amount": 1575,
-        "taxAmount": 315,
-        "nationalInsuranceAmount": 189,
-        "link": "/",
-        "futurePayment": true
-      },
       "payments": [
         {
           "date": "2021-07-28",

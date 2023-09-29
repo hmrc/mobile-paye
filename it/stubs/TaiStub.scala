@@ -48,7 +48,7 @@ object TaiStub {
     nino:        String,
     employments: Seq[IncomeSource] = Seq.empty,
     status:      TaxCodeIncomeStatus = Live,
-    taxYear: Int = TaxYear.current.currentYear
+    taxYear:     Int = TaxYear.current.currentYear
   ): StubMapping =
     stubFor(
       get(
@@ -66,8 +66,10 @@ object TaiStub {
       )
     )
 
-  def employmentsNotCalled(nino: String,
-                           taxYear: Int = TaxYear.current.currentYear): Unit =
+  def employmentsNotCalled(
+    nino:    String,
+    taxYear: Int = TaxYear.current.currentYear
+  ): Unit =
     verify(
       0,
       getRequestedFor(
@@ -78,7 +80,7 @@ object TaiStub {
   def stubForPensions(
     nino:     String,
     pensions: Seq[IncomeSource],
-    taxYear: Int = TaxYear.current.currentYear
+    taxYear:  Int = TaxYear.current.currentYear
   ): StubMapping =
     stubFor(
       get(urlEqualTo(s"/tai/$nino/tax-account/year/$taxYear/income/PensionIncome/status/Live"))
@@ -93,8 +95,10 @@ object TaiStub {
         )
     )
 
-  def pensionsNotCalled(nino: String,
-                        taxYear: Int = TaxYear.current.currentYear): Unit =
+  def pensionsNotCalled(
+    nino:    String,
+    taxYear: Int = TaxYear.current.currentYear
+  ): Unit =
     verify(0,
            getRequestedFor(
              urlEqualTo(s"/tai/$nino/tax-account/year/$taxYear/income/PensionIncome/status/Live")
@@ -103,7 +107,7 @@ object TaiStub {
   def nonTaxCodeIncomeIsFound(
     nino:             String,
     nonTaxCodeIncome: NonTaxCodeIncome,
-    taxYear: Int = TaxYear.current.currentYear
+    taxYear:          Int = TaxYear.current.currentYear
   ): StubMapping =
     stubFor(
       get(urlEqualTo(s"/tai/$nino/tax-account/$taxYear/income"))
@@ -120,15 +124,17 @@ object TaiStub {
         )
     )
 
-  def nonTaxCodeIncomeNotCalled(nino: String,
-                                taxYear: Int = TaxYear.current.currentYear): Unit =
+  def nonTaxCodeIncomeNotCalled(
+    nino:    String,
+    taxYear: Int = TaxYear.current.currentYear
+  ): Unit =
     verify(0, getRequestedFor(urlEqualTo(s"/tai/$nino/tax-account/$taxYear/income")))
 
   def taxAccountSummaryIsFound(
     nino:              String,
     taxAccountSummary: TaxAccountSummary,
     cyPlusone:         Boolean = false,
-    taxYear: Int = TaxYear.current.currentYear
+    taxYear:           Int = TaxYear.current.currentYear
   ): StubMapping = {
     val adjustedTaxYear = if (cyPlusone) taxYear + 1 else taxYear
     stubFor(
@@ -148,7 +154,7 @@ object TaiStub {
   def taxAccountSummaryNotFound(
     nino:      String,
     cyPlusone: Boolean = false,
-    taxYear: Int = TaxYear.current.currentYear
+    taxYear:   Int = TaxYear.current.currentYear
   ): StubMapping = {
     val adjustedTaxYear = if (cyPlusone) taxYear + 1 else taxYear
     stubFor(
@@ -160,14 +166,16 @@ object TaiStub {
     )
   }
 
-  def taxAccountSummaryNotCalled(nino: String,
-                                 taxYear: Int = TaxYear.current.currentYear): Unit =
+  def taxAccountSummaryNotCalled(
+    nino:    String,
+    taxYear: Int = TaxYear.current.currentYear
+  ): Unit =
     verify(0, getRequestedFor(urlEqualTo(s"/tai/$nino/tax-account/$taxYear/summary")))
 
   def stubForBenefits(
     nino:               String,
     employmentBenefits: Benefits,
-    taxYear: Int = TaxYear.current.currentYear
+    taxYear:            Int = TaxYear.current.currentYear
   ): StubMapping =
     stubFor(
       get(urlEqualTo(s"/tai/$nino/tax-account/$taxYear/benefits"))
@@ -230,6 +238,24 @@ object TaiStub {
           aResponse()
             .withStatus(200)
             .withBody(hasChanged.toString)
+        )
+    )
+
+  def stubForTaxCodes(
+    nino:           String,
+    taxYear:        Int,
+    taxCodeRecords: Seq[TaxCodeRecord]
+  ): StubMapping =
+    stubFor(
+      get(urlEqualTo(s"/tai/$nino/tax-account/$taxYear/tax-code/latest"))
+        .willReturn(
+          aResponse()
+            .withStatus(200)
+            .withBody(s"""
+                         |{
+                         |  "data": ${Json.toJson(taxCodeRecords)}
+                         |}
+          """.stripMargin)
         )
     )
 

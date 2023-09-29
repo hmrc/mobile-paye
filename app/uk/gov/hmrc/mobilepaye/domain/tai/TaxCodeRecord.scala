@@ -16,22 +16,19 @@
 
 package uk.gov.hmrc.mobilepaye.domain.tai
 
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{Json, OFormat}
 
 import java.time.LocalDate
 
-case class Employment(
-  name:                         String,
-  employmentStatus:             TaxCodeIncomeStatus,
-  payrollNumber:                Option[String],
-  sequenceNumber:               Int,
-  payeNumber:                   String,
-  startDate:                    LocalDate,
-  endDate:                      Option[LocalDate],
-  annualAccounts:               Seq[AnnualAccount],
-  taxDistrictNumber:            String,
-  receivingOccupationalPension: Boolean)
+case class TaxCodeRecord(
+  taxCode:          String,
+  startDate:        LocalDate,
+  endDate:          LocalDate,
+  employerName:     String,
+  pensionIndicator: Boolean,
+  payrollNumber:    Option[String],
+  primary:          Boolean)
 
-object Employment {
-  implicit val employmentFormats: Format[Employment] = Json.format[Employment]
+object TaxCodeRecord {
+  implicit val format: OFormat[TaxCodeRecord] = Json.format[TaxCodeRecord]
 }

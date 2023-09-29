@@ -17,7 +17,7 @@
 package uk.gov.hmrc.mobilepaye.domain
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.mobilepaye.domain.tai.{Benefits, GenericBenefit, Live, Payment, TaxCodeIncomeStatus}
+import uk.gov.hmrc.mobilepaye.domain.tai.{Benefits, Employment, Live, Payment, TaxCodeIncomeStatus}
 
 import java.time.LocalDate
 import scala.math.BigDecimal.RoundingMode
@@ -74,6 +74,32 @@ object PayeIncome {
         buildEmploymentBenefits(_, incomeSource.taxCodeIncome.employmentId)
       ),
       endDate = incomeSource.employment.endDate
+    )
+
+  def fromEmployment(
+    employment:         Employment,
+    taxCode:            Option[String],
+    employmentBenefits: Option[Benefits] = None
+  ): PayeIncome =
+    PayeIncome(
+      name          = employment.name,
+      status        = employment.employmentStatus,
+      payrollNumber = employment.payrollNumber,
+      taxCode       = taxCode.getOrElse(""),
+      amount = employment.annualAccounts.headOption
+        .flatMap(accounts => accounts.latestPayment.map(_.taxAmountYearToDate))
+        .getOrElse(BigDecimal(0)),
+      payeNumber       = s"${employment.taxDistrictNumber}/${employment.payeNumber}",
+      link             = s"/check-income-tax/your-income-calculation-details/${employment.sequenceNumber}",
+      updateIncomeLink = None,
+      latestPayment    = None,
+      payments =
+        if (employment.annualAccounts.headOption.map(_.payments).getOrElse(Seq.empty).isEmpty) None
+        else employment.annualAccounts.headOption.map(_.payments.sorted(Payment.dateOrdering.reverse)),
+      employmentBenefits = employmentBenefits.flatMap(
+        buildEmploymentBenefits(_, Some(employment.sequenceNumber))
+      ),
+      endDate = employment.endDate
     )
 
   private def buildLatestPayment(

@@ -18,7 +18,7 @@ package uk.gov.hmrc.mobilepaye.domain
 
 import ai.x.play.json.Encoders.encoder
 import ai.x.play.json.Jsonx
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.OFormat
 import uk.gov.hmrc.mobilepaye.domain.simpleassessment.MobileSimpleAssessmentResponse
 import uk.gov.hmrc.time.TaxYear
 
