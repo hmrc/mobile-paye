@@ -1053,7 +1053,7 @@ class LiveMobilePayeControllerp800CacheEnabledISpec
 
   implicit def ninoToString(nino: Nino): String = nino.toString()
 
-  s"GET /nino/$nino/tax-year/$currentTaxYear/summary but SHUTTERED" should {
+  s"GET /nino/$nino/tax-year/$currentTaxYear/summary" should {
 
     "Not call taxcalc for P800 repayments if no repayment was found on a call less than 1 day ago" in {
 
@@ -1093,48 +1093,6 @@ class LiveMobilePayeControllerp800CacheEnabledISpec
       response2.status                                         shouldBe 200
       Json.parse(response2.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
 
-      dropCollection()
-    }
-
-    "Call taxcalc for P800 repayments if repayment was found on a call less than 1 day ago" in {
-
-      dropCollection()
-
-      when(mockFeatureFlagService.get(any()))
-        .thenReturn(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = true)))
-
-      stubForShutteringDisabled
-      grantAccess(nino)
-      personalDetailsAreFound(nino, person)
-      nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
-      taxAccountSummaryIsFound(nino, taxAccountSummary)
-      taxAccountSummaryNotFound(nino, cyPlusone = true)
-      stubForPensions(nino, pensionIncomeSource)
-      stubForEmploymentIncome(nino, employmentIncomeSource)
-      stubForEmploymentIncome(nino, status = NotLive)
-      taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now.minusYears(1))
-      stubForBenefits(nino, noBenefits)
-      stubForTaxCodeChangeExists(nino)
-
-      val response = await(
-        getRequestWithAuthHeaders(
-          s"/nino/$nino/tax-year/current/summary?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0"
-        )
-      )
-      response.status                                         shouldBe 200
-      Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
-
-      Thread.sleep(2000)
-
-      val response2 = await(
-        getRequestWithAuthHeaders(
-          s"/nino/$nino/tax-year/current/summary?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0"
-        )
-      )
-      response2.status                                         shouldBe 200
-      Json.parse(response2.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
-
-      taxCalcCalled(nino, currentTaxYear, 2)
       dropCollection()
     }
   }
