@@ -65,6 +65,8 @@ paths:
                           amount: 4143
                           payeNumber: P12345
                           link: /check-income-tax/income-details/1
+                          incomeDetailsLink: /check-income-tax/income-details/1
+                          yourIncomeCalculationDetailsLink: /
                           updateIncomeLink: /
                           latestPayment:
                             date: 2021-08-28
@@ -103,18 +105,24 @@ paths:
                           amount: 5101
                           payeNumber: P12345
                           link: /check-income-tax/income-details/2
+                          incomeDetailsLink: /check-income-tax/income-details/2
+                          yourIncomeCalculationDetailsLink: /
                       pensions:
                         - name: HIGHWIRE RETURNS LTD
                           taxCode: BR
                           amount: 4200
                           payeNumber: P12345
                           link: /check-income-tax/income-details/12
+                          incomeDetailsLink: /check-income-tax/income-details/12
+                          yourIncomeCalculationDetailsLink": /
                         - name: AVIVA (2410)
                           payrollNumber: AB752BR
                           taxCode: BR
                           amount: 5690
                           payeNumber: P12345
                           link: /check-income-tax/income-details/3
+                          incomeDetailsLink: /check-income-tax/income-details/3
+                          yourIncomeCalculationDetailsLink: /
                       repayment:
                         amount: 854.23
                         paymentStatus: REFUND
@@ -151,6 +159,8 @@ paths:
                         amount: 4143
                         payeNumber: P12345
                         link: /check-income-tax/income-details/1
+                        incomeDetailsLink: /check-income-tax/income-details/1
+                        yourIncomeCalculationDetailsLink: /
                         updateIncomeLink: /
                         latestPayment:
                           date: 2021-08-28
@@ -189,18 +199,24 @@ paths:
                         amount: 5101
                         payeNumber: P12345
                         link: /check-income-tax/income-details/2
+                        incomeDetailsLink: /check-income-tax/income-details/2
+                        yourIncomeCalculationDetailsLink: /
                     pensions:
                       - name: HIGHWIRE RETURNS LTD
                         taxCode: BR
                         amount: 4200
                         payeNumber: P12345
                         link: /check-income-tax/income-details/12
+                        incomeDetailsLink: /check-income-tax/income-details/12
+                        yourIncomeCalculationDetailsLink: /
                       - name: AVIVA (2410)
                         payrollNumber: AB752BR
                         taxCode: BR
                         amount: 5690
                         payeNumber: P12345
                         link: /check-income-tax/income-details/3
+                        incomeDetailsLink: /check-income-tax/income-details/3
+                        yourIncomeCalculationDetailsLink: /
                     repayment:
                       amount: 854.23
                       paymentStatus: REFUND
@@ -283,6 +299,8 @@ paths:
                           amount: 4143
                           payeNumber: P12345
                           link: /check-income-tax/income-details/1
+                          incomeDetailsLink: /check-income-tax/income-details/1
+                          yourIncomeCalculationDetailsLink: /
                           updateIncomeLink: /
                           latestPayment:
                             date: 2021-08-28
@@ -321,18 +339,24 @@ paths:
                           amount: 5101
                           payeNumber: P12345
                           link: /check-income-tax/income-details/2
+                          incomeDetailsLink: /check-income-tax/income-details/2
+                          yourIncomeCalculationDetailsLink: /
                       pensions:
                         - name: HIGHWIRE RETURNS LTD
                           taxCode: BR
                           amount: 4200
                           payeNumber: P12345
                           link: /check-income-tax/income-details/12
+                          incomeDetailsLink: /check-income-tax/income-details/12
+                          yourIncomeCalculationDetailsLink: /
                         - name: AVIVA (2410)
                           payrollNumber: AB752BR
                           taxCode: BR
                           amount: 5690
                           payeNumber: P12345
                           link: /check-income-tax/income-details/3
+                          incomeDetailsLink: /check-income-tax/income-details/3
+                          yourIncomeCalculationDetailsLink: /
                       otherIncomes:
                         - name: NON CODED INCOME
                           amount: 22500
@@ -352,6 +376,8 @@ paths:
                         amount: 4143
                         payeNumber: P12345
                         link: /check-income-tax/income-details/1
+                        incomeDetailsLink: /check-income-tax/income-details/1
+                        yourIncomeCalculationDetailsLink: /
                         updateIncomeLink: /
                         latestPayment:
                           date: 2021-08-28
@@ -390,18 +416,24 @@ paths:
                         amount: 5101
                         payeNumber: P12345
                         link: /check-income-tax/income-details/2
+                        incomeDetailsLink: /check-income-tax/income-details/2
+                        yourIncomeCalculationDetailsLink: /
                     pensions:
                       - name: HIGHWIRE RETURNS LTD
                         taxCode: BR
                         amount: 4200
                         payeNumber: P12345
                         link: /check-income-tax/income-details/12
+                        incomeDetailsLink: /check-income-tax/income-details/12
+                        yourIncomeCalculationDetailsLink: /
                       - name: AVIVA (2410)
                         payrollNumber: AB752BR
                         taxCode: BR
                         amount: 5690
                         payeNumber: P12345
                         link: /check-income-tax/income-details/3
+                        incomeDetailsLink: /check-income-tax/income-details/3
+                        yourIncomeCalculationDetailsLink: /
                     otherIncomes:
                       - name: NON CODED INCOME
                         amount: 22500
@@ -553,6 +585,8 @@ components:
         - amount
         - payeNumber
         - link
+        - incomeDetailsLink
+        - yourIncomeCalculationDetailsLink
       type: object
       properties:
         name:
@@ -584,6 +618,8 @@ components:
         amount: 4143
         payeNumber: P12345
         link: /check-income-tax/income-details/1
+        incomeDetailsLink: /check-income-tax/income-details/1
+        yourIncomeCalculationDetailsLink: /
         updateIncomeLink: /
         latestPayment:
           date: 2021-08-28
@@ -701,7 +737,7 @@ components:
         pensions:
           type: array
           items:
-            $ref: '#/components/schemas/Pension'
+            $ref: '#/components/schemas/Employment'
           description: ''
         repayment:
           $ref: '#/components/schemas/Repayment'
@@ -753,6 +789,8 @@ components:
             amount: 4143
             payeNumber: P12345
             link: /check-income-tax/income-details/1
+            incomeDetailsLink: /check-income-tax/income-details/1
+            yourIncomeCalculationDetailsLink: /
             updateIncomeLink: /
             latestPayment:
               date: 2021-08-28
@@ -791,18 +829,24 @@ components:
             amount: 5101
             payeNumber: P12345
             link: /check-income-tax/income-details/2
+            incomeDetailsLink: /check-income-tax/income-details/2
+            yourIncomeCalculationDetailsLink: /
         pensions:
           - name: HIGHWIRE RETURNS LTD
             taxCode: BR
             amount: 4200
             payeNumber: P12345
             link: /check-income-tax/income-details/12
+            incomeDetailsLink: /
+            yourIncomeCalculationDetailsLink: /
           - name: AVIVA (2410)
             payrollNumber: AB752BR
             taxCode: BR
             amount: 5690
             payeNumber: P12345
             link: /check-income-tax/income-details/3
+            incomeDetailsLink: /check-income-tax/income-details/3
+            yourIncomeCalculationDetailsLink: /
         repayment:
           amount: 854.23
           paymentStatus: REFUND
@@ -881,7 +925,7 @@ components:
         pensions:
           type: array
           items:
-            $ref: '#/components/schemas/Pension'
+            $ref: '#/components/schemas/Employment'
           description: ''
         otherIncomes:
           type: array
@@ -903,6 +947,8 @@ components:
             amount: 4143
             payeNumber: P12345
             link: /check-income-tax/income-details/1
+            incomeDetailsLink: /check-income-tax/income-details/1
+            yourIncomeCalculationDetailsLink: /
             updateIncomeLink: /
             latestPayment:
               date: 2021-08-28
@@ -941,18 +987,24 @@ components:
             amount: 5101
             payeNumber: P12345
             link: /check-income-tax/income-details/2
+            incomeDetailsLink: /check-income-tax/income-details/2
+            yourIncomeCalculationDetailsLink: /
         pensions:
           - name: HIGHWIRE RETURNS LTD
             taxCode: BR
             amount: 4200
             payeNumber: P12345
             link: /check-income-tax/income-details/12
+            incomeDetailsLink: /check-income-tax/income-details/12
+            yourIncomeCalculationDetailsLink: /
           - name: AVIVA (2410)
             payrollNumber: AB752BR
             taxCode: BR
             amount: 5690
             payeNumber: P12345
             link: /check-income-tax/income-details/3
+            incomeDetailsLink: /check-income-tax/income-details/3
+            yourIncomeCalculationDetailsLink: /
         otherIncomes:
           - name: NON CODED INCOME
             amount: 22500
@@ -1018,35 +1070,6 @@ components:
         amount: 1600
         taxAmount: 320
         nationalInsuranceAmount: 195
-    Pension:
-      title: Pension
-      required:
-        - name
-        - taxCode
-        - amount
-        - payeNumber
-        - link
-      type: object
-      properties:
-        name:
-          type: string
-        taxCode:
-          type: string
-        amount:
-          type: integer
-          format: int32
-        payeNumber:
-          type: string
-        link:
-          type: string
-        payrollNumber:
-          type: string
-      example:
-        name: HIGHWIRE RETURNS LTD
-        taxCode: BR
-        amount: 4200
-        payeNumber: P12345
-        link: /check-income-tax/income-details/12
     Repayment:
       title: Repayment
       required:

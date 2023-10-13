@@ -9,6 +9,8 @@
       "amount": 18900,
       "payeNumber": "123/P12345",
       "link": "/",
+      "incomeDetailsLink": "/",
+      "yourIncomeCalculationDetailsLink": "/",
       "updateIncomeLink": "/",
       "latestPayment": {
         "date": "<PAYMENT_DATE>",
@@ -61,6 +63,8 @@
       "amount": 18900,
       "payeNumber": "123/P12345",
       "link": "/",
+      "incomeDetailsLink": "/",
+      "yourIncomeCalculationDetailsLink": "/",
       "updateIncomeLink": "/",
       "latestPayment": {
         "date": "<PAYMENT_DATE>",
@@ -111,6 +115,8 @@
       "amount": 18900,
       "payeNumber": "123/P12345",
       "link": "/",
+      "incomeDetailsLink": "/",
+      "yourIncomeCalculationDetailsLink": "/",
       "updateIncomeLink": "/",
       "latestPayment": {
         "date": "<PAYMENT_DATE>",
@@ -169,6 +175,8 @@
       "payeNumber": "P12345",
       "amount": 1500,
       "link": "/",
+      "incomeDetailsLink": "/",
+      "yourIncomeCalculationDetailsLink": "/",
       "payments": []
     }
   ],

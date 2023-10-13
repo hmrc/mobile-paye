@@ -23,18 +23,20 @@ import java.time.LocalDate
 import scala.math.BigDecimal.RoundingMode
 
 case class PayeIncome(
-  name:               String,
-  status:             TaxCodeIncomeStatus,
-  payrollNumber:      Option[String] = None,
-  taxCode:            String,
-  amount:             BigDecimal,
-  payeNumber:         String,
-  link:               String,
-  updateIncomeLink:   Option[String],
-  latestPayment:      Option[LatestPayment],
-  payments:           Option[Seq[Payment]],
-  employmentBenefits: Option[EmploymentBenefits],
-  endDate:            Option[LocalDate])
+  name:                             String,
+  status:                           TaxCodeIncomeStatus,
+  payrollNumber:                    Option[String] = None,
+  taxCode:                          String,
+  amount:                           BigDecimal,
+  payeNumber:                       String,
+  link:                             String,
+  incomeDetailsLink:                String,
+  yourIncomeCalculationDetailsLink: String,
+  updateIncomeLink:                 Option[String],
+  latestPayment:                    Option[LatestPayment],
+  payments:                         Option[Seq[Payment]],
+  employmentBenefits:               Option[EmploymentBenefits],
+  endDate:                          Option[LocalDate])
 
 object PayeIncome {
 
@@ -44,18 +46,17 @@ object PayeIncome {
     employmentBenefits: Option[Benefits] = None
   ): PayeIncome =
     PayeIncome(
-      name          = incomeSource.taxCodeIncome.name,
-      status        = incomeSource.taxCodeIncome.status,
-      payrollNumber = incomeSource.employment.payrollNumber,
-      taxCode       = incomeSource.taxCodeIncome.taxCode,
-      amount        = incomeSource.taxCodeIncome.amount.setScale(0, RoundingMode.FLOOR),
-      payeNumber    = s"${incomeSource.employment.taxDistrictNumber}/${incomeSource.employment.payeNumber}",
-      link =
-        if (incomeSource.taxCodeIncome.status.equals(Live))
-          s"/check-income-tax/income-details/${incomeSource.taxCodeIncome.employmentId.getOrElse(throw new Exception("Employment ID not found"))}"
-        else
-          s"/check-income-tax/your-income-calculation-details/${incomeSource.taxCodeIncome.employmentId
-            .getOrElse(throw new Exception("Employment ID not found"))}",
+      name              = incomeSource.taxCodeIncome.name,
+      status            = incomeSource.taxCodeIncome.status,
+      payrollNumber     = incomeSource.employment.payrollNumber,
+      taxCode           = incomeSource.taxCodeIncome.taxCode,
+      amount            = incomeSource.taxCodeIncome.amount.setScale(0, RoundingMode.FLOOR),
+      payeNumber        = s"${incomeSource.employment.taxDistrictNumber}/${incomeSource.employment.payeNumber}",
+      link              = getIncomeDetailsLink(incomeSource),
+      incomeDetailsLink = getIncomeDetailsLink(incomeSource),
+      yourIncomeCalculationDetailsLink =
+        s"/check-income-tax/your-income-calculation-details/${incomeSource.taxCodeIncome.employmentId
+          .getOrElse(throw new Exception("Employment ID not found"))}",
       updateIncomeLink = if (employment && incomeSource.taxCodeIncome.status.equals(Live))
         Option(
           s"/check-income-tax/update-income/load/${incomeSource.taxCodeIncome.employmentId.getOrElse(throw new Exception("Employment ID not found"))}"
@@ -89,8 +90,11 @@ object PayeIncome {
       amount = employment.annualAccounts.headOption
         .flatMap(accounts => accounts.latestPayment.map(_.taxAmountYearToDate))
         .getOrElse(BigDecimal(0)),
-      payeNumber       = s"${employment.taxDistrictNumber}/${employment.payeNumber}",
-      link             = s"/check-income-tax/your-income-calculation-details/${employment.sequenceNumber}",
+      payeNumber        = s"${employment.taxDistrictNumber}/${employment.payeNumber}",
+      link              = s"/check-income-tax/your-income-calculation-details/${employment.sequenceNumber}",
+      incomeDetailsLink = s"/check-income-tax/your-income-calculation-details/${employment.sequenceNumber}",
+      yourIncomeCalculationDetailsLink =
+        s"/check-income-tax/your-income-calculation-details/${employment.sequenceNumber}",
       updateIncomeLink = None,
       latestPayment    = None,
       payments =
@@ -148,6 +152,13 @@ object PayeIncome {
     if (employmentBenefits.benefits.isEmpty) None else Some(employmentBenefits)
 
   }
+
+  private def getIncomeDetailsLink(incomeSource: IncomeSource): String =
+    if (incomeSource.taxCodeIncome.status.equals(Live))
+      s"/check-income-tax/income-details/${incomeSource.taxCodeIncome.employmentId.getOrElse(throw new Exception("Employment ID not found"))}"
+    else
+      s"/check-income-tax/your-income-calculation-details/${incomeSource.taxCodeIncome.employmentId
+        .getOrElse(throw new Exception("Employment ID not found"))}"
 
   implicit val format: OFormat[PayeIncome] = Json.format[PayeIncome]
 }

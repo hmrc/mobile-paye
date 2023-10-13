@@ -35,6 +35,8 @@ Fetch the MobilePayeResponse object.
       "amount": 4636,
       "payeNumber": "P12345",
       "link": "/",
+      "incomeDetailsLink": "/",
+      "yourIncomeCalculationDetailsLink": "/",
       "payments": [
         {
           "date": "2021-07-28",
@@ -91,6 +93,8 @@ Fetch the MobilePayeResponse object.
       "amount": 5690,
       "payeNumber": "P54321",
       "link": "/",
+      "incomeDetailsLink": "/",
+      "yourIncomeCalculationDetailsLink": "/",
       "payments": [
         {
           "date": "2021-05-28",
@@ -132,6 +136,8 @@ Fetch the MobilePayeResponse object.
       "taxCode": "BR",
       "amount": 5101,
       "link": "/"
+      "incomeDetailsLink": "/",
+      "yourIncomeCalculationDetailsLink": "/",
     }
   ],
   "previousEmployments": [
@@ -143,6 +149,8 @@ Fetch the MobilePayeResponse object.
       "amount": 18900,
       "payeNumber": "P12345",
       "link": "/",
+      "incomeDetailsLink": "/",
+      "yourIncomeCalculationDetailsLink": "/",
       "payments": [
         {
           "date": "2020-07-28",
@@ -181,6 +189,8 @@ Fetch the MobilePayeResponse object.
       "amount": 18900,
       "payeNumber": "P12345",
       "link": "/",
+      "incomeDetailsLink": "/",
+      "yourIncomeCalculationDetailsLink": "/",
       "payments": [
         {
           "date": "2020-07-28",
@@ -219,6 +229,8 @@ Fetch the MobilePayeResponse object.
       "amount": 4200,
       "payeNumber": "P12345",
       "link": "/"
+      "incomeDetailsLink": "/",
+      "yourIncomeCalculationDetailsLink": "/",
     },
     {
       "name": "AVIVA (2410)",
@@ -227,6 +239,8 @@ Fetch the MobilePayeResponse object.
       "amount": 5690,
       "payeNumber": "P12345",
       "link": "/"
+      "incomeDetailsLink": "/",
+      "yourIncomeCalculationDetailsLink": "/",
     }
   ],
   "otherIncomes": [
@@ -258,6 +272,8 @@ Fetch the MobilePayeResponse object.
       "amount": 4143,
       "payeNumber": "P12345",
       "link": "/",
+      "incomeDetailsLink": "/",
+      "yourIncomeCalculationDetailsLink": "/",
       "payments": [
         {
           "date": "2021-07-28",
@@ -307,6 +323,8 @@ Fetch the MobilePayeResponse object.
       "amount": 4200,
       "payeNumber": "P12345",
       "link": "/"
+      "incomeDetailsLink": "/",
+      "yourIncomeCalculationDetailsLink": "/",
     }
   ],
   "taxFreeAmount": 11850,
