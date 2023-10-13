@@ -9,6 +9,8 @@
       "amount": 4143,
       "payeNumber": "123/P12345",
       "link": "/",
+      "incomeDetailsLink": "/",
+      "yourIncomeCalculationDetailsLink": "/",
       "updateIncomeLink": "/",
       "payments": []
     }
