@@ -71,7 +71,7 @@ trait MobilePayeTestData {
                Some("ABC123"),
                3,
                "P12345",
-               LocalDate.now().minusYears(4),
+               Some(LocalDate.now().minusYears(4)),
                None,
                Seq(annualAccount(taxYear)),
                "123",
@@ -83,7 +83,7 @@ trait MobilePayeTestData {
     payrollNumber    = Some("DEF456"),
     sequenceNumber   = 4,
     payeNumber       = "P54321",
-    startDate        = TaxYear.current.back(5).starts,
+    startDate        = Some(TaxYear.current.back(5).starts),
     endDate          = Some(TaxYear.current.back(3).starts),
     annualAccounts = Seq(
       AnnualAccount(TaxYear(TaxYear.current.back(4).currentYear),
