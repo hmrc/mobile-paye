@@ -80,7 +80,7 @@ class IncomeTaxHistoryServiceSpec extends BaseSpec {
       response.head.taxYear.startYear              shouldBe TaxYear.current.startYear
       response.head.incomes.get.size               shouldBe 2
       response.head.incomes.get.head.name          shouldBe "TESCO"
-      response.head.incomes.get.head.startDate     shouldBe LocalDate.now().minusYears(4)
+      response.head.incomes.get.head.startDate.get shouldBe LocalDate.now().minusYears(4)
       response.head.incomes.get.head.amount.get    shouldBe 50
       response.head.incomes.get.head.taxAmount.get shouldBe 20
       response.head.incomes.get.head.taxCode.get   shouldBe "S1150L"
@@ -143,6 +143,24 @@ class IncomeTaxHistoryServiceSpec extends BaseSpec {
       response.size                   shouldBe 2
       response.head.incomes.isDefined shouldBe true
       response(1).incomes.isDefined   shouldBe true
+
+    }
+
+    "return no start date for employment if year of date is 1900 or older" in {
+
+      val service = new IncomeTaxHistoryService(mockTaiConnector, 2)
+
+      mockTaxCodeIncomes(Future successful Seq(taxCodeIncome, taxCodeIncome2, taxCodeIncome3),
+                         TaxYear.current.startYear)
+      mockTaxCodeIncomes(Future successful Seq(taxCodeIncome, taxCodeIncome2, taxCodeIncome3),
+                         TaxYear.current.startYear - 1)
+      mockEmployments(Future successful Seq(taiEmployment(2022),
+                                            taiEmployment2.copy(startDate = Some(LocalDate.of(1899, 1, 1)))),
+                      TaxYear.current.startYear)
+      mockEmployments(Future successful Seq(taiEmployment(2021), taiEmployment2), TaxYear.current.startYear - 1)
+
+      val response = await(service.getIncomeTaxHistoryYearsList(nino))
+      response.head.incomes.get.last.startDate.isDefined shouldBe false
 
     }
 

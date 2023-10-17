@@ -82,14 +82,14 @@ class IncomeTaxHistoryService @Inject() (
           incomes <- taxCodesMap.get(Some(employment.sequenceNumber))
           taxCodeIncome: TaxCodeIncome <- incomes.headOption
         } yield taxCodeIncome
-
-        val maybeLastPayment: Option[Payment] = fetchLastPayment(employment, taxYear)
+        val startDate:        Option[LocalDate] = employment.startDate.filter(_.getYear > 1900)
+        val maybeLastPayment: Option[Payment]   = fetchLastPayment(employment, taxYear)
         val isPension = maybeTaxCode.exists(_.componentType == PensionIncome)
 
         HistoricTaxCodeIncome(
           employment.name,
           employment.payrollNumber.getOrElse(s"${employment.taxDistrictNumber}/${employment.payeNumber}"),
-          employment.startDate,
+          startDate,
           employment.endDate,
           maybeLastPayment.map(_.amountYearToDate),
           maybeLastPayment.map(_.taxAmountYearToDate),
