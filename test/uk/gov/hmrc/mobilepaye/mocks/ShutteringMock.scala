@@ -32,8 +32,8 @@ trait ShutteringMock extends MockFactory {
   )(implicit shutteringConnector: ShutteringConnector
   ): CallHandler[Future[Shuttering]] =
     (shutteringConnector
-      .getShutteringStatus(_: JourneyId)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(*, *, *)
+      .getShutteringStatus(_: JourneyId, _: String)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *, *, *)
       .returning(Future successful response)
 
 }

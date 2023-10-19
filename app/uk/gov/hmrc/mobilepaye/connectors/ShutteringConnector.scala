@@ -35,11 +35,12 @@ class ShutteringConnector @Inject() (
   val logger: Logger = Logger(this.getClass)
 
   def getShutteringStatus(
-    journeyId:              JourneyId
+    journeyId:              JourneyId,
+    service:                String = "mobile-paye"
   )(implicit headerCarrier: HeaderCarrier,
     ex:                     ExecutionContext
   ): Future[Shuttering] =
-    http.GET[JsValue](s"$serviceUrl/mobile-shuttering/service/mobile-paye/shuttered-status?journeyId=$journeyId").map {
+    http.GET[JsValue](s"$serviceUrl/mobile-shuttering/service/$service/shuttered-status?journeyId=$journeyId").map {
       json =>
         (json).as[Shuttering]
     } recover {

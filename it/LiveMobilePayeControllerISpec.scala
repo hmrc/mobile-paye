@@ -60,7 +60,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       when(mockFeatureFlagService.get(any()))
         .thenReturn(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = true)))
 
-      stubForShutteringDisabled
+      stubForShutteringDisabled()
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
       stubForPensions(nino, pensionIncomeSource)
@@ -124,7 +124,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     }
 
     "return OK and a full valid MobilePayeResponse json with no comparison link if data not found" in {
-      stubForShutteringDisabled
+      stubForShutteringDisabled()
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
       stubForPensions(nino, pensionIncomeSource)
@@ -144,7 +144,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     }
 
     "return OK and a valid MobilePayeResponse json without untaxed income but other income" in {
-      stubForShutteringDisabled
+      stubForShutteringDisabled()
       grantAccess(nino)
       stubForPensions(nino, pensionIncomeSource)
       stubForEmploymentIncome(nino, employmentIncomeSource)
@@ -165,7 +165,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     }
 
     "return OK and a valid MobilePayeResponse json without employments" in {
-      stubForShutteringDisabled
+      stubForShutteringDisabled()
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
       stubForPensions(nino, pensionIncomeSource)
@@ -184,7 +184,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     }
 
     "return OK and a valid MobilePayeResponse json without pensions" in {
-      stubForShutteringDisabled
+      stubForShutteringDisabled()
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
       stubForPensions(nino, Seq.empty)
@@ -203,7 +203,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     }
 
     "return OK and a valid MobilePayeResponse json without otherIncomes" in {
-      stubForShutteringDisabled
+      stubForShutteringDisabled()
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
       stubForEmploymentIncome(nino, employmentIncomeSource)
@@ -222,7 +222,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     }
 
     "return GONE when person is deceased" in {
-      stubForShutteringDisabled
+      stubForShutteringDisabled()
       grantAccess(nino)
       personalDetailsAreFound(nino, person.copy(isDeceased = true))
 
@@ -237,7 +237,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     }
 
     "return LOCKED when person is locked in CID" in {
-      stubForShutteringDisabled
+      stubForShutteringDisabled()
       grantAccess(nino)
       personalLocked(nino)
 
@@ -252,7 +252,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     }
 
     "return LOCKED when mci is returned true" in {
-      stubForShutteringDisabled
+      stubForShutteringDisabled()
       grantAccess(nino)
       personalDetailsAreFound(nino, person.copy(manualCorrespondenceInd = Some(true)))
 
@@ -266,7 +266,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     }
 
     "return 429 when TAI returns too many requests" in {
-      stubForShutteringDisabled
+      stubForShutteringDisabled()
       grantAccess(nino)
       personalTooManyRequests(nino)
 
@@ -275,7 +275,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     }
 
     "return 400 when no journeyId supplied" in {
-      stubForShutteringDisabled
+      stubForShutteringDisabled()
       grantAccess(nino)
 
       val response =
@@ -284,7 +284,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     }
 
     "return 400 when invalid journeyId supplied" in {
-      stubForShutteringDisabled
+      stubForShutteringDisabled()
       grantAccess(nino)
 
       val response = await(
@@ -299,7 +299,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
   s"GET /nino/$nino/tax-year/current/summary" should {
 
     "return OK and a full valid MobilePayeResponse json" in {
-      stubForShutteringDisabled
+      stubForShutteringDisabled()
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
@@ -318,7 +318,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     }
 
     "return OK and a valid MobilePayeResponse json without untaxed income but other income" in {
-      stubForShutteringDisabled
+      stubForShutteringDisabled()
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
       stubForPensions(nino, pensionIncomeSource)
@@ -339,7 +339,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     }
 
     "return OK and a valid MobilePayeResponse json without employments" in {
-      stubForShutteringDisabled
+      stubForShutteringDisabled()
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
       stubForPensions(nino, pensionIncomeSource)
@@ -358,7 +358,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     }
 
     "return OK and a valid MobilePayeResponse json without pensions" in {
-      stubForShutteringDisabled
+      stubForShutteringDisabled()
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
       stubForPensions(nino, Seq.empty)
@@ -377,7 +377,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     }
 
     "return OK and a valid MobilePayeResponse json without otherIncomes" in {
-      stubForShutteringDisabled
+      stubForShutteringDisabled()
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
       stubForPensions(nino, pensionIncomeSource)
@@ -399,7 +399,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       when(mockFeatureFlagService.get(any()))
         .thenReturn(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = true)))
 
-      stubForShutteringDisabled
+      stubForShutteringDisabled()
       List(Refund, PaymentProcessing, PaymentPaid, ChequeSent)
         .foreach { repaymentStatus =>
           val amount = Random.nextDouble(): BigDecimal
@@ -429,7 +429,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     }
 
     "return OK with no P800Repayments for Underpaid tax" in {
-      stubForShutteringDisabled
+      stubForShutteringDisabled()
       List(PaymentDue, PartPaid, PaidAll, PaymentsDown, Unknown)
         .foreach { repaymentStatus =>
           val amount = Random.nextDouble(): BigDecimal
@@ -454,7 +454,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     }
 
     "return OK with no P800Repayments for uncovered RepaymentStatuses" in {
-      stubForShutteringDisabled
+      stubForShutteringDisabled()
       List(SaUser, UnableToClaim)
         .foreach { repaymentStatus =>
           val amount = Random.nextDouble(): BigDecimal
@@ -482,7 +482,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       when(mockFeatureFlagService.get(any()))
         .thenReturn(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = true)))
 
-      stubForShutteringDisabled
+      stubForShutteringDisabled()
       val time = LocalDate.now
 
       grantAccess(nino)
@@ -507,7 +507,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     }
 
     "return GONE when person is deceased" in {
-      stubForShutteringDisabled
+      stubForShutteringDisabled()
       grantAccess(nino)
       personalDetailsAreFound(nino, person.copy(isDeceased = true))
 
@@ -520,7 +520,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     }
 
     "return LOCKED when person data locked in CID" in {
-      stubForShutteringDisabled
+      stubForShutteringDisabled()
       grantAccess(nino)
       personalLocked(nino)
 
@@ -535,7 +535,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     }
 
     "return LOCKED when mci set to true" in {
-      stubForShutteringDisabled
+      stubForShutteringDisabled()
       grantAccess(nino)
       personalDetailsAreFound(nino, person.copy(manualCorrespondenceInd = Some(true)))
 
@@ -549,7 +549,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     }
 
     "return OK and a full valid MobilePayeResponse json ith employment benefit info" in {
-      stubForShutteringDisabled
+      stubForShutteringDisabled()
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
@@ -596,7 +596,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
   }
 
   "return matching payloads when called with the current year as int and as 'current' " in {
-    stubForShutteringDisabled
+    stubForShutteringDisabled()
     grantAccess(nino)
     personalDetailsAreFound(nino, person)
     nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
@@ -618,7 +618,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
   }
 
   "return OK and a full valid MobilePayeResponse json when no P800" in {
-    stubForShutteringDisabled
+    stubForShutteringDisabled()
     grantAccess(nino)
     personalDetailsAreFound(nino, person)
     nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
@@ -637,7 +637,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
   }
 
   "return OK and no P800 when datePaid is more than 6 weeks ago" in {
-    stubForShutteringDisabled
+    stubForShutteringDisabled()
     grantAccess(nino)
     personalDetailsAreFound(nino, person)
     nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
@@ -659,7 +659,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     when(mockFeatureFlagService.get(any()))
       .thenReturn(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = true)))
 
-    stubForShutteringDisabled
+    stubForShutteringDisabled()
     grantAccess(nino)
     personalDetailsAreFound(nino, person)
     nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
@@ -685,7 +685,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     when(mockFeatureFlagService.get(any()))
       .thenReturn(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = true)))
 
-    stubForShutteringDisabled
+    stubForShutteringDisabled()
     grantAccess(nino)
     personalDetailsAreFound(nino, person)
     nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
@@ -708,7 +708,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
   }
 
   "return OK and no P800 when type is underpaid" in {
-    stubForShutteringDisabled
+    stubForShutteringDisabled()
     grantAccess(nino)
     personalDetailsAreFound(nino, person)
     nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
@@ -727,7 +727,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
   }
 
   "return OK and no P800 when type is not overpaid" in {
-    stubForShutteringDisabled
+    stubForShutteringDisabled()
     grantAccess(nino)
     personalDetailsAreFound(nino, person)
     nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
@@ -746,7 +746,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
   }
 
   "return OK and no P800 when status is sa_user" in {
-    stubForShutteringDisabled
+    stubForShutteringDisabled()
     grantAccess(nino)
     personalDetailsAreFound(nino, person)
     nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
@@ -765,7 +765,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
   }
 
   "return OK and no P800 when status is unable_to_claim" in {
-    stubForShutteringDisabled
+    stubForShutteringDisabled()
     grantAccess(nino)
     personalDetailsAreFound(nino, person)
     nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
@@ -787,7 +787,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     when(mockFeatureFlagService.get(any()))
       .thenReturn(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = true)))
 
-    stubForShutteringDisabled
+    stubForShutteringDisabled()
     grantAccess(nino)
     personalDetailsAreFound(nino, person)
     nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
@@ -814,7 +814,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     when(mockFeatureFlagService.get(any()))
       .thenReturn(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = true)))
 
-    stubForShutteringDisabled
+    stubForShutteringDisabled()
     grantAccess(nino)
     personalDetailsAreFound(nino, person)
     nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
@@ -870,7 +870,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
   s"GET /nino/$nino/income-tax-history" should {
 
     "return OK and a full valid income tax history json" in {
-      stubForShutteringDisabled
+      stubForShutteringDisabled("mobile-paye-income-tax-history")
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
       stubForTaxCodeIncomes(nino, TaxYear.current.startYear, Seq(taxCodeIncome))
@@ -892,7 +892,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     }
 
     "return OK and a empty valid income tax history json" in {
-      stubForShutteringDisabled
+      stubForShutteringDisabled("mobile-paye-income-tax-history")
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
       stubForTaxCodeIncomes(nino, TaxYear.current.startYear, Seq.empty)
@@ -909,7 +909,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
 
   s"GET /nino/$nino/previous-tax-year/$previousTaxYear/summary" should {
     "return OK and a full valid MobilePayeResponse json" in {
-      stubForShutteringDisabled
+      stubForShutteringDisabled()
       grantAccess(nino)
       stubForEmployments(nino, previousTaxYear, employmentData)
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome, previousTaxYear)
@@ -926,7 +926,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     }
 
     "return OK and a valid MobilePayeResponse json without employments" in {
-      stubForShutteringDisabled
+      stubForShutteringDisabled()
       grantAccess(nino)
       stubForEmployments(nino,
                          previousTaxYear,
@@ -944,7 +944,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     }
 
     "return OK and a valid MobilePayeResponse json without pensions" in {
-      stubForShutteringDisabled
+      stubForShutteringDisabled()
       grantAccess(nino)
       stubForEmployments(nino,
                          previousTaxYear,
@@ -963,7 +963,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     }
 
     "return OK and a valid MobilePayeResponse json without otherIncomes" in {
-      stubForShutteringDisabled
+      stubForShutteringDisabled()
       grantAccess(nino)
       stubForEmployments(nino, previousTaxYear, employmentData)
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome.copy(otherNonTaxCodeIncomes = Nil), previousTaxYear)
@@ -979,7 +979,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     }
 
     "return 404 when tax year supplied is beyond the history limit" in {
-      stubForShutteringDisabled
+      stubForShutteringDisabled()
       grantAccess(nino)
 
       val response = await(
@@ -991,7 +991,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     }
 
     "return 400 when no journeyId supplied" in {
-      stubForShutteringDisabled
+      stubForShutteringDisabled()
       grantAccess(nino)
 
       val response =
@@ -1000,7 +1000,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     }
 
     "return 400 when invalid journeyId supplied" in {
-      stubForShutteringDisabled
+      stubForShutteringDisabled()
       grantAccess(nino)
 
       val response = await(
@@ -1023,7 +1023,7 @@ class LiveMobilePayeControllerShutteredISpec extends BaseISpec {
   s"GET /nino/$nino/tax-year/$currentTaxYear/summary but SHUTTERED" should {
 
     "return SHUTTERED when shuttered" in {
-      stubForShutteringEnabled
+      stubForShutteringEnabled()
       grantAccess(nino)
 
       val response: WSResponse = await(getRequestWithAuthHeaders(request))
@@ -1070,7 +1070,7 @@ class LiveMobilePayeControllerp800CacheEnabledISpec
       when(mockFeatureFlagService.get(any()))
         .thenReturn(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = true)))
 
-      stubForShutteringDisabled
+      stubForShutteringDisabled()
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
