@@ -22,7 +22,7 @@ import uk.gov.hmrc.mobilepaye.utils.EnumUtils
 
 case class MobileSAReconciliation(
   reconciliationId:         Int,
-  reconciliationStatus:     Option[String] = None,
+  reconciliationStatus:     Option[Int] = None,
   cumulativeAmount:         Double,
   taxLiabilityAmount:       Double,
   taxPaidAmount:            Double,

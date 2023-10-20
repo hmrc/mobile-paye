@@ -271,9 +271,9 @@ Fetch the MobilePayeResponse object.
       "taxCode": "BR",
       "amount": 4200,
       "payeNumber": "P12345",
-      "link": "/"
+      "link": "/",
       "incomeDetailsLink": "/",
-      "yourIncomeCalculationDetailsLink": "/",
+      "yourIncomeCalculationDetailsLink": "/"
     },
     {
       "name": "AVIVA (2410)",
@@ -281,9 +281,9 @@ Fetch the MobilePayeResponse object.
       "taxCode": "BR",
       "amount": 5690,
       "payeNumber": "P12345",
-      "link": "/"
+      "link": "/",
       "incomeDetailsLink": "/",
-      "yourIncomeCalculationDetailsLink": "/",
+      "yourIncomeCalculationDetailsLink": "/"
     }
   ],
   "otherIncomes": [
@@ -307,7 +307,7 @@ Fetch the MobilePayeResponse object.
         "reconciliations": [
           {
             "reconciliationId": 1,
-            "reconciliationStatus": "UNDERPAID",
+            "reconciliationStatus": 5,
             "cumulativeAmount": 200,
             "taxLiabilityAmount": 300,
             "taxPaidAmount": 100,
@@ -345,7 +345,7 @@ Fetch the MobilePayeResponse object.
         "reconciliations": [
           {
             "reconciliationId": 2,
-            "reconciliationStatus": "UNDERPAID",
+            "reconciliationStatus": 5,
             "cumulativeAmount": 100,
             "taxLiabilityAmount": 200,
             "taxPaidAmount": 50,
@@ -483,9 +483,9 @@ Fetch the MobilePayeResponse object.
       "taxCode": "BR",
       "amount": 4200,
       "payeNumber": "P12345",
-      "link": "/"
+      "link": "/",
       "incomeDetailsLink": "/",
-      "yourIncomeCalculationDetailsLink": "/",
+      "yourIncomeCalculationDetailsLink": "/"
     }
   ],
   "taxCodeChange": {

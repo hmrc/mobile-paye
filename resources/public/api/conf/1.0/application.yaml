@@ -865,7 +865,7 @@ components:
             - taxYear: 2021
               reconciliations:
                 - reconciliationId: 1
-                  reconciliationStatus: UNDERPAID
+                  reconciliationStatus: 5
                   cumulativeAmount: 200
                   taxLiabilityAmount: 300
                   taxPaidAmount: 100
@@ -1209,7 +1209,7 @@ components:
         reconciliationId:
           type: integer
         reconciliationStatus:
-          type: string
+          type: integer
         cumulativeAmount:
           type: number
         taxLiabilityAmount:
