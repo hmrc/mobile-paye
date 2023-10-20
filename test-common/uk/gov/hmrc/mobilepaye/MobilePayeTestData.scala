@@ -182,7 +182,7 @@ trait MobilePayeTestData {
         reconciliations = List(
           MobileSAReconciliation(
             reconciliationId         = 1,
-            reconciliationStatus     = Some("UNDERPAID"),
+            reconciliationStatus     = Some(5),
             cumulativeAmount         = 200,
             taxLiabilityAmount       = 300,
             taxPaidAmount            = 100,
@@ -229,7 +229,7 @@ trait MobilePayeTestData {
         reconciliations = List(
           MobileSAReconciliation(
             reconciliationId         = 2,
-            reconciliationStatus     = Some("UNDERPAID"),
+            reconciliationStatus     = Some(5),
             cumulativeAmount         = 100,
             taxLiabilityAmount       = 200,
             taxPaidAmount            = 50,
