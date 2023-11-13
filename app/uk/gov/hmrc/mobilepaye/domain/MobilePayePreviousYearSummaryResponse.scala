@@ -19,26 +19,16 @@ package uk.gov.hmrc.mobilepaye.domain
 import play.api.libs.json.{Json, OFormat}
 
 case class MobilePayePreviousYearSummaryResponse(
-  taxYear:             Option[Int],
-  employments:         Option[Seq[PayeIncome]],
-  previousEmployments: Option[Seq[PayeIncome]],
-  pensions:            Option[Seq[PayeIncome]],
-  otherIncomes:        Option[Seq[OtherIncome]],
-  taxFreeAmount:       Option[BigDecimal],
-  estimatedTaxAmount:  Option[BigDecimal])
+  taxYear:                   Option[Int],
+  employments:               Option[Seq[PayeIncome]],
+  previousEmployments:       Option[Seq[PayeIncome]],
+  pensions:                  Option[Seq[PayeIncome]],
+  otherIncomes:              Option[Seq[OtherIncome]],
+  taxFreeAmount:             Option[BigDecimal],
+  estimatedTaxAmount:        Option[BigDecimal],
+  understandYourTaxCodeLink: String = "/check-income-tax/tax-codes")
 
 object MobilePayePreviousYearSummaryResponse {
-
-  def fromPayeSummaryResponse(payeSummary: MobilePayeSummaryResponse): MobilePayePreviousYearSummaryResponse =
-    MobilePayePreviousYearSummaryResponse(
-      taxYear             = payeSummary.taxYear,
-      employments         = payeSummary.employments,
-      previousEmployments = payeSummary.previousEmployments,
-      pensions            = payeSummary.pensions,
-      otherIncomes        = payeSummary.otherIncomes,
-      taxFreeAmount       = payeSummary.taxFreeAmount,
-      estimatedTaxAmount  = payeSummary.estimatedTaxAmount
-    )
 
   implicit val format: OFormat[MobilePayePreviousYearSummaryResponse] =
     Json.format[MobilePayePreviousYearSummaryResponse]

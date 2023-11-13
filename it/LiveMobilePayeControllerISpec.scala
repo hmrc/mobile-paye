@@ -56,6 +56,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
   implicit def ninoToString(nino: Nino): String = nino.toString()
 
   s"GET /nino/$nino/tax-year/$currentTaxYear/summary" should {
+
     "return OK and a full valid MobilePayeResponse json" in {
       when(mockFeatureFlagService.get(any()))
         .thenReturn(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = true)))
@@ -313,7 +314,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChangeExists(nino)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status                                         shouldBe 200
+      response.status shouldBe 200
       Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
     }
 
@@ -353,7 +354,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChangeExists(nino)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status                                         shouldBe 200
+      response.status shouldBe 200
       Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse.copy(employments = None)
     }
 
@@ -372,7 +373,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChangeExists(nino)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status                                         shouldBe 200
+      response.status shouldBe 200
       Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse.copy(pensions = None)
     }
 
@@ -391,7 +392,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChangeExists(nino)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status                                         shouldBe 200
+      response.status shouldBe 200
       Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse.copy(otherIncomes = None)
     }
 
@@ -403,7 +404,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       List(Refund, PaymentProcessing, PaymentPaid, ChequeSent)
         .foreach { repaymentStatus =>
           val amount = Random.nextDouble(): BigDecimal
-          val time   = LocalDate.now
+          val time = LocalDate.now
 
           grantAccess(nino)
           personalDetailsAreFound(nino, person)
@@ -433,7 +434,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       List(PaymentDue, PartPaid, PaidAll, PaymentsDown, Unknown)
         .foreach { repaymentStatus =>
           val amount = Random.nextDouble(): BigDecimal
-          val time   = LocalDate.now
+          val time = LocalDate.now
 
           grantAccess(nino)
           personalDetailsAreFound(nino, person)
@@ -448,7 +449,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
           stubForTaxCodeChangeExists(nino)
 
           val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-          response.status                                      shouldBe 200
+          response.status shouldBe 200
           response.body[JsValue].as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
         }
     }
@@ -458,7 +459,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       List(SaUser, UnableToClaim)
         .foreach { repaymentStatus =>
           val amount = Random.nextDouble(): BigDecimal
-          val time   = LocalDate.now
+          val time = LocalDate.now
 
           grantAccess(nino)
           personalDetailsAreFound(nino, person)
@@ -473,7 +474,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
           stubForTaxCodeChangeExists(nino)
 
           val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-          response.status                                      shouldBe 200
+          response.status shouldBe 200
           response.body[JsValue].as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
         }
     }
@@ -498,7 +499,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChangeExists(nino)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status                                                shouldBe 200
+      response.status shouldBe 200
       response.body[JsValue].as[MobilePayeSummaryResponse].repayment shouldBe a[Some[_]]
       response.body[JsValue].as[MobilePayeSummaryResponse].repayment.foreach { repayment =>
         repayment.datePaid shouldBe a[Some[_]]
@@ -581,7 +582,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       employment1.employmentBenefits.get.benefits
         .filter(_.benefitType.toString == OtherBenefits.toString)
         .head
-        .amount                                        shouldBe BigDecimal(450)
+        .amount shouldBe BigDecimal(450)
       employment2.employmentBenefits.get.benefits.size shouldBe 2
       employment2.employmentBenefits.get.benefits
         .filter(_.benefitType.toString == MedicalInsurance.toString)
@@ -593,278 +594,277 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
         .amount shouldBe BigDecimal(100)
     }
 
-  }
+    "return matching payloads when called with the current year as int and as 'current' " in {
+      stubForShutteringDisabled()
+      grantAccess(nino)
+      personalDetailsAreFound(nino, person)
+      nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+      taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxAccountSummaryNotFound(nino, cyPlusone = true)
+      stubForPensions(nino, pensionIncomeSource)
+      stubForEmploymentIncome(nino, employmentIncomeSource)
+      stubForEmploymentIncome(nino, status = NotLive)
+      taxCalcNoResponse(nino, currentTaxYear)
+      stubForBenefits(nino, noBenefits)
+      stubForTaxCodeChangeExists(nino)
 
-  "return matching payloads when called with the current year as int and as 'current' " in {
-    stubForShutteringDisabled()
-    grantAccess(nino)
-    personalDetailsAreFound(nino, person)
-    nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
-    taxAccountSummaryIsFound(nino, taxAccountSummary)
-    taxAccountSummaryNotFound(nino, cyPlusone = true)
-    stubForPensions(nino, pensionIncomeSource)
-    stubForEmploymentIncome(nino, employmentIncomeSource)
-    stubForEmploymentIncome(nino, status = NotLive)
-    taxCalcNoResponse(nino, currentTaxYear)
-    stubForBenefits(nino, noBenefits)
-    stubForTaxCodeChangeExists(nino)
+      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
+      response.status shouldBe 200
+      val response2 = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
+      response2.status shouldBe 200
 
-    val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-    response.status shouldBe 200
-    val response2 = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
-    response2.status shouldBe 200
-
-    response.body shouldBe response2.body
-  }
-
-  "return OK and a full valid MobilePayeResponse json when no P800" in {
-    stubForShutteringDisabled()
-    grantAccess(nino)
-    personalDetailsAreFound(nino, person)
-    nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
-    taxAccountSummaryIsFound(nino, taxAccountSummary)
-    taxAccountSummaryNotFound(nino, cyPlusone = true)
-    stubForPensions(nino, pensionIncomeSource)
-    stubForEmploymentIncome(nino, employmentIncomeSource)
-    stubForEmploymentIncome(nino, status = NotLive)
-    taxCalcWithNoP800(nino, currentTaxYear, LocalDate.now)
-    stubForBenefits(nino, noBenefits)
-    stubForTaxCodeChangeExists(nino)
-
-    val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-    response.status                                         shouldBe 200
-    Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
-  }
-
-  "return OK and no P800 when datePaid is more than 6 weeks ago" in {
-    stubForShutteringDisabled()
-    grantAccess(nino)
-    personalDetailsAreFound(nino, person)
-    nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
-    taxAccountSummaryIsFound(nino, taxAccountSummary)
-    taxAccountSummaryNotFound(nino, cyPlusone = true)
-    stubForPensions(nino, pensionIncomeSource)
-    stubForEmploymentIncome(nino, employmentIncomeSource)
-    stubForEmploymentIncome(nino, status = NotLive)
-    taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now.minusWeeks(6).minusDays(1))
-    stubForBenefits(nino, noBenefits)
-    stubForTaxCodeChangeExists(nino)
-
-    val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-    response.status                                         shouldBe 200
-    Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
-  }
-
-  "return OK and a P800 when datePaid is less than 6 weeks ago" in {
-    when(mockFeatureFlagService.get(any()))
-      .thenReturn(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = true)))
-
-    stubForShutteringDisabled()
-    grantAccess(nino)
-    personalDetailsAreFound(nino, person)
-    nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
-    taxAccountSummaryIsFound(nino, taxAccountSummary)
-    taxAccountSummaryNotFound(nino, cyPlusone = true)
-    stubForPensions(nino, pensionIncomeSource)
-    stubForEmploymentIncome(nino, employmentIncomeSource)
-    stubForEmploymentIncome(nino, status = NotLive)
-    taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now.minusWeeks(6))
-    stubForBenefits(nino, noBenefits)
-    stubForTaxCodeChangeExists(nino)
-
-    val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-    response.status                                                shouldBe 200
-    response.body[JsValue].as[MobilePayeSummaryResponse].repayment shouldBe a[Some[_]]
-    response.body[JsValue].as[MobilePayeSummaryResponse].repayment.foreach { repayment =>
-      repayment.datePaid shouldBe a[Some[_]]
-      repayment.datePaid.foreach(l => l shouldBe LocalDate.now.minusWeeks(6))
-    }
-  }
-
-  "return OK and a P800 when datePaid is not present" in {
-    when(mockFeatureFlagService.get(any()))
-      .thenReturn(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = true)))
-
-    stubForShutteringDisabled()
-    grantAccess(nino)
-    personalDetailsAreFound(nino, person)
-    nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
-    taxAccountSummaryIsFound(nino, taxAccountSummary)
-    taxAccountSummaryNotFound(nino, cyPlusone = true)
-    stubForPensions(nino, pensionIncomeSource)
-    stubForEmploymentIncome(nino, employmentIncomeSource)
-    stubForEmploymentIncome(nino, status = NotLive)
-    taxCalcWithNoDate(nino, currentTaxYear)
-    stubForBenefits(nino, noBenefits)
-    stubForTaxCodeChangeExists(nino)
-
-    val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-    response.status                                                shouldBe 200
-    response.body[JsValue].as[MobilePayeSummaryResponse].repayment shouldBe a[Some[_]]
-    response.body[JsValue].as[MobilePayeSummaryResponse].repayment.foreach { repayment =>
-      repayment.amount shouldBe a[Some[_]]
-      repayment.amount.foreach(l => l shouldBe 1000)
-    }
-  }
-
-  "return OK and no P800 when type is underpaid" in {
-    stubForShutteringDisabled()
-    grantAccess(nino)
-    personalDetailsAreFound(nino, person)
-    nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
-    taxAccountSummaryIsFound(nino, taxAccountSummary)
-    taxAccountSummaryNotFound(nino, cyPlusone = true)
-    stubForPensions(nino, pensionIncomeSource)
-    stubForEmploymentIncome(nino, employmentIncomeSource)
-    stubForEmploymentIncome(nino, status                                    = NotLive)
-    taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoType = "underpaid")
-    stubForBenefits(nino, noBenefits)
-    stubForTaxCodeChangeExists(nino)
-
-    val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-    response.status                                         shouldBe 200
-    Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
-  }
-
-  "return OK and no P800 when type is not overpaid" in {
-    stubForShutteringDisabled()
-    grantAccess(nino)
-    personalDetailsAreFound(nino, person)
-    nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
-    taxAccountSummaryIsFound(nino, taxAccountSummary)
-    taxAccountSummaryNotFound(nino, cyPlusone = true)
-    stubForPensions(nino, pensionIncomeSource)
-    stubForEmploymentIncome(nino, employmentIncomeSource)
-    stubForEmploymentIncome(nino, status                                    = NotLive)
-    taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoType = "balanced")
-    stubForBenefits(nino, noBenefits)
-    stubForTaxCodeChangeExists(nino)
-
-    val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-    response.status                                         shouldBe 200
-    Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
-  }
-
-  "return OK and no P800 when status is sa_user" in {
-    stubForShutteringDisabled()
-    grantAccess(nino)
-    personalDetailsAreFound(nino, person)
-    nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
-    taxAccountSummaryIsFound(nino, taxAccountSummary)
-    taxAccountSummaryNotFound(nino, cyPlusone = true)
-    stubForPensions(nino, pensionIncomeSource)
-    stubForEmploymentIncome(nino, employmentIncomeSource)
-    stubForEmploymentIncome(nino, status                                      = NotLive)
-    taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoStatus = "sa_user")
-    stubForBenefits(nino, noBenefits)
-    stubForTaxCodeChangeExists(nino)
-
-    val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-    response.status                                         shouldBe 200
-    Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
-  }
-
-  "return OK and no P800 when status is unable_to_claim" in {
-    stubForShutteringDisabled()
-    grantAccess(nino)
-    personalDetailsAreFound(nino, person)
-    nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
-    taxAccountSummaryIsFound(nino, taxAccountSummary)
-    taxAccountSummaryNotFound(nino, cyPlusone = true)
-    stubForPensions(nino, pensionIncomeSource)
-    stubForEmploymentIncome(nino, employmentIncomeSource)
-    stubForEmploymentIncome(nino, status                                      = NotLive)
-    taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoStatus = "unable_to_claim")
-    stubForBenefits(nino, noBenefits)
-    stubForTaxCodeChangeExists(nino)
-
-    val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-    response.status                                         shouldBe 200
-    Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
-  }
-
-  "return OK and a P800 with link when status is refund" in {
-    when(mockFeatureFlagService.get(any()))
-      .thenReturn(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = true)))
-
-    stubForShutteringDisabled()
-    grantAccess(nino)
-    personalDetailsAreFound(nino, person)
-    nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
-    taxAccountSummaryIsFound(nino, taxAccountSummary)
-    taxAccountSummaryNotFound(nino, cyPlusone = true)
-    stubForPensions(nino, pensionIncomeSource)
-    stubForEmploymentIncome(nino, employmentIncomeSource)
-    stubForEmploymentIncome(nino, status                                      = NotLive)
-    taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoStatus = "refund")
-    stubForBenefits(nino, noBenefits)
-    stubForTaxCodeChangeExists(nino)
-
-    val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-    response.status                                                shouldBe 200
-    response.body[JsValue].as[MobilePayeSummaryResponse].repayment shouldBe a[Some[_]]
-    response.body[JsValue].as[MobilePayeSummaryResponse].repayment.foreach { repayment =>
-      repayment.claimRefundLink shouldBe a[Some[_]]
-      repayment.claimRefundLink
-        .foreach(l => l shouldBe s"/tax-you-paid/${currentTaxYear - 1}-$currentTaxYear/paid-too-much")
-    }
-  }
-
-  "Call taxcalc for P800 repayments if a repayment was found on a call less than 1 day ago" in {
-    when(mockFeatureFlagService.get(any()))
-      .thenReturn(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = true)))
-
-    stubForShutteringDisabled()
-    grantAccess(nino)
-    personalDetailsAreFound(nino, person)
-    nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
-    taxAccountSummaryIsFound(nino, taxAccountSummary)
-    taxAccountSummaryNotFound(nino, cyPlusone = true)
-    stubForPensions(nino, pensionIncomeSource)
-    stubForEmploymentIncome(nino, employmentIncomeSource)
-    stubForEmploymentIncome(nino, status = NotLive)
-    taxCalcWithNoDate(nino, currentTaxYear)
-    stubForBenefits(nino, noBenefits)
-    stubForTaxCodeChangeExists(nino)
-
-    val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-    response.status                                                shouldBe 200
-    response.body[JsValue].as[MobilePayeSummaryResponse].repayment shouldBe a[Some[_]]
-    response.body[JsValue].as[MobilePayeSummaryResponse].repayment.foreach { repayment =>
-      repayment.amount shouldBe a[Some[_]]
-      repayment.amount.foreach(l => l shouldBe 1000)
+      response.body shouldBe response2.body
     }
 
-    val response2 = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-    response2.status                                                shouldBe 200
-    response2.body[JsValue].as[MobilePayeSummaryResponse].repayment shouldBe a[Some[_]]
-    response2.body[JsValue].as[MobilePayeSummaryResponse].repayment.foreach { repayment =>
-      repayment.amount shouldBe a[Some[_]]
-      repayment.amount.foreach(l => l shouldBe 1000)
+    "return OK and a full valid MobilePayeResponse json when no P800" in {
+      stubForShutteringDisabled()
+      grantAccess(nino)
+      personalDetailsAreFound(nino, person)
+      nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+      taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxAccountSummaryNotFound(nino, cyPlusone = true)
+      stubForPensions(nino, pensionIncomeSource)
+      stubForEmploymentIncome(nino, employmentIncomeSource)
+      stubForEmploymentIncome(nino, status = NotLive)
+      taxCalcWithNoP800(nino, currentTaxYear, LocalDate.now)
+      stubForBenefits(nino, noBenefits)
+      stubForTaxCodeChangeExists(nino)
+
+      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
+      response.status shouldBe 200
+      Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
     }
-    taxCalcCalled(nino, currentTaxYear, 2)
-  }
 
-  "Assume unshuttered and return OK and a full valid MobilePayeResponse json if error returned from mobile-shuttering service" in {
-    grantAccess(nino)
-    personalDetailsAreFound(nino, person)
-    stubForPensions(nino, pensionIncomeSource)
-    stubForEmploymentIncome(nino, employmentIncomeSource)
-    stubForEmploymentIncome(nino, status = NotLive)
-    nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
-    taxAccountSummaryIsFound(nino, taxAccountSummary)
-    taxAccountSummaryNotFound(nino, cyPlusone = true)
-    taxCalcNoResponse(nino, currentTaxYear)
-    stubForBenefits(nino, noBenefits)
-    stubForTaxCodeChangeExists(nino)
+    "return OK and no P800 when datePaid is more than 6 weeks ago" in {
+      stubForShutteringDisabled()
+      grantAccess(nino)
+      personalDetailsAreFound(nino, person)
+      nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+      taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxAccountSummaryNotFound(nino, cyPlusone = true)
+      stubForPensions(nino, pensionIncomeSource)
+      stubForEmploymentIncome(nino, employmentIncomeSource)
+      stubForEmploymentIncome(nino, status = NotLive)
+      taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now.minusWeeks(6).minusDays(1))
+      stubForBenefits(nino, noBenefits)
+      stubForTaxCodeChangeExists(nino)
 
-    val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
+      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
+      response.status shouldBe 200
+      Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
+    }
 
-    response.status shouldBe 200
-    response.body shouldBe Json
-      .toJson(fullMobilePayeResponse)
-      .toString()
+    "return OK and a P800 when datePaid is less than 6 weeks ago" in {
+      when(mockFeatureFlagService.get(any()))
+        .thenReturn(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = true)))
 
+      stubForShutteringDisabled()
+      grantAccess(nino)
+      personalDetailsAreFound(nino, person)
+      nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+      taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxAccountSummaryNotFound(nino, cyPlusone = true)
+      stubForPensions(nino, pensionIncomeSource)
+      stubForEmploymentIncome(nino, employmentIncomeSource)
+      stubForEmploymentIncome(nino, status = NotLive)
+      taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now.minusWeeks(6))
+      stubForBenefits(nino, noBenefits)
+      stubForTaxCodeChangeExists(nino)
+
+      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
+      response.status shouldBe 200
+      response.body[JsValue].as[MobilePayeSummaryResponse].repayment shouldBe a[Some[_]]
+      response.body[JsValue].as[MobilePayeSummaryResponse].repayment.foreach { repayment =>
+        repayment.datePaid shouldBe a[Some[_]]
+        repayment.datePaid.foreach(l => l shouldBe LocalDate.now.minusWeeks(6))
+      }
+    }
+
+    "return OK and a P800 when datePaid is not present" in {
+      when(mockFeatureFlagService.get(any()))
+        .thenReturn(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = true)))
+
+      stubForShutteringDisabled()
+      grantAccess(nino)
+      personalDetailsAreFound(nino, person)
+      nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+      taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxAccountSummaryNotFound(nino, cyPlusone = true)
+      stubForPensions(nino, pensionIncomeSource)
+      stubForEmploymentIncome(nino, employmentIncomeSource)
+      stubForEmploymentIncome(nino, status = NotLive)
+      taxCalcWithNoDate(nino, currentTaxYear)
+      stubForBenefits(nino, noBenefits)
+      stubForTaxCodeChangeExists(nino)
+
+      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
+      response.status shouldBe 200
+      response.body[JsValue].as[MobilePayeSummaryResponse].repayment shouldBe a[Some[_]]
+      response.body[JsValue].as[MobilePayeSummaryResponse].repayment.foreach { repayment =>
+        repayment.amount shouldBe a[Some[_]]
+        repayment.amount.foreach(l => l shouldBe 1000)
+      }
+    }
+
+    "return OK and no P800 when type is underpaid" in {
+      stubForShutteringDisabled()
+      grantAccess(nino)
+      personalDetailsAreFound(nino, person)
+      nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+      taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxAccountSummaryNotFound(nino, cyPlusone = true)
+      stubForPensions(nino, pensionIncomeSource)
+      stubForEmploymentIncome(nino, employmentIncomeSource)
+      stubForEmploymentIncome(nino, status = NotLive)
+      taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoType = "underpaid")
+      stubForBenefits(nino, noBenefits)
+      stubForTaxCodeChangeExists(nino)
+
+      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
+      response.status shouldBe 200
+      Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
+    }
+
+    "return OK and no P800 when type is not overpaid" in {
+      stubForShutteringDisabled()
+      grantAccess(nino)
+      personalDetailsAreFound(nino, person)
+      nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+      taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxAccountSummaryNotFound(nino, cyPlusone = true)
+      stubForPensions(nino, pensionIncomeSource)
+      stubForEmploymentIncome(nino, employmentIncomeSource)
+      stubForEmploymentIncome(nino, status = NotLive)
+      taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoType = "balanced")
+      stubForBenefits(nino, noBenefits)
+      stubForTaxCodeChangeExists(nino)
+
+      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
+      response.status shouldBe 200
+      Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
+    }
+
+    "return OK and no P800 when status is sa_user" in {
+      stubForShutteringDisabled()
+      grantAccess(nino)
+      personalDetailsAreFound(nino, person)
+      nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+      taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxAccountSummaryNotFound(nino, cyPlusone = true)
+      stubForPensions(nino, pensionIncomeSource)
+      stubForEmploymentIncome(nino, employmentIncomeSource)
+      stubForEmploymentIncome(nino, status = NotLive)
+      taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoStatus = "sa_user")
+      stubForBenefits(nino, noBenefits)
+      stubForTaxCodeChangeExists(nino)
+
+      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
+      response.status shouldBe 200
+      Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
+    }
+
+    "return OK and no P800 when status is unable_to_claim" in {
+      stubForShutteringDisabled()
+      grantAccess(nino)
+      personalDetailsAreFound(nino, person)
+      nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+      taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxAccountSummaryNotFound(nino, cyPlusone = true)
+      stubForPensions(nino, pensionIncomeSource)
+      stubForEmploymentIncome(nino, employmentIncomeSource)
+      stubForEmploymentIncome(nino, status = NotLive)
+      taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoStatus = "unable_to_claim")
+      stubForBenefits(nino, noBenefits)
+      stubForTaxCodeChangeExists(nino)
+
+      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
+      response.status shouldBe 200
+      Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
+    }
+
+    "return OK and a P800 with link when status is refund" in {
+      when(mockFeatureFlagService.get(any()))
+        .thenReturn(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = true)))
+
+      stubForShutteringDisabled()
+      grantAccess(nino)
+      personalDetailsAreFound(nino, person)
+      nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+      taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxAccountSummaryNotFound(nino, cyPlusone = true)
+      stubForPensions(nino, pensionIncomeSource)
+      stubForEmploymentIncome(nino, employmentIncomeSource)
+      stubForEmploymentIncome(nino, status = NotLive)
+      taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoStatus = "refund")
+      stubForBenefits(nino, noBenefits)
+      stubForTaxCodeChangeExists(nino)
+
+      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
+      response.status shouldBe 200
+      response.body[JsValue].as[MobilePayeSummaryResponse].repayment shouldBe a[Some[_]]
+      response.body[JsValue].as[MobilePayeSummaryResponse].repayment.foreach { repayment =>
+        repayment.claimRefundLink shouldBe a[Some[_]]
+        repayment.claimRefundLink
+          .foreach(l => l shouldBe s"/tax-you-paid/${currentTaxYear - 1}-$currentTaxYear/paid-too-much")
+      }
+    }
+
+    "Call taxcalc for P800 repayments if a repayment was found on a call less than 1 day ago" in {
+      when(mockFeatureFlagService.get(any()))
+        .thenReturn(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = true)))
+
+      stubForShutteringDisabled()
+      grantAccess(nino)
+      personalDetailsAreFound(nino, person)
+      nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+      taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxAccountSummaryNotFound(nino, cyPlusone = true)
+      stubForPensions(nino, pensionIncomeSource)
+      stubForEmploymentIncome(nino, employmentIncomeSource)
+      stubForEmploymentIncome(nino, status = NotLive)
+      taxCalcWithNoDate(nino, currentTaxYear)
+      stubForBenefits(nino, noBenefits)
+      stubForTaxCodeChangeExists(nino)
+
+      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
+      response.status shouldBe 200
+      response.body[JsValue].as[MobilePayeSummaryResponse].repayment shouldBe a[Some[_]]
+      response.body[JsValue].as[MobilePayeSummaryResponse].repayment.foreach { repayment =>
+        repayment.amount shouldBe a[Some[_]]
+        repayment.amount.foreach(l => l shouldBe 1000)
+      }
+
+      val response2 = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
+      response2.status shouldBe 200
+      response2.body[JsValue].as[MobilePayeSummaryResponse].repayment shouldBe a[Some[_]]
+      response2.body[JsValue].as[MobilePayeSummaryResponse].repayment.foreach { repayment =>
+        repayment.amount shouldBe a[Some[_]]
+        repayment.amount.foreach(l => l shouldBe 1000)
+      }
+      taxCalcCalled(nino, currentTaxYear, 2)
+    }
+
+    "Assume unshuttered and return OK and a full valid MobilePayeResponse json if error returned from mobile-shuttering service" in {
+      grantAccess(nino)
+      personalDetailsAreFound(nino, person)
+      stubForPensions(nino, pensionIncomeSource)
+      stubForEmploymentIncome(nino, employmentIncomeSource)
+      stubForEmploymentIncome(nino, status = NotLive)
+      nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+      taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxAccountSummaryNotFound(nino, cyPlusone = true)
+      taxCalcNoResponse(nino, currentTaxYear)
+      stubForBenefits(nino, noBenefits)
+      stubForTaxCodeChangeExists(nino)
+
+      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
+
+      response.status shouldBe 200
+      response.body shouldBe Json
+        .toJson(fullMobilePayeResponse)
+        .toString()
+
+    }
   }
 
   s"GET /nino/$nino/income-tax-history" should {
