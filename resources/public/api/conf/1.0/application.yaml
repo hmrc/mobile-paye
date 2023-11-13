@@ -148,6 +148,8 @@ paths:
                       updateEstimatedIncomeLink: /check-income-tax/check-income-tax/update-income/start
                       currentYearPlusOneLink: /check-income-tax/income-tax-comparison
                       taxCodeLocation: rUK
+                      updateEmployerLink: /check-income-tax/update-remove-employment/decision-page
+                      incomeTaxHistoricPayeUrl: /check-income-tax/historic-paye/
               examples:
                 example-1:
                   value:
@@ -244,6 +246,8 @@ paths:
                     updateEstimatedIncomeLink: /check-income-tax/check-income-tax/update-income/start
                     currentYearPlusOneLink: /check-income-tax/income-tax-comparison
                     taxCodeLocation: rUK
+                    updateEmployerLink: /check-income-tax/update-remove-employment/decision-page
+                    incomeTaxHistoricPayeUrl: /check-income-tax/historic-paye/
       deprecated: false
       security:
         - userRestricted:
@@ -704,17 +708,6 @@ components:
     MobilePayeNinoTaxYearSummaryresponse:
       title: MobilePayeNinoTaxYearSummaryresponse
       required:
-        - taxYear
-        - employments
-        - pensions
-        - repayment
-        - otherIncomes
-        - taxCodeChange
-        - taxFreeAmount
-        - taxFreeAmountLink
-        - estimatedTaxAmount
-        - estimatedTaxAmountLink
-        - understandYourTaxCodeLink
         - addMissingEmployerLink
         - addMissingPensionLink
         - addMissingIncomeLink
@@ -722,8 +715,8 @@ components:
         - addMissingCompanyCarLink
         - previousTaxYearLink
         - updateEstimatedIncomeLink
-        - currentYearPlusOneLink
-        - taxCodeLocation
+        - updateEmployerLink
+        - incomeTaxHistoricPayeUrl
       type: object
       properties:
         taxYear:
@@ -779,6 +772,10 @@ components:
         currentYearPlusOneLink:
           type: string
         taxCodeLocation:
+          type: string
+        updateEmployerLink:
+          type: string
+        incomeTaxHistoricPayeUrl:
           type: string
       example:
         taxYear: 2018
@@ -903,15 +900,10 @@ components:
         updateEstimatedIncomeLink: /check-income-tax/check-income-tax/update-income/start
         currentYearPlusOneLink: /check-income-tax/income-tax-comparison
         taxCodeLocation: rUK
+        updateEmployerLink: /check-income-tax/update-remove-employment/decision-page
+        incomeTaxHistoricPayeUrl: /check-income-tax/historic-paye/
     MobilePayeNinoPreviousTaxYearSummaryresponse:
       title: MobilePayeNinoPreviousTaxYearSummaryresponse
-      required:
-        - taxYear
-        - employments
-        - pensions
-        - otherIncomes
-        - taxFreeAmount
-        - estimatedTaxAmount
       type: object
       properties:
         taxYear:
@@ -938,6 +930,8 @@ components:
         estimatedTaxAmount:
           type: integer
           format: int32
+        understandYourTaxCodeLink:
+          type: string
       example:
         taxYear: 2018
         employments:
@@ -1013,6 +1007,7 @@ components:
             link: /check-income-tax/income/bank-building-society-savings
         taxFreeAmount: 11850
         estimatedTaxAmount: 618
+        understandYourTaxCodeLink: /check-income-tax/tax-codes
     OtherIncome:
       title: OtherIncome
       required:
@@ -1266,10 +1261,10 @@ components:
         actualAmount:
           type: number
       example:
-          reasonType: UNDERPAYMENT
-          reasonCode: 45
-          estimatedAmount: 175
-          actualAmount: 185
+        reasonType: UNDERPAYMENT
+        reasonCode: 45
+        estimatedAmount: 175
+        actualAmount: 185
     Receipts:
       title: Receipts
       type: object
@@ -1289,11 +1284,11 @@ components:
         promiseToPayRef:
           type: string
       example:
-          receiptAmount: 100
-          receiptDate: 2022-08-02
-          receiptMethod: RECEIVED FROM ETMP
-          receiptStatus: ALLOCATED
-          allocatedAmount: 100
+        receiptAmount: 100
+        receiptDate: 2022-08-02
+        receiptMethod: RECEIVED FROM ETMP
+        receiptStatus: ALLOCATED
+        allocatedAmount: 100
 tags:
   - name: mobile-paye
     description: ''
