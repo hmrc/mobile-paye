@@ -56,7 +56,7 @@ object PayeIncome {
       payeNumber                       = s"${incomeSource.employment.taxDistrictNumber}/${incomeSource.employment.payeNumber}",
       link                             = getIncomeDetailsLink(incomeSource),
       incomeDetailsLink                = getIncomeDetailsLink(incomeSource),
-      updateEmployerLink               = Some(s"/check-income-tax/your-income-calculation-details/$empId"),
+      updateEmployerLink               = Some(s"/check-income-tax/update-remove-employment/decision/$empId"),
       yourIncomeCalculationDetailsLink = s"/check-income-tax/your-income-calculation-details/$empId",
       updateIncomeLink =
         if (employment && incomeSource.taxCodeIncome.status.equals(Live))
@@ -100,7 +100,7 @@ object PayeIncome {
       yourIncomeCalculationDetailsLink =
         s"/check-income-tax/your-income-calculation-details/${employment.sequenceNumber}",
       updateIncomeLink   = None,
-      updateEmployerLink = Some(s"/check-income-tax/your-income-calculation-details/${employment.sequenceNumber}"),
+      updateEmployerLink = Some(s"/check-income-tax/update-remove-employment/decision/${employment.sequenceNumber}"),
       latestPayment      = None,
       payments =
         if (employment.annualAccounts.headOption.map(_.payments).getOrElse(Seq.empty).isEmpty) None

@@ -12,6 +12,7 @@
       "incomeDetailsLink": "/",
       "yourIncomeCalculationDetailsLink": "/",
       "updateIncomeLink": "/",
+      "updateEmployerLink": "/",
       "payments": []
     }
   ],
