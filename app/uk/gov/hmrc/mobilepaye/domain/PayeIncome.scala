@@ -33,6 +33,7 @@ case class PayeIncome(
   incomeDetailsLink:                String,
   yourIncomeCalculationDetailsLink: String,
   updateIncomeLink:                 Option[String],
+  updateEmployerLink:               Option[String],
   latestPayment:                    Option[LatestPayment],
   payments:                         Option[Seq[Payment]],
   employmentBenefits:               Option[EmploymentBenefits],
@@ -44,24 +45,25 @@ object PayeIncome {
     incomeSource:       IncomeSource,
     employment:         Boolean,
     employmentBenefits: Option[Benefits] = None
-  ): PayeIncome =
+  ): PayeIncome = {
+    val empId = incomeSource.taxCodeIncome.employmentId.getOrElse(throw new Exception("Employment ID not found"))
     PayeIncome(
-      name              = incomeSource.taxCodeIncome.name,
-      status            = incomeSource.taxCodeIncome.status,
-      payrollNumber     = incomeSource.employment.payrollNumber,
-      taxCode           = incomeSource.taxCodeIncome.taxCode,
-      amount            = incomeSource.taxCodeIncome.amount.setScale(0, RoundingMode.FLOOR),
-      payeNumber        = s"${incomeSource.employment.taxDistrictNumber}/${incomeSource.employment.payeNumber}",
-      link              = getIncomeDetailsLink(incomeSource),
-      incomeDetailsLink = getIncomeDetailsLink(incomeSource),
-      yourIncomeCalculationDetailsLink =
-        s"/check-income-tax/your-income-calculation-details/${incomeSource.taxCodeIncome.employmentId
-          .getOrElse(throw new Exception("Employment ID not found"))}",
-      updateIncomeLink = if (employment && incomeSource.taxCodeIncome.status.equals(Live))
-        Option(
-          s"/check-income-tax/update-income/load/${incomeSource.taxCodeIncome.employmentId.getOrElse(throw new Exception("Employment ID not found"))}"
-        )
-      else None,
+      name                             = incomeSource.taxCodeIncome.name,
+      status                           = incomeSource.taxCodeIncome.status,
+      payrollNumber                    = incomeSource.employment.payrollNumber,
+      taxCode                          = incomeSource.taxCodeIncome.taxCode,
+      amount                           = incomeSource.taxCodeIncome.amount.setScale(0, RoundingMode.FLOOR),
+      payeNumber                       = s"${incomeSource.employment.taxDistrictNumber}/${incomeSource.employment.payeNumber}",
+      link                             = getIncomeDetailsLink(incomeSource),
+      incomeDetailsLink                = getIncomeDetailsLink(incomeSource),
+      updateEmployerLink               = Some(s"/check-income-tax/update-remove-employment/decision/$empId"),
+      yourIncomeCalculationDetailsLink = s"/check-income-tax/your-income-calculation-details/$empId",
+      updateIncomeLink =
+        if (employment && incomeSource.taxCodeIncome.status.equals(Live))
+          Some(
+            s"/check-income-tax/update-income/load/$empId"
+          )
+        else None,
       latestPayment =
         if (employment)
           buildLatestPayment(
@@ -69,13 +71,15 @@ object PayeIncome {
             incomeSource.taxCodeIncome.employmentId
           )
         else None,
-      if (incomeSource.employment.annualAccounts.headOption.map(_.payments).getOrElse(Seq.empty).isEmpty) None
-      else incomeSource.employment.annualAccounts.headOption.map(_.payments.sorted(Payment.dateOrdering.reverse)),
-      employmentBenefits.flatMap(
+      payments =
+        if (incomeSource.employment.annualAccounts.headOption.map(_.payments).getOrElse(Seq.empty).isEmpty) None
+        else incomeSource.employment.annualAccounts.headOption.map(_.payments.sorted(Payment.dateOrdering.reverse)),
+      employmentBenefits = employmentBenefits.flatMap(
         buildEmploymentBenefits(_, incomeSource.taxCodeIncome.employmentId)
       ),
       endDate = incomeSource.employment.endDate
     )
+  }
 
   def fromEmployment(
     employment:         Employment,
@@ -95,8 +99,9 @@ object PayeIncome {
       incomeDetailsLink = s"/check-income-tax/your-income-calculation-details/${employment.sequenceNumber}",
       yourIncomeCalculationDetailsLink =
         s"/check-income-tax/your-income-calculation-details/${employment.sequenceNumber}",
-      updateIncomeLink = None,
-      latestPayment    = None,
+      updateIncomeLink   = None,
+      updateEmployerLink = Some(s"/check-income-tax/update-remove-employment/decision/${employment.sequenceNumber}"),
+      latestPayment      = None,
       payments =
         if (employment.annualAccounts.headOption.map(_.payments).getOrElse(Seq.empty).isEmpty) None
         else employment.annualAccounts.headOption.map(_.payments.sorted(Payment.dateOrdering.reverse)),

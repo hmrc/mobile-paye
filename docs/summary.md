@@ -38,6 +38,7 @@ Fetch the MobilePayeResponse object.
       "incomeDetailsLink": "/",
       "yourIncomeCalculationDetailsLink": "/",
       "updateIncomeLink": "/",
+      "updateEmployerLink": "/",
       "latestPayment": {
         "date": "2021-08-28",
         "amount": 1575,
@@ -105,6 +106,7 @@ Fetch the MobilePayeResponse object.
       "incomeDetailsLink": "/",
       "yourIncomeCalculationDetailsLink": "/",
       "updateIncomeLink": "/",
+      "updateEmployerLink": "/",
       "payments": [
         {
           "date": "2021-05-28",
@@ -149,6 +151,7 @@ Fetch the MobilePayeResponse object.
       "incomeDetailsLink": "/",
       "yourIncomeCalculationDetailsLink": "/",
       "updateIncomeLink": "/",
+      "updateEmployerLink": "/",
       "latestPayment": {
         "date": "2021-08-30",
         "amount": 475,
@@ -171,6 +174,7 @@ Fetch the MobilePayeResponse object.
       "incomeDetailsLink": "/",
       "yourIncomeCalculationDetailsLink": "/",
       "updateIncomeLink": "/",
+      "updateEmployerLink": "/",
       "latestPayment": {
         "date": "2020-07-28",
         "amount": 1575,
@@ -223,6 +227,7 @@ Fetch the MobilePayeResponse object.
       "incomeDetailsLink": "/",
       "yourIncomeCalculationDetailsLink": "/",
       "updateIncomeLink": "/",
+      "updateEmployerLink": "/",
       "latestPayment": {
         "date": "2020-07-28",
         "amount": 1575,

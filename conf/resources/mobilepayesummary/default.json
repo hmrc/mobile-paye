@@ -12,6 +12,7 @@
       "incomeDetailsLink": "/",
       "yourIncomeCalculationDetailsLink": "/",
       "updateIncomeLink": "/",
+      "updateEmployerLink": "/",
       "latestPayment": {
         "date": "<PAYMENT_DATE>",
         "amount": 1575,
@@ -66,6 +67,7 @@
       "incomeDetailsLink": "/",
       "yourIncomeCalculationDetailsLink": "/",
       "updateIncomeLink": "/",
+      "updateEmployerLink": "/",
       "latestPayment": {
         "date": "<PAYMENT_DATE>",
         "amount": 1575,
@@ -118,6 +120,7 @@
       "incomeDetailsLink": "/",
       "yourIncomeCalculationDetailsLink": "/",
       "updateIncomeLink": "/",
+      "updateEmployerLink": "/",
       "latestPayment": {
         "date": "<PAYMENT_DATE>",
         "amount": 1575,
