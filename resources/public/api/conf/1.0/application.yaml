@@ -68,6 +68,7 @@ paths:
                           incomeDetailsLink: /check-income-tax/income-details/1
                           yourIncomeCalculationDetailsLink: /
                           updateIncomeLink: /
+                          updateEmployerLink: /
                           latestPayment:
                             date: 2021-08-28
                             amount: 1575
@@ -107,6 +108,7 @@ paths:
                           link: /check-income-tax/income-details/2
                           incomeDetailsLink: /check-income-tax/income-details/2
                           yourIncomeCalculationDetailsLink: /
+                          updateEmployerLink: /
                       pensions:
                         - name: HIGHWIRE RETURNS LTD
                           taxCode: BR
@@ -608,6 +610,8 @@ components:
           type: string
         updateIncomeLink:
           type: string
+        updateEmployerLink:
+          type: string
         latestPayment:
           $ref: '#/components/schemas/LatestPayment'
         payments:
@@ -625,6 +629,7 @@ components:
         incomeDetailsLink: /check-income-tax/income-details/1
         yourIncomeCalculationDetailsLink: /
         updateIncomeLink: /
+        updateEmployerLink: /
         latestPayment:
           date: 2021-08-28
           amount: 1575
@@ -789,6 +794,7 @@ components:
             incomeDetailsLink: /check-income-tax/income-details/1
             yourIncomeCalculationDetailsLink: /
             updateIncomeLink: /
+            updateEmployerLink: /
             latestPayment:
               date: 2021-08-28
               amount: 1575
@@ -828,6 +834,7 @@ components:
             link: /check-income-tax/income-details/2
             incomeDetailsLink: /check-income-tax/income-details/2
             yourIncomeCalculationDetailsLink: /
+            updateEmployerLink: /
         pensions:
           - name: HIGHWIRE RETURNS LTD
             taxCode: BR
@@ -944,6 +951,7 @@ components:
             incomeDetailsLink: /check-income-tax/income-details/1
             yourIncomeCalculationDetailsLink: /
             updateIncomeLink: /
+            updateEmployerLink: /
             latestPayment:
               date: 2021-08-28
               amount: 1575
@@ -983,6 +991,7 @@ components:
             link: /check-income-tax/income-details/2
             incomeDetailsLink: /check-income-tax/income-details/2
             yourIncomeCalculationDetailsLink: /
+            updateEmployerLink: /
         pensions:
           - name: HIGHWIRE RETURNS LTD
             taxCode: BR
