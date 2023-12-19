@@ -8,7 +8,7 @@
     {
       "name": "UNTAXED INTEREST INCOME",
       "amount": 9301,
-      "link": "/"
+      "incomeDetailsLink": "/"
     }
   ],
   "taxFreeAmount": 12500,

@@ -23,13 +23,13 @@ class OtherIncomeSpec extends BaseSpec {
     "Build the link when given an UNTAXED INTEREST INCOME name" in {
       val result = OtherIncome.withMaybeLink("UNTAXED INTEREST INCOME", BigDecimal(200.0))
 
-      result.link.get shouldBe "/check-income-tax/income/bank-building-society-savings"
+      result.incomeDetailsLink.get shouldBe "/check-income-tax/income/bank-building-society-savings"
     }
 
     "Don't build a link when given anything other than UNTAXED INTEREST INCOME name" in {
       val result = OtherIncome.withMaybeLink("MAXIMUM INTEREST", BigDecimal(200.0))
 
-      result.link.isDefined shouldBe false
+      result.incomeDetailsLink.isDefined shouldBe false
     }
   }
 }

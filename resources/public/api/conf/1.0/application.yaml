@@ -136,6 +136,7 @@ paths:
                         - name: UNTAXED INTEREST INCOME
                           amount: 9301
                           link: /check-income-tax/income/bank-building-society-savings
+                          incomeDetailsLink: /check-income-tax/income/bank-building-society-savings
                       taxFreeAmount: 11850
                       taxFreeAmountLink: /check-income-tax/tax-free-allowance
                       estimatedTaxAmount: 618
@@ -232,6 +233,7 @@ paths:
                       - name: UNTAXED INTEREST INCOME
                         amount: 9301
                         link: /check-income-tax/income/bank-building-society-savings
+                        incomeDetailsLink: /check-income-tax/income/bank-building-society-savings
                     taxCodeChange:
                       hasChanged: false
                     taxFreeAmount: 11850
@@ -369,6 +371,7 @@ paths:
                         - name: UNTAXED INTEREST INCOME
                           amount: 9301
                           link: /check-income-tax/income/bank-building-society-savings
+                          incomeDetailsLink: /check-income-tax/income/bank-building-society-savings
                       taxFreeAmount: 11850
                       estimatedTaxAmount: 618
               examples:
@@ -446,6 +449,7 @@ paths:
                       - name: UNTAXED INTEREST INCOME
                         amount: 9301
                         link: /check-income-tax/income/bank-building-society-savings
+                        incomeDetailsLink: /check-income-tax/income/bank-building-society-savings
                     taxFreeAmount: 11850
                     estimatedTaxAmount: 618
       deprecated: false
@@ -861,7 +865,8 @@ components:
             amount: 22500
           - name: UNTAXED INTEREST INCOME
             amount: 9301
-            link: /check-income-tax/income/bank-building-society-savings
+            link: /check-income-tax/income/bank-building-society-saving
+            incomeDetailsLink: /check-income-tax/income/bank-building-society-savings
         taxCodeChange:
           hasChanged: false
         simpleAssessment:
@@ -1014,6 +1019,7 @@ components:
           - name: UNTAXED INTEREST INCOME
             amount: 9301
             link: /check-income-tax/income/bank-building-society-savings
+            incomeDetailsLink: /check-income-tax/income/bank-building-society-savings
         taxFreeAmount: 11850
         estimatedTaxAmount: 618
         understandYourTaxCodeLink: /check-income-tax/tax-codes
@@ -1030,6 +1036,8 @@ components:
           type: integer
           format: int32
         link:
+          type: string
+        incomeDetailsLink:
           type: string
       example:
         name: NON CODED INCOME
