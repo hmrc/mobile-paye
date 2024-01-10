@@ -343,7 +343,8 @@ Fetch the MobilePayeResponse object.
               }
             ]
           }
-        ]
+        ],
+        "cardPaymentFallbackUrl": "/"
       },
       {
         "taxYear": 2021,
@@ -380,7 +381,8 @@ Fetch the MobilePayeResponse object.
               }
             ]
           }
-        ]
+        ],
+        "cardPaymentFallbackUrl": "/"
       }
     ]
   },

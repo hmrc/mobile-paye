@@ -898,6 +898,7 @@ components:
                       receiptMethod: RECEIVED FROM ETMP
                       receiptStatus: ALLOCATED
                       allocatedAmount: 100
+              cardPaymentFallbackUrl: /tax-you-paid/2021-2022/paid-too-little
         taxFreeAmount: 11850
         taxFreeAmountLink: /check-income-tax/tax-free-allowance
         estimatedTaxAmount: 618
@@ -1205,6 +1206,8 @@ components:
           items:
             $ref: '#/components/schemas/Reconciliation'
           description: ''
+        cardPaymentFallbackUrl:
+          type: string
     Reconciliation:
       title: Reconciliation
       required:
