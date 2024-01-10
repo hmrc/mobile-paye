@@ -222,7 +222,8 @@ trait MobilePayeTestData {
               )
             )
           )
-        )
+        ),
+        cardPaymentFallbackUrl = s"/tax-you-paid/$previousTaxYear-$currentTaxYear/paid-too-little"
       ),
       MobileSATaxYearReconciliation(
         taxYear = previousTaxYear - 1,
@@ -268,7 +269,8 @@ trait MobilePayeTestData {
               )
             )
           )
-        )
+        ),
+        cardPaymentFallbackUrl = s"/tax-you-paid/${previousTaxYear - 1}-$previousTaxYear/paid-too-little"
       )
     )
   )

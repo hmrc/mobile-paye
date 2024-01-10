@@ -141,7 +141,8 @@
               }
             ]
           }
-        ]
+        ],
+        "cardPaymentFallbackUrl": "/tax-you-paid/2022-2023/paid-too-little"
       },
       {
         "taxYear": 2021,
@@ -178,7 +179,8 @@
               }
             ]
           }
-        ]
+        ],
+        "cardPaymentFallbackUrl": "/tax-you-paid/2021-2022/paid-too-little"
       }
     ]
   },
@@ -195,4 +197,4 @@
   "previousTaxYearLink": "/check-income-tax/income-tax-history",
   "updateEstimatedIncomeLink": "/check-income-tax/update-income/start",
   "updateEmployerLink": "/check-income-tax/update-remove-employment/decision-page"
-}-tax
+}

@@ -59,7 +59,8 @@ object MobileSimpleAssessmentStub {
                        |            }
                        |          ]
                        |        }
-                       |      ]
+                       |      ],
+                       |      "cardPaymentFallbackUrl": "/tax-you-paid/$previousTaxYear-$currentTaxYear/paid-too-little"
                        |    },
                        |    {
                        |    "taxYear" : $cyMinus2TaxYear,
@@ -96,7 +97,8 @@ object MobileSimpleAssessmentStub {
                      |            }
                      |          ]
                      |        }
-                     |      ]
+                     |      ],
+                     |      "cardPaymentFallbackUrl": "/tax-you-paid/${cyMinus2TaxYear}-$previousTaxYear/paid-too-little"
                      |    }
                      |  ]
                      |}

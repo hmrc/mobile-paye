@@ -19,8 +19,9 @@ package uk.gov.hmrc.mobilepaye.domain.simpleassessment
 import play.api.libs.json.{Json, OFormat}
 
 case class MobileSATaxYearReconciliation(
-  taxYear:         Int,
-  reconciliations: List[MobileSAReconciliation])
+  taxYear:                Int,
+  reconciliations:        List[MobileSAReconciliation],
+  cardPaymentFallbackUrl: String)
 
 object MobileSATaxYearReconciliation {
 
