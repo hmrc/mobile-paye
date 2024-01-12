@@ -194,6 +194,75 @@
   "taxCodeChange": {
     "hasChanged": true
   },
+  "simpleAssessment": {
+    "taxYears": [
+      {
+        "taxYear": <PREVIOUS_TAX_YEAR>,
+        "reconciliations": [
+          {
+            "reconciliationId": 2,
+            "reconciliationStatus": 5,
+            "cumulativeAmount": 2550,
+            "taxLiabilityAmount": 3760,
+            "taxPaidAmount": 1210,
+            "reconciliationTimeStamp": "2023-07-30 12:34:56",
+            "p800Status": "ISSUED",
+            "collectionMethod": 31,
+            "previousReconciliationId": 1,
+            "multiYearRecIndicator": false,
+            "p800Reasons": [
+              {
+                "reasonType": "UNDERPAYMENT",
+                "reasonCode": 1,
+                "estimatedAmount": 1250,
+                "actualAmount": 3400
+              },
+              {
+                "reasonType": "UNDERPAYMENT",
+                "reasonCode": 2,
+                "estimatedAmount": 300,
+                "actualAmount": 700
+              }
+            ],
+            "businessReason": "P302",
+            "eligibility": true,
+            "receivableStatus": "PART PAID",
+            "totalAmountOwed": 1950,
+            "chargeReference": "XQ004100001540",
+            "dueDate": "2024-01-31",
+            "dunningLock": false,
+            "receipts": [
+              {
+                "receiptAmount": 200,
+                "allocatedAmount": 200,
+                "receiptDate": "2023-08-02",
+                "receiptMethod": "FASTER-PAYMENTS",
+                "receiptStatus": "ALLOCATED",
+                "receiptDescription": "PAID-BANK-TRANSFER"
+              },
+              {
+                "receiptAmount": 200,
+                "allocatedAmount": 200,
+                "receiptDate": "2023-08-02",
+                "receiptMethod": "FASTER-PAYMENTS",
+                "receiptStatus": "ALLOCATED",
+                "receiptDescription": "PAID-BANK-TRANSFER"
+              },
+              {
+                "receiptAmount": 200,
+                "allocatedAmount": 200,
+                "receiptDate": "2023-08-02",
+                "receiptMethod": "CHEQUE",
+                "receiptStatus": "ALLOCATED",
+                "receiptDescription": "PAID-CHEQUE"
+              }
+            ]
+          }
+        ],
+        "cardPaymentFallbackUrl": "/"
+      }
+    ]
+  },
   "taxFreeAmount": 12500,
   "taxFreeAmountLink": "/",
   "estimatedTaxAmount": 1578,

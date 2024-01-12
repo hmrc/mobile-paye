@@ -141,6 +141,8 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
       (response.json \\ "otherIncomes").isEmpty      shouldBe false
       (response.json \ "taxFreeAmount").as[Int]      shouldBe 12500
       (response.json \ "estimatedTaxAmount").as[Int] shouldBe 1578
+      (response.json \ "simpleAssessment" \ "taxYears" \ 0 \ "taxYear")
+        .as[Int] shouldBe TaxYear.current.currentYear - 1
     }
 
     "return OK and a single employment with no pension or otherIncome data when SANDBOX-CONTROL is SINGLE-EMPLOYMENT" in {
@@ -308,4 +310,3 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
   }
 
 }
-
