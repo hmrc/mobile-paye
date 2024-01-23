@@ -17,27 +17,48 @@
 package uk.gov.hmrc.mobilepaye.domain
 
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.mobilepaye.domain.simpleassessment.MobileSimpleAssessmentResponse
 
 case class MobilePayeSummaryResponseAudit(
-  taxYear:            Option[Int],
-  employments:        Option[Seq[PayeIncomeAudit]],
-  pensions:           Option[Seq[PayeIncomeAudit]],
-  repayment:          Option[P800Repayment],
-  otherIncomes:       Option[Seq[OtherIncomeAudit]],
-  taxFreeAmount:      Option[BigDecimal],
-  estimatedTaxAmount: Option[BigDecimal])
+  taxYear:             Option[Int],
+  employments:         Option[Seq[PayeIncomeAudit]],
+  previousEmployments: Option[Seq[PayeIncomeAudit]],
+  pensions:            Option[Seq[PayeIncomeAudit]],
+  repayment:           Option[P800Repayment],
+  otherIncomes:        Option[Seq[OtherIncomeAudit]],
+  taxCodeChange:       Option[TaxCodeChange],
+  simpleAssessment:    Option[MobileSimpleAssessmentResponse],
+  taxFreeAmount:       Option[BigDecimal],
+  estimatedTaxAmount:  Option[BigDecimal])
 
 object MobilePayeSummaryResponseAudit {
 
   def fromResponse(response: MobilePayeSummaryResponse): MobilePayeSummaryResponseAudit =
     MobilePayeSummaryResponseAudit(
-      taxYear            = response.taxYear,
-      employments        = response.employments.map(emps => emps.map(PayeIncomeAudit.fromPayeIncome)),
-      pensions           = response.pensions.map(pens => pens.map(PayeIncomeAudit.fromPayeIncome)),
-      repayment          = response.repayment,
-      otherIncomes       = response.otherIncomes.map(oIncs => oIncs.map(OtherIncomeAudit.fromOtherIncome)),
-      taxFreeAmount      = response.taxFreeAmount,
-      estimatedTaxAmount = response.estimatedTaxAmount
+      taxYear             = response.taxYear,
+      employments         = response.employments.map(emps => emps.map(PayeIncomeAudit.fromPayeIncome)),
+      previousEmployments = response.previousEmployments.map(emps => emps.map(PayeIncomeAudit.fromPayeIncome)),
+      pensions            = response.pensions.map(pens => pens.map(PayeIncomeAudit.fromPayeIncome)),
+      repayment           = response.repayment,
+      otherIncomes        = response.otherIncomes.map(oIncs => oIncs.map(OtherIncomeAudit.fromOtherIncome)),
+      taxCodeChange       = response.taxCodeChange,
+      simpleAssessment    = response.simpleAssessment,
+      taxFreeAmount       = response.taxFreeAmount,
+      estimatedTaxAmount  = response.estimatedTaxAmount
+    )
+
+  def fromPYResponse(response: MobilePayePreviousYearSummaryResponse): MobilePayeSummaryResponseAudit =
+    MobilePayeSummaryResponseAudit(
+      taxYear             = response.taxYear,
+      employments         = response.employments.map(emps => emps.map(PayeIncomeAudit.fromPayeIncome)),
+      previousEmployments = response.previousEmployments.map(emps => emps.map(PayeIncomeAudit.fromPayeIncome)),
+      pensions            = response.pensions.map(pens => pens.map(PayeIncomeAudit.fromPayeIncome)),
+      repayment           = None,
+      otherIncomes        = response.otherIncomes.map(oIncs => oIncs.map(OtherIncomeAudit.fromOtherIncome)),
+      taxCodeChange       = None,
+      simpleAssessment    = None,
+      taxFreeAmount       = response.taxFreeAmount,
+      estimatedTaxAmount  = response.estimatedTaxAmount
     )
 
   implicit val format: OFormat[MobilePayeSummaryResponseAudit] = Json.format[MobilePayeSummaryResponseAudit]
