@@ -99,13 +99,15 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
                   )
                 ) ++
                 employments.map(emp =>
-                  emp.copy(status           = NotLive,
-                           link             = s"/check-income-tax/your-income-calculation-details/${emp.link.last}",
+                  emp.copy(
+                    status            = NotLive,
+                    link              = s"/check-income-tax/your-income-calculation-details/${emp.link.last}",
                     incomeDetailsLink = s"/check-income-tax/your-income-calculation-details/${emp.link.last}",
                     yourIncomeCalculationDetailsLink =
                       s"/check-income-tax/your-income-calculation-details/${emp.link.last}",
-                           updateIncomeLink = None,
-                           endDate          = Some(LocalDate.of(2022, 2, 1)))
+                    updateIncomeLink = None,
+                    endDate          = Some(LocalDate.of(2022, 2, 1))
+                  )
                 )
               ),
               simpleAssessment = Some(fullMobileSimpleAssessmentResponse),
@@ -314,7 +316,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChangeExists(nino)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status shouldBe 200
+      response.status                                         shouldBe 200
       Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
     }
 
@@ -354,7 +356,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChangeExists(nino)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status shouldBe 200
+      response.status                                         shouldBe 200
       Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse.copy(employments = None)
     }
 
@@ -373,7 +375,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChangeExists(nino)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status shouldBe 200
+      response.status                                         shouldBe 200
       Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse.copy(pensions = None)
     }
 
@@ -392,7 +394,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChangeExists(nino)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status shouldBe 200
+      response.status                                         shouldBe 200
       Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse.copy(otherIncomes = None)
     }
 
@@ -404,7 +406,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       List(Refund, PaymentProcessing, PaymentPaid, ChequeSent)
         .foreach { repaymentStatus =>
           val amount = Random.nextDouble(): BigDecimal
-          val time = LocalDate.now
+          val time   = LocalDate.now
 
           grantAccess(nino)
           personalDetailsAreFound(nino, person)
@@ -434,7 +436,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       List(PaymentDue, PartPaid, PaidAll, PaymentsDown, Unknown)
         .foreach { repaymentStatus =>
           val amount = Random.nextDouble(): BigDecimal
-          val time = LocalDate.now
+          val time   = LocalDate.now
 
           grantAccess(nino)
           personalDetailsAreFound(nino, person)
@@ -449,7 +451,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
           stubForTaxCodeChangeExists(nino)
 
           val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-          response.status shouldBe 200
+          response.status                                      shouldBe 200
           response.body[JsValue].as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
         }
     }
@@ -459,7 +461,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       List(SaUser, UnableToClaim)
         .foreach { repaymentStatus =>
           val amount = Random.nextDouble(): BigDecimal
-          val time = LocalDate.now
+          val time   = LocalDate.now
 
           grantAccess(nino)
           personalDetailsAreFound(nino, person)
@@ -474,7 +476,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
           stubForTaxCodeChangeExists(nino)
 
           val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-          response.status shouldBe 200
+          response.status                                      shouldBe 200
           response.body[JsValue].as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
         }
     }
@@ -499,7 +501,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChangeExists(nino)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status shouldBe 200
+      response.status                                                shouldBe 200
       response.body[JsValue].as[MobilePayeSummaryResponse].repayment shouldBe a[Some[_]]
       response.body[JsValue].as[MobilePayeSummaryResponse].repayment.foreach { repayment =>
         repayment.datePaid shouldBe a[Some[_]]
@@ -582,7 +584,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       employment1.employmentBenefits.get.benefits
         .filter(_.benefitType.toString == OtherBenefits.toString)
         .head
-        .amount shouldBe BigDecimal(450)
+        .amount                                        shouldBe BigDecimal(450)
       employment2.employmentBenefits.get.benefits.size shouldBe 2
       employment2.employmentBenefits.get.benefits
         .filter(_.benefitType.toString == MedicalInsurance.toString)
@@ -631,7 +633,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChangeExists(nino)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status shouldBe 200
+      response.status                                         shouldBe 200
       Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
     }
 
@@ -650,7 +652,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChangeExists(nino)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status shouldBe 200
+      response.status                                         shouldBe 200
       Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
     }
 
@@ -672,7 +674,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChangeExists(nino)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status shouldBe 200
+      response.status                                                shouldBe 200
       response.body[JsValue].as[MobilePayeSummaryResponse].repayment shouldBe a[Some[_]]
       response.body[JsValue].as[MobilePayeSummaryResponse].repayment.foreach { repayment =>
         repayment.datePaid shouldBe a[Some[_]]
@@ -698,7 +700,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChangeExists(nino)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status shouldBe 200
+      response.status                                                shouldBe 200
       response.body[JsValue].as[MobilePayeSummaryResponse].repayment shouldBe a[Some[_]]
       response.body[JsValue].as[MobilePayeSummaryResponse].repayment.foreach { repayment =>
         repayment.amount shouldBe a[Some[_]]
@@ -715,13 +717,13 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       taxAccountSummaryNotFound(nino, cyPlusone = true)
       stubForPensions(nino, pensionIncomeSource)
       stubForEmploymentIncome(nino, employmentIncomeSource)
-      stubForEmploymentIncome(nino, status = NotLive)
+      stubForEmploymentIncome(nino, status                                    = NotLive)
       taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoType = "underpaid")
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status shouldBe 200
+      response.status                                         shouldBe 200
       Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
     }
 
@@ -734,13 +736,13 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       taxAccountSummaryNotFound(nino, cyPlusone = true)
       stubForPensions(nino, pensionIncomeSource)
       stubForEmploymentIncome(nino, employmentIncomeSource)
-      stubForEmploymentIncome(nino, status = NotLive)
+      stubForEmploymentIncome(nino, status                                    = NotLive)
       taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoType = "balanced")
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status shouldBe 200
+      response.status                                         shouldBe 200
       Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
     }
 
@@ -753,13 +755,13 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       taxAccountSummaryNotFound(nino, cyPlusone = true)
       stubForPensions(nino, pensionIncomeSource)
       stubForEmploymentIncome(nino, employmentIncomeSource)
-      stubForEmploymentIncome(nino, status = NotLive)
+      stubForEmploymentIncome(nino, status                                      = NotLive)
       taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoStatus = "sa_user")
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status shouldBe 200
+      response.status                                         shouldBe 200
       Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
     }
 
@@ -772,13 +774,13 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       taxAccountSummaryNotFound(nino, cyPlusone = true)
       stubForPensions(nino, pensionIncomeSource)
       stubForEmploymentIncome(nino, employmentIncomeSource)
-      stubForEmploymentIncome(nino, status = NotLive)
+      stubForEmploymentIncome(nino, status                                      = NotLive)
       taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoStatus = "unable_to_claim")
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status shouldBe 200
+      response.status                                         shouldBe 200
       Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
     }
 
@@ -794,13 +796,13 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       taxAccountSummaryNotFound(nino, cyPlusone = true)
       stubForPensions(nino, pensionIncomeSource)
       stubForEmploymentIncome(nino, employmentIncomeSource)
-      stubForEmploymentIncome(nino, status = NotLive)
+      stubForEmploymentIncome(nino, status                                      = NotLive)
       taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoStatus = "refund")
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status shouldBe 200
+      response.status                                                shouldBe 200
       response.body[JsValue].as[MobilePayeSummaryResponse].repayment shouldBe a[Some[_]]
       response.body[JsValue].as[MobilePayeSummaryResponse].repayment.foreach { repayment =>
         repayment.claimRefundLink shouldBe a[Some[_]]
@@ -827,7 +829,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChangeExists(nino)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status shouldBe 200
+      response.status                                                shouldBe 200
       response.body[JsValue].as[MobilePayeSummaryResponse].repayment shouldBe a[Some[_]]
       response.body[JsValue].as[MobilePayeSummaryResponse].repayment.foreach { repayment =>
         repayment.amount shouldBe a[Some[_]]
@@ -835,7 +837,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       }
 
       val response2 = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response2.status shouldBe 200
+      response2.status                                                shouldBe 200
       response2.body[JsValue].as[MobilePayeSummaryResponse].repayment shouldBe a[Some[_]]
       response2.body[JsValue].as[MobilePayeSummaryResponse].repayment.foreach { repayment =>
         repayment.amount shouldBe a[Some[_]]
@@ -918,6 +920,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodes(nino, previousTaxYear, taxCodeData)
 
       val response = await(getRequestWithAuthHeaders(urlWithPreviousYear))
+      println("TEST DEBUG" + Json.prettyPrint(response.json))
       response.status shouldBe 200
       response.body shouldBe Json
         .toJson(fullMobilePayePreviousYearResponse())

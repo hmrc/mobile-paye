@@ -89,14 +89,18 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
     "return 200 and full paye summary data for valid authorised nino" in {
       mockShutteringResponse(notShuttered)
       mockGetPerson(Future.successful(person))
-      mockGetMobilePayeResponse(Future.successful(fullMobilePayeResponse))
+      mockGetMobilePayeResponse(
+        Future.successful(fullMobilePayeResponse.copy(simpleAssessment = Some(fullMobileSimpleAssessmentResponse)))
+      )
       mockAuthorisationGrantAccess(grantAccessWithCL200)
-      mockAudit(nino, fullMobilePayeAudit, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42")
+      mockAudit(nino,
+                fullMobilePayeAudit.copy(simpleAssessment = Some(fullMobileSimpleAssessmentResponse)),
+                "9bcb9c5a-0cfd-49e3-a935-58a28c386a42")
 
       val result = controller.getPayeSummary(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42", currentTaxYear)(fakeRequest)
 
       status(result)        shouldBe 200
-      contentAsJson(result) shouldBe Json.toJson(fullMobilePayeResponse)
+      contentAsJson(result) shouldBe Json.toJson(fullMobilePayeResponse.copy(simpleAssessment = Some(fullMobileSimpleAssessmentResponse)))
     }
 
     "return 200 and paye summary data with no employment data for valid authorised nino" in {
@@ -264,6 +268,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
         Future.successful(fullMobilePayePreviousYearResponse())
       )
       mockAuthorisationGrantAccess(grantAccessWithCL200)
+      mockAudit(nino, fullMobilePayePYAudit(), "9bcb9c5a-0cfd-49e3-a935-58a28c386a42")
 
       val result = controller.getPreviousYearPayeSummary(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42", previousTaxYear)(
         fakeRequest
@@ -279,6 +284,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
         Future.successful(fullMobilePayePreviousYearResponse().copy(employments = None))
       )
       mockAuthorisationGrantAccess(grantAccessWithCL200)
+      mockAudit(nino, fullMobilePayePYAudit().copy(employments = None), "9bcb9c5a-0cfd-49e3-a935-58a28c386a42")
 
       val result = controller.getPreviousYearPayeSummary(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42", previousTaxYear)(
         fakeRequest
@@ -294,6 +300,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
         Future.successful(fullMobilePayePreviousYearResponse().copy(pensions = None))
       )
       mockAuthorisationGrantAccess(grantAccessWithCL200)
+      mockAudit(nino, fullMobilePayePYAudit().copy(pensions = None), "9bcb9c5a-0cfd-49e3-a935-58a28c386a42")
 
       val result = controller.getPreviousYearPayeSummary(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42", previousTaxYear)(
         fakeRequest
@@ -309,6 +316,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
         Future.successful(fullMobilePayePreviousYearResponse().copy(otherIncomes = None))
       )
       mockAuthorisationGrantAccess(grantAccessWithCL200)
+      mockAudit(nino, fullMobilePayePYAudit().copy(otherIncomes = None), "9bcb9c5a-0cfd-49e3-a935-58a28c386a42")
 
       val result = controller.getPreviousYearPayeSummary(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42", previousTaxYear)(
         fakeRequest

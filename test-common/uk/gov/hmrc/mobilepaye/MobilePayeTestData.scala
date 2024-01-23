@@ -322,11 +322,14 @@ trait MobilePayeTestData {
     taxYear = Some(TaxYear.current.currentYear),
     employments =
       Some(employments.map(employment => PayeIncomeAudit.fromPayeIncome(employment.copy(payrollNumber = None)))),
-    repayment          = None,
-    pensions           = Some(pensions.map(pension => PayeIncomeAudit.fromPayeIncome(pension.copy(payrollNumber = None)))),
-    otherIncomes       = Some(otherIncomes.map(otherIncs => OtherIncomeAudit.fromOtherIncome((otherIncs)))),
-    taxFreeAmount      = Some(10000),
-    estimatedTaxAmount = Some(250)
+    previousEmployments = None,
+    repayment           = None,
+    pensions            = Some(pensions.map(pension => PayeIncomeAudit.fromPayeIncome(pension.copy(payrollNumber = None)))),
+    otherIncomes        = Some(otherIncomes.map(otherIncs => OtherIncomeAudit.fromOtherIncome((otherIncs)))),
+    taxCodeChange       = Some(TaxCodeChange(true)),
+    simpleAssessment    = None,
+    taxFreeAmount       = Some(10000),
+    estimatedTaxAmount  = Some(250)
   )
 
   val feedbackModel: Feedback = Feedback(Some(true), Some(5), Some("It was great"), Some(4))
@@ -401,6 +404,37 @@ trait MobilePayeTestData {
         Seq(PayeIncome.fromEmployment(taiEmployment3.copy(name = "ALDI", receivingOccupationalPension = true), None))
       ),
       otherIncomes       = Some(otherIncomes),
+      taxFreeAmount      = Some(10000),
+      estimatedTaxAmount = Some(250)
+    )
+
+  def fullMobilePayePYAudit(taxYear: Int = previousTaxYear): MobilePayeSummaryResponseAudit =
+    MobilePayeSummaryResponseAudit(
+      taxYear = Some(taxYear),
+      employments = Some(
+        Seq(
+          PayeIncomeAudit
+            .fromPayeIncome(PayeIncome.fromEmployment(taiEmployment(TaxYear.current.previous.startYear), Some("1250L")))
+        )
+      ),
+      previousEmployments = Some(
+        Seq(
+          PayeIncomeAudit
+            .fromPayeIncome(PayeIncome.fromEmployment(taiEmployment2.copy(employmentStatus = Ceased), Some("1199L")))
+        )
+      ),
+      repayment = None,
+      pensions = Some(
+        Seq(
+          PayeIncomeAudit
+            .fromPayeIncome(
+              PayeIncome.fromEmployment(taiEmployment3.copy(name = "ALDI", receivingOccupationalPension = true), None)
+            )
+        )
+      ),
+      otherIncomes       = Some(otherIncomes.map(otherIncs => OtherIncomeAudit.fromOtherIncome((otherIncs)))),
+      taxCodeChange      = None,
+      simpleAssessment   = None,
       taxFreeAmount      = Some(10000),
       estimatedTaxAmount = Some(250)
     )

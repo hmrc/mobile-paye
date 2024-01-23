@@ -51,9 +51,9 @@ trait AuditMock extends MockFactory {
     }
 
   def mockAudit(
-                 nino:                    Nino,
-                 expectedDetails:         MobilePayeSummaryResponseAudit,
-                 journeyId:               String
+    nino:                    Nino,
+    expectedDetails:         MobilePayeSummaryResponseAudit,
+    journeyId:               String
   )(implicit auditConnector: AuditConnector
   ): Unit = {
     (auditConnector

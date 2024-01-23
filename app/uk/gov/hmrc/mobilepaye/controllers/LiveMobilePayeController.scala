@@ -102,7 +102,7 @@ class LiveMobilePayeController @Inject() (
                 mobilePayeService.getMobilePayeSummaryResponse(nino, taxYear, journeyId).map { mpr =>
                   sendAuditEvent(
                     nino,
-                    mpr,
+                    MobilePayeSummaryResponseAudit.fromResponse(mpr),
                     request.path,
                     journeyId
                   )
@@ -146,6 +146,12 @@ class LiveMobilePayeController @Inject() (
           errorWrapper {
             previousYearSummaryService.getMobilePayePreviousYearSummaryResponse(nino, taxYear).map {
               mobilePayePreviousYearSummaryResponse =>
+                sendAuditEvent(
+                  nino,
+                  MobilePayeSummaryResponseAudit.fromPYResponse(mobilePayePreviousYearSummaryResponse),
+                  request.path,
+                  journeyId
+                )
                 Ok(Json.toJson(mobilePayePreviousYearSummaryResponse))
             }
           }
@@ -155,7 +161,7 @@ class LiveMobilePayeController @Inject() (
 
   private def sendAuditEvent(
     nino:        Nino,
-    response:    MobilePayeSummaryResponse,
+    response:    MobilePayeSummaryResponseAudit,
     path:        String,
     journeyId:   JourneyId
   )(implicit hc: HeaderCarrier
@@ -163,12 +169,8 @@ class LiveMobilePayeController @Inject() (
     ExtendedDataEvent(
       appName,
       "viewPayeSummary",
-      tags = hc.toAuditTags("view-paye-summary", path),
-      detail = obj(
-        "nino"      -> nino.value,
-        "journeyId" -> journeyId.value,
-        "data"      -> MobilePayeSummaryResponseAudit.fromResponse(response)
-      )
+      tags   = hc.toAuditTags("view-paye-summary", path),
+      detail = obj("nino" -> nino.value, "journeyId" -> journeyId.value, "data" -> response)
     )
   )
 }
