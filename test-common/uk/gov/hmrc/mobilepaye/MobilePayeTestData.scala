@@ -396,12 +396,19 @@ trait MobilePayeTestData {
   def fullMobilePayePreviousYearResponse(taxYear: Int = previousTaxYear): MobilePayePreviousYearSummaryResponse =
     MobilePayePreviousYearSummaryResponse(
       taxYear = Some(taxYear),
-      employments =
-        Some(Seq(PayeIncome.fromEmployment(taiEmployment(TaxYear.current.previous.startYear), Some("1250L")))),
-      previousEmployments =
-        Some(Seq(PayeIncome.fromEmployment(taiEmployment2.copy(employmentStatus = Ceased), Some("1199L")))),
+      employments = Some(
+        Seq(PayeIncome.fromEmployment(taiEmployment(TaxYear.current.previous.startYear), Some("1250L"), None, taxYear))
+      ),
+      previousEmployments = Some(
+        Seq(PayeIncome.fromEmployment(taiEmployment2.copy(employmentStatus = Ceased), Some("1199L"), None, taxYear))
+      ),
       pensions = Some(
-        Seq(PayeIncome.fromEmployment(taiEmployment3.copy(name = "ALDI", receivingOccupationalPension = true), None))
+        Seq(
+          PayeIncome.fromEmployment(taiEmployment3.copy(name = "ALDI", receivingOccupationalPension = true),
+                                    None,
+                                    None,
+                                    taxYear)
+        )
       ),
       otherIncomes       = Some(otherIncomes),
       taxFreeAmount      = Some(10000),
@@ -414,13 +421,17 @@ trait MobilePayeTestData {
       employments = Some(
         Seq(
           PayeIncomeAudit
-            .fromPayeIncome(PayeIncome.fromEmployment(taiEmployment(TaxYear.current.previous.startYear), Some("1250L")))
+            .fromPayeIncome(
+              PayeIncome.fromEmployment(taiEmployment(TaxYear.current.previous.startYear), Some("1250L"), None, taxYear)
+            )
         )
       ),
       previousEmployments = Some(
         Seq(
           PayeIncomeAudit
-            .fromPayeIncome(PayeIncome.fromEmployment(taiEmployment2.copy(employmentStatus = Ceased), Some("1199L")))
+            .fromPayeIncome(
+              PayeIncome.fromEmployment(taiEmployment2.copy(employmentStatus = Ceased), Some("1199L"), None, taxYear)
+            )
         )
       ),
       repayment = None,
@@ -428,7 +439,10 @@ trait MobilePayeTestData {
         Seq(
           PayeIncomeAudit
             .fromPayeIncome(
-              PayeIncome.fromEmployment(taiEmployment3.copy(name = "ALDI", receivingOccupationalPension = true), None)
+              PayeIncome.fromEmployment(taiEmployment3.copy(name = "ALDI", receivingOccupationalPension = true),
+                                        None,
+                                        None,
+                                        taxYear)
             )
         )
       ),

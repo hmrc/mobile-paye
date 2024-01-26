@@ -135,9 +135,9 @@ Fetch the MobilePayeResponse object.
       "name": "TESCO",
       "taxCode": "BR",
       "amount": 5101,
-      "link": "/"
+      "link": "/",
       "incomeDetailsLink": "/",
-      "yourIncomeCalculationDetailsLink": "/",
+      "yourIncomeCalculationDetailsLink": "/"
     }
   ],
   "previousEmployments": [
@@ -228,9 +228,9 @@ Fetch the MobilePayeResponse object.
       "taxCode": "BR",
       "amount": 4200,
       "payeNumber": "P12345",
-      "link": "/"
+      "link": "/",
       "incomeDetailsLink": "/",
-      "yourIncomeCalculationDetailsLink": "/",
+      "yourIncomeCalculationDetailsLink": "/"
     },
     {
       "name": "AVIVA (2410)",
@@ -238,9 +238,9 @@ Fetch the MobilePayeResponse object.
       "taxCode": "BR",
       "amount": 5690,
       "payeNumber": "P12345",
-      "link": "/"
+      "link": "/",
       "incomeDetailsLink": "/",
-      "yourIncomeCalculationDetailsLink": "/",
+      "yourIncomeCalculationDetailsLink": "/"
     }
   ],
   "otherIncomes": [
@@ -251,7 +251,8 @@ Fetch the MobilePayeResponse object.
     {
       "name": "UNTAXED INTEREST INCOME",
       "amount": 9301,
-      "link": "/"
+      "link": "/",
+      "incomeDetailsLink": "/"
     }
   ],
   "taxFreeAmount": 11850,
@@ -324,9 +325,9 @@ Fetch the MobilePayeResponse object.
       "taxCode": "BR",
       "amount": 4200,
       "payeNumber": "P12345",
-      "link": "/"
+      "link": "/",
       "incomeDetailsLink": "/",
-      "yourIncomeCalculationDetailsLink": "/",
+      "yourIncomeCalculationDetailsLink": "/"
     }
   ],
   "taxFreeAmount": 11850,

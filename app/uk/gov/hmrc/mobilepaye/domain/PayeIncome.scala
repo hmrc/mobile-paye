@@ -84,7 +84,8 @@ object PayeIncome {
   def fromEmployment(
     employment:         Employment,
     taxCode:            Option[String],
-    employmentBenefits: Option[Benefits] = None
+    employmentBenefits: Option[Benefits] = None,
+    taxYear:            Int
   ): PayeIncome =
     PayeIncome(
       name          = employment.name,
@@ -94,9 +95,10 @@ object PayeIncome {
       amount = employment.annualAccounts.headOption
         .flatMap(accounts => accounts.latestPayment.map(_.taxAmountYearToDate))
         .getOrElse(BigDecimal(0)),
-      payeNumber        = s"${employment.taxDistrictNumber}/${employment.payeNumber}",
-      link              = s"/check-income-tax/your-income-calculation-details/${employment.sequenceNumber}",
-      incomeDetailsLink = s"/check-income-tax/your-income-calculation-details/${employment.sequenceNumber}",
+      payeNumber = s"${employment.taxDistrictNumber}/${employment.payeNumber}",
+      link       = s"/check-income-tax/your-income-calculation-details/${employment.sequenceNumber}",
+      incomeDetailsLink =
+        s"/check-income-tax/your-income-calculation-previous-year/$taxYear/${employment.sequenceNumber}",
       yourIncomeCalculationDetailsLink =
         s"/check-income-tax/your-income-calculation-details/${employment.sequenceNumber}",
       updateIncomeLink   = None,
