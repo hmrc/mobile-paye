@@ -102,9 +102,9 @@ class PreviousYearSummaryService @Inject() (
 
     MobilePayePreviousYearSummaryResponse(
       taxYear             = Some(taxYear),
-      employments         = buildPayeIncomes(liveEmployments, taxCodes, Some(employmentBenefits)),
-      previousEmployments = buildPayeIncomes(notLiveEmployments, taxCodes, Some(employmentBenefits)),
-      pensions            = buildPayeIncomes(pensions, taxCodes, None),
+      employments         = buildPayeIncomes(liveEmployments, taxCodes, Some(employmentBenefits), taxYear),
+      previousEmployments = buildPayeIncomes(notLiveEmployments, taxCodes, Some(employmentBenefits), taxYear),
+      pensions            = buildPayeIncomes(pensions, taxCodes, None, taxYear),
       otherIncomes        = otherNonTaxCodeIncomes,
       taxFreeAmount       = taxFreeAmount,
       estimatedTaxAmount  = estimatedTaxAmount
@@ -114,10 +114,11 @@ class PreviousYearSummaryService @Inject() (
   private def buildPayeIncomes(
     incomes:            Seq[Employment],
     taxCodes:           Seq[TaxCodeRecord],
-    employmentBenefits: Option[Benefits]
+    employmentBenefits: Option[Benefits],
+    taxYear:            Int
   ): Option[Seq[PayeIncome]] =
     incomes.map { inc =>
-      PayeIncome.fromEmployment(inc, findTaxCode(inc, taxCodes), employmentBenefits)
+      PayeIncome.fromEmployment(inc, findTaxCode(inc, taxCodes), employmentBenefits, taxYear)
     } match {
       case Nil => None
       case epi => Some(epi)

@@ -920,7 +920,6 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodes(nino, previousTaxYear, taxCodeData)
 
       val response = await(getRequestWithAuthHeaders(urlWithPreviousYear))
-      println("TEST DEBUG" + Json.prettyPrint(response.json))
       response.status shouldBe 200
       response.body shouldBe Json
         .toJson(fullMobilePayePreviousYearResponse())
