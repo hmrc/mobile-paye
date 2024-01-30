@@ -19,10 +19,10 @@ package uk.gov.hmrc.mobilepaye.domain
 import ai.x.play.json.Encoders.encoder
 import ai.x.play.json.Jsonx
 import play.api.libs.json.OFormat
-import uk.gov.hmrc.mobilepaye.domain.simpleassessment.MobileSimpleAssessmentResponse
+import uk.gov.hmrc.mobilepaye.domain.simpleassessment.{MobileSimpleAssessmentResponse, TempSandboxMobileSimpleAssessmentResponse}
 import uk.gov.hmrc.time.TaxYear
 
-case class MobilePayeSummaryResponse(
+case class TempSandboxMobilePayeSummaryResponse(
   taxYear:                   Option[Int],
   employments:               Option[Seq[PayeIncome]],
   previousEmployments:       Option[Seq[PayeIncome]],
@@ -30,7 +30,7 @@ case class MobilePayeSummaryResponse(
   repayment:                 Option[P800Repayment],
   otherIncomes:              Option[Seq[OtherIncome]],
   taxCodeChange:             Option[TaxCodeChange],
-  simpleAssessment:          Option[MobileSimpleAssessmentResponse],
+  simpleAssessment:          Option[TempSandboxMobileSimpleAssessmentResponse],
   taxFreeAmount:             Option[BigDecimal],
   taxFreeAmountLink:         Option[String] = Some("/check-income-tax/tax-free-allowance"),
   estimatedTaxAmount:        Option[BigDecimal],
@@ -48,10 +48,10 @@ case class MobilePayeSummaryResponse(
   taxCodeLocation:           Option[String] = None,
   incomeTaxHistoricPayeUrl:  String = "/check-income-tax/historic-paye/")
 
-object MobilePayeSummaryResponse {
+object TempSandboxMobilePayeSummaryResponse {
 
-  def empty: MobilePayeSummaryResponse =
-    MobilePayeSummaryResponse(
+  def empty: TempSandboxMobilePayeSummaryResponse =
+    TempSandboxMobilePayeSummaryResponse(
       taxYear                   = Option(TaxYear.current.currentYear),
       employments               = None,
       previousEmployments       = None,
@@ -68,5 +68,5 @@ object MobilePayeSummaryResponse {
       currentYearPlusOneLink    = None
     )
 
-  implicit val format: OFormat[MobilePayeSummaryResponse] = Jsonx.formatCaseClass
+  implicit val format: OFormat[TempSandboxMobilePayeSummaryResponse] = Jsonx.formatCaseClass
 }
