@@ -18,7 +18,7 @@ package uk.gov.hmrc.mobilepaye.domain.simpleassessment
 
 import play.api.libs.json.{Json, OFormat}
 
-case class TempSandboxMobileSimpleAssessmentResponse(taxYears: List[MobileSATaxYearReconciliation])
+case class TempSandboxMobileSimpleAssessmentResponse(taxYears: List[TempSandboxMobileSATaxYearReconciliation])
 
 object TempSandboxMobileSimpleAssessmentResponse {
 
