@@ -34,7 +34,6 @@ Fetch the MobilePayeResponse object.
       "taxCode": "1185L",
       "amount": 4636,
       "payeNumber": "P12345",
-      "link": "/",
       "incomeDetailsLink": "/",
       "yourIncomeCalculationDetailsLink": "/",
       "payments": [
@@ -92,7 +91,6 @@ Fetch the MobilePayeResponse object.
       "taxCode": "BR",
       "amount": 5690,
       "payeNumber": "P54321",
-      "link": "/",
       "incomeDetailsLink": "/",
       "yourIncomeCalculationDetailsLink": "/",
       "payments": [
@@ -135,7 +133,6 @@ Fetch the MobilePayeResponse object.
       "name": "TESCO",
       "taxCode": "BR",
       "amount": 5101,
-      "link": "/",
       "incomeDetailsLink": "/",
       "yourIncomeCalculationDetailsLink": "/"
     }
@@ -148,7 +145,6 @@ Fetch the MobilePayeResponse object.
       "payrollNumber": "EMP0000001",
       "amount": 18900,
       "payeNumber": "P12345",
-      "link": "/",
       "incomeDetailsLink": "/",
       "yourIncomeCalculationDetailsLink": "/",
       "payments": [
@@ -188,7 +184,6 @@ Fetch the MobilePayeResponse object.
       "payrollNumber": "EMP0000001",
       "amount": 18900,
       "payeNumber": "P12345",
-      "link": "/",
       "incomeDetailsLink": "/",
       "yourIncomeCalculationDetailsLink": "/",
       "payments": [
@@ -228,7 +223,6 @@ Fetch the MobilePayeResponse object.
       "taxCode": "BR",
       "amount": 4200,
       "payeNumber": "P12345",
-      "link": "/",
       "incomeDetailsLink": "/",
       "yourIncomeCalculationDetailsLink": "/"
     },
@@ -238,7 +232,6 @@ Fetch the MobilePayeResponse object.
       "taxCode": "BR",
       "amount": 5690,
       "payeNumber": "P12345",
-      "link": "/",
       "incomeDetailsLink": "/",
       "yourIncomeCalculationDetailsLink": "/"
     }
@@ -251,7 +244,6 @@ Fetch the MobilePayeResponse object.
     {
       "name": "UNTAXED INTEREST INCOME",
       "amount": 9301,
-      "link": "/",
       "incomeDetailsLink": "/"
     }
   ],
@@ -273,7 +265,6 @@ Fetch the MobilePayeResponse object.
       "taxCode": "1185L",
       "amount": 4143,
       "payeNumber": "P12345",
-      "link": "/",
       "incomeDetailsLink": "/",
       "yourIncomeCalculationDetailsLink": "/",
       "payments": [
@@ -325,7 +316,6 @@ Fetch the MobilePayeResponse object.
       "taxCode": "BR",
       "amount": 4200,
       "payeNumber": "P12345",
-      "link": "/",
       "incomeDetailsLink": "/",
       "yourIncomeCalculationDetailsLink": "/"
     }
@@ -350,7 +340,7 @@ Fetch the MobilePayeResponse object.
     {
       "name": "UNTAXED INTEREST INCOME",
       "amount": 9301,
-      "link": "/"
+      "incomeDetailsLink": "/"
     }
   ],
   "taxFreeAmount": 11850,

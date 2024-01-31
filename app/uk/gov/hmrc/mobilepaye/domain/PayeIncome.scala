@@ -29,12 +29,10 @@ case class PayeIncome(
   taxCode:                          String,
   amount:                           BigDecimal,
   payeNumber:                       String,
-  link:                             String,
   incomeDetailsLink:                String,
   yourIncomeCalculationDetailsLink: String,
   updateIncomeLink:                 Option[String],
   updateEmployerLink:               Option[String],
-  latestPayment:                    Option[LatestPayment],
   payments:                         Option[Seq[Payment]],
   employmentBenefits:               Option[EmploymentBenefits],
   endDate:                          Option[LocalDate])
@@ -54,7 +52,6 @@ object PayeIncome {
       taxCode                          = incomeSource.taxCodeIncome.taxCode,
       amount                           = incomeSource.taxCodeIncome.amount.setScale(0, RoundingMode.FLOOR),
       payeNumber                       = s"${incomeSource.employment.taxDistrictNumber}/${incomeSource.employment.payeNumber}",
-      link                             = getIncomeDetailsLink(incomeSource),
       incomeDetailsLink                = getIncomeDetailsLink(incomeSource),
       updateEmployerLink               = Some(s"/check-income-tax/update-remove-employment/decision/$empId"),
       yourIncomeCalculationDetailsLink = s"/check-income-tax/your-income-calculation-details/$empId",
@@ -62,13 +59,6 @@ object PayeIncome {
         if (employment && incomeSource.taxCodeIncome.status.equals(Live))
           Some(
             s"/check-income-tax/update-income/load/$empId"
-          )
-        else None,
-      latestPayment =
-        if (employment)
-          buildLatestPayment(
-            incomeSource.employment.annualAccounts.headOption.flatMap(accounts => accounts.latestPayment),
-            incomeSource.taxCodeIncome.employmentId
           )
         else None,
       payments =
@@ -96,14 +86,12 @@ object PayeIncome {
         .flatMap(accounts => accounts.latestPayment.map(_.taxAmountYearToDate))
         .getOrElse(BigDecimal(0)),
       payeNumber = s"${employment.taxDistrictNumber}/${employment.payeNumber}",
-      link       = s"/check-income-tax/your-income-calculation-details/${employment.sequenceNumber}",
       incomeDetailsLink =
         s"/check-income-tax/your-income-calculation-previous-year/$taxYear/${employment.sequenceNumber}",
       yourIncomeCalculationDetailsLink =
         s"/check-income-tax/your-income-calculation-details/${employment.sequenceNumber}",
       updateIncomeLink   = None,
       updateEmployerLink = Some(s"/check-income-tax/update-remove-employment/decision/${employment.sequenceNumber}"),
-      latestPayment      = None,
       payments =
         if (employment.annualAccounts.headOption.map(_.payments).getOrElse(Seq.empty).isEmpty) None
         else employment.annualAccounts.headOption.map(_.payments.sorted(Payment.dateOrdering.reverse)),
@@ -111,30 +99,6 @@ object PayeIncome {
         buildEmploymentBenefits(_, Some(employment.sequenceNumber))
       ),
       endDate = employment.endDate
-    )
-
-  private def buildLatestPayment(
-    payment: Option[Payment],
-    empId:   Option[Int]
-  ): Option[LatestPayment] =
-    payment.flatMap(latestPayment =>
-      if (latestPayment.date.isAfter(LocalDate.now.minusDays(62))) {
-        Some(
-          LatestPayment(
-            latestPayment.date,
-            latestPayment.amount,
-            latestPayment.taxAmount,
-            latestPayment.nationalInsuranceAmount,
-            latestPayment.amountYearToDate,
-            latestPayment.taxAmountYearToDate,
-            latestPayment.nationalInsuranceAmountYearToDate,
-            s"/check-income-tax/your-income-calculation-details/${empId.getOrElse(throw new Exception("Employment ID not found"))}",
-            futurePayment = if (latestPayment.date.isAfter(LocalDate.now())) true else false
-          )
-        )
-      } else {
-        None
-      }
     )
 
   private def buildEmploymentBenefits(

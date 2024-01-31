@@ -55,7 +55,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/MobilePayeNinoTaxYearSummaryresponse'
+                  - $ref: '#/components/schemas/MobilePayeNinoTaxYearSummaryResponse'
                   - example:
                       taxYear: 2018
                       employments:
@@ -64,21 +64,10 @@ paths:
                           payrollNumber: EMP0000001
                           amount: 4143
                           payeNumber: P12345
-                          link: /check-income-tax/income-details/1
                           incomeDetailsLink: /check-income-tax/income-details/1
                           yourIncomeCalculationDetailsLink: /
                           updateIncomeLink: /
                           updateEmployerLink: /
-                          latestPayment:
-                            date: 2021-08-28
-                            amount: 1575
-                            taxAmount: 315
-                            nationalInsuranceAmount: 189
-                            amountYearToDate: 6201
-                            taxAmountYearToDate: 1180
-                            nationalInsuranceAmountYearToDate: 657
-                            link: /
-                            futurePayment: true
                           payments:
                             - date: 2021-07-28
                               amountYearToDate: 4636
@@ -105,7 +94,6 @@ paths:
                           taxCode: BR
                           amount: 5101
                           payeNumber: P12345
-                          link: /check-income-tax/income-details/2
                           incomeDetailsLink: /check-income-tax/income-details/2
                           yourIncomeCalculationDetailsLink: /
                           updateEmployerLink: /
@@ -114,7 +102,6 @@ paths:
                           taxCode: BR
                           amount: 4200
                           payeNumber: P12345
-                          link: /check-income-tax/income-details/12
                           incomeDetailsLink: /check-income-tax/income-details/12
                           yourIncomeCalculationDetailsLink": /
                         - name: AVIVA (2410)
@@ -122,7 +109,6 @@ paths:
                           taxCode: BR
                           amount: 5690
                           payeNumber: P12345
-                          link: /check-income-tax/income-details/3
                           incomeDetailsLink: /check-income-tax/income-details/3
                           yourIncomeCalculationDetailsLink: /
                       repayment:
@@ -135,7 +121,6 @@ paths:
                           amount: 22500
                         - name: UNTAXED INTEREST INCOME
                           amount: 9301
-                          link: /check-income-tax/income/bank-building-society-savings
                           incomeDetailsLink: /check-income-tax/income/bank-building-society-savings
                       taxFreeAmount: 11850
                       taxFreeAmountLink: /check-income-tax/tax-free-allowance
@@ -163,20 +148,9 @@ paths:
                         payrollNumber: EMP0000001
                         amount: 4143
                         payeNumber: P12345
-                        link: /check-income-tax/income-details/1
                         incomeDetailsLink: /check-income-tax/income-details/1
                         yourIncomeCalculationDetailsLink: /
                         updateIncomeLink: /
-                        latestPayment:
-                          date: 2021-08-28
-                          amount: 1575
-                          taxAmount: 315
-                          nationalInsuranceAmount: 189
-                          amountYearToDate: 6201
-                          taxAmountYearToDate: 1180
-                          nationalInsuranceAmountYearToDate: 657
-                          link: /
-                          futurePayment: true
                         payments:
                           - date: 2021-07-28
                             amountYearToDate: 4636
@@ -203,7 +177,6 @@ paths:
                         taxCode: BR
                         amount: 5101
                         payeNumber: P12345
-                        link: /check-income-tax/income-details/2
                         incomeDetailsLink: /check-income-tax/income-details/2
                         yourIncomeCalculationDetailsLink: /
                     pensions:
@@ -211,7 +184,6 @@ paths:
                         taxCode: BR
                         amount: 4200
                         payeNumber: P12345
-                        link: /check-income-tax/income-details/12
                         incomeDetailsLink: /check-income-tax/income-details/12
                         yourIncomeCalculationDetailsLink: /
                       - name: AVIVA (2410)
@@ -219,7 +191,6 @@ paths:
                         taxCode: BR
                         amount: 5690
                         payeNumber: P12345
-                        link: /check-income-tax/income-details/3
                         incomeDetailsLink: /check-income-tax/income-details/3
                         yourIncomeCalculationDetailsLink: /
                     repayment:
@@ -232,7 +203,6 @@ paths:
                         amount: 22500
                       - name: UNTAXED INTEREST INCOME
                         amount: 9301
-                        link: /check-income-tax/income/bank-building-society-savings
                         incomeDetailsLink: /check-income-tax/income/bank-building-society-savings
                     taxCodeChange:
                       hasChanged: false
@@ -297,7 +267,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/MobilePayeNinoPreviousTaxYearSummaryresponse'
+                  - $ref: '#/components/schemas/MobilePayeNinoPreviousTaxYearSummaryResponse'
                   - example:
                       taxYear: 2018
                       employments:
@@ -306,20 +276,9 @@ paths:
                           payrollNumber: EMP0000001
                           amount: 4143
                           payeNumber: P12345
-                          link: /check-income-tax/income-details/1
                           incomeDetailsLink: /check-income-tax/income-details/1
                           yourIncomeCalculationDetailsLink: /
                           updateIncomeLink: /
-                          latestPayment:
-                            date: 2021-08-28
-                            amount: 1575
-                            taxAmount: 315
-                            nationalInsuranceAmount: 189
-                            amountYearToDate: 6201
-                            taxAmountYearToDate: 1180
-                            nationalInsuranceAmountYearToDate: 657
-                            link: /
-                            futurePayment: true
                           payments:
                             - date: 2021-07-28
                               amountYearToDate: 4636
@@ -346,7 +305,6 @@ paths:
                           taxCode: BR
                           amount: 5101
                           payeNumber: P12345
-                          link: /check-income-tax/income-details/2
                           incomeDetailsLink: /check-income-tax/income-details/2
                           yourIncomeCalculationDetailsLink: /
                       pensions:
@@ -354,7 +312,6 @@ paths:
                           taxCode: BR
                           amount: 4200
                           payeNumber: P12345
-                          link: /check-income-tax/income-details/12
                           incomeDetailsLink: /check-income-tax/income-details/12
                           yourIncomeCalculationDetailsLink: /
                         - name: AVIVA (2410)
@@ -362,7 +319,6 @@ paths:
                           taxCode: BR
                           amount: 5690
                           payeNumber: P12345
-                          link: /check-income-tax/income-details/3
                           incomeDetailsLink: /check-income-tax/income-details/3
                           yourIncomeCalculationDetailsLink: /
                       otherIncomes:
@@ -370,7 +326,6 @@ paths:
                           amount: 22500
                         - name: UNTAXED INTEREST INCOME
                           amount: 9301
-                          link: /check-income-tax/income/bank-building-society-savings
                           incomeDetailsLink: /check-income-tax/income/bank-building-society-savings
                       taxFreeAmount: 11850
                       estimatedTaxAmount: 618
@@ -384,20 +339,9 @@ paths:
                         payrollNumber: EMP0000001
                         amount: 4143
                         payeNumber: P12345
-                        link: /check-income-tax/income-details/1
                         incomeDetailsLink: /check-income-tax/income-details/1
                         yourIncomeCalculationDetailsLink: /
                         updateIncomeLink: /
-                        latestPayment:
-                          date: 2021-08-28
-                          amount: 1575
-                          taxAmount: 315
-                          nationalInsuranceAmount: 189
-                          amountYearToDate: 6201
-                          taxAmountYearToDate: 1180
-                          nationalInsuranceAmountYearToDate: 657
-                          link: /
-                          futurePayment: true
                         payments:
                           - date: 2021-07-28
                             amountYearToDate: 4636
@@ -424,7 +368,6 @@ paths:
                         taxCode: BR
                         amount: 5101
                         payeNumber: P12345
-                        link: /check-income-tax/income-details/2
                         incomeDetailsLink: /check-income-tax/income-details/2
                         yourIncomeCalculationDetailsLink: /
                     pensions:
@@ -432,7 +375,6 @@ paths:
                         taxCode: BR
                         amount: 4200
                         payeNumber: P12345
-                        link: /check-income-tax/income-details/12
                         incomeDetailsLink: /check-income-tax/income-details/12
                         yourIncomeCalculationDetailsLink: /
                       - name: AVIVA (2410)
@@ -440,7 +382,6 @@ paths:
                         taxCode: BR
                         amount: 5690
                         payeNumber: P12345
-                        link: /check-income-tax/income-details/3
                         incomeDetailsLink: /check-income-tax/income-details/3
                         yourIncomeCalculationDetailsLink: /
                     otherIncomes:
@@ -448,7 +389,6 @@ paths:
                         amount: 22500
                       - name: UNTAXED INTEREST INCOME
                         amount: 9301
-                        link: /check-income-tax/income/bank-building-society-savings
                         incomeDetailsLink: /check-income-tax/income/bank-building-society-savings
                     taxFreeAmount: 11850
                     estimatedTaxAmount: 618
@@ -594,7 +534,6 @@ components:
         - taxCode
         - amount
         - payeNumber
-        - link
         - incomeDetailsLink
         - yourIncomeCalculationDetailsLink
       type: object
@@ -610,14 +549,10 @@ components:
           format: int32
         payeNumber:
           type: string
-        link:
-          type: string
         updateIncomeLink:
           type: string
         updateEmployerLink:
           type: string
-        latestPayment:
-          $ref: '#/components/schemas/LatestPayment'
         payments:
           type: array
           items:
@@ -629,21 +564,10 @@ components:
         payrollNumber: EMP0000001
         amount: 4143
         payeNumber: P12345
-        link: /check-income-tax/income-details/1
         incomeDetailsLink: /check-income-tax/income-details/1
         yourIncomeCalculationDetailsLink: /
         updateIncomeLink: /
         updateEmployerLink: /
-        latestPayment:
-          date: 2021-08-28
-          amount: 1575
-          taxAmount: 315
-          nationalInsuranceAmount: 189
-          amountYearToDate: 6201
-          taxAmountYearToDate: 1180
-          nationalInsuranceAmountYearToDate: 657
-          link: /
-          futurePayment: true
         payments:
           - date: 2021-07-28
             amountYearToDate: 4636
@@ -666,56 +590,8 @@ components:
             amount: 1470
             taxAmount: 256
             nationalInsuranceAmount: 127
-    LatestPayment:
-      title: LatestPayment
-      required:
-        - date
-        - amount
-        - taxAmount
-        - nationalInsuranceAmount
-        - amountYearToDate
-        - taxAmountYearToDate
-        - nationalInsuranceAmountYearToDate
-        - link
-        - futurePayment
-      type: object
-      properties:
-        date:
-          type: string
-        amount:
-          type: integer
-          format: int32
-        taxAmount:
-          type: integer
-          format: int32
-        nationalInsuranceAmount:
-          type: integer
-          format: int32
-        amountYearToDate:
-          type: integer
-          format: int32
-        taxAmountYearToDate:
-          type: integer
-          format: int32
-        nationalInsuranceAmountYearToDate:
-          type: integer
-          format: int32
-        link:
-          type: string
-        futurePayment:
-          type: boolean
-      example:
-        date: 2021-08-28
-        amount: 1575
-        taxAmount: 315
-        nationalInsuranceAmount: 189
-        amountYearToDate: 6201
-        taxAmountYearToDate: 1180
-        nationalInsuranceAmountYearToDate: 657
-        link: /
-        futurePayment: true
-    MobilePayeNinoTaxYearSummaryresponse:
-      title: MobilePayeNinoTaxYearSummaryresponse
+    MobilePayeNinoTaxYearSummaryResponse:
+      title: MobilePayeNinoTaxYearSummaryResponse
       required:
         - addMissingEmployerLink
         - addMissingPensionLink
@@ -794,21 +670,10 @@ components:
             payrollNumber: EMP0000001
             amount: 4143
             payeNumber: P12345
-            link: /check-income-tax/income-details/1
             incomeDetailsLink: /check-income-tax/income-details/1
             yourIncomeCalculationDetailsLink: /
             updateIncomeLink: /
             updateEmployerLink: /
-            latestPayment:
-              date: 2021-08-28
-              amount: 1575
-              taxAmount: 315
-              nationalInsuranceAmount: 189
-              amountYearToDate: 6201
-              taxAmountYearToDate: 1180
-              nationalInsuranceAmountYearToDate: 657
-              link: /
-              futurePayment: true
             payments:
               - date: 2021-07-28
                 amountYearToDate: 4636
@@ -835,7 +700,6 @@ components:
             taxCode: BR
             amount: 5101
             payeNumber: P12345
-            link: /check-income-tax/income-details/2
             incomeDetailsLink: /check-income-tax/income-details/2
             yourIncomeCalculationDetailsLink: /
             updateEmployerLink: /
@@ -844,7 +708,6 @@ components:
             taxCode: BR
             amount: 4200
             payeNumber: P12345
-            link: /check-income-tax/income-details/12
             incomeDetailsLink: /
             yourIncomeCalculationDetailsLink: /
           - name: AVIVA (2410)
@@ -852,7 +715,6 @@ components:
             taxCode: BR
             amount: 5690
             payeNumber: P12345
-            link: /check-income-tax/income-details/3
             incomeDetailsLink: /check-income-tax/income-details/3
             yourIncomeCalculationDetailsLink: /
         repayment:
@@ -865,7 +727,6 @@ components:
             amount: 22500
           - name: UNTAXED INTEREST INCOME
             amount: 9301
-            link: /check-income-tax/income/bank-building-society-saving
             incomeDetailsLink: /check-income-tax/income/bank-building-society-savings
         taxCodeChange:
           hasChanged: false
@@ -915,8 +776,8 @@ components:
         taxCodeLocation: rUK
         updateEmployerLink: /check-income-tax/update-remove-employment/decision-page
         incomeTaxHistoricPayeUrl: /check-income-tax/historic-paye/
-    MobilePayeNinoPreviousTaxYearSummaryresponse:
-      title: MobilePayeNinoPreviousTaxYearSummaryresponse
+    MobilePayeNinoPreviousTaxYearSummaryResponse:
+      title: MobilePayeNinoPreviousTaxYearSummaryResponse
       type: object
       properties:
         taxYear:
@@ -953,21 +814,10 @@ components:
             payrollNumber: EMP0000001
             amount: 4143
             payeNumber: P12345
-            link: /check-income-tax/income-details/1
             incomeDetailsLink: /check-income-tax/income-details/1
             yourIncomeCalculationDetailsLink: /
             updateIncomeLink: /
             updateEmployerLink: /
-            latestPayment:
-              date: 2021-08-28
-              amount: 1575
-              taxAmount: 315
-              nationalInsuranceAmount: 189
-              amountYearToDate: 6201
-              taxAmountYearToDate: 1180
-              nationalInsuranceAmountYearToDate: 657
-              link: /
-              futurePayment: true
             payments:
               - date: 2021-07-28
                 amountYearToDate: 4636
@@ -994,7 +844,6 @@ components:
             taxCode: BR
             amount: 5101
             payeNumber: P12345
-            link: /check-income-tax/income-details/2
             incomeDetailsLink: /check-income-tax/income-details/2
             yourIncomeCalculationDetailsLink: /
             updateEmployerLink: /
@@ -1003,7 +852,6 @@ components:
             taxCode: BR
             amount: 4200
             payeNumber: P12345
-            link: /check-income-tax/income-details/12
             incomeDetailsLink: /check-income-tax/income-details/12
             yourIncomeCalculationDetailsLink: /
           - name: AVIVA (2410)
@@ -1011,7 +859,6 @@ components:
             taxCode: BR
             amount: 5690
             payeNumber: P12345
-            link: /check-income-tax/income-details/3
             incomeDetailsLink: /check-income-tax/income-details/3
             yourIncomeCalculationDetailsLink: /
         otherIncomes:
@@ -1019,7 +866,6 @@ components:
             amount: 22500
           - name: UNTAXED INTEREST INCOME
             amount: 9301
-            link: /check-income-tax/income/bank-building-society-savings
             incomeDetailsLink: /check-income-tax/income/bank-building-society-savings
         taxFreeAmount: 11850
         estimatedTaxAmount: 618
@@ -1036,8 +882,6 @@ components:
         amount:
           type: integer
           format: int32
-        link:
-          type: string
         incomeDetailsLink:
           type: string
       example:

@@ -16,12 +16,11 @@
 
 package uk.gov.hmrc.mobilepaye.services
 
-import play.api.libs.json.Json
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, HttpResponse, InternalServerException, NotFoundException, UnauthorizedException}
+import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, HttpResponse, InternalServerException, UnauthorizedException}
 import uk.gov.hmrc.mobilepaye.connectors.{FeedbackConnector, MobileSimpleAssessmentConnector, TaiConnector, TaxCalcConnector}
 import uk.gov.hmrc.mobilepaye.domain.simpleassessment.MobileSimpleAssessmentResponse
-import uk.gov.hmrc.mobilepaye.domain.{Feedback, IncomeSource, MobilePayeSummaryResponse, OtherBenefits, P800Cache, PayeIncome, TaxCodeChange}
+import uk.gov.hmrc.mobilepaye.domain.{Feedback, IncomeSource, MobilePayeSummaryResponse, OtherBenefits, P800Cache, TaxCodeChange}
 import uk.gov.hmrc.mobilepaye.domain.tai._
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.TaxYearReconciliation
 import uk.gov.hmrc.mobilepaye.domain.types.ModelTypes.JourneyId
@@ -332,32 +331,8 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       result shouldBe fullMobilePayeResponse.copy(otherIncomes = None)
     }
 
-    "return MobilePayeResponse with correct employment latestPayments" in {
-      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource))
-      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
-      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
-      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
-      mockTaxAccountSummary(Future.successful(taxAccountSummary))
-      mockGetBenefits(Future.successful((noBenefits)))
-      mockGetTaxCodeChangeExists(Future.successful(true))
-      mockP800Summary()
 
-      val result         = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
-      val latestPayment1 = result.employments.get.head.latestPayment.get
-      val latestPayment2 = result.employments.get.last.latestPayment
-
-      latestPayment1.amount                            shouldBe 50
-      latestPayment1.taxAmount                         shouldBe 5
-      latestPayment1.nationalInsuranceAmount           shouldBe 2
-      latestPayment1.amountYearToDate                  shouldBe 100
-      latestPayment1.taxAmountYearToDate               shouldBe 20
-      latestPayment1.nationalInsuranceAmountYearToDate shouldBe 10
-      latestPayment1.futurePayment                     shouldBe false
-      latestPayment1.link                              shouldBe "/check-income-tax/your-income-calculation-details/3"
-      latestPayment2                                   shouldBe None
-    }
-
-    "return MobilePayeResponse with correct employment latestPayments and previousPayments" in {
+    "return MobilePayeResponse with correct Payments" in {
       mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource2))
       mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
       mockMatchingTaxCodeNotLive(Future successful Seq.empty)
@@ -368,16 +343,6 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       mockP800Summary()
 
       val result         = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
-      val latestPayment1 = result.employments.get.head.latestPayment.get
-
-      latestPayment1.amount                            shouldBe 50
-      latestPayment1.taxAmount                         shouldBe 5
-      latestPayment1.nationalInsuranceAmount           shouldBe 2
-      latestPayment1.amountYearToDate                  shouldBe 100
-      latestPayment1.taxAmountYearToDate               shouldBe 20
-      latestPayment1.nationalInsuranceAmountYearToDate shouldBe 10
-      latestPayment1.futurePayment                     shouldBe true
-      latestPayment1.link                              shouldBe "/check-income-tax/your-income-calculation-details/3"
       result.employments.get.head.payments.get.size    shouldBe 3
     }
 
@@ -396,21 +361,6 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       val payments = result.employments.get.head.payments
 
       payments shouldBe None
-    }
-
-    "return MobilePayeResponse with no latestPayment for pension" in {
-      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource))
-      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
-      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
-      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
-      mockTaxAccountSummary(Future.successful(taxAccountSummary))
-      mockGetBenefits(Future.successful((noBenefits)))
-      mockGetTaxCodeChangeExists(Future.successful(true))
-      mockP800Summary()
-
-      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
-
-      result.pensions.get.head.latestPayment shouldBe None
     }
 
     "return full MobilePayeResponse with employment benefits data totalled correctly" in {

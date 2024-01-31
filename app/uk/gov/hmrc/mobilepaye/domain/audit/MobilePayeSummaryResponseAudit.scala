@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.mobilepaye.domain
+package uk.gov.hmrc.mobilepaye.domain.audit
 
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.mobilepaye.domain._
 import uk.gov.hmrc.mobilepaye.domain.simpleassessment.MobileSimpleAssessmentResponse
 
 case class MobilePayeSummaryResponseAudit(

@@ -7,7 +7,6 @@
       "taxCode": "BR",
       "amount": 4200,
       "payeNumber": "123/P12345",
-      "link": "/",
       "incomeDetailsLink": "/",
       "yourIncomeCalculationDetailsLink": "/",
       "payments": []
