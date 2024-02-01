@@ -8,22 +8,10 @@
       "payrollNumber": "EMP0000001",
       "amount": 18900,
       "payeNumber": "123/P12345",
-      "link": "/",
       "incomeDetailsLink": "/",
       "yourIncomeCalculationDetailsLink": "/",
       "updateIncomeLink": "/",
       "updateEmployerLink": "/",
-      "latestPayment": {
-        "date": "<PAYMENT_DATE>",
-        "amount": 1575,
-        "taxAmount": 315,
-        "nationalInsuranceAmount": 189,
-        "amountYearToDate": 6201,
-        "taxAmountYearToDate": 1180,
-        "nationalInsuranceAmountYearToDate": 657,
-        "link": "/",
-        "futurePayment": true
-      },
       "payments": [
         {
           "date": "2021-07-28",
@@ -63,22 +51,10 @@
       "payrollNumber": "EMP0000001",
       "amount": 18900,
       "payeNumber": "123/P12345",
-      "link": "/",
       "incomeDetailsLink": "/",
       "yourIncomeCalculationDetailsLink": "/",
       "updateIncomeLink": "/",
       "updateEmployerLink": "/",
-      "latestPayment": {
-        "date": "<PAYMENT_DATE>",
-        "amount": 1575,
-        "taxAmount": 315,
-        "nationalInsuranceAmount": 189,
-        "amountYearToDate": 6201,
-        "taxAmountYearToDate": 1180,
-        "nationalInsuranceAmountYearToDate": 657,
-        "link": "/",
-        "futurePayment": true
-      },
       "payments": [
         {
           "date": "2021-07-28",
@@ -116,22 +92,10 @@
       "payrollNumber": "EMP0000001",
       "amount": 18900,
       "payeNumber": "123/P12345",
-      "link": "/",
       "incomeDetailsLink": "/",
       "yourIncomeCalculationDetailsLink": "/",
       "updateIncomeLink": "/",
       "updateEmployerLink": "/",
-      "latestPayment": {
-        "date": "<PAYMENT_DATE>",
-        "amount": 1575,
-        "taxAmount": 315,
-        "nationalInsuranceAmount": 189,
-        "amountYearToDate": 6201,
-        "taxAmountYearToDate": 1180,
-        "nationalInsuranceAmountYearToDate": 657,
-        "link": "/",
-        "futurePayment": true
-      },
       "payments": [
         {
           "date": "2021-07-28",

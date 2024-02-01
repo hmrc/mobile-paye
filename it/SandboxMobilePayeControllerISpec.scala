@@ -27,9 +27,6 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
       (response.json \ "taxFreeAmount").as[Int]                                       shouldBe 12500
       (response.json \ "estimatedTaxAmount").as[Int]                                  shouldBe 1578
       (response.json \ "taxCodeChange" \ "hasChanged").as[Boolean]                    shouldBe true
-      (response.json \ "employments" \ 0 \ "latestPayment" \ "amount").as[BigDecimal] shouldBe BigDecimal(1575)
-      (response.json \ "employments" \ 0 \ "latestPayment" \ "date")
-        .as[String] shouldBe LocalDate.now().plusDays(2).toString
     }
 
     "return OK and a single employment with no pension or otherIncome data when SANDBOX-CONTROL is SINGLE-EMPLOYMENT" in {

@@ -91,20 +91,18 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
                 employments.map(emp =>
                   emp.copy(
                     status            = NotLive,
-                    link              = s"/check-income-tax/your-income-calculation-details/${emp.link.last}",
-                    incomeDetailsLink = s"/check-income-tax/your-income-calculation-details/${emp.link.last}",
+                    incomeDetailsLink = s"/check-income-tax/your-income-calculation-details/${emp.incomeDetailsLink.last}",
                     yourIncomeCalculationDetailsLink =
-                      s"/check-income-tax/your-income-calculation-details/${emp.link.last}",
+                      s"/check-income-tax/your-income-calculation-details/${emp.incomeDetailsLink.last}",
                     updateIncomeLink = None
                   )
                 ) ++
                 employments.map(emp =>
                   emp.copy(
                     status            = NotLive,
-                    link              = s"/check-income-tax/your-income-calculation-details/${emp.link.last}",
-                    incomeDetailsLink = s"/check-income-tax/your-income-calculation-details/${emp.link.last}",
+                    incomeDetailsLink = s"/check-income-tax/your-income-calculation-details/${emp.incomeDetailsLink.last}",
                     yourIncomeCalculationDetailsLink =
-                      s"/check-income-tax/your-income-calculation-details/${emp.link.last}",
+                      s"/check-income-tax/your-income-calculation-details/${emp.incomeDetailsLink.last}",
                     updateIncomeLink = None,
                     endDate          = Some(LocalDate.of(2022, 2, 1))
                   )

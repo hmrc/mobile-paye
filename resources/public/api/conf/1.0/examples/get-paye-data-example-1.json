@@ -7,7 +7,7 @@
       "taxCode": "K4453X",
       "amount": 50000,
       "payeNumber": "A100",
-      "link": "/check-income-tax/income-details/1",
+      "incomeDetailsLink": "/check-income-tax/income-details/1",
       "updateIncomeLink": "/check-income-tax/update-income/load/1",
       "payments": [
         {
