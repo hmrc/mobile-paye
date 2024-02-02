@@ -1,0 +1,140 @@
+{
+  "taxYear": <TAX_YEAR>,
+  "employments": [
+    {
+      "name": "Supermarket plc",
+      "taxCode": "1257L",
+      "amount": 13574.97,
+      "payeNumber": "P12345",
+      "incomeDetailsLink": "/",
+      "yourIncomeCalculationDetailsLink": "/",
+      "payments": [
+        {
+          "date": "<TAX_YEAR_PLUS_1>-03-28",
+          "amountYearToDate": 13574.97,
+          "taxAmountYearToDate": 828.18,
+          "nationalInsuranceAmountYearToDate": 414.72,
+          "amount": 1508.33,
+          "taxAmount": 92.02,
+          "nationalInsuranceAmount": 46.08
+        },
+        {
+          "date": "<TAX_YEAR_PLUS_1>-02-28",
+          "amountYearToDate": 12066.64,
+          "taxAmountYearToDate": 736.16,
+          "nationalInsuranceAmountYearToDate": 368.64,
+          "amount": 1508.33,
+          "taxAmount": 92.02,
+          "nationalInsuranceAmount": 46.08
+        },
+        {
+          "date": "<TAX_YEAR_PLUS_1>-01-28",
+          "amountYearToDate": 10558.31,
+          "taxAmountYearToDate": 644.14,
+          "nationalInsuranceAmountYearToDate": 322.56,
+          "amount": 1508.33,
+          "taxAmount": 92.02,
+          "nationalInsuranceAmount": 46.08
+        },
+        {
+          "date": "<TAX_YEAR>-12-28",
+          "amountYearToDate": 9049.98,
+          "taxAmountYearToDate": 552.12,
+          "nationalInsuranceAmountYearToDate": 276.48,
+          "amount": 1508.33,
+          "taxAmount": 92.02,
+          "nationalInsuranceAmount": 46.08
+        },
+        {
+          "date": "<TAX_YEAR>-11-28",
+          "amountYearToDate": 7541.65,
+          "taxAmountYearToDate": 460.1,
+          "nationalInsuranceAmountYearToDate": 230.4,
+          "amount": 1508.33,
+          "taxAmount": 92.02,
+          "nationalInsuranceAmount": 46.08
+        },
+        {
+          "date": "<TAX_YEAR>-10-28",
+          "amountYearToDate": 6033.32,
+          "taxAmountYearToDate": 368.08,
+          "nationalInsuranceAmountYearToDate": 184.32,
+          "amount": 1508.33,
+          "taxAmount": 92.02,
+          "nationalInsuranceAmount": 46.08
+        },
+        {
+          "date": "<TAX_YEAR>-09-28",
+          "amountYearToDate": 4524.99,
+          "taxAmountYearToDate": 276.06,
+          "nationalInsuranceAmountYearToDate": 138.24,
+          "amount": 1508.33,
+          "taxAmount": 92.02,
+          "nationalInsuranceAmount": 46.08
+        },
+        {
+          "date": "<TAX_YEAR>-08-28",
+          "amountYearToDate": 3016.66,
+          "taxAmountYearToDate": 184.04,
+          "nationalInsuranceAmountYearToDate": 92.16,
+          "amount": 1508.33,
+          "taxAmount": 92.02,
+          "nationalInsuranceAmount": 46.08
+        },
+        {
+          "date": "<TAX_YEAR>-07-28",
+          "amountYearToDate": 1508.33,
+          "taxAmountYearToDate": 92.02,
+          "nationalInsuranceAmountYearToDate": 46.08,
+          "amount": 1508.33,
+          "taxAmount": 92.02,
+          "nationalInsuranceAmount": 46.08
+        }
+      ]
+    }
+  ],
+  "previousEmployments": [
+    {
+      "name": "JHP Trade",
+      "status": "Ceased",
+      "taxCode": "1257L",
+      "payrollNumber": "EMP0000001",
+      "amount": 4000,
+      "payeNumber": "P12345",
+      "incomeDetailsLink": "/",
+      "yourIncomeCalculationDetailsLink": "/",
+      "payments": [
+        {
+          "date": "<TAX_YEAR>-06-28",
+          "amountYearToDate": 4000,
+          "taxAmountYearToDate": 171.06,
+          "nationalInsuranceAmountYearToDate": 35.76,
+          "amount": 1333.33,
+          "taxAmount": 57.02,
+          "nationalInsuranceAmount": 28.58
+        },
+        {
+          "date": "<TAX_YEAR>-05-28",
+          "amountYearToDate": 2666.66,
+          "taxAmountYearToDate": 114.04,
+          "nationalInsuranceAmountYearToDate": 23.84,
+          "amount": 1333.33,
+          "taxAmount": 57.02,
+          "nationalInsuranceAmount": 28.58
+        },
+        {
+          "date": "<TAX_YEAR>-04-28",
+          "amountYearToDate": 1333.33,
+          "taxAmountYearToDate": 57.02,
+          "nationalInsuranceAmountYearToDate": 11.92,
+          "amount": 1333.33,
+          "taxAmount": 57.02,
+          "nationalInsuranceAmount": 28.58
+        }
+      ]
+    }
+  ],
+  "taxFreeAmount": 0,
+  "estimatedTaxAmount": 0,
+  "understandYourTaxCodeLink": "/"
+}

@@ -18,15 +18,15 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
 
     "return OK and default paye data with no SANDBOX-CONTROL" in {
       val response = await(request.addHttpHeaders(mobileHeader).get())
-      response.status                                                                 shouldBe 200
-      (response.json \ "taxYear").as[Int]                                             shouldBe TaxYear.current.currentYear
-      (response.json \\ "employments").isEmpty                                        shouldBe false
-      (response.json \\ "repayment").isEmpty                                          shouldBe false
-      (response.json \\ "pensions").isEmpty                                           shouldBe false
-      (response.json \\ "otherIncomes").isEmpty                                       shouldBe false
-      (response.json \ "taxFreeAmount").as[Int]                                       shouldBe 12500
-      (response.json \ "estimatedTaxAmount").as[Int]                                  shouldBe 1578
-      (response.json \ "taxCodeChange" \ "hasChanged").as[Boolean]                    shouldBe true
+      response.status                                              shouldBe 200
+      (response.json \ "taxYear").as[Int]                          shouldBe TaxYear.current.currentYear
+      (response.json \\ "employments").isEmpty                     shouldBe false
+      (response.json \\ "repayment").isEmpty                       shouldBe false
+      (response.json \\ "pensions").isEmpty                        shouldBe false
+      (response.json \\ "otherIncomes").isEmpty                    shouldBe false
+      (response.json \ "taxFreeAmount").as[Int]                    shouldBe 12500
+      (response.json \ "estimatedTaxAmount").as[Int]               shouldBe 1578
+      (response.json \ "taxCodeChange" \ "hasChanged").as[Boolean] shouldBe true
     }
 
     "return OK and a single employment with no pension or otherIncome data when SANDBOX-CONTROL is SINGLE-EMPLOYMENT" in {
@@ -306,4 +306,78 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
     }
   }
 
+  s"GET sandbox/nino/$nino/previous-tax-year/$previousTaxYear/summary" should {
+    val request: WSRequest = wsUrl(
+      s"/nino/$nino/previous-tax-year/$previousTaxYear/summary?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0"
+    ).addHttpHeaders(acceptJsonHeader)
+
+    s"return OK and correct paye data for $previousTaxYear" in {
+
+      val response = await(request.addHttpHeaders(mobileHeader).get())
+      response.status                                                             shouldBe 200
+      (response.json \ "taxYear").as[Int]                                         shouldBe previousTaxYear
+      (response.json \\ "employments").isEmpty                                    shouldBe false
+      (response.json \ "employments" \ 0 \ "amount").as[Int]                      shouldBe 18100
+      (response.json \ "employments" \ 0 \ "payments" \ 0 \ "amount").as[Double]  shouldBe 1508.33
+      (response.json \ "employments" \ 0 \ "payments" \ 0 \ "date").as[String]    shouldBe s"$currentTaxYear-03-28"
+      (response.json \ "employments" \ 0 \ "payments" \ 11 \ "amount").as[Double] shouldBe 1508.33
+      (response.json \ "employments" \ 0 \ "payments" \ 11 \ "date").as[String]   shouldBe s"$previousTaxYear-04-28"
+      (response.json \\ "previousEmployments").isEmpty                            shouldBe true
+      (response.json \\ "pensions").isEmpty                                       shouldBe true
+      (response.json \\ "otherIncomes").isEmpty                                   shouldBe true
+      (response.json \ "taxFreeAmount").as[Int]                                   shouldBe 0
+      (response.json \ "estimatedTaxAmount").as[Int]                              shouldBe 0
+
+    }
+  }
+
+  s"GET sandbox/nino/$nino/previous-tax-year/$cyMinus2/summary" should {
+    val request: WSRequest = wsUrl(
+      s"/nino/$nino/previous-tax-year/$cyMinus2/summary?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0"
+    ).addHttpHeaders(acceptJsonHeader)
+
+    s"return OK and correct paye data for $cyMinus2" in {
+
+      val response = await(request.addHttpHeaders(mobileHeader).get())
+      response.status                                                            shouldBe 200
+      (response.json \ "taxYear").as[Int]                                        shouldBe cyMinus2
+      (response.json \\ "employments").isEmpty                                   shouldBe false
+      (response.json \ "employments" \ 0 \ "amount").as[Double]                  shouldBe 13574.97
+      (response.json \ "employments" \ 0 \ "payments" \ 0 \ "amount").as[Double] shouldBe 1508.33
+      (response.json \ "employments" \ 0 \ "payments" \ 0 \ "date").as[String]   shouldBe s"$previousTaxYear-03-28"
+      (response.json \ "employments" \ 0 \ "payments" \ 8 \ "amount").as[Double] shouldBe 1508.33
+      (response.json \ "employments" \ 0 \ "payments" \ 8 \ "date").as[String]   shouldBe s"$cyMinus2-07-28"
+      (response.json \\ "previousEmployments").isEmpty                           shouldBe false
+      (response.json \\ "pensions").isEmpty                                      shouldBe true
+      (response.json \\ "otherIncomes").isEmpty                                  shouldBe true
+      (response.json \ "taxFreeAmount").as[Int]                                  shouldBe 0
+      (response.json \ "estimatedTaxAmount").as[Int]                             shouldBe 0
+
+    }
+  }
+
+  s"GET sandbox/nino/$nino/previous-tax-year/$cyMinus3/summary" should {
+    val request: WSRequest = wsUrl(
+      s"/nino/$nino/previous-tax-year/$cyMinus3/summary?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0"
+    ).addHttpHeaders(acceptJsonHeader)
+
+    s"return OK and correct paye data for $cyMinus3" in {
+
+      val response = await(request.addHttpHeaders(mobileHeader).get())
+      response.status                                                             shouldBe 200
+      (response.json \ "taxYear").as[Int]                                         shouldBe cyMinus3
+      (response.json \\ "employments").isEmpty                                    shouldBe false
+      (response.json \ "employments" \ 0 \ "amount").as[Int]                      shouldBe 16000
+      (response.json \ "employments" \ 0 \ "payments" \ 0 \ "amount").as[Double]  shouldBe 1333.33
+      (response.json \ "employments" \ 0 \ "payments" \ 0 \ "date").as[String]    shouldBe s"$cyMinus2-03-28"
+      (response.json \ "employments" \ 0 \ "payments" \ 11 \ "amount").as[Double] shouldBe 1333.33
+      (response.json \ "employments" \ 0 \ "payments" \ 11 \ "date").as[String]   shouldBe s"$cyMinus3-04-28"
+      (response.json \\ "previousEmployments").isEmpty                            shouldBe true
+      (response.json \\ "pensions").isEmpty                                       shouldBe true
+      (response.json \\ "otherIncomes").isEmpty                                   shouldBe true
+      (response.json \ "taxFreeAmount").as[Int]                                   shouldBe 0
+      (response.json \ "estimatedTaxAmount").as[Int]                              shouldBe 0
+
+    }
+  }
 }

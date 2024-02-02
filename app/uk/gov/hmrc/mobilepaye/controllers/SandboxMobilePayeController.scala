@@ -113,6 +113,41 @@ class SandboxMobilePayeController @Inject() (
     journeyId: JourneyId,
     taxYear:   Int
   ): Action[AnyContent] = validateAccept(acceptHeaderValidationRules).async {
-    Future successful NotFound(Json.toJson("No Data found"))
+
+    val CYMinus1 = TaxYear.current.startYear - 1
+    val CYMinus2 = CYMinus1 - 1
+    val CYMinus3 = CYMinus2 - 1
+
+    if (taxYear < CYMinus3 || taxYear > CYMinus1) Future successful NotFound(Json.toJson("No Data found"))
+    else {
+      val response = taxYear match {
+        case CYMinus1 =>
+          Json.parse(
+            findResource("/resources/mobilepayesummary/cy-1-previous-year-summary.json")
+              .getOrElse(throw new IllegalArgumentException("Resource not found!"))
+              .replace("<TAX_YEAR>", CYMinus1.toString)
+              .replace("<TAX_YEAR_PLUS_1>", (CYMinus1 + 1).toString)
+          )
+        case CYMinus2 =>
+          Json.parse(
+            findResource("/resources/mobilepayesummary/cy-2-previous-year-summary.json")
+              .getOrElse(throw new IllegalArgumentException("Resource not found!"))
+              .replace("<TAX_YEAR>", CYMinus2.toString)
+              .replace("<TAX_YEAR_PLUS_1>", (CYMinus2 + 1).toString)
+          )
+        case CYMinus3 =>
+          Json.parse(
+            findResource("/resources/mobilepayesummary/cy-3-previous-year-summary.json")
+              .getOrElse(throw new IllegalArgumentException("Resource not found!"))
+              .replace("<TAX_YEAR>", CYMinus3.toString)
+              .replace("<TAX_YEAR_PLUS_1>", (CYMinus3 + 1).toString)
+          )
+      }
+      Future.successful(
+        Ok(
+          toJson(response)
+        )
+      )
+    }
   }
 }
