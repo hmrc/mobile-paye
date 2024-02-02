@@ -34,6 +34,8 @@ trait MobilePayeTestData {
   val currentTaxYear:  Int = TaxYear.current.startYear
   val endOfTaxYear:    Int = TaxYear.current.finishYear
   val previousTaxYear: Int = currentTaxYear - 1
+  val cyMinus2: Int = currentTaxYear - 2
+  val cyMinus3: Int = currentTaxYear - 3
 
   val nino:           Nino          = Nino("CS700100A")
   val taxCodeIncome:  TaxCodeIncome = TaxCodeIncome(EmploymentIncome, Live, Some(3), "The Best Shop Ltd", 1000, "S1150L")
