@@ -18,9 +18,9 @@ package uk.gov.hmrc.mobilepaye.services
 
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, HttpResponse, InternalServerException, UnauthorizedException}
-import uk.gov.hmrc.mobilepaye.connectors.{FeedbackConnector, MobileSimpleAssessmentConnector, TaiConnector, TaxCalcConnector}
+import uk.gov.hmrc.mobilepaye.connectors.{FeedbackConnector, MobileSimpleAssessmentConnector, ShutteringConnector, TaiConnector, TaxCalcConnector}
 import uk.gov.hmrc.mobilepaye.domain.simpleassessment.MobileSimpleAssessmentResponse
-import uk.gov.hmrc.mobilepaye.domain.{Feedback, IncomeSource, MobilePayeSummaryResponse, OtherBenefits, P800Cache, TaxCodeChange}
+import uk.gov.hmrc.mobilepaye.domain.{Feedback, IncomeSource, MobilePayeSummaryResponse, OtherBenefits, P800Cache, Shuttering, TaxCodeChange}
 import uk.gov.hmrc.mobilepaye.domain.tai._
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.TaxYearReconciliation
 import uk.gov.hmrc.mobilepaye.domain.types.ModelTypes.JourneyId
@@ -36,6 +36,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
 
   override lazy val repository = new P800CacheMongo(mongoComponent, appConfig)
 
+  implicit val mockShutteringConnector:    ShutteringConnector             = mock[ShutteringConnector]
   val mockTaiConnector:                    TaiConnector                    = mock[TaiConnector]
   val mockTaxCalcConnector:                TaxCalcConnector                = mock[TaxCalcConnector]
   val mockFeedbackConnector:               FeedbackConnector               = mock[FeedbackConnector]
@@ -51,6 +52,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
                                       p800CacheMongo,
                                       mockFeedbackConnector,
                                       mockMobileSimpleAssessmentConnector,
+                                      mockShutteringConnector,
                                       inactiveDate,
                                       inactiveDate,
                                       inactiveDate,
@@ -59,8 +61,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
                                       inactiveDate,
                                       true,
                                       true,
-                                      true,
-                                      5)
+                                      true)
 
   def mockMatchingTaxCodeLive(f: Future[Seq[IncomeSource]]) =
     (mockTaiConnector
@@ -133,6 +134,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       mockGetTaxCodeChangeExists(Future.successful(true))
       mockP800Summary(Some(taxCalcTaxYearReconciliationResponse))
       mockGetSimpleAssessmentLiabilities(Future successful Some(fullMobileSimpleAssessmentResponse))
+      mockShutteringResponse(Shuttering.shutteringDisabled)
 
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
@@ -156,6 +158,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
                                           p800CacheMongo,
                                           mockFeedbackConnector,
                                           mockMobileSimpleAssessmentConnector,
+                                          mockShutteringConnector,
                                           inactiveDate,
                                           inactiveDate,
                                           activeStartDate,
@@ -164,8 +167,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
                                           inactiveDate,
                                           true,
                                           true,
-                                          true,
-                                          5)
+                                          true)
 
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
@@ -189,6 +191,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
                                           p800CacheMongo,
                                           mockFeedbackConnector,
                                           mockMobileSimpleAssessmentConnector,
+                                          mockShutteringConnector,
                                           activeStartDate,
                                           activeEndDate,
                                           inactiveDate,
@@ -197,8 +200,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
                                           inactiveDate,
                                           true,
                                           true,
-                                          true,
-                                          5)
+                                          true)
 
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
@@ -222,6 +224,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
                                           p800CacheMongo,
                                           mockFeedbackConnector,
                                           mockMobileSimpleAssessmentConnector,
+                                          mockShutteringConnector,
                                           inactiveDate,
                                           inactiveDate,
                                           inactiveDate,
@@ -230,8 +233,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
                                           activeEndDate,
                                           true,
                                           true,
-                                          true,
-                                          5)
+                                          true)
 
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
@@ -253,6 +255,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
                                           p800CacheMongo,
                                           mockFeedbackConnector,
                                           mockMobileSimpleAssessmentConnector,
+                                          mockShutteringConnector,
                                           activeStartDate,
                                           activeEndDate,
                                           inactiveDate,
@@ -261,8 +264,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
                                           activeEndDate,
                                           true,
                                           true,
-                                          true,
-                                          5)
+                                          true)
 
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
@@ -331,7 +333,6 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       result shouldBe fullMobilePayeResponse.copy(otherIncomes = None)
     }
 
-
     "return MobilePayeResponse with correct Payments" in {
       mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource2))
       mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
@@ -342,8 +343,8 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       mockGetTaxCodeChangeExists(Future.successful(true))
       mockP800Summary()
 
-      val result         = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
-      result.employments.get.head.payments.get.size    shouldBe 3
+      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
+      result.employments.get.head.payments.get.size shouldBe 3
     }
 
     "return MobilePayeResponse with no payments node for employment with no payments" in {
@@ -416,6 +417,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
                                           p800CacheMongo,
                                           mockFeedbackConnector,
                                           mockMobileSimpleAssessmentConnector,
+                                          mockShutteringConnector,
                                           inactiveDate,
                                           inactiveDate,
                                           inactiveDate,
@@ -424,8 +426,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
                                           inactiveDate,
                                           true,
                                           false,
-                                          true,
-                                          5)
+                                          true)
 
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
@@ -480,6 +481,25 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
       result shouldBe MobilePayeSummaryResponse.empty
+    }
+
+    "return full MobilePayeResponse without repayment data when p800 is shuttered" in {
+      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource))
+      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
+      mockMatchingTaxCodeNotLive(Future successful employmentIncomeSource ++ employmentIncomeSource)
+      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
+      mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockGetBenefits(Future.successful((noBenefits)))
+      mockGetTaxCodeChangeExists(Future.successful(true))
+      mockP800Summary(Some(taxCalcTaxYearReconciliationResponse))
+      mockGetSimpleAssessmentLiabilities(Future successful Some(fullMobileSimpleAssessmentResponse))
+      mockShutteringResponse(Shuttering(shuttered = true))
+
+      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
+
+      result shouldBe fullMobilePayeResponse.copy(previousEmployments = Some((employments ++ employments)),
+                                                  simpleAssessment = Some(fullMobileSimpleAssessmentResponse),
+                                                  repayment        = None)
     }
 
   }
