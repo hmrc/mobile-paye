@@ -5,12 +5,7 @@ val appName: String = "mobile-paye"
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(
-    Seq(
-      play.sbt.PlayScala,
-      SbtAutoBuildPlugin,
-      SbtDistributablesPlugin,
-      ScoverageSbtPlugin
-    ): _*
+    Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtDistributablesPlugin, ScoverageSbtPlugin): _*
   )
   .disablePlugins(JUnitXmlReportPlugin)
   .configs(IntegrationTest)
@@ -27,7 +22,7 @@ lazy val microservice = Project(appName, file("."))
   )
   .settings(
     majorVersion := 0,
-    scalaVersion := "2.12.15",
+    scalaVersion := "2.13.8",
     playDefaultPort := 8247,
     libraryDependencies ++= AppDependencies(),
     update / evictionWarningOptions := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
@@ -45,13 +40,8 @@ lazy val microservice = Project(appName, file("."))
       "-language:higherKinds",
       "-language:postfixOps",
       "-feature",
-      "-Ypartial-unification",
       "-Ywarn-dead-code",
       "-Ywarn-value-discard",
-      "-Ywarn-inaccessible",
-      "-Ywarn-infer-any",
-      "-Ywarn-nullary-override",
-      "-Ywarn-nullary-unit",
       "-Ywarn-numeric-widen",
       //"-Ywarn-unused-import", - does not work well with fatal-warnings because of play-generated sources
       //"-Xfatal-warnings",

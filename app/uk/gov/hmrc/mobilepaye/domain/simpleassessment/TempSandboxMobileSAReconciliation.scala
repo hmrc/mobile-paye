@@ -16,10 +16,7 @@
 
 package uk.gov.hmrc.mobilepaye.domain.simpleassessment
 
-import play.api.libs.json.{Format, Json, OFormat, Reads}
-import uk.gov.hmrc.mobilepaye.domain.simpleassessment.ReasonType.ReasonType
-import uk.gov.hmrc.mobilepaye.utils.EnumUtils
-
+import play.api.libs.json.{Format, Json}
 case class TempSandboxMobileSAReconciliation(
   reconciliationId:         Int,
   reconciliationStatus:     Option[Int] = None,

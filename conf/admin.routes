@@ -5,4 +5,4 @@ GET        /metrics                       @com.kenshoo.play.metrics.MetricsContr
 +nocsrf
 PUT        /featureFlags/:flagName        uk.gov.hmrc.mobilepaye.controllers.admin.FeatureFlagController.put(flagName: FeatureFlagName)
 PUT        /featureFlags                  uk.gov.hmrc.mobilepaye.controllers.admin.FeatureFlagController.putAll
-GET        /featureFlags                  uk.gov.hmrc.mobilepaye.controllers.admin.FeatureFlagController.get
+GET        /featureFlags                  uk.gov.hmrc.mobilepaye.controllers.admin.FeatureFlagController.get()

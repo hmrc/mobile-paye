@@ -50,7 +50,7 @@ trait AuthorisationNoNino extends Results with AuthorisedFunctions {
                         ): Future[Result] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
-    grantAccess
+    grantAccess()
       .flatMap { _ =>
         block(request)
       }
