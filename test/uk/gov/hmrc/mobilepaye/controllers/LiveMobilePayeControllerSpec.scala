@@ -25,6 +25,7 @@ import uk.gov.hmrc.auth.core.syntax.retrieved._
 import uk.gov.hmrc.auth.core.{AuthConnector, MissingBearerToken}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http._
+import uk.gov.hmrc.mobilepaye.controllers.BadRequestException
 import uk.gov.hmrc.mobilepaye.connectors.ShutteringConnector
 import uk.gov.hmrc.mobilepaye.domain.tai.Person
 import uk.gov.hmrc.mobilepaye.domain.{IncomeTaxYear, MobilePayePreviousYearSummaryResponse, MobilePayeSummaryResponse, Shuttering}
@@ -222,7 +223,6 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       mockShutteringResponse(notShuttered)
       mockAuthorisationGrantAccess(grantAccessWithCL200)
       mockGetPerson(Future.failed(new BadRequestException("Bad Request Exception")))
-
       val result = controller.getPayeSummary(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42", currentTaxYear)(fakeRequest)
 
       status(result) shouldBe 400

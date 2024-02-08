@@ -14,11 +14,11 @@ object AppDependencies {
   private val pegdownVersion       = "1.6.0"
   private val wireMockVersion      = "2.21.0"
   private val scalaMockVersion     = "5.1.0"
-  private val scalaTestPlusVersion = "7.0.1"
+  private val scalaTestPlusVersion = "5.1.0"
   private val hmrcMongoVersion     = "0.73.0"
   private val mockitoVersion       = "1.17.30"
   private val refinedVersion       = "0.9.26"
-  private val flexmarkAllVersion   = "0.64.8"
+  private val flexmarkAllVersion   = "0.36.8"
 
   val compile: Seq[ModuleID] = Seq(
     ws,

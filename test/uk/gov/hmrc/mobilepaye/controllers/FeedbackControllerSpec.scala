@@ -28,6 +28,7 @@ import uk.gov.hmrc.mobilepaye.mocks.AuthorisationNoNinoMock
 import uk.gov.hmrc.mobilepaye.services.MobilePayeService
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 import eu.timepit.refined.auto._
+import uk.gov.hmrc.mobilepaye.controllers.BadRequestException
 
 import scala.concurrent.Future
 
