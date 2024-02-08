@@ -104,7 +104,7 @@ class FeatureFlagControllerSpec
 
       running(app) {
         val request =
-          fakeRequest(GET, routes.FeatureFlagController.get.url)
+          fakeRequest(GET, routes.FeatureFlagController.get().url)
             .withHeaders("Authorization" -> "some-token")
 
         val result = route(app, request).head
@@ -161,7 +161,7 @@ class FeatureFlagControllerSpec
         .thenReturn(Future.failed(UpstreamErrorResponse("Unauthorised", UNAUTHORIZED)))
 
       running(app) {
-        val request = fakeRequest(GET, routes.FeatureFlagController.get.url)
+        val request = fakeRequest(GET, routes.FeatureFlagController.get().url)
 
         val result = route(app, request).head
 

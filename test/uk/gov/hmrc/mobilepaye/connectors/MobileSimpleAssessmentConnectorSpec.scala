@@ -66,7 +66,7 @@ class MobileSimpleAssessmentConnectorSpec extends BaseSpec with LogCapturing {
       withCaptureOfLoggingFrom(connector.logger) { events =>
         val result = await(connector.getSimpleAssessmentLiabilities(journeyId))
         events.size            shouldBe 1
-        events.head.getMessage shouldBe "Call to mobile-simple-assessment failed. Reason: java.lang.InternalError: Internal Error Boxed Error"
+        events.head.getMessage shouldBe "Call to mobile-simple-assessment failed. Reason: java.lang.InternalError: Internal Error Boxed Exception"
         result                 shouldBe None
       }
     }

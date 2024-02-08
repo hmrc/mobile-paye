@@ -68,7 +68,7 @@ trait ErrorHandling {
         log("Resource not found!")
         Status(ErrorNotFound.httpStatusCode)(toJson[ErrorResponse](ErrorNotFound))
 
-      case _: BadRequestException =>
+      case ex: BadRequestException if ex.responseCode == 400 =>
         log("BadRequest!")
         Status(ErrorBadRequest.httpStatusCode)(toJson[ErrorResponse](ErrorBadRequest))
 
@@ -89,6 +89,7 @@ trait ErrorHandling {
         Unauthorized(toJson[ErrorResponse](ErrorUnauthorizedUpstream))
 
       case e: Exception =>
+
         logger.warn(s"Native Error - $app Internal server error: ${e.getMessage}", e)
         Status(ErrorInternalServerError.httpStatusCode)(toJson[ErrorResponse](ErrorInternalServerError))
     }
