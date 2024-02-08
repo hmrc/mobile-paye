@@ -28,7 +28,6 @@ import uk.gov.hmrc.mobilepaye.config.MobilePayeConfig
 import uk.gov.hmrc.mobilepaye.domain.types.ModelTypes.JourneyId
 import uk.gov.hmrc.mobilepaye.mocks.{AuditMock, AuthorisationMock, ShutteringMock}
 import eu.timepit.refined.auto._
-import org.scalatest.freespec.AnyFreeSpecLike
 
 import scala.concurrent.ExecutionContext
 

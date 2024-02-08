@@ -5,8 +5,6 @@ import uk.gov.hmrc.mobilepaye.domain.{HistoricTaxCodeIncome, MobilePayeSummaryRe
 import uk.gov.hmrc.time.TaxYear
 import utils.BaseISpec
 
-import java.time.LocalDate
-
 class SandboxMobilePayeControllerISpec extends BaseISpec {
 
   private val mobileHeader = "X-MOBILE-USER-ID" -> "208606423740"

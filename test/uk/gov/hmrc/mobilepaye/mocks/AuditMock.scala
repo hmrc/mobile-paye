@@ -22,7 +22,6 @@ import play.api.libs.json.JsValue
 import play.api.libs.json.Json.obj
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.mobilepaye.domain.MobilePayeSummaryResponse
 import uk.gov.hmrc.mobilepaye.domain.audit.MobilePayeSummaryResponseAudit
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
