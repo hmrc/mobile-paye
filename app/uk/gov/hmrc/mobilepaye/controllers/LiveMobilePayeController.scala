@@ -29,7 +29,6 @@ import uk.gov.hmrc.http.{HeaderCarrier, HeaderNames}
 import uk.gov.hmrc.mobilepaye.connectors.ShutteringConnector
 import uk.gov.hmrc.mobilepaye.controllers.action.AccessControl
 import uk.gov.hmrc.mobilepaye.domain.types.ModelTypes.JourneyId
-import uk.gov.hmrc.mobilepaye.domain.MobilePayeSummaryResponse
 import uk.gov.hmrc.mobilepaye.domain.audit.MobilePayeSummaryResponseAudit
 import uk.gov.hmrc.mobilepaye.services.{IncomeTaxHistoryService, MobilePayeService, PreviousYearSummaryService}
 import uk.gov.hmrc.play.audit.AuditExtensions.auditHeaderCarrier
