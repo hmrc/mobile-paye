@@ -123,6 +123,12 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       .expects(*, *)
       .returning(f)
 
+  def mockGetTaxCodeChange(f: Future[TaxCodeChangeDetails]) =
+    (mockTaiConnector
+      .getTaxCodeChange(_: Nino)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *, *)
+      .returning(f)
+
   "getMobilePayeSummaryResponse" should {
     "return full MobilePayeResponse when all data is available" in {
       mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource))
@@ -517,6 +523,16 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
 
       }
 
+    }
+  }
+
+  "getCurrentTaxCode" should {
+    "return a 200 with the taxCode if a single, current tax code returned from tai" in {
+      mockGetTaxCodeChange(Future successful taxCodeChangeDetails)
+
+      val result = await(service.getCurrentTaxCode(nino))
+
+      result shouldBe Some(taxCodeRecord.taxCode)
     }
   }
 

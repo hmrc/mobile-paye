@@ -107,6 +107,18 @@ class MobilePayeService @Inject() (
     ec:          ExecutionContext
   ): Future[Person] = taiConnector.getPerson(nino)
 
+  def postFeedback(feedback: Feedback)(implicit hc: HeaderCarrier): Future[HttpResponse] =
+    feedbackConnector.postFeedback(feedback)
+
+  def getCurrentTaxCode(
+    nino:        Nino
+  )(implicit hc: HeaderCarrier,
+    ec:          ExecutionContext
+  ): Future[Option[String]] =
+    taiConnector.getTaxCodeChange(nino).map { tcChangeDetails =>
+      if (tcChangeDetails.current.size == 1) tcChangeDetails.current.headOption.map(_.taxCode) else None
+    }
+
   private def getP800Summary(
     reconciliations: Option[List[TaxYearReconciliation]],
     taxYear:         Int,
@@ -281,9 +293,6 @@ class MobilePayeService @Inject() (
       }
     } else None
   }
-
-  def postFeedback(feedback: Feedback)(implicit hc: HeaderCarrier): Future[HttpResponse] =
-    feedbackConnector.postFeedback(feedback)
 
   private def getPreviousEmployments(
     nino:        Nino,

@@ -59,6 +59,11 @@ trait MobilePayeController extends BackendBaseController with HeaderValidator wi
     journeyId: JourneyId,
     taxYear:   Int
   ): Action[AnyContent]
+
+  def getTaxCode(
+    nino:      Nino,
+    journeyId: JourneyId
+  ): Action[AnyContent]
 }
 
 @Singleton
@@ -154,6 +159,25 @@ class LiveMobilePayeController @Inject() (
                   journeyId
                 )
                 Ok(Json.toJson(mobilePayePreviousYearSummaryResponse))
+            }
+          }
+        }
+      }
+    }
+
+  override def getTaxCode(
+    nino:      Nino,
+    journeyId: JourneyId
+  ): Action[AnyContent] =
+    validateAcceptWithAuth(acceptHeaderValidationRules, Option(nino)).async { implicit request =>
+      implicit val hc: HeaderCarrier =
+        fromRequest(request).withExtraHeaders(HeaderNames.xSessionId -> journeyId.value)
+      shutteringConnector.getShutteringStatus(journeyId).flatMap { shuttered =>
+        withShuttering(shuttered) {
+          errorWrapper {
+            mobilePayeService.getCurrentTaxCode(nino).map {
+              case Some(taxCode) => Ok(Json.obj("taxCode" -> taxCode))
+              case _             => NotFound("")
             }
           }
         }
