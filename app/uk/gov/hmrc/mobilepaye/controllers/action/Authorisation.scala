@@ -28,7 +28,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mobilepaye.controllers._
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
 case class Authority(nino: Nino)
@@ -43,7 +42,11 @@ trait Authorisation extends Results with AuthorisedFunctions {
   lazy val failedToMatchNino     = new FailToMatchTaxIdOnAuth
   lazy val lowConfidenceLevel    = new AccountWithLowCL
 
-  def grantAccess(requestedNino: Nino)(implicit hc: HeaderCarrier): Future[Authority] =
+  def grantAccess(
+    requestedNino: Nino
+  )(implicit hc:   HeaderCarrier,
+    ec:            ExecutionContext
+  ): Future[Authority] =
     authorised(Enrolment("HMRC-NI", Seq(EnrolmentIdentifier("NINO", requestedNino.value)), "Activated", None))
       .retrieve(nino and confidenceLevel) {
         case Some(foundNino) ~ foundConfidenceLevel =>
@@ -56,9 +59,10 @@ trait Authorisation extends Results with AuthorisedFunctions {
       }
 
   def invokeAuthBlock[A](
-    request: Request[A],
-    block:   Request[A] => Future[Result],
-    taxId:   Option[Nino]
+    request:     Request[A],
+    block:       Request[A] => Future[Result],
+    taxId:       Option[Nino]
+  )(implicit ec: ExecutionContext
   ): Future[Result] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
@@ -91,8 +95,9 @@ trait AccessControl extends HeaderValidator with Authorisation {
   def parser: BodyParser[AnyContent]
 
   def validateAcceptWithAuth(
-    rules: Option[String] => Boolean,
-    taxId: Option[Nino]
+    rules:       Option[String] => Boolean,
+    taxId:       Option[Nino]
+  )(implicit ec: ExecutionContext
   ): ActionBuilder[Request, AnyContent] =
     new ActionBuilder[Request, AnyContent] {
 
@@ -106,8 +111,10 @@ trait AccessControl extends HeaderValidator with Authorisation {
         if (rules(request.headers.get("Accept"))) {
           if (requiresAuth) invokeAuthBlock(request, block, taxId)
           else block(request)
-        } else Future.successful(Status(ErrorAcceptHeaderInvalid.httpStatusCode)(Json.toJson[ErrorResponse](ErrorAcceptHeaderInvalid)))
+        } else
+          Future.successful(
+            Status(ErrorAcceptHeaderInvalid.httpStatusCode)(Json.toJson[ErrorResponse](ErrorAcceptHeaderInvalid))
+          )
     }
-
 
 }

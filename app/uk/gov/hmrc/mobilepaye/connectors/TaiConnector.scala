@@ -171,4 +171,15 @@ class TaiConnector @Inject() (
         case _: NotFoundException => Seq.empty[TaxCodeRecord]
         case e => throw e
       }
+
+  def getTaxCodeChange(
+    nino:        Nino
+  )(implicit hc: HeaderCarrier,
+    ex:          ExecutionContext
+  ): Future[TaxCodeChangeDetails] =
+    http
+      .GET[JsValue](url(nino, s"tax-account/tax-code-change"))
+      .map { json =>
+        (json \ "data").as[TaxCodeChangeDetails]
+      }
 }

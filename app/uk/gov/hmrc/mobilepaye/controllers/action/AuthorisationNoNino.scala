@@ -26,7 +26,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mobilepaye.controllers._
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
 trait AuthorisationNoNino extends Results with AuthorisedFunctions {
@@ -37,7 +36,10 @@ trait AuthorisationNoNino extends Results with AuthorisedFunctions {
   lazy val requiresAuth       = true
   lazy val lowConfidenceLevel = new AccountWithLowCL
 
-  def grantAccess()(implicit hc: HeaderCarrier): Future[Boolean] =
+  def grantAccess(
+  )(implicit hc: HeaderCarrier,
+    ec:          ExecutionContext
+  ): Future[Boolean] =
     authorised(CredentialStrength("strong") and ConfidenceLevel.L200)
       .retrieve(confidenceLevel) { foundConfidenceLevel =>
         if (confLevel > foundConfidenceLevel.level) throw lowConfidenceLevel
@@ -45,9 +47,10 @@ trait AuthorisationNoNino extends Results with AuthorisedFunctions {
       }
 
   def invokeAuthBlock[A](
-                          request: Request[A],
-                          block:   Request[A] => Future[Result]
-                        ): Future[Result] = {
+    request:     Request[A],
+    block:       Request[A] => Future[Result]
+  )(implicit ec: ExecutionContext
+  ): Future[Result] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
     grantAccess()
@@ -70,16 +73,19 @@ trait AccessControlNoNino extends HeaderValidator with AuthorisationNoNino {
   outer =>
   def parser: BodyParser[AnyContent]
 
-  def validateAcceptWithAuth(rules: Option[String] => Boolean): ActionBuilder[Request, AnyContent] =
+  def validateAcceptWithAuth(
+    rules:       Option[String] => Boolean
+  )(implicit ec: ExecutionContext
+  ): ActionBuilder[Request, AnyContent] =
     new ActionBuilder[Request, AnyContent] {
 
       override def parser:                     BodyParser[AnyContent] = outer.parser
       override protected def executionContext: ExecutionContext       = outer.executionContext
 
       def invokeBlock[A](
-                          request: Request[A],
-                          block:   Request[A] => Future[Result]
-                        ): Future[Result] =
+        request: Request[A],
+        block:   Request[A] => Future[Result]
+      ): Future[Result] =
         if (rules(request.headers.get("Accept"))) {
           if (requiresAuth) invokeAuthBlock(request, block)
           else block(request)
@@ -91,4 +97,3 @@ trait AccessControlNoNino extends HeaderValidator with AuthorisationNoNino {
           )
     }
 }
-

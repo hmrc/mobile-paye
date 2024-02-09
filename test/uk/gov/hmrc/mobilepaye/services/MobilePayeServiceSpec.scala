@@ -123,6 +123,12 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       .expects(*, *)
       .returning(f)
 
+  def mockGetTaxCodeChange(f: Future[TaxCodeChangeDetails]) =
+    (mockTaiConnector
+      .getTaxCodeChange(_: Nino)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *, *)
+      .returning(f)
+
   "getMobilePayeSummaryResponse" should {
     "return full MobilePayeResponse when all data is available" in {
       mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource))
@@ -517,6 +523,40 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
 
       }
 
+    }
+  }
+
+  "getCurrentTaxCode" should {
+    "return a 200 with the taxCode if a single, current tax code returned from tai" in {
+      mockGetTaxCodeChange(Future successful taxCodeChangeDetails)
+
+      val result = await(service.getCurrentTaxCode(nino))
+
+      result shouldBe Some(taxCodeRecord.taxCode)
+    }
+
+    "return a None if no tax codes returned from tai" in {
+      mockGetTaxCodeChange(Future successful TaxCodeChangeDetails(Seq.empty, Seq.empty))
+
+      val result = await(service.getCurrentTaxCode(nino))
+
+      result shouldBe None
+    }
+
+    "return a None if no current tax codes returned from tai" in {
+      mockGetTaxCodeChange(Future successful TaxCodeChangeDetails(Seq.empty, Seq(taxCodeRecord, taxCodeRecord2)))
+
+      val result = await(service.getCurrentTaxCode(nino))
+
+      result shouldBe None
+    }
+
+    "return a None if more than 1 current tax codes returned from tai" in {
+      mockGetTaxCodeChange(Future successful TaxCodeChangeDetails(Seq(taxCodeRecord, taxCodeRecord2), Seq.empty))
+
+      val result = await(service.getCurrentTaxCode(nino))
+
+      result shouldBe None
     }
   }
 

@@ -503,6 +503,49 @@ paths:
       security:
         - userRestricted:
             - read:native-apps-api-orchestration
+  /nino/{nino}/tax-code:
+    get:
+      tags:
+        - mobile-paye
+      summary: Get current tax code for given NINO
+      description: This endpoint retrieves the current tax code for a user
+      operationId: Gettaxcode
+      parameters:
+        - name: nino
+          in: path
+          description: The NINO for the individual.
+          required: true
+          style: simple
+          schema:
+            type: string
+            example: NS123456B
+        - name: journeyId
+          in: query
+          description: ''
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          headers: { }
+          content:
+            application/json:
+              schema:
+                title: TaxCodeResponse
+                properties:
+                  taxCode:
+                    type: string
+                example:
+                  taxCode: CS700100A
+        '404':
+          description: 'Returned when 0 or more than 1 current tax code found for Nino'
+      deprecated: false
+      security:
+        - userRestricted:
+            - read:native-apps-api-orchestration
 components:
   securitySchemes:
     userRestricted:

@@ -150,4 +150,11 @@ class SandboxMobilePayeController @Inject() (
       )
     }
   }
+
+  override def getTaxCode(
+    nino:      Nino,
+    journeyId: JourneyId
+  ): Action[AnyContent] = validateAccept(acceptHeaderValidationRules).async {
+    Future successful NotFound(Json.toJson("No Data found"))
+  }
 }
