@@ -24,10 +24,7 @@ import uk.gov.hmrc.auth.core.AuthorisationException
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendBaseController
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-
-case object ErrorNinoInvalid extends ErrorResponse(400, "NINO_INVALID", "The provided NINO is invalid")
+import scala.concurrent.{ExecutionContext, Future}
 
 case object ErrorUnauthorizedNoNino extends ErrorResponse(401, "UNAUTHORIZED", "NINO does not exist on account")
 
@@ -37,9 +34,7 @@ case object ErrorUnauthorizedUpstream
 case object ErrorBadRequest extends ErrorResponse(400, "BAD_REQUEST", "Invalid POST request")
 
 case object LockedUserRequest
-  extends ErrorResponse(423, "LOCKED", "Locked! User is locked due to manual correspondence indicator flag being set")
-
-case object MandatoryResponse extends ErrorResponse(500, "MANDATORY", "Mandatory data not found")
+    extends ErrorResponse(423, "LOCKED", "Locked! User is locked due to manual correspondence indicator flag being set")
 
 case object ForbiddenAccess extends ErrorResponse(403, "UNAUTHORIZED", "Access denied!")
 
@@ -53,7 +48,8 @@ class NinoNotFoundOnAccount extends GrantAccessException("Unauthorised! NINO not
 
 class AccountWithLowCL extends GrantAccessException("Unauthorised! Account with low CL!")
 
-case object ErrorTooManyRequests extends ErrorResponse(429,"TOO_MANY_REQUESTS","Too many requests made to mobile-paye please try again later")
+case object ErrorTooManyRequests
+    extends ErrorResponse(429, "TOO_MANY_REQUESTS", "Too many requests made to mobile-paye please try again later")
 
 trait ErrorHandling {
   self: BackendBaseController =>
@@ -62,7 +58,7 @@ trait ErrorHandling {
 
   def log(message: String): Unit = logger.info(s"$app $message")
 
-  def errorWrapper(func: => Future[mvc.Result]): Future[Result] =
+  def errorWrapper(func: => Future[mvc.Result])(implicit ec: ExecutionContext): Future[Result] =
     func.recover {
       case _: NotFoundException =>
         log("Resource not found!")
@@ -89,7 +85,6 @@ trait ErrorHandling {
         Unauthorized(toJson[ErrorResponse](ErrorUnauthorizedUpstream))
 
       case e: Exception =>
-
         logger.warn(s"Native Error - $app Internal server error: ${e.getMessage}", e)
         Status(ErrorInternalServerError.httpStatusCode)(toJson[ErrorResponse](ErrorInternalServerError))
     }
