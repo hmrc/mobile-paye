@@ -534,6 +534,30 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
 
       result shouldBe Some(taxCodeRecord.taxCode)
     }
+
+    "return a None if no tax codes returned from tai" in {
+      mockGetTaxCodeChange(Future successful TaxCodeChangeDetails(Seq.empty, Seq.empty))
+
+      val result = await(service.getCurrentTaxCode(nino))
+
+      result shouldBe None
+    }
+
+    "return a None if no current tax codes returned from tai" in {
+      mockGetTaxCodeChange(Future successful TaxCodeChangeDetails(Seq.empty, Seq(taxCodeRecord, taxCodeRecord2)))
+
+      val result = await(service.getCurrentTaxCode(nino))
+
+      result shouldBe None
+    }
+
+    "return a None if more than 1 current tax codes returned from tai" in {
+      mockGetTaxCodeChange(Future successful TaxCodeChangeDetails(Seq(taxCodeRecord, taxCodeRecord2), Seq.empty))
+
+      val result = await(service.getCurrentTaxCode(nino))
+
+      result shouldBe None
+    }
   }
 
 }

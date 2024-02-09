@@ -259,4 +259,21 @@ object TaiStub {
         )
     )
 
+  def stubForTaxCodeChange(
+    nino:                 String,
+    taxCodeChangeDetails: TaxCodeChangeDetails
+  ): StubMapping =
+    stubFor(
+      get(urlEqualTo(s"/tai/$nino/tax-account/tax-code-change"))
+        .willReturn(
+          aResponse()
+            .withStatus(200)
+            .withBody(s"""
+                         |{
+                         |  "data": ${Json.toJson(taxCodeChangeDetails)}
+                         |}
+          """.stripMargin)
+        )
+    )
+
 }

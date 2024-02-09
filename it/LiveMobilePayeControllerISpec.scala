@@ -13,7 +13,7 @@ import stubs.TaxCalcStub._
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, OnlinePaymentIntegration}
 import uk.gov.hmrc.mobilepaye.config.MobilePayeConfig
-import uk.gov.hmrc.mobilepaye.domain.tai.{CarBenefit, Ceased, MedicalInsurance, NotLive}
+import uk.gov.hmrc.mobilepaye.domain.tai.{CarBenefit, Ceased, MedicalInsurance, NotLive, TaxCodeChangeDetails}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status.{Overpaid, Underpaid}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus._
@@ -23,8 +23,8 @@ import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.mongo.test.PlayMongoRepositorySupport
 import uk.gov.hmrc.time.TaxYear
 import utils.BaseISpec
-import scala.language.implicitConversions
 
+import scala.language.implicitConversions
 import java.time.LocalDate
 import scala.concurrent.Future
 import scala.util.Random
@@ -46,6 +46,8 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
 
   lazy val incomeTaxHistoryUrl =
     s"/nino/$nino/income-tax-history?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0"
+
+  lazy val taxCodeUrl = s"/nino/$nino/tax-code?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0"
 
   override def beforeEach(): Unit = {
     dropCollection()
@@ -90,8 +92,9 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
               previousEmployments = Some(
                 employments.map(emp =>
                   emp.copy(
-                    status            = NotLive,
-                    incomeDetailsLink = s"/check-income-tax/your-income-calculation-details/${emp.incomeDetailsLink.last}",
+                    status = NotLive,
+                    incomeDetailsLink =
+                      s"/check-income-tax/your-income-calculation-details/${emp.incomeDetailsLink.last}",
                     yourIncomeCalculationDetailsLink =
                       s"/check-income-tax/your-income-calculation-details/${emp.incomeDetailsLink.last}",
                     updateIncomeLink = None
@@ -99,8 +102,9 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
                 ) ++
                 employments.map(emp =>
                   emp.copy(
-                    status            = NotLive,
-                    incomeDetailsLink = s"/check-income-tax/your-income-calculation-details/${emp.incomeDetailsLink.last}",
+                    status = NotLive,
+                    incomeDetailsLink =
+                      s"/check-income-tax/your-income-calculation-details/${emp.incomeDetailsLink.last}",
                     yourIncomeCalculationDetailsLink =
                       s"/check-income-tax/your-income-calculation-details/${emp.incomeDetailsLink.last}",
                     updateIncomeLink = None,
@@ -1005,6 +1009,50 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
 
       val response = await(
         wsUrl(s"/nino/$nino/previous-tax-year/$previousTaxYear/summary?journeyId=ThisIsAnInvalidJourneyId")
+          .addHttpHeaders(acceptJsonHeader)
+          .get()
+      )
+      response.status shouldBe 400
+    }
+  }
+
+  s"GET /nino/$nino/tax-code" should {
+    "return OK and a the user's current tax code" in {
+      stubForShutteringDisabled()
+      grantAccess(nino)
+      stubForTaxCodeChange(nino, taxCodeChangeDetails)
+
+      val response = await(getRequestWithAuthHeaders(taxCodeUrl))
+      response.status shouldBe 200
+      response.body shouldBe Json
+        .obj("taxCode" -> taxCodeRecord.taxCode)
+        .toString
+
+    }
+
+    "return 404 when no tax codes found" in {
+      stubForShutteringDisabled()
+      grantAccess(nino)
+      stubForTaxCodeChange(nino, TaxCodeChangeDetails(Seq.empty, Seq.empty))
+
+      val response = await(getRequestWithAuthHeaders(taxCodeUrl))
+      response.status shouldBe 404
+    }
+
+    "return 400 when no journeyId supplied" in {
+      stubForShutteringDisabled()
+      grantAccess(nino)
+
+      val response = await(wsUrl(s"/nino/$nino/tax-code").addHttpHeaders(acceptJsonHeader).get())
+      response.status shouldBe 400
+    }
+
+    "return 400 when invalid journeyId supplied" in {
+      stubForShutteringDisabled()
+      grantAccess(nino)
+
+      val response = await(
+        wsUrl(s"/nino/$nino/tax-code?journeyId=ThisIsAnInvalidJourneyId")
           .addHttpHeaders(acceptJsonHeader)
           .get()
       )

@@ -17,6 +17,7 @@
 package uk.gov.hmrc.mobilepaye.domain.tai
 
 import play.api.libs.json.{Json, OFormat}
+import scala.collection.Seq
 
 case class TaxCodeChangeDetails(
   current:  Seq[TaxCodeRecord],
