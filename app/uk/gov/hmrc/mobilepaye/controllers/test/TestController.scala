@@ -20,13 +20,14 @@ import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.mobilepaye.domain.admin.FeatureFlagName
 import uk.gov.hmrc.mobilepaye.repository.admin.AdminRepository
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendBaseController
-import scala.concurrent.ExecutionContext.Implicits.global
 
 import javax.inject.Inject
+import scala.concurrent.ExecutionContext
 
 class TestController @Inject() (
   adminRepo:                AdminRepository,
-  val controllerComponents: ControllerComponents)
+  val controllerComponents: ControllerComponents
+)(implicit ec:              ExecutionContext)
     extends BackendBaseController {
 
   def setFlag(
