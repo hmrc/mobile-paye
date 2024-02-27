@@ -18,7 +18,7 @@ package uk.gov.hmrc.mobilepaye.domain.audit
 
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.mobilepaye.domain._
-import uk.gov.hmrc.mobilepaye.domain.simpleassessment.MobileSimpleAssessmentResponse
+import uk.gov.hmrc.mobilepaye.domain.simpleassessment.{MobileSimpleAssessmentResponse, TempMobileSimpleAssessmentResponse}
 
 case class MobilePayeSummaryResponseAudit(
   taxYear:             Option[Int],
@@ -28,13 +28,13 @@ case class MobilePayeSummaryResponseAudit(
   repayment:           Option[P800Repayment],
   otherIncomes:        Option[Seq[OtherIncomeAudit]],
   taxCodeChange:       Option[TaxCodeChange],
-  simpleAssessment:    Option[MobileSimpleAssessmentResponse],
+  simpleAssessment:    Option[TempMobileSimpleAssessmentResponse],
   taxFreeAmount:       Option[BigDecimal],
   estimatedTaxAmount:  Option[BigDecimal])
 
 object MobilePayeSummaryResponseAudit {
 
-  def fromResponse(response: MobilePayeSummaryResponse): MobilePayeSummaryResponseAudit =
+  def fromResponse(response: TempMobilePayeSummaryResponse): MobilePayeSummaryResponseAudit =
     MobilePayeSummaryResponseAudit(
       taxYear             = response.taxYear,
       employments         = response.employments.map(emps => emps.map(PayeIncomeAudit.fromPayeIncome)),
