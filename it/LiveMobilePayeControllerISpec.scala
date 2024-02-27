@@ -17,7 +17,7 @@ import uk.gov.hmrc.mobilepaye.domain.tai.{CarBenefit, Ceased, MedicalInsurance, 
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status.{Overpaid, Underpaid}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus._
-import uk.gov.hmrc.mobilepaye.domain.{IncomeTaxYear, MobilePayeSummaryResponse, OtherBenefits, P800Cache, P800Repayment, Shuttering}
+import uk.gov.hmrc.mobilepaye.domain.{IncomeTaxYear, MobilePayeSummaryResponse, OtherBenefits, P800Cache, P800Repayment, Shuttering, TempMobilePayeSummaryResponse}
 import uk.gov.hmrc.mobilepaye.repository.P800CacheMongo
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.mongo.test.PlayMongoRepositorySupport
@@ -143,8 +143,8 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChangeExists(nino)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
-      response.status shouldBe 200
-      response.body   shouldBe Json.toJson(fullMobilePayeResponse).toString()
+      response.status                                 shouldBe 200
+      response.json.as[TempMobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
 
     }
 
@@ -164,9 +164,10 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
       response.status shouldBe 200
-      Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse.copy(
-        otherIncomes = Some(Seq(otherIncome))
-      )
+      response.json.as[TempMobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
+        .copy(
+          otherIncomes = Some(Seq(otherIncome))
+        )
     }
 
     "return OK and a valid MobilePayeResponse json without employments" in {
@@ -184,8 +185,8 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChangeExists(nino)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
-      response.status                                         shouldBe 200
-      Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse.copy(employments = None)
+      response.status                                 shouldBe 200
+      response.json.as[TempMobilePayeSummaryResponse] shouldBe fullMobilePayeResponse.copy(employments = None)
     }
 
     "return OK and a valid MobilePayeResponse json without pensions" in {
@@ -203,8 +204,8 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChangeExists(nino)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
-      response.status                                         shouldBe 200
-      Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse.copy(pensions = None)
+      response.status                                 shouldBe 200
+      response.json.as[TempMobilePayeSummaryResponse] shouldBe fullMobilePayeResponse.copy(pensions = None)
     }
 
     "return OK and a valid MobilePayeResponse json without otherIncomes" in {
@@ -222,8 +223,8 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChangeExists(nino)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
-      response.status                                         shouldBe 200
-      Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse.copy(otherIncomes = None)
+      response.status                                 shouldBe 200
+      response.json.as[TempMobilePayeSummaryResponse] shouldBe fullMobilePayeResponse.copy(otherIncomes = None)
     }
 
     "return GONE when person is deceased" in {
@@ -318,8 +319,8 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChangeExists(nino)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status                                         shouldBe 200
-      Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
+      response.status                                 shouldBe 200
+      response.json.as[TempMobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
     }
 
     "return OK and a valid MobilePayeResponse json without untaxed income but other income" in {
@@ -338,9 +339,10 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status shouldBe 200
-      Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse.copy(
-        otherIncomes = Some(Seq(otherIncome))
-      )
+      response.json.as[TempMobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
+        .copy(
+          otherIncomes = Some(Seq(otherIncome))
+        )
     }
 
     "return OK and a valid MobilePayeResponse json without employments" in {
@@ -358,8 +360,8 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChangeExists(nino)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status                                         shouldBe 200
-      Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse.copy(employments = None)
+      response.status                                 shouldBe 200
+      response.json.as[TempMobilePayeSummaryResponse] shouldBe fullMobilePayeResponse.copy(employments = None)
     }
 
     "return OK and a valid MobilePayeResponse json without pensions" in {
@@ -377,8 +379,8 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChangeExists(nino)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status                                         shouldBe 200
-      Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse.copy(pensions = None)
+      response.status                                 shouldBe 200
+      response.json.as[TempMobilePayeSummaryResponse] shouldBe fullMobilePayeResponse.copy(pensions = None)
     }
 
     "return OK and a valid MobilePayeResponse json without otherIncomes" in {
@@ -396,8 +398,8 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChangeExists(nino)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status                                         shouldBe 200
-      Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse.copy(otherIncomes = None)
+      response.status                                 shouldBe 200
+      response.json.as[TempMobilePayeSummaryResponse] shouldBe fullMobilePayeResponse.copy(otherIncomes = None)
     }
 
     "return OK with P800Repayments for Overpaid tax and accepted RepaymentStatus" in {
@@ -427,9 +429,10 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
 
           val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
           response.status shouldBe 200
-          response.body[JsValue].as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse.copy(
-            repayment = expectedRepayment
-          )
+          response.json.as[TempMobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
+            .copy(
+              repayment = expectedRepayment
+            )
         }
     }
 
@@ -453,8 +456,8 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
           stubForTaxCodeChangeExists(nino)
 
           val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-          response.status                                      shouldBe 200
-          response.body[JsValue].as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
+          response.status                                 shouldBe 200
+          response.json.as[TempMobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
         }
     }
 
@@ -478,8 +481,8 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
           stubForTaxCodeChangeExists(nino)
 
           val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-          response.status                                      shouldBe 200
-          response.body[JsValue].as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
+          response.status                                 shouldBe 200
+          response.json.as[TempMobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
         }
     }
 
@@ -635,8 +638,8 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChangeExists(nino)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status                                         shouldBe 200
-      Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
+      response.status                                 shouldBe 200
+      response.json.as[TempMobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
     }
 
     "return OK and no P800 when datePaid is more than 6 weeks ago" in {
@@ -654,8 +657,8 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChangeExists(nino)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status                                         shouldBe 200
-      Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
+      response.status                                 shouldBe 200
+      response.json.as[TempMobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
     }
 
     "return OK and a P800 when datePaid is less than 6 weeks ago" in {
@@ -725,8 +728,8 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChangeExists(nino)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status                                         shouldBe 200
-      Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
+      response.status                                 shouldBe 200
+      response.json.as[TempMobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
     }
 
     "return OK and no P800 when type is not overpaid" in {
@@ -744,8 +747,8 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChangeExists(nino)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status                                         shouldBe 200
-      Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
+      response.status                                 shouldBe 200
+      response.json.as[TempMobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
     }
 
     "return OK and no P800 when status is sa_user" in {
@@ -763,8 +766,8 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChangeExists(nino)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status                                         shouldBe 200
-      Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
+      response.status                                 shouldBe 200
+      response.json.as[TempMobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
     }
 
     "return OK and no P800 when status is unable_to_claim" in {
@@ -782,8 +785,8 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChangeExists(nino)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status                                         shouldBe 200
-      Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
+      response.status                                 shouldBe 200
+      response.json.as[TempMobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
     }
 
     "return OK and a P800 with link when status is refund" in {
@@ -863,10 +866,8 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
 
-      response.status shouldBe 200
-      response.body shouldBe Json
-        .toJson(fullMobilePayeResponse)
-        .toString()
+      response.status                                 shouldBe 200
+      response.json.as[TempMobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
 
     }
   }
@@ -1136,8 +1137,8 @@ class LiveMobilePayeControllerp800CacheEnabledISpec
           s"/nino/$nino/tax-year/current/summary?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0"
         )
       )
-      response.status                                         shouldBe 200
-      Json.parse(response.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
+      response.status                                             shouldBe 200
+      Json.parse(response.body).as[TempMobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
 
       Thread.sleep(2000)
 
@@ -1146,8 +1147,8 @@ class LiveMobilePayeControllerp800CacheEnabledISpec
           s"/nino/$nino/tax-year/current/summary?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0"
         )
       )
-      response2.status                                         shouldBe 200
-      Json.parse(response2.body).as[MobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
+      response2.status                                             shouldBe 200
+      Json.parse(response2.body).as[TempMobilePayeSummaryResponse] shouldBe fullMobilePayeResponse
 
       dropCollection()
     }

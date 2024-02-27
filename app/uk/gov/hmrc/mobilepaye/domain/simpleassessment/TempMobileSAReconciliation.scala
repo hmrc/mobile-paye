@@ -17,7 +17,8 @@
 package uk.gov.hmrc.mobilepaye.domain.simpleassessment
 
 import play.api.libs.json.{Format, Json}
-case class TempSandboxMobileSAReconciliation(
+
+case class TempMobileSAReconciliation(
   reconciliationId:         Int,
   reconciliationStatus:     Option[Int] = None,
   cumulativeAmount:         Double,
@@ -29,7 +30,7 @@ case class TempSandboxMobileSAReconciliation(
   previousReconciliationId: Option[Int] = None,
   nextReconciliationId:     Option[Int] = None,
   multiYearRecIndicator:    Option[Boolean] = None,
-  p800Reasons:              Option[List[TempSandboxReason]] = None,
+  p800Reasons:              Option[List[TempReason]] = None,
   businessReason:           String,
   eligibility:              Boolean,
   totalAmountOwed:          Double,
@@ -39,17 +40,17 @@ case class TempSandboxMobileSAReconciliation(
   receivableStatus:         String,
   receipts:                 Option[List[Receipts]] = None)
 
-object TempSandboxMobileSAReconciliation {
+object TempMobileSAReconciliation {
 
-  implicit val formats: Format[TempSandboxMobileSAReconciliation] = Json.format[TempSandboxMobileSAReconciliation]
+  implicit val formats: Format[TempMobileSAReconciliation] = Json.format[TempMobileSAReconciliation]
 }
 
-case class TempSandboxReason(
+case class TempReason(
   reasonType:      Int,
   reasonCode:      Int,
   estimatedAmount: Option[Double] = None,
   actualAmount:    Option[Double] = None)
 
-object TempSandboxReason {
-  implicit val formats: Format[TempSandboxReason] = Json.format[TempSandboxReason]
+object TempReason {
+  implicit val formats: Format[TempReason] = Json.format[TempReason]
 }

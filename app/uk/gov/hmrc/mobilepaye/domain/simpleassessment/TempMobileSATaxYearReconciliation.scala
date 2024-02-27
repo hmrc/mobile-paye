@@ -18,13 +18,13 @@ package uk.gov.hmrc.mobilepaye.domain.simpleassessment
 
 import play.api.libs.json.{Json, OFormat}
 
-case class TempSandboxMobileSATaxYearReconciliation(
+case class TempMobileSATaxYearReconciliation(
   taxYear:                Int,
-  reconciliations:        List[TempSandboxMobileSAReconciliation],
+  reconciliations:        List[TempMobileSAReconciliation],
   cardPaymentFallbackUrl: String)
 
-object TempSandboxMobileSATaxYearReconciliation {
+object TempMobileSATaxYearReconciliation {
 
-  implicit val format: OFormat[TempSandboxMobileSATaxYearReconciliation] =
-    Json.format[TempSandboxMobileSATaxYearReconciliation]
+  implicit val format: OFormat[TempMobileSATaxYearReconciliation] =
+    Json.format[TempMobileSATaxYearReconciliation]
 }
