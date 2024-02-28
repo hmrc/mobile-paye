@@ -25,7 +25,6 @@ import uk.gov.hmrc.mobilepaye.controllers.api.ApiAccess
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.http.HttpClient
-import uk.gov.hmrc.mobilepaye.repository.RunOnStartup
 
 import scala.jdk.CollectionConverters._
 
@@ -44,7 +43,6 @@ class GuiceModule(
     bind(classOf[CoreGet]).to(classOf[WSHttpImpl])
     bind(classOf[CorePost]).to(classOf[WSHttpImpl])
     bind(classOf[HttpClient]).to(classOf[WSHttpImpl])
-    bind(classOf[RunOnStartup]).asEagerSingleton()
 
     bindConfigInt("controllers.confidenceLevel")
     bind(classOf[ApiAccess]).toInstance(
