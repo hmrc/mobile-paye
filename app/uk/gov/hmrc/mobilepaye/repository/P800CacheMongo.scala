@@ -68,6 +68,4 @@ class P800CacheMongo @Inject() (
 
   def selectByNino(nino: Nino): Future[Seq[P800Cache]] =
     collection.find(equal("nino", nino.nino)).toFuture()
-
-  def deleteCacheRecords(): Future[DeleteResult] = collection.deleteMany(filter = Document()).toFuture
 }
