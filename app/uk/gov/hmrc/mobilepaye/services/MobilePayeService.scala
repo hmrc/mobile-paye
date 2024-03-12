@@ -21,12 +21,12 @@ import play.api.Logger
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.mobilepaye.connectors.{FeedbackConnector, MobileSimpleAssessmentConnector, ShutteringConnector, TaiConnector, TaxCalcConnector}
-import uk.gov.hmrc.mobilepaye.domain.simpleassessment.{MobileSimpleAssessmentResponse, TempMobileSimpleAssessmentResponse}
+import uk.gov.hmrc.mobilepaye.domain.simpleassessment.MobileSimpleAssessmentResponse
 import uk.gov.hmrc.mobilepaye.domain.tai._
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status.{NotSupported, Overpaid, Underpaid}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.{P800Summary, TaxYearReconciliation}
 import uk.gov.hmrc.mobilepaye.domain.types.ModelTypes.JourneyId
-import uk.gov.hmrc.mobilepaye.domain.{Feedback, IncomeSource, MobilePayeSummaryResponse, OtherIncome, P800Cache, P800Repayment, PayeIncome, TaxCodeChange, TempMobilePayeSummaryResponse}
+import uk.gov.hmrc.mobilepaye.domain.{Feedback, IncomeSource, MobilePayeSummaryResponse, OtherIncome, P800Cache, P800Repayment, PayeIncome, TaxCodeChange}
 import uk.gov.hmrc.mobilepaye.repository.P800CacheMongo
 
 import java.time.{LocalDateTime, ZoneId}
@@ -63,7 +63,7 @@ class MobilePayeService @Inject() (
     journeyId:   JourneyId
   )(implicit hc: HeaderCarrier,
     ec:          ExecutionContext
-  ): Future[TempMobilePayeSummaryResponse] =
+  ): Future[MobilePayeSummaryResponse] =
     (for {
       taxCodeIncomesEmployment <- taiConnector
                                    .getMatchingTaxCodeIncomes(nino, taxYear, EmploymentIncome.toString, Live.toString)
@@ -81,7 +81,7 @@ class MobilePayeService @Inject() (
                             else Future successful false
       simpleAssessment <- getSimpleAssessmentData(journeyId, reconciliations)
       p800Summary      <- getP800Summary(reconciliations, taxYear, journeyId)
-      mobilePayeResponse: TempMobilePayeSummaryResponse = buildMobilePayeResponse(
+      mobilePayeResponse: MobilePayeSummaryResponse = buildMobilePayeResponse(
         taxYear,
         taxCodeIncomesEmployment,
         previousEmployments,
@@ -97,7 +97,7 @@ class MobilePayeService @Inject() (
       if (cy1InfoAvailable) mobilePayeResponse.copy(taxCodeLocation = getTaxCodeLocation(taxCodeIncomesEmployment))
       else mobilePayeResponse.copy(currentYearPlusOneLink           = None)
     }) recover {
-      case ex if knownException(ex, nino) => TempMobilePayeSummaryResponse.empty
+      case ex if knownException(ex, nino) => MobilePayeSummaryResponse.empty
       case ex                             => throw ex
     }
 
@@ -199,8 +199,8 @@ class MobilePayeService @Inject() (
     p800Summary:            Option[P800Summary],
     employmentBenefits:     Benefits,
     taxCodeChange:          Option[TaxCodeChange],
-    simpleAssessment:       Option[TempMobileSimpleAssessmentResponse]
-  ): TempMobilePayeSummaryResponse = {
+    simpleAssessment:       Option[MobileSimpleAssessmentResponse]
+  ): MobilePayeSummaryResponse = {
 
     logger.info(s"Number of employments received from TAI for tax year $taxYear: ${incomeSourceEmployment.size}")
     logger.info(s"Number of previous employments received from TAI for tax year $taxYear: ${previousEmployments.size}")
@@ -235,7 +235,7 @@ class MobilePayeService @Inject() (
       s"Number of previous employments sent to ap for tax year $taxYear: ${previousEmploymentPayeIncomes.size}"
     )
 
-    TempMobilePayeSummaryResponse(
+    MobilePayeSummaryResponse(
       taxYear             = Some(taxYear),
       employments         = employmentPayeIncomes,
       previousEmployments = previousEmploymentPayeIncomes,
@@ -309,7 +309,7 @@ class MobilePayeService @Inject() (
     journeyId:       JourneyId,
     reconciliations: Option[List[TaxYearReconciliation]]
   )(implicit hc:     HeaderCarrier
-  ): Future[Option[TempMobileSimpleAssessmentResponse]] = {
+  ): Future[Option[MobileSimpleAssessmentResponse]] = {
     val underpaidRecs = reconciliations
       .map(taxYearReconList => taxYearReconList.filter(_.reconciliation._type == Underpaid))
       .getOrElse(List.empty)
