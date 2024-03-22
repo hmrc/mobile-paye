@@ -19,10 +19,10 @@ package uk.gov.hmrc.mobilepaye.connectors
 import play.api.Logger
 import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.mobilepaye.domain.admin.OnlinePaymentIntegration
-import uk.gov.hmrc.mobilepaye.domain.simpleassessment.{MobileSimpleAssessmentResponse, TempMobileSimpleAssessmentResponse}
 import uk.gov.hmrc.mobilepaye.domain.types.ModelTypes.JourneyId
 import uk.gov.hmrc.mobilepaye.services.admin.FeatureFlagService
 import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.mobilepaye.domain.simpleassessment.MobileSimpleAssessmentResponse
 
 import javax.inject.{Inject, Named}
 import scala.concurrent.{ExecutionContext, Future}
@@ -38,11 +38,11 @@ case class MobileSimpleAssessmentConnector @Inject() (
   def getSimpleAssessmentLiabilities(
     journeyId:   JourneyId
   )(implicit hc: HeaderCarrier
-  ): Future[Option[TempMobileSimpleAssessmentResponse]] = {
+  ): Future[Option[MobileSimpleAssessmentResponse]] = {
     val url = baseUrl + s"/liabilities?journeyId=$journeyId"
     featureFlagService.get(OnlinePaymentIntegration) flatMap { onlinePaymentIntegration =>
       if (onlinePaymentIntegration.isEnabled) {
-        httpGet.GET[Option[TempMobileSimpleAssessmentResponse]](url).recover {
+        httpGet.GET[Option[MobileSimpleAssessmentResponse]](url).recover {
           case _: NotFoundException => None
           case e: Throwable => {
             logger.warn(s"Call to mobile-simple-assessment failed. Reason: ${e.getCause} ${e.getMessage}")

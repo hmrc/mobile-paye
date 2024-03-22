@@ -20,7 +20,7 @@ import play.api.libs.json.{Json, OFormat}
 
 case class MobileSATaxYearReconciliation(
   taxYear:                Int,
-  reconciliations:        List[TempMobileSAReconciliation],
+  reconciliations:        List[MobileSAReconciliation],
   cardPaymentFallbackUrl: String)
 
 object MobileSATaxYearReconciliation {

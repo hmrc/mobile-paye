@@ -28,7 +28,7 @@ import uk.gov.hmrc.http._
 import uk.gov.hmrc.mobilepaye.controllers.BadRequestException
 import uk.gov.hmrc.mobilepaye.connectors.ShutteringConnector
 import uk.gov.hmrc.mobilepaye.domain.tai.Person
-import uk.gov.hmrc.mobilepaye.domain.{IncomeTaxYear, MobilePayePreviousYearSummaryResponse, MobilePayeSummaryResponse, Shuttering, TempMobilePayeSummaryResponse}
+import uk.gov.hmrc.mobilepaye.domain.{IncomeTaxYear, MobilePayePreviousYearSummaryResponse, MobilePayeSummaryResponse, Shuttering}
 import uk.gov.hmrc.mobilepaye.services.{IncomeTaxHistoryService, MobilePayeService, PreviousYearSummaryService}
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
@@ -65,7 +65,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       mockPreviousYearSummaryService
     )
 
-  def mockGetMobilePayeResponse(f: Future[TempMobilePayeSummaryResponse]) =
+  def mockGetMobilePayeResponse(f: Future[MobilePayeSummaryResponse]) =
     (mockMobilePayeService
       .getMobilePayeSummaryResponse(_: Nino, _: Int, _: JourneyId)(_: HeaderCarrier, _: ExecutionContext))
       .expects(*, *, *, *, *)

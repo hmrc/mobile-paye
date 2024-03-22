@@ -19,8 +19,8 @@ package uk.gov.hmrc.mobilepaye.services
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, HttpResponse, InternalServerException, UnauthorizedException}
 import uk.gov.hmrc.mobilepaye.connectors.{FeedbackConnector, MobileSimpleAssessmentConnector, ShutteringConnector, TaiConnector, TaxCalcConnector}
-import uk.gov.hmrc.mobilepaye.domain.simpleassessment.{MobileSimpleAssessmentResponse, TempMobileSimpleAssessmentResponse}
-import uk.gov.hmrc.mobilepaye.domain.{Feedback, IncomeSource, MobilePayeSummaryResponse, OtherBenefits, P800Cache, Shuttering, TaxCodeChange, TempMobilePayeSummaryResponse}
+import uk.gov.hmrc.mobilepaye.domain.simpleassessment.MobileSimpleAssessmentResponse
+import uk.gov.hmrc.mobilepaye.domain.{Feedback, IncomeSource, MobilePayeSummaryResponse, OtherBenefits, P800Cache, Shuttering, TaxCodeChange}
 import uk.gov.hmrc.mobilepaye.domain.tai._
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.TaxYearReconciliation
 import uk.gov.hmrc.mobilepaye.domain.types.ModelTypes.JourneyId
@@ -117,7 +117,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
       .expects(*, *, *)
       .returning(f)
 
-  def mockGetSimpleAssessmentLiabilities(f: Future[Option[TempMobileSimpleAssessmentResponse]]) =
+  def mockGetSimpleAssessmentLiabilities(f: Future[Option[MobileSimpleAssessmentResponse]]) =
     (mockMobileSimpleAssessmentConnector
       .getSimpleAssessmentLiabilities(_: JourneyId)(_: HeaderCarrier))
       .expects(*, *)
@@ -468,7 +468,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
 
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
-      result shouldBe TempMobilePayeSummaryResponse.empty
+      result shouldBe MobilePayeSummaryResponse.empty
     }
 
     "return an empty MobilePayeResponse when an exception is thrown from NPS that contains 'cannot complete a coding calculation without a primary employment'" in {
@@ -478,7 +478,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
 
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
-      result shouldBe TempMobilePayeSummaryResponse.empty
+      result shouldBe MobilePayeSummaryResponse.empty
     }
 
     "return an empty MobilePayeResponse when an exception is thrown from NPS that contains 'no employments recorded for this individual'" in {
@@ -486,7 +486,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
 
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
-      result shouldBe TempMobilePayeSummaryResponse.empty
+      result shouldBe MobilePayeSummaryResponse.empty
     }
 
     "return full MobilePayeResponse without repayment data when p800 is shuttered" in {

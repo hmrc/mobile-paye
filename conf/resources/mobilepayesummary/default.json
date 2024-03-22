@@ -170,19 +170,19 @@
             "taxLiabilityAmount": 3760,
             "taxPaidAmount": 1210,
             "reconciliationTimeStamp": "2023-07-30 12:34:56",
-            "p800Status": 9,
+            "p800Status": "ISSUED",
             "collectionMethod": 31,
             "previousReconciliationId": 1,
             "multiYearRecIndicator": false,
             "p800Reasons": [
               {
-                "reasonType": 2,
+                "reasonType": "UNDERPAYMENT",
                 "reasonCode": 1,
                 "estimatedAmount": 1250,
                 "actualAmount": 3400
               },
               {
-                "reasonType": 2,
+                "reasonType": "UNDERPAYMENT",
                 "reasonCode": 2,
                 "estimatedAmount": 300,
                 "actualAmount": 700
