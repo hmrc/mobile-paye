@@ -21,9 +21,8 @@ import play.api.libs.json.{JsObject, Json}
 import java.time.LocalDate
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mobilepaye.domain.audit.{MobilePayeSummaryResponseAudit, OtherIncomeAudit, PayeIncomeAudit}
-import uk.gov.hmrc.mobilepaye.domain.simpleassessment.ReasonType.UNDERPAYMENT
-import uk.gov.hmrc.mobilepaye.domain.simpleassessment.{MobileSAReconciliation, MobileSATaxYearReconciliation, MobileSimpleAssessmentResponse, Reason, Receipts, TempMobileSAReconciliation, TempMobileSATaxYearReconciliation, TempMobileSimpleAssessmentResponse, TempReason}
-import uk.gov.hmrc.mobilepaye.domain.{Feedback, HistoricTaxCodeIncome, IncomeSource, IncomeTaxYear, MobilePayePreviousYearSummaryResponse, MobilePayeSummaryResponse, OtherIncome, P800Repayment, PayeIncome, TaxCodeChange, TempMobilePayeSummaryResponse}
+import uk.gov.hmrc.mobilepaye.domain.simpleassessment.{Receipts, TempMobileSAReconciliation, TempMobileSATaxYearReconciliation, TempMobileSimpleAssessmentResponse, TempReason}
+import uk.gov.hmrc.mobilepaye.domain.{Feedback, HistoricTaxCodeIncome, IncomeSource, IncomeTaxYear, MobilePayePreviousYearSummaryResponse, OtherIncome, P800Repayment, PayeIncome, TaxCodeChange, TempMobilePayeSummaryResponse}
 import uk.gov.hmrc.mobilepaye.domain.tai._
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status.{NotSupported, Underpaid}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus.{ChequeSent, PaymentDue, PaymentPaid, SaUser}

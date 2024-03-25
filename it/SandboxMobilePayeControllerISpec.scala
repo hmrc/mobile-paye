@@ -5,6 +5,8 @@ import uk.gov.hmrc.mobilepaye.domain.{HistoricTaxCodeIncome, MobilePayeSummaryRe
 import uk.gov.hmrc.time.TaxYear
 import utils.BaseISpec
 
+import java.time.LocalDate
+
 class SandboxMobilePayeControllerISpec extends BaseISpec {
 
   private val mobileHeader = "X-MOBILE-USER-ID" -> "208606423740"
@@ -16,9 +18,15 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
 
     "return OK and default paye data with no SANDBOX-CONTROL" in {
       val response = await(request.addHttpHeaders(mobileHeader).get())
-      response.status                                              shouldBe 200
-      (response.json \ "taxYear").as[Int]                          shouldBe TaxYear.current.currentYear
-      (response.json \\ "employments").isEmpty                     shouldBe false
+      response.status                          shouldBe 200
+      (response.json \ "taxYear").as[Int]      shouldBe TaxYear.current.currentYear
+      (response.json \\ "employments").isEmpty shouldBe false
+      (response.json \ "employments" \ 0 \ "payments" \ 0 \ "date")
+        .as[String] shouldBe LocalDate.now().plusDays(2).toString
+      (response.json \ "employments" \ 0 \ "payments" \ 1 \ "date")
+        .as[String] shouldBe LocalDate.now().minusDays(30).toString
+      (response.json \ "employments" \ 0 \ "payments" \ 2 \ "date")
+        .as[String]                                                shouldBe LocalDate.now().minusDays(60).toString
       (response.json \\ "repayment").isEmpty                       shouldBe false
       (response.json \\ "pensions").isEmpty                        shouldBe false
       (response.json \\ "otherIncomes").isEmpty                    shouldBe false
