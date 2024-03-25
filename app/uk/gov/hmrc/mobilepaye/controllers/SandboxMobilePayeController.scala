@@ -103,7 +103,9 @@ class SandboxMobilePayeController @Inject() (
             .getOrElse(throw new IllegalArgumentException("Resource not found!"))
             .replace("<TAX_YEAR>", TaxYear.current.currentYear.toString)
             .replace("<PREVIOUS_TAX_YEAR>", (TaxYear.current.currentYear - 1).toString)
-            .replace("<PAYMENT_DATE>", LocalDate.now().plusDays(2).toString)
+            .replace("<PAYMENT_DATE1>", LocalDate.now().plusDays(2).toString)
+            .replace("<PAYMENT_DATE2>", LocalDate.now().minusDays(30).toString)
+            .replace("<PAYMENT_DATE3>", LocalDate.now().minusDays(60).toString)
         )
         .as[TempMobilePayeSummaryResponse]
     )
