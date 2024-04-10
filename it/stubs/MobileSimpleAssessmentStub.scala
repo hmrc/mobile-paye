@@ -32,11 +32,11 @@ object MobileSimpleAssessmentStub {
                        |          "taxLiabilityAmount": 300,
                        |          "taxPaidAmount": 100,
                        |          "reconciliationTimeStamp": "$previousTaxYear-07-30 12:34:56",
-                       |          "p800Status": 2,
+                       |          "p800Status": "ISSUED",
                        |          "previousReconciliationId": 2,
                        |          "p800Reasons": [
                        |            {
-                       |              "reasonType": 9,
+                       |              "reasonType": "UNDERPAYMENT",
                        |              "reasonCode": 45,
                        |              "estimatedAmount": 175,
                        |              "actualAmount": 185
@@ -72,10 +72,10 @@ object MobileSimpleAssessmentStub {
                      |          "taxLiabilityAmount": 200,
                      |          "taxPaidAmount": 50,
                      |          "reconciliationTimeStamp": "${previousTaxYear-1}-07-30 12:34:56",
-                     |          "p800Status": 2,
+                     |          "p800Status": "ISSUED",
                      |          "p800Reasons": [
                      |            {
-                     |              "reasonType": 9,
+                     |              "reasonType": "UNDERPAYMENT",
                      |              "reasonCode": 45,
                      |              "estimatedAmount": 175,
                      |              "actualAmount": 185

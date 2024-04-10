@@ -107,7 +107,7 @@ class SandboxMobilePayeController @Inject() (
             .replace("<PAYMENT_DATE2>", LocalDate.now().minusDays(30).toString)
             .replace("<PAYMENT_DATE3>", LocalDate.now().minusDays(60).toString)
         )
-        .as[TempMobilePayeSummaryResponse]
+        .as[MobilePayeSummaryResponse]
     )
 
   override def getPreviousYearPayeSummary(

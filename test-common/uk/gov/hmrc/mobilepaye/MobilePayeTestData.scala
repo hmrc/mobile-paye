@@ -21,8 +21,9 @@ import play.api.libs.json.{JsObject, Json}
 import java.time.LocalDate
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mobilepaye.domain.audit.{MobilePayeSummaryResponseAudit, OtherIncomeAudit, PayeIncomeAudit}
-import uk.gov.hmrc.mobilepaye.domain.simpleassessment.{Receipts, TempMobileSAReconciliation, TempMobileSATaxYearReconciliation, TempMobileSimpleAssessmentResponse, TempReason}
-import uk.gov.hmrc.mobilepaye.domain.{Feedback, HistoricTaxCodeIncome, IncomeSource, IncomeTaxYear, MobilePayePreviousYearSummaryResponse, OtherIncome, P800Repayment, PayeIncome, TaxCodeChange, TempMobilePayeSummaryResponse}
+import uk.gov.hmrc.mobilepaye.domain.simpleassessment.ReasonType.UNDERPAYMENT
+import uk.gov.hmrc.mobilepaye.domain.simpleassessment.{MobileSAReconciliation, MobileSATaxYearReconciliation, MobileSimpleAssessmentResponse, Reason, Receipts}
+import uk.gov.hmrc.mobilepaye.domain.{Feedback, HistoricTaxCodeIncome, IncomeSource, IncomeTaxYear, MobilePayePreviousYearSummaryResponse, MobilePayeSummaryResponse, OtherIncome, P800Repayment, PayeIncome, TaxCodeChange}
 import uk.gov.hmrc.mobilepaye.domain.tai._
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status.{NotSupported, Underpaid}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus.{ChequeSent, PaymentDue, PaymentPaid, SaUser}
@@ -177,26 +178,29 @@ trait MobilePayeTestData {
 
   val otherIncomes: Seq[OtherIncome] = Seq(otherIncome)
 
-  val fullMobileSimpleAssessmentResponse: TempMobileSimpleAssessmentResponse = TempMobileSimpleAssessmentResponse(
+  val fullMobileSimpleAssessmentResponse: MobileSimpleAssessmentResponse = MobileSimpleAssessmentResponse(
     List(
-      TempMobileSATaxYearReconciliation(
+      MobileSATaxYearReconciliation(
         taxYear = previousTaxYear,
         reconciliations = List(
-          TempMobileSAReconciliation(
+          MobileSAReconciliation(
             reconciliationId         = 1,
             reconciliationStatus     = Some(5),
             cumulativeAmount         = 200,
             taxLiabilityAmount       = 300,
             taxPaidAmount            = 100,
             reconciliationTimeStamp  = Some(s"$previousTaxYear-07-30 12:34:56"),
-            p800Status               = Some(2),
+            p800Status               = Some("ISSUED"),
             collectionMethod         = None,
             previousReconciliationId = Some(2),
             nextReconciliationId     = None,
             multiYearRecIndicator    = None,
             p800Reasons = Some(
               List(
-                TempReason(reasonType = 9, reasonCode = 45, estimatedAmount = Some(175), actualAmount = Some(185))
+                Reason(reasonType      = UNDERPAYMENT,
+                       reasonCode      = 45,
+                       estimatedAmount = Some(175),
+                       actualAmount    = Some(185))
               )
             ),
             businessReason   = "P302",
@@ -224,24 +228,27 @@ trait MobilePayeTestData {
         ),
         cardPaymentFallbackUrl = s"/tax-you-paid/$previousTaxYear-$currentTaxYear/paid-too-little"
       ),
-      TempMobileSATaxYearReconciliation(
+      MobileSATaxYearReconciliation(
         taxYear = previousTaxYear - 1,
         reconciliations = List(
-          TempMobileSAReconciliation(
+          MobileSAReconciliation(
             reconciliationId         = 2,
             reconciliationStatus     = Some(5),
             cumulativeAmount         = 100,
             taxLiabilityAmount       = 200,
             taxPaidAmount            = 50,
             reconciliationTimeStamp  = Some(s"${previousTaxYear - 1}-07-30 12:34:56"),
-            p800Status               = Some(2),
+            p800Status               = Some("ISSUED"),
             collectionMethod         = None,
             previousReconciliationId = None,
             nextReconciliationId     = None,
             multiYearRecIndicator    = None,
             p800Reasons = Some(
               List(
-                TempReason(reasonType = 9, reasonCode = 45, estimatedAmount = Some(175), actualAmount = Some(185))
+                Reason(reasonType      = UNDERPAYMENT,
+                       reasonCode      = 45,
+                       estimatedAmount = Some(175),
+                       actualAmount    = Some(185))
               )
             ),
             businessReason   = "P302",
@@ -284,7 +291,7 @@ trait MobilePayeTestData {
     )
   }
 
-  val fullMobilePayeResponse: TempMobilePayeSummaryResponse = TempMobilePayeSummaryResponse(
+  val fullMobilePayeResponse: MobilePayeSummaryResponse = MobilePayeSummaryResponse(
     taxYear                = Some(TaxYear.current.currentYear),
     employments            = Some(employments),
     previousEmployments    = None,
@@ -299,7 +306,7 @@ trait MobilePayeTestData {
     currentYearPlusOneLink = None
   )
 
-  val fullMobilePayeResponseWithCY1Link: TempMobilePayeSummaryResponse = TempMobilePayeSummaryResponse(
+  val fullMobilePayeResponseWithCY1Link: MobilePayeSummaryResponse = MobilePayeSummaryResponse(
     taxYear             = Some(TaxYear.current.currentYear),
     employments         = Some(employments),
     previousEmployments = None,
