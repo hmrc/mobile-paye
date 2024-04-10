@@ -14,7 +14,7 @@
       "updateEmployerLink": "/",
       "payments": [
         {
-          "date": "2021-07-28",
+          "date": "<PAYMENT_DATE1>",
           "amountYearToDate": 4636,
           "taxAmountYearToDate": 865,
           "nationalInsuranceAmountYearToDate": 468,
@@ -23,7 +23,7 @@
           "nationalInsuranceAmount": 195
         },
         {
-          "date": "2021-06-28",
+          "date": "<PAYMENT_DATE2>",
           "amountYearToDate": 3036,
           "taxAmountYearToDate": 545,
           "nationalInsuranceAmountYearToDate": 273,
@@ -32,7 +32,7 @@
           "nationalInsuranceAmount": 146
         },
         {
-          "date": "2021-05-28",
+          "date": "<PAYMENT_DATE3>",
           "amountYearToDate": 1470,
           "taxAmountYearToDate": 256,
           "nationalInsuranceAmountYearToDate": 127,
