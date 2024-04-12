@@ -101,13 +101,14 @@ class PreviousYearSummaryService @Inject() (
     )
 
     MobilePayePreviousYearSummaryResponse(
-      taxYear             = Some(taxYear),
-      employments         = buildPayeIncomes(liveEmployments, taxCodes, Some(employmentBenefits), taxYear),
-      previousEmployments = buildPayeIncomes(notLiveEmployments, taxCodes, Some(employmentBenefits), taxYear),
-      pensions            = buildPayeIncomes(pensions, taxCodes, None, taxYear),
-      otherIncomes        = otherNonTaxCodeIncomes,
-      taxFreeAmount       = taxFreeAmount,
-      estimatedTaxAmount  = estimatedTaxAmount
+      taxYear                = Some(taxYear),
+      employments            = buildPayeIncomes(liveEmployments, taxCodes, Some(employmentBenefits), taxYear),
+      previousEmployments    = buildPayeIncomes(notLiveEmployments, taxCodes, Some(employmentBenefits), taxYear),
+      pensions               = buildPayeIncomes(pensions, taxCodes, None, taxYear),
+      otherIncomes           = otherNonTaxCodeIncomes,
+      taxFreeAmount          = taxFreeAmount,
+      estimatedTaxAmount     = estimatedTaxAmount,
+      payeSomethingWrongLink = s"/check-income-tax/update-income-details/decision/$taxYear"
     )
   }
 

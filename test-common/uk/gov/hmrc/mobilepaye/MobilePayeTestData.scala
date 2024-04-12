@@ -413,9 +413,10 @@ trait MobilePayeTestData {
                                     taxYear)
         )
       ),
-      otherIncomes       = Some(otherIncomes),
-      taxFreeAmount      = Some(10000),
-      estimatedTaxAmount = Some(250)
+      otherIncomes           = Some(otherIncomes),
+      taxFreeAmount          = Some(10000),
+      estimatedTaxAmount     = Some(250),
+      payeSomethingWrongLink = s"/check-income-tax/update-income-details/decision/$taxYear"
     )
 
   def fullMobilePayePYAudit(taxYear: Int = previousTaxYear): MobilePayeSummaryResponseAudit =
