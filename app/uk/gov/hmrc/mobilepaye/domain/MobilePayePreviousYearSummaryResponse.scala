@@ -26,7 +26,8 @@ case class MobilePayePreviousYearSummaryResponse(
   otherIncomes:              Option[Seq[OtherIncome]],
   taxFreeAmount:             Option[BigDecimal],
   estimatedTaxAmount:        Option[BigDecimal],
-  understandYourTaxCodeLink: String = "/check-income-tax/tax-codes")
+  understandYourTaxCodeLink: String = "/check-income-tax/tax-codes",
+  payeSomethingWrongLink:    String)
 
 object MobilePayePreviousYearSummaryResponse {
 

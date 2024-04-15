@@ -329,6 +329,8 @@ paths:
                           incomeDetailsLink: /check-income-tax/income/bank-building-society-savings
                       taxFreeAmount: 11850
                       estimatedTaxAmount: 618
+                      understandYourTaxCodeLink: /check-income-tax/tax-codes
+                      payeSomethingWrongLink: /check-income-tax/update-income-details/decision/2018
               examples:
                 example-1:
                   value:
@@ -392,6 +394,8 @@ paths:
                         incomeDetailsLink: /check-income-tax/income/bank-building-society-savings
                     taxFreeAmount: 11850
                     estimatedTaxAmount: 618
+                    understandYourTaxCodeLink: /check-income-tax/tax-codes
+                    payeSomethingWrongLink: /check-income-tax/update-income-details/decision/2018
       deprecated: false
       security:
         - userRestricted:
@@ -912,7 +916,8 @@ components:
             incomeDetailsLink: /check-income-tax/income/bank-building-society-savings
         taxFreeAmount: 11850
         estimatedTaxAmount: 618
-        understandYourTaxCodeLink: /check-income-tax/tax-codes
+        understandYourTaxCodeLink: /check-income-tax/tax-codes,
+        payeSomethingWrongLink: /check-income-tax/update-income-details/decision/2018
     OtherIncome:
       title: OtherIncome
       required:

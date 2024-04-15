@@ -122,5 +122,6 @@
   ],
   "taxFreeAmount": 0,
   "estimatedTaxAmount": 0,
-  "understandYourTaxCodeLink": "/"
+  "understandYourTaxCodeLink": "/",
+  "payeSomethingWrongLink": "/"
 }

@@ -249,7 +249,8 @@ Fetch the MobilePayeResponse object.
   ],
   "taxFreeAmount": 11850,
   "estimatedTaxAmount": 618,
-  "understandYourTaxCodeLink": "/"
+  "understandYourTaxCodeLink": "/",
+  "payeSomethingWrongLink": "/"
 }
 ```
 
@@ -322,7 +323,8 @@ Fetch the MobilePayeResponse object.
   ],
   "taxFreeAmount": 11850,
   "estimatedTaxAmount": 618,
-  "understandYourTaxCodeLink": "/"
+  "understandYourTaxCodeLink": "/",
+  "payeSomethingWrongLink": "/"
 }
 ```
 
@@ -345,7 +347,8 @@ Fetch the MobilePayeResponse object.
   ],
   "taxFreeAmount": 11850,
   "estimatedTaxAmount": 618,
-  "understandYourTaxCodeLink": "/"
+  "understandYourTaxCodeLink": "/",
+  "payeSomethingWrongLink": "/"
 }
 ```
 
