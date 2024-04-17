@@ -14,21 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.mobilepaye.domain.tai
-
-import java.time.LocalDate
+package uk.gov.hmrc.mobilepaye.domain.citizendetails
 
 import play.api.libs.json._
 import uk.gov.hmrc.domain.Nino
 
 case class Person(
-  nino:                    Nino,
-  firstName:               String,
-  surname:                 String,
-  dateOfBirth:             Option[LocalDate],
-  isDeceased:              Boolean = false,
-  manualCorrespondenceInd: Option[Boolean] = Some(false))
-
+  nino:      Nino,
+  firstName: String,
+  lastName:  String,
+  deceased:  Boolean = false)
 
 object Person {
   implicit val personFormat: Format[Person] = Json.format[Person]

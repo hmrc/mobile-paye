@@ -4,45 +4,11 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.libs.json.Json
 import uk.gov.hmrc.mobilepaye.domain.IncomeSource
+import uk.gov.hmrc.mobilepaye.domain.citizendetails.Person
 import uk.gov.hmrc.mobilepaye.domain.tai._
 import uk.gov.hmrc.time.TaxYear
 
 object TaiStub {
-
-  def personalLocked(nino: String): StubMapping =
-    stubFor(
-      get(urlEqualTo(s"/tai/$nino/person"))
-        .willReturn(
-          aResponse()
-            .withStatus(423)
-        )
-    )
-
-  def personalTooManyRequests(nino: String): StubMapping =
-    stubFor(
-      get(urlEqualTo(s"/tai/$nino/person"))
-        .willReturn(
-          aResponse()
-            .withStatus(429)
-        )
-    )
-
-  def personalDetailsAreFound(
-    nino:   String,
-    person: Person
-  ): StubMapping =
-    stubFor(
-      get(urlEqualTo(s"/tai/$nino/person"))
-        .willReturn(
-          aResponse()
-            .withStatus(200)
-            .withBody(s"""
-                         |{
-                         |  "data": ${Json.toJson(person)}
-                         |}
-          """.stripMargin)
-        )
-    )
 
   def stubForEmploymentIncome(
     nino:        String,

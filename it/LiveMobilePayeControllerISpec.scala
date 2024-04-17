@@ -10,6 +10,7 @@ import stubs.MobileSimpleAssessmentStub.stubSimpleAssessmentResponse
 import stubs.ShutteringStub._
 import stubs.TaiStub._
 import stubs.TaxCalcStub._
+import stubs.CitizenDetailsStub._
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, OnlinePaymentIntegration}
 import uk.gov.hmrc.mobilepaye.config.MobilePayeConfig
@@ -230,7 +231,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     "return GONE when person is deceased" in {
       stubForShutteringDisabled()
       grantAccess(nino)
-      personalDetailsAreFound(nino, person.copy(isDeceased = true))
+      personalDetailsAreFound(nino, person.copy(deceased = true))
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
       response.status shouldBe 410
@@ -250,20 +251,6 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
       response.status shouldBe 423
 
-      employmentsNotCalled(nino)
-      pensionsNotCalled(nino)
-      nonTaxCodeIncomeNotCalled(nino)
-      taxAccountSummaryNotCalled(nino)
-      taxCalcCalled(nino, currentTaxYear)
-    }
-
-    "return LOCKED when mci is returned true" in {
-      stubForShutteringDisabled()
-      grantAccess(nino)
-      personalDetailsAreFound(nino, person.copy(manualCorrespondenceInd = Some(true)))
-
-      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
-      response.status shouldBe 423
       employmentsNotCalled(nino)
       pensionsNotCalled(nino)
       nonTaxCodeIncomeNotCalled(nino)
@@ -517,7 +504,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     "return GONE when person is deceased" in {
       stubForShutteringDisabled()
       grantAccess(nino)
-      personalDetailsAreFound(nino, person.copy(isDeceased = true))
+      personalDetailsAreFound(nino, person.copy(deceased = true))
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status shouldBe 410
@@ -535,20 +522,6 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status shouldBe 423
 
-      employmentsNotCalled(nino)
-      pensionsNotCalled(nino)
-      nonTaxCodeIncomeNotCalled(nino)
-      taxAccountSummaryNotCalled(nino)
-      taxCalcCalled(nino, currentTaxYear)
-    }
-
-    "return LOCKED when mci set to true" in {
-      stubForShutteringDisabled()
-      grantAccess(nino)
-      personalDetailsAreFound(nino, person.copy(manualCorrespondenceInd = Some(true)))
-
-      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status shouldBe 423
       employmentsNotCalled(nino)
       pensionsNotCalled(nino)
       nonTaxCodeIncomeNotCalled(nino)

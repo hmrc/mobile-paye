@@ -68,15 +68,15 @@ trait ErrorHandling {
         log("BadRequest!")
         Status(ErrorBadRequest.httpStatusCode)(toJson[ErrorResponse](ErrorBadRequest))
 
-      case ex: Upstream4xxResponse if ex.upstreamResponseCode == 429 =>
+      case ex: UpstreamErrorResponse if ex.statusCode == 429 =>
         log("Upstream service returned 429")
         Status(ErrorTooManyRequests.httpStatusCode)(toJson[ErrorResponse](ErrorTooManyRequests))
 
-      case ex: Upstream4xxResponse if ex.upstreamResponseCode == 401 =>
+      case ex: UpstreamErrorResponse if ex.statusCode == 401 =>
         log("Upstream service returned 401")
         Status(ErrorUnauthorizedUpstream.httpStatusCode)(toJson[ErrorResponse](ErrorUnauthorizedUpstream))
 
-      case ex: Upstream4xxResponse if ex.upstreamResponseCode == 423 =>
+      case ex: UpstreamErrorResponse if ex.statusCode == 423 =>
         log("Locked! User is locked due to manual correspondence indicator flag being set")
         Status(LockedUserRequest.httpStatusCode)(toJson[ErrorResponse](LockedUserRequest))
 

@@ -40,15 +40,6 @@ class TaiConnector @Inject() (
     route: String
   ) = s"$serviceUrl/tai/${nino.value}/$route"
 
-  def getPerson(
-    nino:                   Nino
-  )(implicit headerCarrier: HeaderCarrier,
-    ex:                     ExecutionContext
-  ): Future[Person] =
-    http.GET[JsValue](url(nino, "person")).map { json =>
-      (json \ "data").as[Person]
-    }
-
   def getNonTaxCodeIncome(
     nino:        Nino,
     taxYear:     Int
