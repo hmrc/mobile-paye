@@ -40,54 +40,6 @@ class TaiConnectorSpec extends BaseSpec {
       .expects(s"$serviceUrl/tai/${nino.value}/$url", *, *, *, *, *)
       .returning(f)
 
-  "Person - GET /tai/:nino/person" should {
-    "return a valid Person when receiving a valid 200 response for an authorised user" in {
-      val taiPersonJson: JsValue =
-        Json.parse(s"""
-                      |{
-                      |  "data": ${Json.toJson(person)}
-                      |}
-          """.stripMargin)
-
-      mockTaiGet("person", Future.successful(taiPersonJson))
-
-      val result = await(connector.getPerson(nino))
-      result shouldBe person
-    }
-
-    "throw UnauthorisedException for valid nino but unauthorized user" in {
-      mockTaiGet("person", Future.failed(new UnauthorizedException("Unauthorized")))
-
-      intercept[UnauthorizedException] {
-        await(connector.getPerson(nino))
-      }
-    }
-
-    "throw ForbiddenException for valid nino for authorised user but for a different nino" in {
-      mockTaiGet("person", Future.failed(new ForbiddenException("Forbidden")))
-
-      intercept[ForbiddenException] {
-        await(connector.getPerson(nino))
-      }
-    }
-
-    "throw InternalServerException for valid nino for authorised user when receiving a 500 response from tai" in {
-      mockTaiGet("person", Future.failed(new InternalServerException("Internal Server Error")))
-
-      intercept[InternalServerException] {
-        await(connector.getPerson(nino))
-      }
-    }
-
-    "throw TooManyRequests Exception for valid nino for authorised user when receiving a 429 response from tai" in {
-      mockTaiGet("person", Future.failed(new TooManyRequestException("TOO_MANY_REQUESTS")))
-
-      intercept[TooManyRequestException] {
-        await(connector.getPerson(nino))
-      }
-    }
-  }
-
   "Non Tax Code Incomes - GET /tai/:nino/tax-account/:year/income" should {
     "return a valid NonTaxCodeIncome when receiving a valid 200 response for an authorised user" in {
       val taiNonTaxCodeIncomeJson: JsValue =

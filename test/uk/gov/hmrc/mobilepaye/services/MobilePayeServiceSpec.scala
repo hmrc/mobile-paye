@@ -18,7 +18,7 @@ package uk.gov.hmrc.mobilepaye.services
 
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, HttpResponse, InternalServerException, UnauthorizedException}
-import uk.gov.hmrc.mobilepaye.connectors.{FeedbackConnector, MobileSimpleAssessmentConnector, ShutteringConnector, TaiConnector, TaxCalcConnector}
+import uk.gov.hmrc.mobilepaye.connectors.{CitizenDetailsConnector, FeedbackConnector, MobileSimpleAssessmentConnector, ShutteringConnector, TaiConnector, TaxCalcConnector}
 import uk.gov.hmrc.mobilepaye.domain.simpleassessment.MobileSimpleAssessmentResponse
 import uk.gov.hmrc.mobilepaye.domain.{Feedback, IncomeSource, MobilePayeSummaryResponse, OtherBenefits, P800Cache, Shuttering, TaxCodeChange}
 import uk.gov.hmrc.mobilepaye.domain.tai._
@@ -41,6 +41,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
   val mockTaxCalcConnector:                TaxCalcConnector                = mock[TaxCalcConnector]
   val mockFeedbackConnector:               FeedbackConnector               = mock[FeedbackConnector]
   val mockMobileSimpleAssessmentConnector: MobileSimpleAssessmentConnector = mock[MobileSimpleAssessmentConnector]
+  val mockCitizenDetailsConnector:         CitizenDetailsConnector         = mock[CitizenDetailsConnector]
   val p800CacheMongo:                      P800CacheMongo                  = repository
   val dateFormatter:                       DateTimeFormatter               = DateTimeFormatter.ofPattern("yyyy-MM-dd\'T\'HH:mm:ss")
   val inactiveDate:                        String                          = "2020-02-01T00:00:00"
@@ -52,6 +53,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
                                       p800CacheMongo,
                                       mockFeedbackConnector,
                                       mockMobileSimpleAssessmentConnector,
+                                      mockCitizenDetailsConnector,
                                       mockShutteringConnector,
                                       inactiveDate,
                                       inactiveDate,
@@ -164,6 +166,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
                                           p800CacheMongo,
                                           mockFeedbackConnector,
                                           mockMobileSimpleAssessmentConnector,
+                                          mockCitizenDetailsConnector,
                                           mockShutteringConnector,
                                           inactiveDate,
                                           inactiveDate,
@@ -197,6 +200,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
                                           p800CacheMongo,
                                           mockFeedbackConnector,
                                           mockMobileSimpleAssessmentConnector,
+                                          mockCitizenDetailsConnector,
                                           mockShutteringConnector,
                                           activeStartDate,
                                           activeEndDate,
@@ -230,6 +234,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
                                           p800CacheMongo,
                                           mockFeedbackConnector,
                                           mockMobileSimpleAssessmentConnector,
+                                          mockCitizenDetailsConnector,
                                           mockShutteringConnector,
                                           inactiveDate,
                                           inactiveDate,
@@ -261,6 +266,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
                                           p800CacheMongo,
                                           mockFeedbackConnector,
                                           mockMobileSimpleAssessmentConnector,
+                                          mockCitizenDetailsConnector,
                                           mockShutteringConnector,
                                           activeStartDate,
                                           activeEndDate,
@@ -423,6 +429,7 @@ class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupp
                                           p800CacheMongo,
                                           mockFeedbackConnector,
                                           mockMobileSimpleAssessmentConnector,
+                                          mockCitizenDetailsConnector,
                                           mockShutteringConnector,
                                           inactiveDate,
                                           inactiveDate,

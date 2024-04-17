@@ -21,6 +21,7 @@ import play.api.libs.json.{JsObject, Json}
 import java.time.LocalDate
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mobilepaye.domain.audit.{MobilePayeSummaryResponseAudit, OtherIncomeAudit, PayeIncomeAudit}
+import uk.gov.hmrc.mobilepaye.domain.citizendetails.Person
 import uk.gov.hmrc.mobilepaye.domain.simpleassessment.ReasonType.UNDERPAYMENT
 import uk.gov.hmrc.mobilepaye.domain.simpleassessment.{MobileSAReconciliation, MobileSATaxYearReconciliation, MobileSimpleAssessmentResponse, Reason, Receipts}
 import uk.gov.hmrc.mobilepaye.domain.{Feedback, HistoricTaxCodeIncome, IncomeSource, IncomeTaxYear, MobilePayePreviousYearSummaryResponse, MobilePayeSummaryResponse, OtherIncome, P800Repayment, PayeIncome, TaxCodeChange}
@@ -155,7 +156,7 @@ trait MobilePayeTestData {
     pensionIncomeSource.map(ic => PayeIncome.fromIncomeSource(ic, employment = false))
 
   val taxAccountSummary: TaxAccountSummary = TaxAccountSummary(BigDecimal(250), BigDecimal(10000))
-  val person:            Person            = Person(nino, "Carrot", "Smith", None)
+  val person:            Person            = Person(nino, "Carrot", "Smith")
   val otherIncome:       OtherIncome       = OtherIncome("STATE PENSION", 250.0, None)
 
   def repayment(

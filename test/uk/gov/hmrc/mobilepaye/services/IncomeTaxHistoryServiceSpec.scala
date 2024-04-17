@@ -146,7 +146,7 @@ class IncomeTaxHistoryServiceSpec extends BaseSpec {
 
     }
 
-    "return no start date for employment if year of date is 1900 or older" in {
+    "return no start date for employment if year of date is 1949 or older" in {
 
       val service = new IncomeTaxHistoryService(mockTaiConnector, 2)
 
@@ -155,7 +155,7 @@ class IncomeTaxHistoryServiceSpec extends BaseSpec {
       mockTaxCodeIncomes(Future successful Seq(taxCodeIncome, taxCodeIncome2, taxCodeIncome3),
                          TaxYear.current.startYear - 1)
       mockEmployments(Future successful Seq(taiEmployment(2022),
-                                            taiEmployment2.copy(startDate = Some(LocalDate.of(1899, 1, 1)))),
+                                            taiEmployment2.copy(startDate = Some(LocalDate.of(1949, 1, 1)))),
                       TaxYear.current.startYear)
       mockEmployments(Future successful Seq(taiEmployment(2021), taiEmployment2), TaxYear.current.startYear - 1)
 

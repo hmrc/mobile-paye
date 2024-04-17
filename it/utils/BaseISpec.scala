@@ -40,6 +40,7 @@ abstract class BaseISpec
       "microservice.services.auth.port"                     -> wireMockPort,
       "microservice.services.tai.port"                      -> wireMockPort,
       "microservice.services.taxcalc.port"                  -> wireMockPort,
+      "microservice.services.citizen-details.port"          -> wireMockPort,
       "microservice.services.mobile-simple-assessment.port" -> wireMockPort,
       "microservice.services.mobile-shuttering.port"        -> wireMockPort,
       "microservice.services.mobile-shuttering.port"        -> wireMockPort,

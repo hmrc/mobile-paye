@@ -27,12 +27,12 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.mobilepaye.controllers.BadRequestException
 import uk.gov.hmrc.mobilepaye.connectors.ShutteringConnector
-import uk.gov.hmrc.mobilepaye.domain.tai.Person
 import uk.gov.hmrc.mobilepaye.domain.{IncomeTaxYear, MobilePayePreviousYearSummaryResponse, MobilePayeSummaryResponse, Shuttering}
 import uk.gov.hmrc.mobilepaye.services.{IncomeTaxHistoryService, MobilePayeService, PreviousYearSummaryService}
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import eu.timepit.refined.auto._
+import uk.gov.hmrc.mobilepaye.domain.citizendetails.Person
 import uk.gov.hmrc.mobilepaye.domain.types.ModelTypes.JourneyId
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -154,17 +154,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
     "return 423 for a valid nino and authorised user but LOCKED returned" in {
       mockShutteringResponse(notShuttered)
       mockAuthorisationGrantAccess(grantAccessWithCL200)
-      mockGetPerson(Future.failed(Upstream4xxResponse("locked", 423, 423)))
-
-      val result = controller.getPayeSummary(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42", currentTaxYear)(fakeRequest)
-
-      status(result) shouldBe 423
-    }
-
-    "return 423 for a valid nino and authorised user but mci indicator user" in {
-      mockShutteringResponse(notShuttered)
-      mockAuthorisationGrantAccess(grantAccessWithCL200)
-      mockGetPerson(Future.successful(person.copy(manualCorrespondenceInd = Some(true))))
+      mockGetPerson(Future.failed(UpstreamErrorResponse("locked", 423, 423)))
 
       val result = controller.getPayeSummary(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42", currentTaxYear)(fakeRequest)
 
@@ -174,7 +164,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
     "return 410 for a valid nino and authorised user but deceased user" in {
       mockShutteringResponse(notShuttered)
       mockAuthorisationGrantAccess(grantAccessWithCL200)
-      mockGetPerson(Future.successful(person.copy(isDeceased = true)))
+      mockGetPerson(Future.successful(person.copy(deceased = true)))
 
       val result = controller.getPayeSummary(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42", currentTaxYear)(fakeRequest)
 

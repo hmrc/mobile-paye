@@ -20,7 +20,8 @@ import com.google.inject.{Inject, Singleton}
 import play.api.Logger
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.mobilepaye.connectors.{FeedbackConnector, MobileSimpleAssessmentConnector, ShutteringConnector, TaiConnector, TaxCalcConnector}
+import uk.gov.hmrc.mobilepaye.connectors.{CitizenDetailsConnector, FeedbackConnector, MobileSimpleAssessmentConnector, ShutteringConnector, TaiConnector, TaxCalcConnector}
+import uk.gov.hmrc.mobilepaye.domain.citizendetails.Person
 import uk.gov.hmrc.mobilepaye.domain.simpleassessment.MobileSimpleAssessmentResponse
 import uk.gov.hmrc.mobilepaye.domain.tai._
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status.{NotSupported, Overpaid, Underpaid}
@@ -41,6 +42,7 @@ class MobilePayeService @Inject() (
   p800CacheMongo:                                                  P800CacheMongo,
   feedbackConnector:                                               FeedbackConnector,
   mobileSimpleAssessmentConnector:                                 MobileSimpleAssessmentConnector,
+  citizenDetailsConnector:                                         CitizenDetailsConnector,
   shutteringConnector:                                             ShutteringConnector,
   @Named("rUK.startDate") rUKComparisonStartDate:                  String,
   @Named("rUK.endDate") rUKComparisonEndDate:                      String,
@@ -105,7 +107,7 @@ class MobilePayeService @Inject() (
     nino:        Nino
   )(implicit hc: HeaderCarrier,
     ec:          ExecutionContext
-  ): Future[Person] = taiConnector.getPerson(nino)
+  ): Future[Person] = citizenDetailsConnector.getPerson(nino)
 
   def postFeedback(feedback: Feedback)(implicit hc: HeaderCarrier): Future[HttpResponse] =
     feedbackConnector.postFeedback(feedback)

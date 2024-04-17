@@ -98,11 +98,8 @@ class LiveMobilePayeController @Inject() (
         withShuttering(shuttered) {
           errorWrapper {
             mobilePayeService.getPerson(nino).flatMap { person =>
-              if (person.isDeceased) {
+              if (person.deceased) {
                 Future.successful(Gone)
-              } else if (person.manualCorrespondenceInd.getOrElse(false)) {
-                logger.info("Locked! User is locked due to manual correspondence indicator flag being set")
-                Future.successful(Locked)
               } else {
                 mobilePayeService.getMobilePayeSummaryResponse(nino, taxYear, journeyId).map { mpr =>
                   sendAuditEvent(
