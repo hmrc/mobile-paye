@@ -21,7 +21,7 @@ import com.google.inject.name.Named
 import play.api.Logger
 import play.api.http.Status.{LOCKED, NOT_FOUND}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, HttpException, UpstreamErrorResponse}
+import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.mobilepaye.domain.citizendetails.Person
 
 import scala.concurrent.{ExecutionContext, Future}

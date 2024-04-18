@@ -47,7 +47,7 @@ object PayeIncome {
     val empId = incomeSource.taxCodeIncome.employmentId.getOrElse(throw new Exception("Employment ID not found"))
     PayeIncome(
       name                             = incomeSource.taxCodeIncome.name,
-      status                           = incomeSource.taxCodeIncome.status,
+      status                           = incomeSource.employment.employmentStatus,
       payrollNumber                    = incomeSource.employment.payrollNumber,
       taxCode                          = incomeSource.taxCodeIncome.taxCode,
       amount                           = incomeSource.taxCodeIncome.amount.setScale(0, RoundingMode.FLOOR),
@@ -56,7 +56,7 @@ object PayeIncome {
       updateEmployerLink               = Some(s"/check-income-tax/update-remove-employment/decision/$empId"),
       yourIncomeCalculationDetailsLink = s"/check-income-tax/your-income-calculation-details/$empId",
       updateIncomeLink =
-        if (employment && incomeSource.taxCodeIncome.status.equals(Live))
+        if (employment && incomeSource.employment.employmentStatus.equals(Live))
           Some(
             s"/check-income-tax/update-income/load/$empId"
           )
