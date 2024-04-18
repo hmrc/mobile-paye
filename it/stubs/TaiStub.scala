@@ -4,7 +4,6 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.libs.json.Json
 import uk.gov.hmrc.mobilepaye.domain.IncomeSource
-import uk.gov.hmrc.mobilepaye.domain.citizendetails.Person
 import uk.gov.hmrc.mobilepaye.domain.tai._
 import uk.gov.hmrc.time.TaxYear
 

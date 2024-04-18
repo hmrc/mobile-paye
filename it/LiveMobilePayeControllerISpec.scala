@@ -71,8 +71,12 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForEmploymentIncome(nino, employmentIncomeSource)
       stubForEmploymentIncome(
         nino,
-        employmentIncomeSource ++ employmentIncomeSource.map(incSrc =>
-          incSrc.copy(employment = incSrc.employment.copy(endDate = Some(LocalDate.of(2022, 2, 1))))
+        employmentIncomeSource.map(incSrc =>
+          incSrc.copy(employment = incSrc.employment.copy(employmentStatus = NotLive))
+        ) ++ employmentIncomeSource.map(incSrc =>
+          incSrc.copy(employment =
+            incSrc.employment.copy(endDate = Some(LocalDate.of(2022, 2, 1)), employmentStatus = NotLive)
+          )
         ),
         status = NotLive
       )
