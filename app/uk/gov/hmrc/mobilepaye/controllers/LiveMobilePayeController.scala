@@ -36,7 +36,6 @@ import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendBaseController
 import uk.gov.hmrc.play.http.HeaderCarrierConverter.fromRequest
-import uk.gov.hmrc.service.Auditor
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -72,14 +71,13 @@ class LiveMobilePayeController @Inject() (
   mobilePayeService:                                            MobilePayeService,
   val controllerComponents:                                     ControllerComponents,
   val auditConnector:                                           AuditConnector,
-  @Named("appName") override val appName:                       String,
+  @Named("appName") val appName:                                String,
   shutteringConnector:                                          ShutteringConnector,
   incomeTaxHistoryService:                                      IncomeTaxHistoryService,
   previousYearSummaryService:                                   PreviousYearSummaryService
 )(implicit val executionContext:                                ExecutionContext)
     extends MobilePayeController
     with AccessControl
-    with Auditor
     with ControllerChecks {
 
   override def parser: BodyParser[AnyContent] = controllerComponents.parsers.anyContent

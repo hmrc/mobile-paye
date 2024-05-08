@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.mobilepaye.config
 
-import akka.actor.ActorSystem
+import org.apache.pekko.actor.ActorSystem
 import com.google.inject.Inject
 import com.typesafe.config.Config
 import javax.inject.Named

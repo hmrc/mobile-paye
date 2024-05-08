@@ -25,6 +25,8 @@ import uk.gov.hmrc.mobilepaye.controllers.api.ApiAccess
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.http.HttpClient
+import uk.gov.hmrc.play.audit.DefaultAuditConnector
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
 import scala.jdk.CollectionConverters._
 
@@ -40,6 +42,7 @@ class GuiceModule(
   override def configure(): Unit = {
 
     bind(classOf[AuthConnector]).to(classOf[DefaultAuthConnector])
+    bind(classOf[AuditConnector]).to(classOf[DefaultAuditConnector])
     bind(classOf[CoreGet]).to(classOf[WSHttpImpl])
     bind(classOf[CorePost]).to(classOf[WSHttpImpl])
     bind(classOf[HttpClient]).to(classOf[WSHttpImpl])
@@ -57,7 +60,9 @@ class GuiceModule(
     bindConfigStringSeq("scopes")
     bind(classOf[String]).annotatedWith(named("tai")).toInstance(servicesConfig.baseUrl("tai"))
     bind(classOf[String]).annotatedWith(named("taxcalc")).toInstance(servicesConfig.baseUrl("taxcalc"))
-    bind(classOf[String]).annotatedWith(named("mobile-simple-assessment")).toInstance(servicesConfig.baseUrl("mobile-simple-assessment"))
+    bind(classOf[String])
+      .annotatedWith(named("mobile-simple-assessment"))
+      .toInstance(servicesConfig.baseUrl("mobile-simple-assessment"))
     bind(classOf[String])
       .annotatedWith(named("mobile-shuttering"))
       .toInstance(servicesConfig.baseUrl("mobile-shuttering"))

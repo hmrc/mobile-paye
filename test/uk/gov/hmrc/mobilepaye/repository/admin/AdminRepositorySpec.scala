@@ -19,21 +19,18 @@ package uk.gov.hmrc.mobilepaye.repository.admin
 import org.mongodb.scala.MongoWriteException
 import org.mongodb.scala.model.Filters
 import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, FeatureFlagName, OnlinePaymentIntegration}
-import uk.gov.hmrc.mobilepaye.utils.BaseSpec
-import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
+import uk.gov.hmrc.mobilepaye.utils.{BaseSpec, PlayMongoRepositorySupport}
 
 import scala.concurrent.Future
 
-class AdminRepositorySpec
-  extends BaseSpec
-    with DefaultPlayMongoRepositorySupport[FeatureFlag] {
+class AdminRepositorySpec extends BaseSpec with PlayMongoRepositorySupport[FeatureFlag] {
 
   override lazy val repository: AdminRepository =
     new AdminRepository(mongoComponent)
 
   def insertRecord(
-    flag: FeatureFlagName = OnlinePaymentIntegration,
-    enabled: Boolean = true
+    flag:    FeatureFlagName = OnlinePaymentIntegration,
+    enabled: Boolean         = true
   ): Future[Boolean] =
     insert(
       FeatureFlag(flag, enabled, flag.description)
@@ -72,7 +69,7 @@ class AdminRepositorySpec
         result <- find(Filters.equal("name", OnlinePaymentIntegration.toString))
       } yield result).futureValue
 
-      result.length shouldBe 1
+      result.length         shouldBe 1
       result.head.isEnabled shouldBe false
     }
   }
@@ -84,7 +81,7 @@ class AdminRepositorySpec
         result <- find(Filters.equal("name", OnlinePaymentIntegration.toString))
       } yield result).futureValue
 
-      result.length shouldBe 1
+      result.length         shouldBe 1
       result.head.isEnabled shouldBe false
     }
   }
@@ -117,7 +114,7 @@ class AdminRepositorySpec
 
       result.getCode shouldBe 11000
       result.getError.getMessage shouldBe
-        s"""E11000 duplicate key error collection: test-AdminRepositorySpec.admin-feature-flags index: name dup key: { name: "$OnlinePaymentIntegration" }"""
+      s"""E11000 duplicate key error collection: test-AdminRepositorySpec.admin-feature-flags index: name dup key: { name: "$OnlinePaymentIntegration" }"""
     }
   }
 }

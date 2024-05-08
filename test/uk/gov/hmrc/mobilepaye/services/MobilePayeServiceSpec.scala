@@ -25,14 +25,13 @@ import uk.gov.hmrc.mobilepaye.domain.tai._
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.TaxYearReconciliation
 import uk.gov.hmrc.mobilepaye.domain.types.ModelTypes.JourneyId
 import uk.gov.hmrc.mobilepaye.repository.P800CacheMongo
-import uk.gov.hmrc.mobilepaye.utils.BaseSpec
-import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
+import uk.gov.hmrc.mobilepaye.utils.{BaseSpec, PlayMongoRepositorySupport}
 
 import java.time.{LocalDateTime, ZoneId}
 import java.time.format.DateTimeFormatter
 import scala.concurrent.{ExecutionContext, Future}
 
-class MobilePayeServiceSpec extends BaseSpec with DefaultPlayMongoRepositorySupport[P800Cache] {
+class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P800Cache] {
 
   override lazy val repository = new P800CacheMongo(mongoComponent, appConfig)
 
