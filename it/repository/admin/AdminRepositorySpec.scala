@@ -1,6 +1,6 @@
 package repository.admin
 
-import akka.util.Timeout
+import org.apache.pekko.util.Timeout
 import org.mongodb.scala.MongoWriteException
 import org.mongodb.scala.model.Filters
 import org.scalatest.OptionValues

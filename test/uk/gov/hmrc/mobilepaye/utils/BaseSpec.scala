@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.mobilepaye.utils
 
-import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.stream.ActorMaterializer
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import play.api.{Configuration, Environment}
@@ -28,6 +28,8 @@ import uk.gov.hmrc.mobilepaye.config.MobilePayeConfig
 import uk.gov.hmrc.mobilepaye.domain.types.ModelTypes.JourneyId
 import uk.gov.hmrc.mobilepaye.mocks.{AuditMock, AuthorisationMock, ShutteringMock}
 import eu.timepit.refined.auto._
+import org.scalatest.Outcome
+import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
 import scala.concurrent.ExecutionContext
 
@@ -50,6 +52,11 @@ trait BaseSpec
   implicit lazy val appConfig    = new MobilePayeConfig(configuration)
 
   val acceptHeader: (String, String) = "Accept" -> "application/vnd.hmrc.1.0+json"
-  val journeyId: JourneyId = "27085215-69a4-4027-8f72-b04b10ec16b0"
+  val journeyId:    JourneyId        = "27085215-69a4-4027-8f72-b04b10ec16b0"
 
+}
+
+trait PlayMongoRepositorySupport[A] extends DefaultPlayMongoRepositorySupport[A] {
+  override def withFixture(test: NoArgTest): Outcome = super.withFixture(test)
+  override protected def checkTtlIndex: Boolean = false
 }

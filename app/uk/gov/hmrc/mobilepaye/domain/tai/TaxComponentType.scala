@@ -354,7 +354,7 @@ object TaxComponentType {
     "OtherIncome"                                          -> OtherIncome
   )
 
-  implicit val formatTaxComponentType = new Format[TaxComponentType] {
+  implicit val formatTaxComponentType: Format[TaxComponentType] = new Format[TaxComponentType] {
 
     override def reads(json: JsValue): JsResult[TaxComponentType] = {
       val taxComponentType = json.as[String]
@@ -362,7 +362,7 @@ object TaxComponentType {
       JsSuccess(component)
     }
 
-    override def writes(taxComponentType: TaxComponentType) = JsString(taxComponentType.toString)
+    override def writes(taxComponentType: TaxComponentType): JsString = JsString(taxComponentType.toString)
   }
 }
 
@@ -400,13 +400,13 @@ object BenefitComponentType {
     "EmployerProvidedServices"                             -> EmployerProvidedServices
   )
 
-  implicit val formatBenefitTaxComponentType = new Format[BenefitComponentType] {
+  implicit val formatBenefitTaxComponentType: Format[BenefitComponentType] = new Format[BenefitComponentType] {
 
     override def reads(json: JsValue): JsSuccess[BenefitComponentType] = JsSuccess(
       benefitComponentTypeMap.getOrElse(json.as[String],
                                         throw new IllegalArgumentException("Invalid Benefit component type"))
     )
-    override def writes(benefitComponentType: BenefitComponentType) = JsString(benefitComponentType.toString)
+    override def writes(benefitComponentType: BenefitComponentType): JsString = JsString(benefitComponentType.toString)
   }
 }
 
@@ -444,15 +444,16 @@ object NonTaxCodeIncomeComponentType {
     "EmploymentAndSupportAllowance"  -> EmploymentAndSupportAllowance
   )
 
-  implicit val formatNonTaxCodeIncomeComponentType = new Format[NonTaxCodeIncomeComponentType] {
+  implicit val formatNonTaxCodeIncomeComponentType: Format[NonTaxCodeIncomeComponentType] =
+    new Format[NonTaxCodeIncomeComponentType] {
 
-    override def reads(json: JsValue): JsSuccess[NonTaxCodeIncomeComponentType] =
-      JsSuccess(
-        nonTaxCodeIncomesMap.getOrElse(json.as[String],
-                                       throw new IllegalArgumentException("Invalid Non tax code component type"))
-      )
+      override def reads(json: JsValue): JsSuccess[NonTaxCodeIncomeComponentType] =
+        JsSuccess(
+          nonTaxCodeIncomesMap.getOrElse(json.as[String],
+                                         throw new IllegalArgumentException("Invalid Non tax code component type"))
+        )
 
-    override def writes(nonTaxCodeIncomeComponentType: NonTaxCodeIncomeComponentType) =
-      JsString(nonTaxCodeIncomeComponentType.toString)
-  }
+      override def writes(nonTaxCodeIncomeComponentType: NonTaxCodeIncomeComponentType): JsString =
+        JsString(nonTaxCodeIncomeComponentType.toString)
+    }
 }

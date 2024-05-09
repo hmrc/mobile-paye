@@ -1,9 +1,8 @@
 package utils
 
-import org.mockito.MockitoSugar.mock
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
-
+import org.scalatestplus.mockito.MockitoSugar.mock
 import org.scalatestplus.play.WsScalaTestClient
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.inject.bind

@@ -20,15 +20,15 @@ import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
-import java.time.LocalDateTime
+import java.time.Instant
 
 case class P800Cache(
   nino:      Nino,
-  createdAt: LocalDateTime = LocalDateTime.now())
+  createdAt: Instant = Instant.now())
 
 object P800Cache {
 
-  implicit val dateFormat: Format[LocalDateTime] = MongoJavatimeFormats.localDateTimeFormat
+  implicit val dateFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
 
   implicit val format: Format[P800Cache] = Json.format[P800Cache]
 

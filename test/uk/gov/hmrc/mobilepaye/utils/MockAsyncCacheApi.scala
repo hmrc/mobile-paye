@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.mobilepaye.utils
 
-import akka.Done
+import org.apache.pekko.Done
 import play.api.cache.AsyncCacheApi
 
 import scala.concurrent.Future

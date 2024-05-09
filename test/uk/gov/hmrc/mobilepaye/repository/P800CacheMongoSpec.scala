@@ -17,11 +17,10 @@
 package uk.gov.hmrc.mobilepaye.repository
 
 import uk.gov.hmrc.mobilepaye.domain.P800Cache
-import uk.gov.hmrc.mobilepaye.utils.BaseSpec
-import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
+import uk.gov.hmrc.mobilepaye.utils.{BaseSpec, PlayMongoRepositorySupport}
 import uk.gov.hmrc.serviceResponse.Response
 
-class P800CacheMongoSpec extends BaseSpec with DefaultPlayMongoRepositorySupport[P800Cache] {
+class P800CacheMongoSpec extends BaseSpec with PlayMongoRepositorySupport[P800Cache] {
 
   override lazy val repository = new P800CacheMongo(mongoComponent, appConfig)
 
