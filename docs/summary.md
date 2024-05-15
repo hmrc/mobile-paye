@@ -258,7 +258,10 @@ Fetch the MobilePayeResponse object.
     }
   ],
   "taxCodeChange": {
-    "hasChanged": false
+    "hasChanged": true,
+    "startDate": "2024-04-06",
+    "taxCodeChangeUrl": "/",
+    "taxCodeChangeUrlCy": "/"
   },
   "simpleAssessment": {
     "taxYears": [

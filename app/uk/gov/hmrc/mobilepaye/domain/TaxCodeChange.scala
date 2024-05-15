@@ -18,7 +18,13 @@ package uk.gov.hmrc.mobilepaye.domain
 
 import play.api.libs.json.{Format, Json}
 
-case class TaxCodeChange(hasChanged: Boolean)
+import java.time.LocalDate
+
+case class TaxCodeChange(
+  hasChanged:         Boolean,
+  startDate:          Option[LocalDate] = None,
+  taxCodeChangeUrl:   String = "/check-income-tax/tax-code-change/tax-code-comparison",
+  taxCodeChangeUrlCy: String = "/check-income-tax/tax-code-change/tax-code-comparison/cy")
 
 object TaxCodeChange {
   implicit val formats: Format[TaxCodeChange] = Json.format[TaxCodeChange]

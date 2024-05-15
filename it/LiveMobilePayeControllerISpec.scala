@@ -86,6 +86,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       taxCalcWithNoDate(nino, currentTaxYear)
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
+      stubForTaxCodeChange(nino, taxCodeChangeDetails)
       stubSimpleAssessmentResponse
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
@@ -146,6 +147,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       taxCalcNoResponse(nino, currentTaxYear)
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
+      stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
       response.status                             shouldBe 200
@@ -166,6 +168,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       taxCalcNoResponse(nino, currentTaxYear)
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
+      stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
       response.status shouldBe 200
@@ -188,6 +191,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       taxCalcNoResponse(nino, currentTaxYear)
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
+      stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
       response.status                             shouldBe 200
@@ -207,6 +211,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       taxCalcNoResponse(nino, currentTaxYear)
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
+      stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
       response.status                             shouldBe 200
@@ -226,6 +231,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       taxCalcNoResponse(nino, currentTaxYear)
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
+      stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
       response.status                             shouldBe 200
@@ -308,6 +314,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       taxCalcNoResponse(nino, currentTaxYear)
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
+      stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status                             shouldBe 200
@@ -327,6 +334,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       taxCalcNoResponse(nino, currentTaxYear)
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
+      stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status shouldBe 200
@@ -349,6 +357,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       taxCalcNoResponse(nino, currentTaxYear)
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
+      stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status                             shouldBe 200
@@ -368,6 +377,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       taxCalcNoResponse(nino, currentTaxYear)
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
+      stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status                             shouldBe 200
@@ -387,6 +397,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       taxCalcNoResponse(nino, currentTaxYear)
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
+      stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status                             shouldBe 200
@@ -414,6 +425,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
           taxCalcValidResponse(nino, currentTaxYear - 1, amount, Overpaid, repaymentStatus, time)
           stubForBenefits(nino, noBenefits)
           stubForTaxCodeChangeExists(nino)
+          stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
           val expectedRepayment: Option[P800Repayment] =
             repayment(P800Status.Overpaid, repaymentStatus, currentTaxYear, amount, time)
@@ -445,6 +457,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
           taxCalcValidResponse(nino, currentTaxYear, amount, Underpaid, repaymentStatus, time)
           stubForBenefits(nino, noBenefits)
           stubForTaxCodeChangeExists(nino)
+          stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
           val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
           response.status                             shouldBe 200
@@ -470,6 +483,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
           taxCalcValidResponse(nino, currentTaxYear, amount, Overpaid, repaymentStatus, time)
           stubForBenefits(nino, noBenefits)
           stubForTaxCodeChangeExists(nino)
+          stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
           val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
           response.status                             shouldBe 200
@@ -495,6 +509,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       taxCalcWithInstantDate(nino, currentTaxYear, time)
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
+      stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status                                                shouldBe 200
@@ -546,6 +561,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       taxCalcNoResponse(nino, currentTaxYear)
       stubForBenefits(nino, allBenefits)
       stubForTaxCodeChangeExists(nino)
+      stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status shouldBe 200
@@ -591,6 +607,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       taxCalcNoResponse(nino, currentTaxYear)
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
+      stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status shouldBe 200
@@ -613,6 +630,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       taxCalcWithNoP800(nino, currentTaxYear, LocalDate.now)
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
+      stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status                             shouldBe 200
@@ -632,6 +650,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now.minusWeeks(6).minusDays(1))
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
+      stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status                             shouldBe 200
@@ -654,6 +673,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now.minusWeeks(6))
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
+      stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status                                                shouldBe 200
@@ -680,6 +700,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       taxCalcWithNoDate(nino, currentTaxYear)
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
+      stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status                                                shouldBe 200
@@ -703,6 +724,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoType = "underpaid")
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
+      stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status                             shouldBe 200
@@ -722,6 +744,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoType = "balanced")
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
+      stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status                             shouldBe 200
@@ -741,6 +764,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoStatus = "sa_user")
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
+      stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status                             shouldBe 200
@@ -760,6 +784,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoStatus = "unable_to_claim")
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
+      stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status                             shouldBe 200
@@ -782,6 +807,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoStatus = "refund")
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
+      stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status                                                shouldBe 200
@@ -809,6 +835,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       taxCalcWithNoDate(nino, currentTaxYear)
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
+      stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status                                                shouldBe 200
@@ -840,6 +867,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       taxCalcNoResponse(nino, currentTaxYear)
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
+      stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
 
@@ -1108,6 +1136,7 @@ class LiveMobilePayeControllerp800CacheEnabledISpec
       taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now.minusYears(1), yearTwoType = "balanced")
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
+      stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(
         getRequestWithAuthHeaders(

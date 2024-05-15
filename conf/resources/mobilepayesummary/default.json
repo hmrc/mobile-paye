@@ -156,7 +156,10 @@
     }
   ],
   "taxCodeChange": {
-    "hasChanged": true
+    "hasChanged": true,
+    "startDate": "2024-04-06",
+    "taxCodeChangeUrl": "/",
+    "taxCodeChangeUrlCy": "/"
   },
   "simpleAssessment": {
     "taxYears": [

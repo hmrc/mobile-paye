@@ -205,7 +205,10 @@ paths:
                         amount: 9301
                         incomeDetailsLink: /check-income-tax/income/bank-building-society-savings
                     taxCodeChange:
-                      hasChanged: false
+                      hasChanged: true
+                      startDate: 01-01-2024
+                      taxCodeChangeUrl: /check-income-tax/tax-code-change/tax-code-comparison
+                      taxCodeChangeUrlCy: /check-income-tax/tax-code-change/tax-code-comparison/cy
                     taxFreeAmount: 11850
                     taxFreeAmountLink: /check-income-tax/tax-free-allowance
                     estimatedTaxAmount: 618
@@ -776,7 +779,10 @@ components:
             amount: 9301
             incomeDetailsLink: /check-income-tax/income/bank-building-society-savings
         taxCodeChange:
-          hasChanged: false
+          hasChanged: true
+          startDate: 01-01-2024
+          taxCodeChangeUrl: /check-income-tax/tax-code-change/tax-code-comparison
+          taxCodeChangeUrlCy: /check-income-tax/tax-code-change/tax-code-comparison/cy
         simpleAssessment:
           taxYears:
             - taxYear: 2021
@@ -1072,12 +1078,23 @@ components:
         isPension: false
     TaxCodeChange:
       title: TaxCodeChange
+      required:
+        - hasChanged
       type: object
       properties:
         hasChanged:
           type: boolean
+        startDate:
+          type: string
+        taxCodeChangeUrl:
+          type: string
+        taxCodeChangeUrlCy:
+          type: string
       example:
-        hasChanged: false
+        hasChanged: true
+        startDate: 01-01-2024
+        taxCodeChangeUrl: /
+        taxCodeChangeUrlCy: /
     SimpleAssessment:
       title: SimpleAssessment
       type: object

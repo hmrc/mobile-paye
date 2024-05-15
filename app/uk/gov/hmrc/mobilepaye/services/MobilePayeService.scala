@@ -69,21 +69,26 @@ class MobilePayeService @Inject() (
     (for {
       taxCodeIncomesEmployment <- taiConnector
                                    .getMatchingTaxCodeIncomes(nino, taxYear, EmploymentIncome.toString, Live.toString)
-      previousEmployments <- getPreviousEmployments(nino, taxYear)
-      taxCodeIncomesPension <- taiConnector
-                                .getMatchingTaxCodeIncomes(nino, taxYear, PensionIncome.toString, Live.toString)
+      previousEmployments      <- getPreviousEmployments(nino, taxYear)
+      taxCodeIncomesPension    <- taiConnector
+                                  .getMatchingTaxCodeIncomes(nino, taxYear, PensionIncome.toString, Live.toString)
       nonTaxCodeIncomes        <- taiConnector.getNonTaxCodeIncome(nino, taxYear)
       taxAccountSummary        <- taiConnector.getTaxAccountSummary(nino, taxYear)
       reconciliations          <- getTaxYearReconciliation(nino)
       tcComparisonPeriodActive <- cyPlus1InfoCheck(taxCodeIncomesEmployment)
-      cy1InfoAvailable <- if (tcComparisonPeriodActive) taiConnector.getCYPlusOneAccountSummary(nino, taxYear)
-                         else Future successful false
-      employmentBenefits <- taiConnector.getBenefits(nino, taxYear)
-      taxCodeChangeExists <- if (taxCodeChangeEnabled) taiConnector.getTaxCodeChangeExists(nino)
-                            else Future successful false
-      simpleAssessment <- getSimpleAssessmentData(journeyId, reconciliations)
-      p800Summary      <- getP800Summary(reconciliations, taxYear, journeyId)
-      mobilePayeResponse: MobilePayeSummaryResponse = buildMobilePayeResponse(
+      cy1InfoAvailable         <- if (tcComparisonPeriodActive) taiConnector.getCYPlusOneAccountSummary(nino, taxYear)
+                                  else Future successful false
+      employmentBenefits        <- taiConnector.getBenefits(nino, taxYear)
+      taxCodeChangeExists      <- if (taxCodeChangeEnabled) taiConnector.getTaxCodeChangeExists(nino)
+                                  else Future successful false
+      taxCodeChangeDetails     <- if (taxCodeChangeExists)
+                                    taiConnector
+                                      .getTaxCodeChange(nino)
+                                      .map(_.current)
+                                  else Future successful None
+      simpleAssessment         <- getSimpleAssessmentData(journeyId, reconciliations)
+      p800Summary              <- getP800Summary(reconciliations, taxYear, journeyId)
+      mobilePayeResponse = buildMobilePayeResponse(
         taxYear,
         taxCodeIncomesEmployment,
         previousEmployments,
@@ -92,7 +97,7 @@ class MobilePayeService @Inject() (
         taxAccountSummary,
         p800Summary,
         employmentBenefits,
-        Some(TaxCodeChange(taxCodeChangeExists)),
+        Some(TaxCodeChange(taxCodeChangeExists, taxCodeChangeDetails.iterator.map(_.startDate).nextOption())),
         simpleAssessment
       )
     } yield {
