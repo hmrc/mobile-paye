@@ -46,9 +46,8 @@ lazy val microservice = Project(appName, file("."))
       "-Ywarn-dead-code",
       "-Ywarn-value-discard",
       "-Ywarn-numeric-widen",
-      //"-Ywarn-unused-import", - does not work well with fatal-warnings because of play-generated sources
-      //"-Xfatal-warnings",
-      "-Xlint"
+      "-Xlint",
+      "-Wconf:cat=w-flag-value-discard&msg=discarded non-Unit value of type org\\.scalatest\\.Assertion:s"
     ),
     coverageMinimumStmtTotal := 90,
     coverageFailOnMinimum := true,

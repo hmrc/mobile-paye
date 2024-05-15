@@ -19,6 +19,7 @@ package uk.gov.hmrc.mobilepaye.connectors
 
 import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, HttpReads, NotFoundException}
 import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, FeatureFlagName, OnlinePaymentIntegration}
+import uk.gov.hmrc.mobilepaye.domain.simpleassessment.MobileSimpleAssessmentResponse
 import uk.gov.hmrc.mobilepaye.services.admin.FeatureFlagService
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 import uk.gov.hmrc.play.bootstrap.tools.LogCapturing
@@ -54,7 +55,7 @@ class MobileSimpleAssessmentConnectorSpec extends BaseSpec with LogCapturing {
       mockMobileSimpleAssessmentGet(Future.failed(new NotFoundException("")))
 
       withCaptureOfLoggingFrom(connector.logger) { events =>
-        val result = await(connector.getSimpleAssessmentLiabilities(journeyId))
+        val result: Option[MobileSimpleAssessmentResponse] = await(connector.getSimpleAssessmentLiabilities(journeyId))
         events.size shouldBe 0
         result      shouldBe None
       }
