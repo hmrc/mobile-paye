@@ -40,7 +40,18 @@
           "taxAmount": 256,
           "nationalInsuranceAmount": 127
         }
-      ]
+      ],
+      "employmentBenefits": {
+        "benefits": [
+          {
+            "benefitType": "MedicalInsurance",
+            "amount": 650
+          }
+        ],
+        "changeCarBenefitLink": "/",
+        "changeMedicalBenefitLink": "/",
+        "changeOtherBenefitLink": "/"
+      }
     }
   ],
   "previousEmployments": [
