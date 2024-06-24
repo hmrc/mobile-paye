@@ -27,6 +27,10 @@ class SandboxMobilePayeControllerISpec extends BaseISpec {
         .as[String] shouldBe LocalDate.now().minusDays(30).toString
       (response.json \ "employments" \ 0 \ "payments" \ 2 \ "date")
         .as[String]                                                shouldBe LocalDate.now().minusDays(60).toString
+      (response.json \ "employments" \ 0 \ "employmentBenefits" \ "benefits" \ 0 \ "benefitType")
+        .as[String] shouldBe "MedicalInsurance"
+      (response.json \ "employments" \ 0 \ "employmentBenefits" \ "benefits" \ 0 \ "amount")
+        .as[Int] shouldBe 650
       (response.json \\ "repayment").isEmpty                       shouldBe false
       (response.json \\ "pensions").isEmpty                        shouldBe false
       (response.json \\ "otherIncomes").isEmpty                    shouldBe false

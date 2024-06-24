@@ -1,200 +1,111 @@
-{
-  "taxYear": 2022,
-  "employments": [
-    {
-      "name": "SAINSBURYS",
-      "payrollNumber": "TEST",
-      "taxCode": "K4453X",
-      "amount": 50000,
-      "payeNumber": "A100",
-      "incomeDetailsLink": "/check-income-tax/income-details/1",
-      "updateIncomeLink": "/check-income-tax/update-income/load/1",
-      "payments": [
-        {
-          "date": "2017-02-28",
-          "amountYearToDate": 50000,
-          "taxAmountYearToDate": 24000,
-          "nationalInsuranceAmountYearToDate": 2280,
-          "amount": 35000,
-          "taxAmount": 20250,
-          "nationalInsuranceAmount": 480
-        },
-        {
-          "date": "2016-10-31",
-          "amountYearToDate": 15000,
-          "taxAmountYearToDate": 4250,
-          "nationalInsuranceAmountYearToDate": 1800,
-          "amount": 4000,
-          "taxAmount": 1000,
-          "nationalInsuranceAmount": 480
-        },
-        {
-          "date": "2016-07-31",
-          "amountYearToDate": 11000,
-          "taxAmountYearToDate": 3250,
-          "nationalInsuranceAmountYearToDate": 1320,
-          "amount": 6000,
-          "taxAmount": 1750,
-          "nationalInsuranceAmount": 720
-        },
-        {
-          "date": "2016-04-30",
-          "amountYearToDate": 5000,
-          "taxAmountYearToDate": 1000,
-          "nationalInsuranceAmountYearToDate": 600,
-          "amount": 5000,
-          "taxAmount": 1000,
-          "nationalInsuranceAmount": 600
-        }
-      ],
-      "employmentBenefits": {
-        "benefits": [
-          {
-            "benefitType": "CarBenefit",
-            "amount": 100
-          },
-          {
-            "benefitType": "MedicalInsurance",
-            "amount": 100
-          },
-          {
-            "benefitType": "OtherBenefits",
-            "amount": 14600
-          }
-        ],
-        "changeCarBenefitLink": "/paye/company-car/details",
-        "changeMedicalBenefitLink": "/paye/benefits/medical-benefit",
-        "changeOtherBenefitLink": "/digital-forms/form/tell-us-about-company-benefits/draft/guide"
-      }
-    }
-  ],
-  "pensions": [
-    {
-      "name": "AVIVA PENSIONS",
-      "payrollNumber": "64765",
-      "taxCode": "D0",
-      "amount": 50000,
-      "payeNumber": "AZ00070",
-      "link": "/check-income-tax/income-details/2"
-    }
-  ],
-  "otherIncomes": [
-    {
-      "name": "JOB SEEKERS ALLOWANCE",
-      "amount": 100
-    },
-    {
-      "name": "OTHER INCOME EARNED",
-      "amount": 100
-    },
-    {
-      "name": "PROFIT",
-      "amount": 100
-    },
-    {
-      "name": "NON CODED INCOME",
-      "amount": 100
-    },
-    {
-      "name": "STATE PENSION",
-      "amount": 9225
-    }
-  ],
-  "taxCodeChange": {
-    "hasChanged": false
-  },
-  "simpleAssessment": {
-    "taxYears": [
+[
+  {
+    "taxYear": 2024,
+    "incomes": [
       {
-        "taxYear": 2022,
-        "reconciliations": [
-          {
-            "reconciliationId": 1,
-            "reconciliationStatus": 5,
-            "cumulativeAmount": 200,
-            "taxLiabilityAmount": 300,
-            "taxPaidAmount": 100,
-            "reconciliationTimeStamp": "2022-07-30 12:34:56",
-            "p800Status": "ISSUED",
-            "previousReconciliationId": 2,
-            "p800Reasons": [
-              {
-                "reasonType": "UNDERPAYMENT",
-                "reasonCode": 45,
-                "estimatedAmount": 175,
-                "actualAmount": 185
-              }
-            ],
-            "businessReason": "P302",
-            "eligibility": true,
-            "totalAmountOwed": 400,
-            "chargeReference": "XQ004100001540",
-            "dueDate": "2024-01-31",
-            "receivableStatus": "OUTSTANDING",
-            "receipts": [
-              {
-                "receiptAmount": 100,
-                "receiptDate": "2023-08-02",
-                "receiptMethod": "RECEIVED FROM ETMP",
-                "receiptStatus": "ALLOCATED",
-                "allocatedAmount": 100
-              }
-            ]
-          }
-        ],
-        "cardPaymentFallbackUrl": "/tax-you-paid/2022-2023/paid-too-little"
+        "name": "REDACTED",
+        "payrollNumber": "REDACTED",
+        "startDate": "2011-12-12",
+        "amount": 2788.9,
+        "taxAmount": 142.6,
+        "taxCode": "1231LX",
+        "isPension": true
       },
       {
-        "taxYear": 2021,
-        "reconciliations": [
-          {
-            "reconciliationId": 2,
-            "reconciliationStatus": 5,
-            "cumulativeAmount": 100,
-            "taxLiabilityAmount": 200,
-            "taxPaidAmount": 50,
-            "reconciliationTimeStamp": "2021-07-30 12:34:56",
-            "p800Status": "ISSUED",
-            "p800Reasons": [
-              {
-                "reasonType": "UNDERPAYMENT",
-                "reasonCode": 45,
-                "estimatedAmount": 175,
-                "actualAmount": 185
-              }
-            ],
-            "businessReason": "P302",
-            "eligibility": true,
-            "totalAmountOwed": 300,
-            "chargeReference": "XQ004100001539",
-            "dueDate": "2024-01-31",
-            "receivableStatus": "OUTSTANDING",
-            "receipts": [
-              {
-                "receiptAmount": 150,
-                "receiptDate": "2022-08-02",
-                "receiptMethod": "RECEIVED FROM ETMP",
-                "receiptStatus": "ALLOCATED",
-                "allocatedAmount": 150
-              }
-            ]
-          }
-        ],
-        "cardPaymentFallbackUrl": "/tax-you-paid/2021-2022/paid-too-little"
+        "name": "REDACTED",
+        "payrollNumber": "REDACTED",
+        "startDate": "2024-04-19",
+        "amount": 5000,
+        "taxAmount": 952.07,
+        "taxCode": "BRX",
+        "isPension": true
       }
     ]
   },
-  "taxFreeAmount": -45769,
-  "taxFreeAmountLink": "/check-income-tax/tax-free-allowance",
-  "estimatedTaxAmount": 51224,
-  "estimatedTaxAmountLink": "/check-income-tax/paye-income-tax-estimate",
-  "understandYourTaxCodeLink": "/check-income-tax/tax-codes",
-  "addMissingEmployerLink": "/check-income-tax/add-employment/employment-name",
-  "addMissingPensionLink": "/check-income-tax/add-pension-provider/name",
-  "addMissingIncomeLink": "/digital-forms/form/tell-us-about-other-income/draft/guide",
-  "addMissingBenefitLink": "/digital-forms/form/tell-us-about-company-benefits/draft/guide",
-  "addMissingCompanyCarLink": "/paye/company-car/do-you-pay-towards-car/",
-  "previousTaxYearLink": "/check-income-tax/income-tax-history",
-  "updateEstimatedIncomeLink": "/check-income-tax/update-income/start",
-  "updateEmployerLink": "/check-income-tax/update-remove-employment/decision-page"
-}
+  {
+    "taxYear": 2023,
+    "incomes": [
+      {
+        "name": "REDACTED",
+        "payrollNumber": "REDACTED",
+        "startDate": "2011-12-12",
+        "amount": 16049.76,
+        "taxAmount": 694,
+        "taxCode": "1257L",
+        "isPension": true
+      }
+    ]
+  },
+  {
+    "taxYear": 2022,
+    "incomes": [
+      {
+        "name": "REDACTED",
+        "payrollNumber": "REDACTED",
+        "startDate": "2011-12-12",
+        "amount": 15395.88,
+        "taxAmount": 747.2,
+        "taxCode": "1165L",
+        "isPension": true
+      }
+    ]
+  },
+  {
+    "taxYear": 2021,
+    "incomes": [
+      {
+        "name": "REDACTED",
+        "payrollNumber": "REDACTED",
+        "startDate": "2011-12-12",
+        "amount": 14959.2,
+        "taxAmount": 476,
+        "taxCode": "1257L",
+        "isPension": true
+      }
+    ]
+  },
+  {
+    "taxYear": 2020,
+    "incomes": [
+      {
+        "name": "REDACTED",
+        "payrollNumber": "REDACTED",
+        "startDate": "2011-12-12",
+        "amount": 13966,
+        "taxAmount": 56.4,
+        "taxCode": "801L",
+        "isPension": true
+      },
+      {
+        "name": "REDACTED",
+        "payrollNumber": "REDACTED",
+        "startDate": "2008-09-04",
+        "endDate": "2020-10-31",
+        "amount": 31539.38,
+        "taxAmount": 7440.6,
+        "isPension": false
+      }
+    ]
+  },
+  {
+    "taxYear": 2019,
+    "incomes": [
+      {
+        "name": "REDACTED",
+        "payrollNumber": "REDACTED",
+        "startDate": "2011-12-12",
+        "amount": 13459.2,
+        "taxAmount": 5383.6,
+        "isPension": false
+      },
+      {
+        "name": "REDACTED",
+        "payrollNumber": "REDACTED",
+        "startDate": "2008-09-04",
+        "endDate": "2020-10-31",
+        "amount": 60770.64,
+        "taxAmount": 15304.4,
+        "taxCode": "375L",
+        "isPension": false
+      }
+    ]

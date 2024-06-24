@@ -1,6 +1,6 @@
 import play.sbt.PlayImport.PlayKeys.*
 import sbt.Keys.excludeDependencies
-import sbt.Tests.{Group, SubProcess}
+import uk.gov.hmrc.DefaultBuildSettings.oneForkedJvmPerTest
 
 import scala.collection.Seq
 
@@ -8,7 +8,7 @@ val appName: String = "mobile-paye"
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(
-    Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtDistributablesPlugin, ScoverageSbtPlugin): _*
+    Seq(play.sbt.PlayScala, SbtDistributablesPlugin, ScoverageSbtPlugin): _*
   )
   .disablePlugins(JUnitXmlReportPlugin)
   .configs(IntegrationTest)
@@ -59,8 +59,3 @@ lazy val microservice = Project(appName, file("."))
     ExclusionRule(organization = "com.typesafe.play")
     )
   )
-
-def oneForkedJvmPerTest(tests: Seq[TestDefinition]): Seq[Group] =
-  tests map { test =>
-    Group(test.name, Seq(test), SubProcess(ForkOptions().withRunJVMOptions(Vector(s"-Dtest.name=${test.name}"))))
-  }
