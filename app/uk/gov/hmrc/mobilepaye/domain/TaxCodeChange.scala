@@ -24,7 +24,7 @@ case class TaxCodeChange(
   hasChanged:         Boolean,
   startDate:          Option[LocalDate] = None,
   taxCodeChangeUrl:   String = "/check-income-tax/tax-code-change/tax-code-comparison",
-  taxCodeChangeUrlCy: String = "/check-income-tax/tax-code-change/tax-code-comparison/cy")
+  taxCodeChangeUrlCy: String = "/check-income-tax/tax-code-change/tax-code-comparison")
 
 object TaxCodeChange {
   implicit val formats: Format[TaxCodeChange] = Json.format[TaxCodeChange]
