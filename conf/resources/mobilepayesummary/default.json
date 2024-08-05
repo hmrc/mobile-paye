@@ -207,7 +207,7 @@
             "receivableStatus": "PART PAID",
             "totalAmountOwed": 1950,
             "chargeReference": "XQ004100001540",
-            "dueDate": "2024-01-31",
+            "dueDate": "<PAYMENT_DATE1>",
             "dunningLock": false,
             "receipts": [
               {
