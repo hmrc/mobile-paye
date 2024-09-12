@@ -23,6 +23,7 @@ import java.time.LocalDate
 case class HistoricTaxCodeIncome(
   name:          String,
   payrollNumber: String,
+  payeReference: String,
   startDate:     Option[LocalDate],
   endDate:       Option[LocalDate],
   amount:        Option[BigDecimal],

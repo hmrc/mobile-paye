@@ -471,6 +471,7 @@ paths:
                         incomes:
                           - name: SAINSBURY'S PLC
                             payrollNumber: EMP0000001
+                            payeReference: EMP0000001
                             startDate: 01-08-2022
                             amount: 14143
                             taxAmount: 1135
@@ -480,6 +481,7 @@ paths:
                         incomes:
                           - name: SAINSBURY'S PLC
                             payrollNumber: EMP0000001
+                            payeReference: EMP0000001
                             startDate: 01-08-2022
                             amount: 14143
                             taxAmount: 1135
@@ -487,6 +489,7 @@ paths:
                             isPension: false
                           - name: TESCO LTD
                             payrollNumber: TS1234321
+                            payeReference: TS1234321
                             startDate: 11-09-2020
                             endDate: 16-07-22
                             amount: 11250
@@ -497,6 +500,7 @@ paths:
                         incomes:
                           - name: TESCO LTD
                             payrollNumber: TS1234321
+                            payeReference: TS1234321
                             startDate: 11-09-2020
                             endDate: 16-07-22
                             amount: 10000
@@ -1046,6 +1050,7 @@ components:
       required:
         - name
         - payrollNumber
+        - payeReference
         - startDate
         - isPension
       type: object
@@ -1053,6 +1058,8 @@ components:
         name:
           type: string
         payrollNumber:
+          type: string
+        payeReference:
           type: string
         startDate:
           type: string
@@ -1071,6 +1078,7 @@ components:
       example:
         name: "TESCO"
         payrollNumber: "P123123"
+        payeReference: "P123123"
         startDate: "01-01-2023"
         amount: 12000
         taxAmount: 1000
