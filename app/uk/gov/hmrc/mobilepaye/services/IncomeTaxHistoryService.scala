@@ -89,6 +89,7 @@ class IncomeTaxHistoryService @Inject() (
         HistoricTaxCodeIncome(
           employment.name,
           employment.payrollNumber.getOrElse(s"${employment.taxDistrictNumber}/${employment.payeNumber}"),
+          s"${employment.taxDistrictNumber}/${employment.payeNumber}",
           startDate,
           employment.endDate,
           maybeLastPayment.map(_.amountYearToDate),

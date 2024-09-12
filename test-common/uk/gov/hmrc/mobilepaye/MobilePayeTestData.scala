@@ -355,6 +355,7 @@ trait MobilePayeTestData {
   val historicTaxCodeIncome1: HistoricTaxCodeIncome = HistoricTaxCodeIncome(
     name          = taiEmployment().name,
     payrollNumber = taiEmployment().payrollNumber.get,
+    payeReference = s"${taiEmployment().taxDistrictNumber}/${taiEmployment().payeNumber}",
     startDate     = taiEmployment().startDate,
     endDate       = None,
     amount        = taiEmployment().annualAccounts.head.payments.lastOption.map(_.amountYearToDate),
@@ -365,6 +366,7 @@ trait MobilePayeTestData {
   val historicTaxCodeIncome2: HistoricTaxCodeIncome = HistoricTaxCodeIncome(
     name          = taiEmployment2.name,
     payrollNumber = taiEmployment2.payrollNumber.get,
+    payeReference = s"${taiEmployment2.taxDistrictNumber}/${taiEmployment2.payeNumber}",
     startDate     = taiEmployment2.startDate,
     endDate       = taiEmployment2.endDate,
     amount        = None,
@@ -375,6 +377,7 @@ trait MobilePayeTestData {
   val historicTaxCodeIncome3: HistoricTaxCodeIncome = HistoricTaxCodeIncome(
     name          = taiEmployment3.name,
     payrollNumber = s"${taiEmployment3.taxDistrictNumber}/${taiEmployment3.payeNumber}",
+    payeReference = s"${taiEmployment3.taxDistrictNumber}/${taiEmployment3.payeNumber}",
     startDate     = taiEmployment3.startDate,
     endDate       = None,
     amount        = None,

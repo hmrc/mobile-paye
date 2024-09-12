@@ -31,6 +31,7 @@ Fetch the income tax history for a user.
       {
         "name": "Sainsbury's PLC",
         "payrollNumber": "9282SAINS22",
+        "payeReference": "9282SAINS22",
         "startDate": "2020-07-10",
         "amount": 18900,
         "taxAmount": 1578,
@@ -45,6 +46,7 @@ Fetch the income tax history for a user.
       {
         "name": "Sainsbury's PLC",
         "payrollNumber": "9282SAINS22",
+        "payeReference": "9282SAINS22",
         "startDate": "2020-07-10",
         "amount": 27900,
         "taxAmount": 2134,
@@ -59,6 +61,7 @@ Fetch the income tax history for a user.
       {
         "name": "Sainsbury's PLC",
         "payrollNumber": "9282SAINS22",
+        "payeReference": "9282SAINS22",
         "startDate": "2020-07-10",
         "amount": 15679,
         "taxAmount": 1345,
@@ -68,6 +71,7 @@ Fetch the income tax history for a user.
       {
         "name": "TESCO LTD",
         "payrollNumber": "1212TESCO12",
+        "payeReference": "1212TESCO12",
         "startDate": "2019-05-25",
         "endDate": "2020-07-05",
         "amount": 3567,
@@ -83,6 +87,7 @@ Fetch the income tax history for a user.
       {
         "name": "TESCO LTD",
         "payrollNumber": "1212TESCO12",
+        "payeReference": "1212TESCO12",
         "startDate": "2019-05-25",
         "endDate": "2020-07-05",
         "amount": 16098,
