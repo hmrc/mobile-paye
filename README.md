@@ -14,6 +14,24 @@ The following services are exposed from the micro-service.
 Please note it is mandatory to supply an Accept HTTP header to all below services with the
 value ```application/vnd.hmrc.1.0+json```.
 
+## Development Setup
+- Run locally: `sbt run` which runs on port `8247` by default
+- Run with test endpoints: `sbt 'run -Dplay.http.router=testOnlyDoNotUseInAppConf.Routes'`
+
+##  Service Manager Profiles
+The service can be run locally from Service Manager, using the following profiles:
+
+| Profile Details                | Command                                                                                                                                                                                     |
+|--------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| MOBILE_PAYE_ALL                | sm2 --start MOBILE_PAYE_ALL --appendArgs '{"MOBILE_PAYE": ["-DincomeTaxComparisonPeriod.rUK.startDate=2021-01-01T00:00:00", "-DincomeTaxComparisonPeriod.rUK.endDate=2030-01-01T00:00:00", "-Dapplication.router=testOnlyDoNotUseInAppConf.Routes"], "TAI": ["-Dapplication.router=testOnlyDoNotUseInAppConf.Routes"]}'                                                                  |
+
+
+## Run Tests
+- Run Unit Tests:  `sbt test`
+- Run Integration Tests: `sbt it:test`
+- Run Unit and Integration Tests: `sbt test it:test`
+- Run Unit and Integration Tests with coverage report: `sbt clean compile coverage test it:test coverageReport dependencyUpdates`
+
 API
 ---
 
