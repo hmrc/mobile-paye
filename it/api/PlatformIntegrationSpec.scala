@@ -1,7 +1,6 @@
 package api
 
 import org.scalatest.concurrent.Eventually
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsArray, JsValue}
 import play.api.libs.ws.WSResponse
 import play.api.test.PlayRunners
@@ -18,16 +17,6 @@ import utils.BaseISpec
   */
 class PlatformIntegrationSpec extends BaseISpec with Eventually with PlayRunners {
 
-  private val appId1: String = "00010002-0003-0004-0005-000600070008"
-  private val appId2: String = "00090002-0003-0004-0005-000600070008"
-
-  override protected def appBuilder: GuiceApplicationBuilder = new GuiceApplicationBuilder().configure(
-    config ++
-    Map(
-      "api.access.white-list.applicationIds" -> Seq(appId1, appId2)
-    )
-  )
-
   "microservice" should {
     "provide definition with configurable whitelist" in {
       val result: WSResponse = await(wsUrl("/api/definition").get())
@@ -42,8 +31,6 @@ class PlatformIntegrationSpec extends BaseISpec with Eventually with PlayRunners
 
       val accessDetails: JsValue = (versionJson \\ "access").head
       (accessDetails \ "type").as[String]                           shouldBe "PRIVATE"
-      (accessDetails \ "whitelistedApplicationIds").head.as[String] shouldBe appId1
-      (accessDetails \ "whitelistedApplicationIds")(1).as[String]   shouldBe appId2
     }
 
     "provide YAML conf endpoint" in {

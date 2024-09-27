@@ -28,8 +28,6 @@ import uk.gov.hmrc.http.HttpClient
 import uk.gov.hmrc.play.audit.DefaultAuditConnector
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
-import scala.jdk.CollectionConverters._
-
 class GuiceModule(
   environment:   Environment,
   configuration: Configuration)
@@ -48,14 +46,7 @@ class GuiceModule(
     bind(classOf[HttpClient]).to(classOf[WSHttpImpl])
 
     bindConfigInt("controllers.confidenceLevel")
-    bind(classOf[ApiAccess]).toInstance(
-      ApiAccess(
-        "PRIVATE",
-        configuration.underlying
-          .getStringList("api.access.white-list.applicationIds")
-          .asScala
-      )
-    )
+    bind(classOf[ApiAccess]).toInstance(ApiAccess("PRIVATE"))
 
     bindConfigStringSeq("scopes")
     bind(classOf[String]).annotatedWith(named("tai")).toInstance(servicesConfig.baseUrl("tai"))
