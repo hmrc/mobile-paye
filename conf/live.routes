@@ -8,5 +8,3 @@ GET        /nino/:nino/previous-tax-year/:taxYear/summary uk.gov.hmrc.mobilepaye
 GET        /nino/:nino/income-tax-history                 uk.gov.hmrc.mobilepaye.controllers.LiveMobilePayeController.getTaxIncomeHistory(nino: uk.gov.hmrc.domain.Nino, journeyId: JourneyId)
 
 GET        /nino/:nino/tax-code                           uk.gov.hmrc.mobilepaye.controllers.LiveMobilePayeController.getTaxCode(nino: uk.gov.hmrc.domain.Nino, journeyId: JourneyId)
-
-POST       /feedback                                      uk.gov.hmrc.mobilepaye.controllers.FeedbackController.postFeedback(journeyId: JourneyId)

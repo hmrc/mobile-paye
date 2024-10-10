@@ -41,7 +41,6 @@ API
 | ```/mobile-paye/nino/:nino/previous-tax-year/:taxYear/summary``` | GET                 | Fetch the previous tax year PAYE Summary object for a given NINO for a given previous Tax Year. [More...](docs/previous-year-summary.md) |
 | ```/mobile-paye/nino/:nino/income-tax-history```                 | GET                 | Fetch the Income Tax History (Default 5 years) for a given NINO. [More...](docs/income-tax-history.md)                                   |
 | ```/mobile-paye/nino/:nino/tax-code```                           | GET                 | Get the current tax code for a given NINO. [More...](docs/tax-code.md)                                                                   |
-| ```/mobile-paye/feedback```                                      | POST                | Send user feedback to mobile-feedback which will be sent to splunk. [More...](docs/feedback.md)                                          |
 
 Shuttered
 ---------
