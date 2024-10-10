@@ -16,15 +16,13 @@
 
 package uk.gov.hmrc.mobilepaye
 
-import play.api.libs.json.{JsObject, Json}
-
 import java.time.LocalDate
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mobilepaye.domain.audit.{MobilePayeSummaryResponseAudit, OtherIncomeAudit, PayeIncomeAudit}
 import uk.gov.hmrc.mobilepaye.domain.citizendetails.Person
 import uk.gov.hmrc.mobilepaye.domain.simpleassessment.ReasonType.UNDERPAYMENT
 import uk.gov.hmrc.mobilepaye.domain.simpleassessment.{MobileSAReconciliation, MobileSATaxYearReconciliation, MobileSimpleAssessmentResponse, Reason, Receipts}
-import uk.gov.hmrc.mobilepaye.domain.{Feedback, HistoricTaxCodeIncome, IncomeSource, IncomeTaxYear, MobilePayePreviousYearSummaryResponse, MobilePayeSummaryResponse, OtherIncome, P800Repayment, PayeIncome, TaxCodeChange}
+import uk.gov.hmrc.mobilepaye.domain.{HistoricTaxCodeIncome, IncomeSource, IncomeTaxYear, MobilePayePreviousYearSummaryResponse, MobilePayeSummaryResponse, OtherIncome, P800Repayment, PayeIncome, TaxCodeChange}
 import uk.gov.hmrc.mobilepaye.domain.tai._
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status.{NotSupported, Underpaid}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus.{ChequeSent, PaymentDue, PaymentPaid, SaUser}
@@ -335,11 +333,6 @@ trait MobilePayeTestData {
     taxFreeAmount       = Some(10000),
     estimatedTaxAmount  = Some(250)
   )
-
-  val feedbackModel: Feedback = Feedback(Some(true), Some(5), Some("It was great"), Some(4))
-
-  val feedbackJson: JsObject =
-    Json.obj("ableToDo" -> true, "howEasyScore" -> 5, "whyGiveScore" -> "It was great", "howDoYouFeelScore" -> 4)
 
   val emptyIncomeTaxHistoryList: List[IncomeTaxYear] = {
     List(

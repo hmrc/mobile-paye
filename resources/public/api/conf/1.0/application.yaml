@@ -403,36 +403,6 @@ paths:
       security:
         - userRestricted:
             - read:native-apps-api-orchestration
-  /feedback:
-    post:
-      tags:
-        - mobile-paye
-      summary: Post feedback from the mobile app
-      description: This endpoint receives a feedback model to post to the mobile-feedback service.
-      operationId: PostFeedback
-      parameters:
-        - name: journeyId
-          in: query
-          description: ''
-          required: true
-          style: form
-          explode: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        description: Post Feedback Request
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Feedback'
-      responses:
-        '204':
-          description: 'No Content'
-      deprecated: false
-      security:
-        - userRestricted:
-            - read:native-apps-api-orchestration
   /nino/{nino}/income-tax-history:
     get:
       tags:
@@ -1008,23 +978,6 @@ components:
         paymentStatus: REFUND
         taxYear: 2018
         claimRefundLink: /tax-you-paid/2018-2019/paid-too-much
-    Feedback:
-      title: Feedback
-      type: object
-      properties:
-        ableToDo:
-          type: boolean
-        howEasyScore:
-          type: integer
-        whyGiveScore:
-          type: string
-        howDoYouFeelScore:
-          type: integer
-      example:
-        ableToDo: true
-        howEasyScore: 5
-        whyGiveScore: "It was great"
-        howDoYouFeelScore: 4
     IncomeTaxHistoryResponse:
       title: IncomeTaxHistoryResponse
       type: array

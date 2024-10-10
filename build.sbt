@@ -36,6 +36,7 @@ lazy val microservice = Project(appName, file("."))
     ).value,
     Test / unmanagedSourceDirectories := (Test / baseDirectory)(base => Seq(base / "test", base / "test-common")).value,
     IntegrationTest / testGrouping := oneForkedJvmPerTest((IntegrationTest / definedTests).value),
+    scalacOptions in Test -= "-Ywarn-dead-code",
     scalacOptions ++= Seq(
       "-deprecation",
       "-encoding",
