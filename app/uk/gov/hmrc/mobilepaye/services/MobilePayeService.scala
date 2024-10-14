@@ -19,15 +19,15 @@ package uk.gov.hmrc.mobilepaye.services
 import com.google.inject.{Inject, Singleton}
 import play.api.Logger
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.mobilepaye.connectors.{CitizenDetailsConnector, FeedbackConnector, MobileSimpleAssessmentConnector, ShutteringConnector, TaiConnector, TaxCalcConnector}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.mobilepaye.connectors.{CitizenDetailsConnector, MobileSimpleAssessmentConnector, ShutteringConnector, TaiConnector, TaxCalcConnector}
 import uk.gov.hmrc.mobilepaye.domain.citizendetails.Person
 import uk.gov.hmrc.mobilepaye.domain.simpleassessment.MobileSimpleAssessmentResponse
 import uk.gov.hmrc.mobilepaye.domain.tai._
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status.{NotSupported, Overpaid, Underpaid}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.{P800Summary, TaxYearReconciliation}
 import uk.gov.hmrc.mobilepaye.domain.types.ModelTypes.JourneyId
-import uk.gov.hmrc.mobilepaye.domain.{Feedback, IncomeSource, MobilePayeSummaryResponse, OtherIncome, P800Cache, P800Repayment, PayeIncome, TaxCodeChange}
+import uk.gov.hmrc.mobilepaye.domain.{IncomeSource, MobilePayeSummaryResponse, OtherIncome, P800Cache, P800Repayment, PayeIncome, TaxCodeChange}
 import uk.gov.hmrc.mobilepaye.repository.P800CacheMongo
 
 import java.time.{LocalDateTime, ZoneId}
@@ -40,7 +40,6 @@ class MobilePayeService @Inject() (
   taiConnector:                                                    TaiConnector,
   taxCalcConnector:                                                TaxCalcConnector,
   p800CacheMongo:                                                  P800CacheMongo,
-  feedbackConnector:                                               FeedbackConnector,
   mobileSimpleAssessmentConnector:                                 MobileSimpleAssessmentConnector,
   citizenDetailsConnector:                                         CitizenDetailsConnector,
   shutteringConnector:                                             ShutteringConnector,
@@ -113,9 +112,6 @@ class MobilePayeService @Inject() (
   )(implicit hc: HeaderCarrier,
     ec:          ExecutionContext
   ): Future[Person] = citizenDetailsConnector.getPerson(nino)
-
-  def postFeedback(feedback: Feedback)(implicit hc: HeaderCarrier): Future[HttpResponse] =
-    feedbackConnector.postFeedback(feedback)
 
   def getCurrentTaxCode(
     nino:        Nino

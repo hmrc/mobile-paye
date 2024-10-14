@@ -18,9 +18,9 @@ package uk.gov.hmrc.mobilepaye.services
 
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, HttpResponse, InternalServerException, UnauthorizedException}
-import uk.gov.hmrc.mobilepaye.connectors.{CitizenDetailsConnector, FeedbackConnector, MobileSimpleAssessmentConnector, ShutteringConnector, TaiConnector, TaxCalcConnector}
+import uk.gov.hmrc.mobilepaye.connectors.{CitizenDetailsConnector, MobileSimpleAssessmentConnector, ShutteringConnector, TaiConnector, TaxCalcConnector}
 import uk.gov.hmrc.mobilepaye.domain.simpleassessment.MobileSimpleAssessmentResponse
-import uk.gov.hmrc.mobilepaye.domain.{Feedback, IncomeSource, MobilePayeSummaryResponse, OtherBenefits, P800Cache, Shuttering, TaxCodeChange}
+import uk.gov.hmrc.mobilepaye.domain.{IncomeSource, MobilePayeSummaryResponse, OtherBenefits, P800Cache, Shuttering, TaxCodeChange}
 import uk.gov.hmrc.mobilepaye.domain.tai._
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.TaxYearReconciliation
 import uk.gov.hmrc.mobilepaye.domain.types.ModelTypes.JourneyId
@@ -38,7 +38,6 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
   implicit val mockShutteringConnector:    ShutteringConnector             = mock[ShutteringConnector]
   val mockTaiConnector:                    TaiConnector                    = mock[TaiConnector]
   val mockTaxCalcConnector:                TaxCalcConnector                = mock[TaxCalcConnector]
-  val mockFeedbackConnector:               FeedbackConnector               = mock[FeedbackConnector]
   val mockMobileSimpleAssessmentConnector: MobileSimpleAssessmentConnector = mock[MobileSimpleAssessmentConnector]
   val mockCitizenDetailsConnector:         CitizenDetailsConnector         = mock[CitizenDetailsConnector]
   val p800CacheMongo:                      P800CacheMongo                  = repository
@@ -50,7 +49,6 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
   val service = new MobilePayeService(mockTaiConnector,
                                       mockTaxCalcConnector,
                                       p800CacheMongo,
-                                      mockFeedbackConnector,
                                       mockMobileSimpleAssessmentConnector,
                                       mockCitizenDetailsConnector,
                                       mockShutteringConnector,
@@ -106,12 +104,6 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
       .expects(*, *, *, *)
       .returning(f)
 
-  def mockPostFeedback(f: Future[HttpResponse]) =
-    (mockFeedbackConnector
-      .postFeedback(_: Feedback)(_: HeaderCarrier))
-      .expects(*, *)
-      .returning(f)
-
   def mockGetTaxCodeChangeExists(f: Future[Boolean]) =
     (mockTaiConnector
       .getTaxCodeChangeExists(_: Nino)(_: HeaderCarrier, _: ExecutionContext))
@@ -165,7 +157,6 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
       val service = new MobilePayeService(mockTaiConnector,
                                           mockTaxCalcConnector,
                                           p800CacheMongo,
-                                          mockFeedbackConnector,
                                           mockMobileSimpleAssessmentConnector,
                                           mockCitizenDetailsConnector,
                                           mockShutteringConnector,
@@ -200,7 +191,6 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
       val service = new MobilePayeService(mockTaiConnector,
                                           mockTaxCalcConnector,
                                           p800CacheMongo,
-                                          mockFeedbackConnector,
                                           mockMobileSimpleAssessmentConnector,
                                           mockCitizenDetailsConnector,
                                           mockShutteringConnector,
@@ -235,7 +225,6 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
       val service = new MobilePayeService(mockTaiConnector,
                                           mockTaxCalcConnector,
                                           p800CacheMongo,
-                                          mockFeedbackConnector,
                                           mockMobileSimpleAssessmentConnector,
                                           mockCitizenDetailsConnector,
                                           mockShutteringConnector,
@@ -268,7 +257,6 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
       val service = new MobilePayeService(mockTaiConnector,
                                           mockTaxCalcConnector,
                                           p800CacheMongo,
-                                          mockFeedbackConnector,
                                           mockMobileSimpleAssessmentConnector,
                                           mockCitizenDetailsConnector,
                                           mockShutteringConnector,
@@ -438,7 +426,6 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
       val service = new MobilePayeService(mockTaiConnector,
                                           mockTaxCalcConnector,
                                           p800CacheMongo,
-                                          mockFeedbackConnector,
                                           mockMobileSimpleAssessmentConnector,
                                           mockCitizenDetailsConnector,
                                           mockShutteringConnector,
@@ -527,22 +514,6 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
                                                   repayment        = None)
     }
 
-  }
-
-  "postFeedback" should {
-
-    "return a 201 No Content" when {
-
-      "a valid feedbackModel has been provided" in {
-        mockPostFeedback(Future.successful(HttpResponse.apply(204, "")))
-
-        val result = await(service.postFeedback(feedbackModel))
-
-        result.status shouldBe 204
-
-      }
-
-    }
   }
 
   "getCurrentTaxCode" should {
