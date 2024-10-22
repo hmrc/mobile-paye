@@ -229,7 +229,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
     "return 401 when handling 401 Upstream4xxResponse" in {
       mockShutteringResponse(notShuttered)
       mockAuthorisationGrantAccess(grantAccessWithCL200)
-      mockGetPerson(Future.failed(Upstream4xxResponse("Upstream Exception", 401, 401)))
+      mockGetPerson(Future.failed(UpstreamErrorResponse("Upstream Exception", 401, 401)))
 
       val result = controller.getPayeSummary(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42", currentTaxYear)(fakeRequest)
 
@@ -394,7 +394,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
     "return 401 when handling 401 Upstream4xxResponse" in {
       mockShutteringResponse(notShuttered)
       mockAuthorisationGrantAccess(grantAccessWithCL200)
-      mockGetMobilePayePreviousYearResponse(Future.failed(Upstream4xxResponse("Upstream Exception", 401, 401)))
+      mockGetMobilePayePreviousYearResponse(Future.failed(UpstreamErrorResponse("Upstream Exception", 401, 401)))
 
       val result = controller.getPreviousYearPayeSummary(nino, "9bcb9c5a-0cfd-49e3-a935-58a28c386a42", previousTaxYear)(
         fakeRequest

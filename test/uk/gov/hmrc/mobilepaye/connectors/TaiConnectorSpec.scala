@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,24 +21,30 @@ import uk.gov.hmrc.http._
 import uk.gov.hmrc.mobilepaye.domain.tai.{EmploymentIncome, Live, PensionIncome}
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 
+import java.net.URL
 import scala.concurrent.{ExecutionContext, Future}
 
 class TaiConnectorSpec extends BaseSpec {
 
-  val mockCoreGet: CoreGet      = mock[CoreGet]
-  val serviceUrl:  String       = "tst-url"
-  val connector:   TaiConnector = new TaiConnector(mockCoreGet, serviceUrl)
+  val serviceUrl: String       = "https://tst-url"
+  val connector:  TaiConnector = new TaiConnector(mockHttpClient, serviceUrl)
 
   def mockTaiGet[T](
-    url: String,
-    f:   Future[T]
-  ) =
-    (mockCoreGet
-      .GET(_: String, _: Seq[(String, String)], _: Seq[(String, String)])(_: HttpReads[T],
-                                                                          _: HeaderCarrier,
-                                                                          _: ExecutionContext))
-      .expects(s"$serviceUrl/tai/${nino.value}/$url", *, *, *, *, *)
-      .returning(f)
+    url1: String,
+    f:    Future[T]
+  ) = {
+
+    val urlNew = s"$serviceUrl/tai/${nino.value}/$url1"
+    (mockHttpClient
+      .get(_: URL)(_: HeaderCarrier))
+      .expects(url"$urlNew", *)
+      .returning(mockRequestBuilder)
+
+    (mockRequestBuilder
+      .execute[T](_: HttpReads[T], _: ExecutionContext))
+      .expects(*, *)
+      .returns(f)
+  }
 
   "Non Tax Code Incomes - GET /tai/:nino/tax-account/:year/income" should {
     "return a valid NonTaxCodeIncome when receiving a valid 200 response for an authorised user" in {

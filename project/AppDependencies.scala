@@ -4,14 +4,14 @@ object AppDependencies {
 
   import play.sbt.PlayImport._
 
-  private val playBootstrapVersion  = "8.5.0"
+  private val playBootstrapVersion  = "9.5.0"
   private val playHmrcVersion       = "8.0.0"
-  private val domainVersion         = "9.0.0"
-  private val taxYearVersion        = "4.0.0"
+  private val domainVersion         = "10.0.0"
+  private val taxYearVersion        = "5.0.0"
   private val scalaMockVersion      = "5.2.0"
-  private val hmrcMongoVersion      = "1.8.0"
-  private val refinedVersion         = "0.11.1"
-  private val authClientVersion     = "2.0.0"
+  private val hmrcMongoVersion      = "2.2.0"
+  private val refinedVersion        = "0.11.2"
+  private val authClientVersion     = "3.0.0"
   private val jsonExtensionsVersion = "0.42.0"
 
   val compile: Seq[ModuleID] = Seq(
@@ -21,7 +21,7 @@ object AppDependencies {
     "uk.gov.hmrc"       %% "play-hmrc-api-play-30"        % playHmrcVersion,
     "uk.gov.hmrc"       %% "tax-year"                     % taxYearVersion,
     "uk.gov.hmrc.mongo" %% "hmrc-mongo-play-30"           % hmrcMongoVersion,
-    "eu.timepit"        %% "refined"                       % refinedVersion,
+    "eu.timepit"        %% "refined"                      % refinedVersion,
     "uk.gov.hmrc"       %% "internal-auth-client-play-30" % authClientVersion,
     "ai.x"              %% "play-json-extensions"         % jsonExtensionsVersion,
     ehcache

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,28 +23,36 @@ import uk.gov.hmrc.mobilepaye.domain.taxcalc.TaxYearReconciliation
 import uk.gov.hmrc.mobilepaye.services.admin.FeatureFlagService
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 
+import java.net.URL
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 class TaxCalcConnectorSpec extends BaseSpec {
-  val mockCoreGet: CoreGet                       = mock[CoreGet]
-  val serviceUrl: String                         = "tax-calc-url"
+
+  val serviceUrl:             String             = "https://tax-calc-url"
   val mockFeatureFlagService: FeatureFlagService = mock[FeatureFlagService]
-  val connector: TaxCalcConnector                = new TaxCalcConnector(mockCoreGet, serviceUrl, mockFeatureFlagService)
+  val connector:              TaxCalcConnector   = new TaxCalcConnector(mockHttpClient, serviceUrl, mockFeatureFlagService)
 
-  def mockTaxCalcGet[T](f: Future[T]) =
-    (mockCoreGet
-      .GET(_: String, _: Seq[(String, String)], _: Seq[(String, String)])(_: HttpReads[T],
-                                                                          _: HeaderCarrier,
-                                                                          _: ExecutionContext))
-      .expects(s"$serviceUrl/taxcalc/${nino.value}/reconciliations", *, *, *, *, *)
-      .returning(f)
+  def mockTaxCalcGet[T](f: Future[T]) = {
 
-  (mockFeatureFlagService.get(_: FeatureFlagName))
-    .expects(OnlinePaymentIntegration)
-    .returning(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = true)))
+    (mockHttpClient
+      .get(_: URL)(_: HeaderCarrier))
+      .expects(url"$serviceUrl/taxcalc/${nino.value}/reconciliations", *)
+      .returning(mockRequestBuilder)
+
+    (mockRequestBuilder
+      .execute[T](_: HttpReads[T], _: ExecutionContext))
+      .expects(*, *)
+      .returns(f)
+  }
 
   "getTaxReconciliations" should {
     "not fail for some Throwable" in {
+
+      (mockFeatureFlagService
+        .get(_: FeatureFlagName))
+        .expects(OnlinePaymentIntegration)
+        .returning(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = true)))
       mockTaxCalcGet(Future.failed(new Throwable("")))
 
       val result: Option[List[TaxYearReconciliation]] = await(connector.getTaxReconciliations(nino))

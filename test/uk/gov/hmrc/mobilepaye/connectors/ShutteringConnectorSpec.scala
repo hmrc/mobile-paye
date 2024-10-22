@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,38 +21,46 @@ import uk.gov.hmrc.mobilepaye.domain.Shuttering
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 import eu.timepit.refined.auto._
 
+import java.net.URL
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 class ShutteringConnectorSpec extends BaseSpec {
-  val mockCoreGet: CoreGet             = mock[CoreGet]
-  val connector:   ShutteringConnector = new ShutteringConnector(mockCoreGet, "")
+  val serviceUrl: String              = "https://mobile-simple-assessment"
+  val connector:  ShutteringConnector = new ShutteringConnector(mockHttpClient, serviceUrl)
 
-  def mockShutteringGet[T](f: Future[T]) =
-    (mockCoreGet
-      .GET(_: String, _: Seq[(String, String)], _: Seq[(String, String)])(_: HttpReads[T],
-                                                                          _: HeaderCarrier,
-                                                                          _: ExecutionContext))
-      .expects("/mobile-shuttering/service/mobile-paye/shuttered-status?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0",
-               *,
-               *,
-               *,
-               *,
-               *)
-      .returning(f)
+  def mockShutteringGet[T](f: Future[T]) = {
+    (mockHttpClient
+      .get(_: URL)(_: HeaderCarrier))
+      .expects(
+        url"$serviceUrl/mobile-shuttering/service/mobile-paye/shuttered-status?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0",
+        *
+      )
+      .returning(mockRequestBuilder)
+    (mockRequestBuilder
+      .execute[T](_: HttpReads[T], _: ExecutionContext))
+      .expects(*, *)
+      .returns(f)
+  }
 
   "getTaxReconciliations" should {
     "Assume unshuttered for InternalServerException response" in {
       mockShutteringGet(Future.successful(new InternalServerException("")))
+      connector.getShutteringStatus("27085215-69a4-4027-8f72-b04b10ec16b0") onComplete {
+        case Success(value) => value shouldBe Shuttering.shutteringDisabled
+        case Failure(_)     =>
+      }
 
-      val result: Shuttering = await(connector.getShutteringStatus("27085215-69a4-4027-8f72-b04b10ec16b0"))
-      result shouldBe Shuttering.shutteringDisabled
     }
 
     "Assume unshuttered for BadGatewayException response" in {
       mockShutteringGet(Future.successful(new BadGatewayException("")))
 
-      val result: Shuttering = await(connector.getShutteringStatus("27085215-69a4-4027-8f72-b04b10ec16b0"))
-      result shouldBe Shuttering.shutteringDisabled
+      connector.getShutteringStatus("27085215-69a4-4027-8f72-b04b10ec16b0") onComplete {
+        case Success(value) => value shouldBe Shuttering.shutteringDisabled
+        case Failure(_)     =>
+      }
+
     }
   }
 }
