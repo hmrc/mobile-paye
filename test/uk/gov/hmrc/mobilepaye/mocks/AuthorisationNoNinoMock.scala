@@ -22,10 +22,11 @@ import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.Retrieval
 import uk.gov.hmrc.auth.core.{AuthConnector, ConfidenceLevel}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait AuthorisationNoNinoMock extends MockFactory {
+trait AuthorisationNoNinoMock extends BaseSpec {
 
   type GrantAccessNoNino = ConfidenceLevel
 

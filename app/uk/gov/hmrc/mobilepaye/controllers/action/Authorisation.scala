@@ -71,7 +71,7 @@ trait Authorisation extends Results with AuthorisedFunctions {
         block(request)
       }
       .recover {
-        case _: uk.gov.hmrc.http.Upstream4xxResponse =>
+        case _: uk.gov.hmrc.http.UpstreamErrorResponse =>
           logger.info("Unauthorized! Failed to grant access since 4xx response!")
           Unauthorized(Json.toJson[ErrorResponse](ErrorUnauthorizedUpstream))
 

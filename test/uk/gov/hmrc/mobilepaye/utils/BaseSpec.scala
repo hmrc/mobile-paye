@@ -17,7 +17,7 @@
 package uk.gov.hmrc.mobilepaye.utils
 
 import org.apache.pekko.actor.ActorSystem
-import org.apache.pekko.stream.ActorMaterializer
+import org.apache.pekko.stream.{ActorMaterializer, Materializer}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import play.api.{Configuration, Environment}
@@ -29,6 +29,7 @@ import uk.gov.hmrc.mobilepaye.domain.types.ModelTypes.JourneyId
 import uk.gov.hmrc.mobilepaye.mocks.{AuditMock, AuthorisationMock, ShutteringMock}
 import eu.timepit.refined.auto._
 import org.scalatest.Outcome
+import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
 import scala.concurrent.ExecutionContext
@@ -50,6 +51,8 @@ trait BaseSpec
   private lazy val env           = Environment.simple()
   private lazy val configuration = Configuration.load(env)
   implicit lazy val appConfig    = new MobilePayeConfig(configuration)
+  val mockHttpClient:     HttpClientV2   = mock[HttpClientV2]
+  val mockRequestBuilder: RequestBuilder = mock[RequestBuilder]
 
   val acceptHeader: (String, String) = "Accept" -> "application/vnd.hmrc.1.0+json"
   val journeyId:    JourneyId        = "27085215-69a4-4027-8f72-b04b10ec16b0"

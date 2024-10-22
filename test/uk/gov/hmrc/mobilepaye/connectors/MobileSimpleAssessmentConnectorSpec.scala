@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,31 +16,34 @@
 
 package uk.gov.hmrc.mobilepaye.connectors
 
-
-import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, HttpReads, NotFoundException}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, NotFoundException, StringContextOps}
 import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, FeatureFlagName, OnlinePaymentIntegration}
 import uk.gov.hmrc.mobilepaye.domain.simpleassessment.MobileSimpleAssessmentResponse
 import uk.gov.hmrc.mobilepaye.services.admin.FeatureFlagService
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 import uk.gov.hmrc.play.bootstrap.tools.LogCapturing
 
+import java.net.URL
 import scala.concurrent.{ExecutionContext, Future}
 
 class MobileSimpleAssessmentConnectorSpec extends BaseSpec with LogCapturing {
-  val mockCoreGet:            CoreGet            = mock[CoreGet]
-  val serviceUrl:             String             = "mobile-simple-assessment"
+  val serviceUrl:             String             = "https://mobile-simple-assessment"
   val mockFeatureFlagService: FeatureFlagService = mock[FeatureFlagService]
 
   val connector: MobileSimpleAssessmentConnector =
-    MobileSimpleAssessmentConnector(mockCoreGet, serviceUrl, mockFeatureFlagService)
+    MobileSimpleAssessmentConnector(mockHttpClient, serviceUrl, mockFeatureFlagService)
 
-  def mockMobileSimpleAssessmentGet[T](f: Future[T]) =
-    (mockCoreGet
-      .GET(_: String, _: Seq[(String, String)], _: Seq[(String, String)])(_: HttpReads[T],
-                                                                          _: HeaderCarrier,
-                                                                          _: ExecutionContext))
-      .expects(s"$serviceUrl/liabilities?journeyId=$journeyId", *, *, *, *, *)
-      .returning(f)
+  def mockMobileSimpleAssessmentGet[T](f: Future[T]) = {
+    (mockHttpClient
+      .get(_: URL)(_: HeaderCarrier))
+      .expects(url"$serviceUrl/liabilities?journeyId=$journeyId", *)
+      .returning(mockRequestBuilder)
+
+    (mockRequestBuilder
+      .execute[T](_: HttpReads[T], _: ExecutionContext))
+      .expects(*, *)
+      .returns(f)
+  }
 
   def mockFeatureFlagGet =
     (mockFeatureFlagService

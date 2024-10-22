@@ -21,15 +21,17 @@ import com.google.inject.name.Named
 import play.api.Logger
 import play.api.http.Status.{LOCKED, NOT_FOUND}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, UpstreamErrorResponse}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.mobilepaye.domain.citizendetails.Person
+import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class CitizenDetailsConnector @Inject() (
   @Named("citizen-details") citizenDetailsConnectorUrl: String,
-  http:                                                 CoreGet) {
+  http:                                                 HttpClientV2) {
 
   val logger: Logger = Logger(this.getClass)
 
@@ -38,12 +40,15 @@ class CitizenDetailsConnector @Inject() (
   )(implicit hc: HeaderCarrier,
     ec:          ExecutionContext
   ): Future[Person] =
-    http.GET[Person](s"$citizenDetailsConnectorUrl/citizen-details/$nino/designatory-details/basic") recover {
-      case e: UpstreamErrorResponse if e.statusCode == LOCKED =>
-        logger.info("Person details are hidden")
-        throw UpstreamErrorResponse(e.getMessage(), LOCKED)
-      case e: UpstreamErrorResponse if e.statusCode == NOT_FOUND =>
-        logger.info(s"No details found for nino '$nino'")
-        throw UpstreamErrorResponse(e.getMessage(), NOT_FOUND)
-    }
+    http
+      .get(url"$citizenDetailsConnectorUrl/citizen-details/$nino/designatory-details/basic")
+      .execute[Person]
+      .recover {
+        case e: UpstreamErrorResponse if e.statusCode == LOCKED =>
+          logger.info("Person details are hidden")
+          throw UpstreamErrorResponse(e.getMessage(), LOCKED)
+        case e: UpstreamErrorResponse if e.statusCode == NOT_FOUND =>
+          logger.info(s"No details found for nino '$nino'")
+          throw UpstreamErrorResponse(e.getMessage(), NOT_FOUND)
+      }
 }

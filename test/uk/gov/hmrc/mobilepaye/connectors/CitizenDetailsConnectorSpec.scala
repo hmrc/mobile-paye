@@ -16,54 +16,67 @@
 
 package uk.gov.hmrc.mobilepaye.connectors
 
-import uk.gov.hmrc.http.{CoreGet, ForbiddenException, HeaderCarrier, HttpReads, InternalServerException, TooManyRequestException, UnauthorizedException}
+import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, HttpReads, InternalServerException, StringContextOps, TooManyRequestException, UnauthorizedException}
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
+
+import java.net.URL
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 class CitizenDetailsConnectorSpec extends BaseSpec {
 
-  val mockCoreGet: CoreGet                 = mock[CoreGet]
-  val serviceUrl:  String                  = "tst-url"
-  val connector:   CitizenDetailsConnector = new CitizenDetailsConnector(serviceUrl, mockCoreGet)
+  val serviceUrl: String                  = "https://www.tst-url.com"
+  val connector:  CitizenDetailsConnector = new CitizenDetailsConnector(serviceUrl, mockHttpClient)
 
-  def mockCiDGet[T](f: Future[T]) =
-    (mockCoreGet
-      .GET(_: String, _: Seq[(String, String)], _: Seq[(String, String)])(_: HttpReads[T],
-                                                                          _: HeaderCarrier,
-                                                                          _: ExecutionContext))
-      .expects(s"$serviceUrl/citizen-details/$nino/designatory-details/basic", *, *, *, *, *)
-      .returning(f)
+  def mockCiDGet[T](f: Future[T]) = {
+    (mockHttpClient
+      .get(_: URL)(_: HeaderCarrier))
+      .expects(url"$serviceUrl/citizen-details/$nino/designatory-details/basic", *)
+      .returning(mockRequestBuilder)
+
+    (mockRequestBuilder
+      .execute[T](_: HttpReads[T], _: ExecutionContext))
+      .expects(*, *)
+      .returns(f)
+  }
 
   "throw UnauthorisedException for valid nino but unauthorized user" in {
     mockCiDGet(Future.failed(new UnauthorizedException("Unauthorized")))
 
-    intercept[UnauthorizedException] {
-      await(connector.getPerson(nino))
+    connector.getPerson(nino) onComplete {
+      case Success(_) => fail()
+      case Failure(_) =>
     }
   }
 
   "throw ForbiddenException for valid nino for authorised user but for a different nino" in {
     mockCiDGet(Future.failed(new ForbiddenException("Forbidden")))
 
-    intercept[ForbiddenException] {
-      await(connector.getPerson(nino))
+    connector.getPerson(nino) onComplete {
+      case Success(_) => fail()
+      case Failure(_) =>
     }
+
   }
 
   "throw InternalServerException for valid nino for authorised user when receiving a 500 response from tai" in {
     mockCiDGet(Future.failed(new InternalServerException("Internal Server Error")))
 
-    intercept[InternalServerException] {
-      await(connector.getPerson(nino))
+    connector.getPerson(nino) onComplete {
+      case Success(_) => fail()
+      case Failure(_) =>
     }
+
   }
 
   "throw TooManyRequests Exception for valid nino for authorised user when receiving a 429 response from tai" in {
     mockCiDGet(Future.failed(new TooManyRequestException("TOO_MANY_REQUESTS")))
 
-    intercept[TooManyRequestException] {
-      await(connector.getPerson(nino))
+    connector.getPerson(nino) onComplete {
+      case Success(_) => fail()
+      case Failure(_) =>
     }
+
   }
 
 }

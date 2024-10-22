@@ -20,11 +20,11 @@ import com.google.inject.name.Names.named
 import com.google.inject.{AbstractModule, TypeLiteral}
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.http.{CoreGet, CorePost}
+
 import uk.gov.hmrc.mobilepaye.controllers.api.ApiAccess
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.http.HttpClient
+
 import uk.gov.hmrc.play.audit.DefaultAuditConnector
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
@@ -41,9 +41,6 @@ class GuiceModule(
 
     bind(classOf[AuthConnector]).to(classOf[DefaultAuthConnector])
     bind(classOf[AuditConnector]).to(classOf[DefaultAuditConnector])
-    bind(classOf[CoreGet]).to(classOf[WSHttpImpl])
-    bind(classOf[CorePost]).to(classOf[WSHttpImpl])
-    bind(classOf[HttpClient]).to(classOf[WSHttpImpl])
 
     bindConfigInt("controllers.confidenceLevel")
     bind(classOf[ApiAccess]).toInstance(ApiAccess("PRIVATE"))
