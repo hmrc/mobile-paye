@@ -1,6 +1,5 @@
 import play.sbt.PlayImport.PlayKeys.*
 import sbt.Keys.excludeDependencies
-import uk.gov.hmrc.DefaultBuildSettings.oneForkedJvmPerTest
 
 import scala.collection.Seq
 
@@ -35,7 +34,7 @@ lazy val microservice = Project(appName, file("."))
       Seq(base / "it", base / "test-common")
     ).value,
     Test / unmanagedSourceDirectories := (Test / baseDirectory)(base => Seq(base / "test", base / "test-common")).value,
-    IntegrationTest / testGrouping := oneForkedJvmPerTest((IntegrationTest / definedTests).value),
+    IntegrationTest / parallelExecution := false,
     scalacOptions in Test -= "-Ywarn-dead-code",
     scalacOptions ++= Seq(
       "-deprecation",
@@ -55,8 +54,8 @@ lazy val microservice = Project(appName, file("."))
     coverageHighlighting := true,
     coverageExcludedPackages := "<empty>;com.kenshoo.play.metrics.*;.*definition.*;prod.*;testOnlyDoNotUseInAppConf.*;app.*;.*BuildInfo.*;.*Routes.*;.*javascript.*;.*Reverse.*",
     excludeDependencies ++= Seq(
-    // As of Play 3.0, groupId has changed to org.playframework; exclude transitive dependencies to the old artifacts
-    // Specifically affects play-json-extensions dependency
-    ExclusionRule(organization = "com.typesafe.play")
+      // As of Play 3.0, groupId has changed to org.playframework; exclude transitive dependencies to the old artifacts
+      // Specifically affects play-json-extensions dependency
+      ExclusionRule(organization = "com.typesafe.play")
     )
   )
