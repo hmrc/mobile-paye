@@ -6,12 +6,12 @@ object AppDependencies {
 
   private val playBootstrapVersion  = "9.11.0"
   private val playHmrcVersion       = "8.0.0"
-  private val domainVersion         = "10.0.0"
-  private val taxYearVersion        = "5.0.0"
+  private val domainVersion         = "11.0.0"
+  private val taxYearVersion        = "6.0.0"
   private val scalaMockVersion      = "5.2.0"
-  private val hmrcMongoVersion      = "2.5.0"
+  private val hmrcMongoVersion      = "2.6.0"
   private val refinedVersion        = "0.11.3"
-  private val authClientVersion     = "3.1.0"
+  private val authClientVersion     = "4.0.0"
   private val jsonExtensionsVersion = "0.42.0"
 
   val compile: Seq[ModuleID] = Seq(
@@ -24,7 +24,7 @@ object AppDependencies {
     "eu.timepit"        %% "refined"                      % refinedVersion,
     "uk.gov.hmrc"       %% "internal-auth-client-play-30" % authClientVersion,
     "ai.x"              %% "play-json-extensions"         % jsonExtensionsVersion,
-    ehcache
+    caffeine
   )
 
   trait TestDependencies {
