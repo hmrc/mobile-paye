@@ -20,7 +20,7 @@ import org.mockito.ArgumentMatchers.{any, anyBoolean}
 import org.mockito.Mockito
 import org.mockito.Mockito.{reset, times, verify, when}
 import org.scalatest.BeforeAndAfterEach
-import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
+import org.scalatest.matchers.must.Matchers.*
 import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, FeatureFlagName, OnlinePaymentIntegration}
 import uk.gov.hmrc.mobilepaye.repository.admin.AdminRepository
 import uk.gov.hmrc.mobilepaye.utils.{BaseSpec, MockAsyncCacheApi}
@@ -28,15 +28,13 @@ import uk.gov.hmrc.mobilepaye.utils.{BaseSpec, MockAsyncCacheApi}
 import scala.concurrent.Future
 import scala.reflect.ClassTag
 
-class FeatureFlagServiceSpec
-  extends BaseSpec
-    with BeforeAndAfterEach {
+class FeatureFlagServiceSpec extends BaseSpec with BeforeAndAfterEach {
 
   def mock[T](implicit ev: ClassTag[T]): T =
     Mockito.mock(ev.runtimeClass.asInstanceOf[Class[T]])
   val mockCacheApi: MockAsyncCacheApi =
     new MockAsyncCacheApi()
-  val mockAdminRepository: AdminRepository =
+  lazy val mockAdminRepository: AdminRepository =
     mock[AdminRepository]
   val service: FeatureFlagService =
     new FeatureFlagService(mockAdminRepository, mockCacheApi)
@@ -87,6 +85,6 @@ class FeatureFlagServiceSpec
   "When setAll is called return successful Unit" in {
     when(mockAdminRepository.setFeatureFlags(any())).thenReturn(Future.successful(()))
 
-    await(service.setAll(Map(flag().name -> flag().isEnabled))) mustBe((): Unit)
+    await(service.setAll(Map(flag().name -> flag().isEnabled))) mustBe ((): Unit)
   }
 }

@@ -22,7 +22,7 @@ import uk.gov.hmrc.serviceResponse.Response
 
 class P800CacheMongoSpec extends BaseSpec with PlayMongoRepositorySupport[P800Cache] {
 
-  override lazy val repository = new P800CacheMongo(mongoComponent, appConfig)
+  val repository: P800CacheMongo = new P800CacheMongo(mongoComponent, appConfig)
 
   "P800CacheMongo" should {
     "add new record" in {

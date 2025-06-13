@@ -17,24 +17,32 @@
 package uk.gov.hmrc.mobilepaye.utils
 
 import play.api.Logging
-import play.api.libs.json._
+import play.api.libs.json.*
 
-object EnumUtils extends Logging {
+import scala.language.{implicitConversions, postfixOps}
+import scala.util.{Failure, Try}
 
-  def enumReads[E <: Enumeration](`enum`: E): Reads[E#Value] =
-    new Reads[E#Value] {
+class InvalidEnumException(className: String, input: String)
+    extends RuntimeException(s"Enumeration expected of type: '$className', but it does not contain '$input'")
 
-      def reads(json: JsValue): JsResult[E#Value] = json match {
-        case JsString(s) =>
-          try JsSuccess(enum.withName(s))
-          catch {
-            case e: NoSuchElementException =>
-              logger.error(s"[Enumeration] Validation failure: $s  is not a valid ${enum.toString}")
-              throw e
-          }
-        case JsNumber(n) =>
-          JsSuccess(enum(n.toInt))
-        case _ => JsError("String value expected")
-      }
-    }
+object EnumUtils {
+
+  import scala.language.implicitConversions
+
+  def enumReads[E <: Enumeration](customEnum: E): Reads[customEnum.Value] = {
+    case JsString(s) =>
+      Try(JsSuccess(customEnum.withName(s))).recover { case _: NoSuchElementException =>
+        JsError(
+          s"Expected an enumeration of type: '${customEnum.getClass.getSimpleName}', but it does not contain the name: '$s'"
+        )
+      }.get
+
+    case _ => JsError("String value is expected")
+  }
+
+  implicit def enumWrites[E <: Enumeration, V <: Enumeration#Value]: Writes[V] =
+    Writes((v: V) => JsString(v.toString))
+
+  implicit def format[E <: Enumeration](customEnum: E): Format[customEnum.Value] =
+    Format(enumReads(customEnum), enumWrites[E, customEnum.Value])
 }

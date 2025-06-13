@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,14 @@ import uk.gov.hmrc.mobilepaye.connectors.{TaiConnector, TaxCalcConnector}
 import uk.gov.hmrc.mobilepaye.domain.tai.{Benefits, Ceased, Employment, NonTaxCodeIncome, TaxAccountSummary, TaxCodeRecord}
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 import uk.gov.hmrc.time.TaxYear
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class PreviousYearSummaryServiceSpec extends BaseSpec {
 
-  val mockTaiConnector:     TaiConnector     = mock[TaiConnector]
+  val mockTaiConnector: TaiConnector = mock[TaiConnector]
   val mockTaxCalcConnector: TaxCalcConnector = mock[TaxCalcConnector]
 
   val service = new PreviousYearSummaryService(mockTaiConnector, 5)
@@ -67,7 +69,7 @@ class PreviousYearSummaryServiceSpec extends BaseSpec {
       mockEmployments()
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
-      mockGetBenefits(Future.successful((noBenefits)))
+      mockGetBenefits(Future.successful(noBenefits))
       mockGetTaxCodes()
 
       val result = await(service.getMobilePayePreviousYearSummaryResponse(nino, previousTaxYear))
@@ -80,7 +82,7 @@ class PreviousYearSummaryServiceSpec extends BaseSpec {
       mockEmployments(Future successful Seq(taiEmployment3.copy(name = "ALDI", receivingOccupationalPension = true)))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
-      mockGetBenefits(Future.successful((noBenefits)))
+      mockGetBenefits(Future.successful(noBenefits))
       mockGetTaxCodes()
 
       val result = await(service.getMobilePayePreviousYearSummaryResponse(nino, previousTaxYear))
@@ -90,12 +92,11 @@ class PreviousYearSummaryServiceSpec extends BaseSpec {
 
     "return MobilePayePreviousYearSummaryResponse with no pensions when pension data is missing" in {
       mockEmployments(
-        Future successful Seq(taiEmployment(TaxYear.current.previous.startYear),
-                              taiEmployment2.copy(employmentStatus = Ceased))
+        Future successful Seq(taiEmployment(TaxYear.current.previous.startYear), taiEmployment2.copy(employmentStatus = Ceased))
       )
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
-      mockGetBenefits(Future.successful((noBenefits)))
+      mockGetBenefits(Future.successful(noBenefits))
       mockGetTaxCodes()
 
       val result = await(service.getMobilePayePreviousYearSummaryResponse(nino, previousTaxYear))
@@ -110,7 +111,7 @@ class PreviousYearSummaryServiceSpec extends BaseSpec {
         Future.successful(nonTaxCodeIncomeWithoutUntaxedInterest.copy(otherNonTaxCodeIncomes = Nil))
       )
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
-      mockGetBenefits(Future.successful((noBenefits)))
+      mockGetBenefits(Future.successful(noBenefits))
       mockGetTaxCodes()
 
       val result = await(service.getMobilePayePreviousYearSummaryResponse(nino, previousTaxYear))
@@ -123,7 +124,7 @@ class PreviousYearSummaryServiceSpec extends BaseSpec {
       mockEmployments()
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
-      mockGetBenefits(Future.successful((noBenefits)))
+      mockGetBenefits(Future.successful(noBenefits))
       mockGetTaxCodes()
 
       val result = await(service.getMobilePayePreviousYearSummaryResponse(nino, previousTaxYear))
@@ -136,7 +137,7 @@ class PreviousYearSummaryServiceSpec extends BaseSpec {
       )
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
-      mockGetBenefits(Future.successful((noBenefits)))
+      mockGetBenefits(Future.successful(noBenefits))
       mockGetTaxCodes()
 
       val result = await(service.getMobilePayePreviousYearSummaryResponse(nino, previousTaxYear))

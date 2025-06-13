@@ -16,15 +16,15 @@
 
 package uk.gov.hmrc.mobilepaye.controllers
 
-import com.google.inject._
+import com.google.inject.*
 import play.api.Logger
 import play.api.libs.json.Json.toJson
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc._
+import play.api.mvc.*
 import uk.gov.hmrc.api.sandbox.FileResource
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.mobilepaye.domain._
-import uk.gov.hmrc.mobilepaye.domain.types.ModelTypes.JourneyId
+import uk.gov.hmrc.mobilepaye.domain.*
+import uk.gov.hmrc.mobilepaye.domain.types.JourneyId
 import uk.gov.hmrc.time.TaxYear
 
 import java.time.LocalDate
@@ -32,12 +32,12 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class SandboxMobilePayeController @Inject() (
-  val controllerComponents:      ControllerComponents
+  val controllerComponents: ControllerComponents
 )(implicit val executionContext: ExecutionContext)
     extends MobilePayeController
     with FileResource {
 
-  override val app:    String = "Sandbox-Paye-Controller"
+  override val app: String = "Sandbox-Paye-Controller"
   override val logger: Logger = Logger(this.getClass)
   private final val WebServerIsDown = new Status(521)
 
@@ -45,9 +45,9 @@ class SandboxMobilePayeController @Inject() (
     Json.toJson(Shuttering(shuttered = true, title = Some("Shuttered"), message = Some("PAYE is currently shuttered")))
 
   override def getPayeSummary(
-    nino:      Nino,
+    nino: Nino,
     journeyId: JourneyId,
-    taxYear:   Int
+    taxYear: Int
   ): Action[AnyContent] =
     validateAccept(acceptHeaderValidationRules).async { implicit request =>
       Future.successful(request.headers.get("SANDBOX-CONTROL") match {
@@ -74,7 +74,7 @@ class SandboxMobilePayeController @Inject() (
   override def parser: BodyParser[AnyContent] = controllerComponents.parsers.anyContent
 
   override def getTaxIncomeHistory(
-    nino:      Nino,
+    nino: Nino,
     journeyId: JourneyId
   ): Action[AnyContent] = validateAccept(acceptHeaderValidationRules).async {
     Future.successful(
@@ -111,9 +111,9 @@ class SandboxMobilePayeController @Inject() (
     )
 
   override def getPreviousYearPayeSummary(
-    nino:      Nino,
+    nino: Nino,
     journeyId: JourneyId,
-    taxYear:   Int
+    taxYear: Int
   ): Action[AnyContent] = validateAccept(acceptHeaderValidationRules).async {
 
     val CYMinus1 = TaxYear.current.startYear - 1
@@ -154,7 +154,7 @@ class SandboxMobilePayeController @Inject() (
   }
 
   override def getTaxCode(
-    nino:      Nino,
+    nino: Nino,
     journeyId: JourneyId
   ): Action[AnyContent] = validateAccept(acceptHeaderValidationRules).async {
     Future successful NotFound(Json.toJson("No Data found"))

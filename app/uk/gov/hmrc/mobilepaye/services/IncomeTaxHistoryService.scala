@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.mobilepaye.services
 
-import cats.implicits._
+import cats.implicits.*
 import com.google.inject.{Inject, Singleton}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
@@ -31,26 +31,23 @@ import javax.inject.Named
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class IncomeTaxHistoryService @Inject() (
-  taiConnector:                                                                TaiConnector,
-  @Named("numberOfPreviousYearsToShowIncomeTaxHistory") IncomeTaxHistoryYears: Int) {
+class IncomeTaxHistoryService @Inject() (taiConnector: TaiConnector,
+                                         @Named("numberOfPreviousYearsToShowIncomeTaxHistory") IncomeTaxHistoryYears: Int
+                                        ) {
 
   def getIncomeTaxHistoryYearsList(
-    nino:        Nino
-  )(implicit hc: HeaderCarrier,
-    ec:          ExecutionContext
-  ): Future[List[IncomeTaxYear]] = {
+    nino: Nino
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[List[IncomeTaxYear]] = {
     val currentTaxYear: TaxYear = getCurrentTaxYear
     val taxYears: List[TaxYear] =
-      Range(currentTaxYear.startYear, (currentTaxYear.startYear - IncomeTaxHistoryYears), -1)
+      Range(currentTaxYear.startYear, currentTaxYear.startYear - IncomeTaxHistoryYears, -1)
         .map(TaxYear(_))
         .toList
 
     taxYears traverse (taxYear => {
-      getIncomeTaxYear(nino, taxYear).recover {
-        case e: Exception =>
-          logger.info(s"Couldn't get taxYear info for $taxYear due to: \n$e")
-          IncomeTaxYear(taxYear, None)
+      getIncomeTaxYear(nino, taxYear).recover { case e: Exception =>
+        logger.info(s"Couldn't get taxYear info for $taxYear due to: \n$e")
+        IncomeTaxYear(taxYear, None)
       }
     })
 
@@ -58,7 +55,7 @@ class IncomeTaxHistoryService @Inject() (
 
   private def getCurrentTaxYear: TaxYear = {
     val currentDate = LocalDate.now(ZoneId.of("Europe/London"))
-    val taxYear     = TaxYear(currentDate.getYear)
+    val taxYear = TaxYear(currentDate.getYear)
     if (currentDate isBefore taxYear.starts) {
       taxYear.previous
     } else {
@@ -67,11 +64,9 @@ class IncomeTaxHistoryService @Inject() (
   }
 
   private def getIncomeTaxYear(
-    nino:        Nino,
-    taxYear:     TaxYear
-  )(implicit hc: HeaderCarrier,
-    ec:          ExecutionContext
-  ): Future[IncomeTaxYear] =
+    nino: Nino,
+    taxYear: TaxYear
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[IncomeTaxYear] =
     for {
       maybeTaxCodeIncomeDetails <- taiConnector.getTaxCodeIncomes(nino, taxYear.startYear)
       employmentDetails         <- taiConnector.getEmployments(nino, taxYear.startYear)
@@ -79,23 +74,23 @@ class IncomeTaxHistoryService @Inject() (
       val taxCodesMap = maybeTaxCodeIncomeDetails.groupBy(_.employmentId)
       val incomeTaxHistory = employmentDetails.map { employment =>
         val maybeTaxCode = for {
-          incomes <- taxCodesMap.get(Some(employment.sequenceNumber))
+          incomes                      <- taxCodesMap.get(Some(employment.sequenceNumber))
           taxCodeIncome: TaxCodeIncome <- incomes.headOption
         } yield taxCodeIncome
-        val startDate:        Option[LocalDate] = employment.startDate.filter(_.getYear > 1949)
-        val maybeLastPayment: Option[Payment]   = fetchLastPayment(employment, taxYear)
+        val startDate: Option[LocalDate] = employment.startDate.filter(_.getYear > 1949)
+        val maybeLastPayment: Option[Payment] = fetchLastPayment(employment, taxYear)
         val isPension = maybeTaxCode.exists(_.componentType == PensionIncome)
 
         HistoricTaxCodeIncome(
-          employment.name,
-          employment.payrollNumber.getOrElse(s"${employment.taxDistrictNumber}/${employment.payeNumber}"),
-          s"${employment.taxDistrictNumber}/${employment.payeNumber}",
-          startDate,
-          employment.endDate,
-          maybeLastPayment.map(_.amountYearToDate),
-          maybeLastPayment.map(_.taxAmountYearToDate),
-          maybeTaxCode.map(_.taxCode),
-          isPension
+          name          = employment.name,
+          payrollNumber = employment.payrollNumber.getOrElse(s"${employment.taxDistrictNumber}/${employment.payeNumber}"),
+          payeReference = s"${employment.taxDistrictNumber}/${employment.payeNumber}",
+          startDate     = startDate,
+          endDate       = employment.endDate,
+          amount        = maybeLastPayment.map(_.amountYearToDate),
+          taxAmount     = maybeLastPayment.map(_.taxAmountYearToDate),
+          taxCode       = maybeTaxCode.map(_.taxCode),
+          isPension     = isPension
         )
       }.toList
       IncomeTaxYear(taxYear, if (incomeTaxHistory.isEmpty) None else Some(incomeTaxHistory))
@@ -103,7 +98,7 @@ class IncomeTaxHistoryService @Inject() (
 
   private def fetchLastPayment(
     employment: Employment,
-    taxYear:    TaxYear
+    taxYear: TaxYear
   ) = employment.annualAccounts.find(_.taxYear.startYear == taxYear.startYear).flatMap(_.payments.lastOption)
 
 }

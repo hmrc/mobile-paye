@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,23 @@
 
 package uk.gov.hmrc.mobilepaye.connectors
 
-import uk.gov.hmrc.http._
+import uk.gov.hmrc.http.*
 import uk.gov.hmrc.mobilepaye.domain.admin.OnlinePaymentIntegration
 import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, FeatureFlagName}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.TaxYearReconciliation
 import uk.gov.hmrc.mobilepaye.services.admin.FeatureFlagService
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
-
+import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import java.net.URL
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 class TaxCalcConnectorSpec extends BaseSpec {
+  override val mockHttpClient: HttpClientV2 = mock[HttpClientV2]
+  override val mockRequestBuilder: RequestBuilder = mock[RequestBuilder]
+  val serviceUrl: String = "https://tax-calc-url"
 
-  val serviceUrl:             String             = "https://tax-calc-url"
-  val mockFeatureFlagService: FeatureFlagService = mock[FeatureFlagService]
-  val connector:              TaxCalcConnector   = new TaxCalcConnector(mockHttpClient, serviceUrl, mockFeatureFlagService)
+  val connector: TaxCalcConnector = new TaxCalcConnector(mockHttpClient, serviceUrl, mockFeatureFlagService)
 
   def mockTaxCalcGet[T](f: Future[T]) = {
 
@@ -41,7 +42,7 @@ class TaxCalcConnectorSpec extends BaseSpec {
       .returning(mockRequestBuilder)
 
     (mockRequestBuilder
-      .execute[T](_: HttpReads[T], _: ExecutionContext))
+      .execute[T](using _: HttpReads[T], _: ExecutionContext))
       .expects(*, *)
       .returns(f)
   }

@@ -16,20 +16,20 @@
 
 package uk.gov.hmrc.mobilepaye.controllers
 
-import com.google.inject._
+import com.google.inject.*
 import com.google.inject.name.Named
 import play.api.Logger
 import play.api.libs.json.Json
 import play.api.libs.json.Json.obj
-import play.api.mvc._
+import play.api.mvc.*
 import uk.gov.hmrc.api.controllers.HeaderValidator
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, HeaderNames}
 import uk.gov.hmrc.mobilepaye.connectors.ShutteringConnector
 import uk.gov.hmrc.mobilepaye.controllers.action.AccessControl
-import uk.gov.hmrc.mobilepaye.domain.types.ModelTypes.JourneyId
 import uk.gov.hmrc.mobilepaye.domain.audit.MobilePayeSummaryResponseAudit
+import uk.gov.hmrc.mobilepaye.domain.types.JourneyId
 import uk.gov.hmrc.mobilepaye.services.{IncomeTaxHistoryService, MobilePayeService, PreviousYearSummaryService}
 import uk.gov.hmrc.play.audit.AuditExtensions.auditHeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
@@ -42,56 +42,56 @@ import scala.concurrent.{ExecutionContext, Future}
 trait MobilePayeController extends BackendBaseController with HeaderValidator with ErrorHandling {
 
   def getPayeSummary(
-    nino:      Nino,
+    nino: Nino,
     journeyId: JourneyId,
-    taxYear:   Int
+    taxYear: Int
   ): Action[AnyContent]
 
   def getTaxIncomeHistory(
-    nino:      Nino,
+    nino: Nino,
     journeyId: JourneyId
   ): Action[AnyContent]
 
   def getPreviousYearPayeSummary(
-    nino:      Nino,
+    nino: Nino,
     journeyId: JourneyId,
-    taxYear:   Int
+    taxYear: Int
   ): Action[AnyContent]
 
   def getTaxCode(
-    nino:      Nino,
+    nino: Nino,
     journeyId: JourneyId
   ): Action[AnyContent]
 }
 
 @Singleton
 class LiveMobilePayeController @Inject() (
-  override val authConnector:                                   AuthConnector,
+  override val authConnector: AuthConnector,
   @Named("controllers.confidenceLevel") override val confLevel: Int,
-  mobilePayeService:                                            MobilePayeService,
-  val controllerComponents:                                     ControllerComponents,
-  val auditConnector:                                           AuditConnector,
-  @Named("appName") val appName:                                String,
-  shutteringConnector:                                          ShutteringConnector,
-  incomeTaxHistoryService:                                      IncomeTaxHistoryService,
-  previousYearSummaryService:                                   PreviousYearSummaryService
-)(implicit val executionContext:                                ExecutionContext)
+  mobilePayeService: MobilePayeService,
+  val controllerComponents: ControllerComponents,
+  val auditConnector: AuditConnector,
+  @Named("appName") val appName: String,
+  shutteringConnector: ShutteringConnector,
+  incomeTaxHistoryService: IncomeTaxHistoryService,
+  previousYearSummaryService: PreviousYearSummaryService
+)(implicit val executionContext: ExecutionContext)
     extends MobilePayeController
     with AccessControl
     with ControllerChecks {
 
   override def parser: BodyParser[AnyContent] = controllerComponents.parsers.anyContent
-  override val app:    String                 = "Live-Paye-Controller"
-  override val logger: Logger                 = Logger(this.getClass)
+  override val app: String = "Live-Paye-Controller"
+  override val logger: Logger = Logger(this.getClass)
 
   override def getPayeSummary(
-    nino:      Nino,
+    nino: Nino,
     journeyId: JourneyId,
-    taxYear:   Int
+    taxYear: Int
   ): Action[AnyContent] =
     validateAcceptWithAuth(acceptHeaderValidationRules, Option(nino)).async { implicit request =>
       implicit val hc: HeaderCarrier =
-        fromRequest(request).withExtraHeaders(HeaderNames.xSessionId -> journeyId.value)
+        fromRequest(request).withExtraHeaders(HeaderNames.xSessionId -> journeyId.value.toString)
       shutteringConnector.getShutteringStatus(journeyId).flatMap { shuttered =>
         withShuttering(shuttered) {
           errorWrapper {
@@ -116,11 +116,11 @@ class LiveMobilePayeController @Inject() (
     }
 
   override def getTaxIncomeHistory(
-    nino:      Nino,
+    nino: Nino,
     journeyId: JourneyId
   ): Action[AnyContent] = validateAcceptWithAuth(acceptHeaderValidationRules, Option(nino)).async { implicit request =>
     implicit val hc: HeaderCarrier =
-      fromRequest(request).withExtraHeaders(HeaderNames.xSessionId -> journeyId.value)
+      fromRequest(request).withExtraHeaders(HeaderNames.xSessionId -> journeyId.value.toString.toString)
     shutteringConnector.getShutteringStatus(journeyId, "mobile-paye-income-tax-history").flatMap { shuttered =>
       withShuttering(shuttered) {
         errorWrapper {
@@ -134,25 +134,24 @@ class LiveMobilePayeController @Inject() (
   }
 
   override def getPreviousYearPayeSummary(
-    nino:      Nino,
+    nino: Nino,
     journeyId: JourneyId,
-    taxYear:   Int
+    taxYear: Int
   ): Action[AnyContent] =
     validateAcceptWithAuth(acceptHeaderValidationRules, Option(nino)).async { implicit request =>
       implicit val hc: HeaderCarrier =
-        fromRequest(request).withExtraHeaders(HeaderNames.xSessionId -> journeyId.value)
+        fromRequest(request).withExtraHeaders(HeaderNames.xSessionId -> journeyId.value.toString)
       shutteringConnector.getShutteringStatus(journeyId).flatMap { shuttered =>
         withShuttering(shuttered) {
           errorWrapper {
-            previousYearSummaryService.getMobilePayePreviousYearSummaryResponse(nino, taxYear).map {
-              mobilePayePreviousYearSummaryResponse =>
-                sendAuditEvent(
-                  nino,
-                  MobilePayeSummaryResponseAudit.fromPYResponse(mobilePayePreviousYearSummaryResponse),
-                  request.path,
-                  journeyId
-                )
-                Ok(Json.toJson(mobilePayePreviousYearSummaryResponse))
+            previousYearSummaryService.getMobilePayePreviousYearSummaryResponse(nino, taxYear).map { mobilePayePreviousYearSummaryResponse =>
+              sendAuditEvent(
+                nino,
+                MobilePayeSummaryResponseAudit.fromPYResponse(mobilePayePreviousYearSummaryResponse),
+                request.path,
+                journeyId
+              )
+              Ok(Json.toJson(mobilePayePreviousYearSummaryResponse))
             }
           }
         }
@@ -160,12 +159,12 @@ class LiveMobilePayeController @Inject() (
     }
 
   override def getTaxCode(
-    nino:      Nino,
+    nino: Nino,
     journeyId: JourneyId
   ): Action[AnyContent] =
     validateAcceptWithAuth(acceptHeaderValidationRules, Option(nino)).async { implicit request =>
       implicit val hc: HeaderCarrier =
-        fromRequest(request).withExtraHeaders(HeaderNames.xSessionId -> journeyId.value)
+        fromRequest(request).withExtraHeaders(HeaderNames.xSessionId -> journeyId.value.toString)
       shutteringConnector.getShutteringStatus(journeyId).flatMap { shuttered =>
         withShuttering(shuttered) {
           errorWrapper {
@@ -179,17 +178,16 @@ class LiveMobilePayeController @Inject() (
     }
 
   private def sendAuditEvent(
-    nino:        Nino,
-    response:    MobilePayeSummaryResponseAudit,
-    path:        String,
-    journeyId:   JourneyId
-  )(implicit hc: HeaderCarrier
-  ): Unit = auditConnector.sendExtendedEvent(
+    nino: Nino,
+    response: MobilePayeSummaryResponseAudit,
+    path: String,
+    journeyId: JourneyId
+  )(implicit hc: HeaderCarrier) = auditConnector.sendExtendedEvent(
     ExtendedDataEvent(
       appName,
       "viewPayeSummary",
       tags   = hc.toAuditTags("view-paye-summary", path),
-      detail = obj("nino" -> nino.value, "journeyId" -> journeyId.value, "data" -> response)
+      detail = obj("nino" -> nino.value, "journeyId" -> journeyId.value.toString, "data" -> response)
     )
   )
 }

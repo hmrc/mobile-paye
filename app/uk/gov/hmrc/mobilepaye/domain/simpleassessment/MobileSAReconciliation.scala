@@ -16,42 +16,38 @@
 
 package uk.gov.hmrc.mobilepaye.domain.simpleassessment
 
-import play.api.libs.json.{Format, Json, OFormat, Reads}
+import play.api.libs.json.{Format, JsString, Json, OFormat, Reads, Writes}
 import uk.gov.hmrc.mobilepaye.domain.simpleassessment.ReasonType.ReasonType
 import uk.gov.hmrc.mobilepaye.utils.EnumUtils
 
-case class MobileSAReconciliation(
-  reconciliationId:         Int,
-  reconciliationStatus:     Option[Int] = None,
-  cumulativeAmount:         Double,
-  taxLiabilityAmount:       Double,
-  taxPaidAmount:            Double,
-  reconciliationTimeStamp:  Option[String] = None,
-  p800Status:               Option[String],
-  collectionMethod:         Option[Int] = None,
-  previousReconciliationId: Option[Int] = None,
-  nextReconciliationId:     Option[Int] = None,
-  multiYearRecIndicator:    Option[Boolean] = None,
-  p800Reasons:              Option[List[Reason]] = None,
-  businessReason:           String,
-  eligibility:              Boolean,
-  totalAmountOwed:          Double,
-  chargeReference:          Option[String] = None,
-  dueDate:                  Option[String] = None,
-  dunningLock:              Option[Boolean] = None,
-  receivableStatus:         String,
-  receipts:                 Option[List[Receipts]] = None)
+case class MobileSAReconciliation(reconciliationId: Int,
+                                  reconciliationStatus: Option[Int] = None,
+                                  cumulativeAmount: Double,
+                                  taxLiabilityAmount: Double,
+                                  taxPaidAmount: Double,
+                                  reconciliationTimeStamp: Option[String] = None,
+                                  p800Status: Option[String],
+                                  collectionMethod: Option[Int] = None,
+                                  previousReconciliationId: Option[Int] = None,
+                                  nextReconciliationId: Option[Int] = None,
+                                  multiYearRecIndicator: Option[Boolean] = None,
+                                  p800Reasons: Option[List[Reason]] = None,
+                                  businessReason: String,
+                                  eligibility: Boolean,
+                                  totalAmountOwed: Double,
+                                  chargeReference: Option[String] = None,
+                                  dueDate: Option[String] = None,
+                                  dunningLock: Option[Boolean] = None,
+                                  receivableStatus: String,
+                                  receipts: Option[List[Receipts]] = None
+                                 )
 
 object MobileSAReconciliation {
 
   implicit val formats: Format[MobileSAReconciliation] = Json.format[MobileSAReconciliation]
 }
 
-case class Reason(
-  reasonType:      ReasonType,
-  reasonCode:      Int,
-  estimatedAmount: Option[Double] = None,
-  actualAmount:    Option[Double] = None)
+case class Reason(reasonType: ReasonType, reasonCode: Int, estimatedAmount: Option[Double] = None, actualAmount: Option[Double] = None)
 
 object Reason {
   implicit val formats: Format[Reason] = Json.format[Reason]
@@ -59,20 +55,22 @@ object Reason {
 
 object ReasonType extends Enumeration {
   type ReasonType = Value
-  val UNDERPAYMENT:             ReasonType        = Value(9)
-  val OVERPAYMENT:              ReasonType        = Value(10)
-  implicit val readsReasonType: Reads[ReasonType] = EnumUtils.enumReads(ReasonType)
+  val UNDERPAYMENT: ReasonType = Value(9)
+  val OVERPAYMENT: ReasonType = Value(10)
+  given readsReconciliationStatus: Reads[ReasonType] = EnumUtils.enumReads(ReasonType)
+  EnumUtils.enumReads[ReasonType.type](ReasonType)
+  given writesReasonType: Writes[ReasonType] = Writes(reasonType => JsString(reasonType.toString))
 }
 
-case class Receipts(
-  receiptAmount:      Option[Double],
-  receiptDate:        Option[String],
-  receiptMethod:      Option[String] = None,
-  receiptStatus:      Option[String] = None,
-  taxYearCodedOut:    Option[String] = None,
-  allocatedAmount:    Option[Double] = None,
-  promiseToPayRef:    Option[String] = None,
-  receiptDescription: Option[String] = None)
+case class Receipts(receiptAmount: Option[Double],
+                    receiptDate: Option[String],
+                    receiptMethod: Option[String] = None,
+                    receiptStatus: Option[String] = None,
+                    taxYearCodedOut: Option[String] = None,
+                    allocatedAmount: Option[Double] = None,
+                    promiseToPayRef: Option[String] = None,
+                    receiptDescription: Option[String] = None
+                   )
 
 object Receipts {
   implicit val formats: OFormat[Receipts] = Json.format[Receipts]

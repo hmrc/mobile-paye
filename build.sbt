@@ -19,20 +19,18 @@ lazy val microservice = Project(appName, file("."))
       "uk.gov.hmrc.time.TaxYear",
       "uk.gov.hmrc.mobilepaye.domain.types._",
       "uk.gov.hmrc.mobilepaye.domain.admin._",
-      "uk.gov.hmrc.mobilepaye.domain.types.ModelTypes._"
+      "uk.gov.hmrc.mobilepaye.domain.types.JourneyId._"
     )
   )
   .settings(
     majorVersion := 0,
-    scalaVersion := "2.13.12",
+    scalaVersion := "3.3.5",
     playDefaultPort := 8247,
     libraryDependencies ++= AppDependencies(),
     update / evictionWarningOptions := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
     resolvers += Resolver.jcenterRepo,
     Compile / unmanagedResourceDirectories += baseDirectory.value / "resources",
-    IntegrationTest / unmanagedSourceDirectories := (IntegrationTest / baseDirectory)(base =>
-      Seq(base / "it", base / "test-common")
-    ).value,
+    IntegrationTest / unmanagedSourceDirectories := (IntegrationTest / baseDirectory)(base => Seq(base / "it", base / "test-common")).value,
     Test / unmanagedSourceDirectories := (Test / baseDirectory)(base => Seq(base / "test", base / "test-common")).value,
     IntegrationTest / parallelExecution := false,
     scalacOptions in Test -= "-Ywarn-dead-code",

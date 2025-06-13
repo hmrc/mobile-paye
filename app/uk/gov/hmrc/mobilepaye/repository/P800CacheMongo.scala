@@ -28,14 +28,15 @@ import uk.gov.hmrc.mobilepaye.errors.MongoDBError
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.serviceResponse.ServiceResponse
+import org.mongodb.scala.{ObservableFuture, SingleObservableFuture}
 
 import java.util.concurrent.TimeUnit
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class P800CacheMongo @Inject() (
-  mongo:                     MongoComponent,
-  appConfig:                 MobilePayeConfig
+  mongo: MongoComponent,
+  appConfig: MobilePayeConfig
 )(implicit executionContext: ExecutionContext)
     extends PlayMongoRepository[P800Cache](
       collectionName = "p800Cache",
@@ -46,12 +47,14 @@ class P800CacheMongo @Inject() (
                    IndexOptions()
                      .background(false)
                      .name("createdAt")
-                     .expireAfter(appConfig.mongoTtl, TimeUnit.SECONDS)),
+                     .expireAfter(appConfig.mongoTtl, TimeUnit.SECONDS)
+                  ),
         IndexModel(ascending("nino"),
                    IndexOptions()
                      .background(false)
                      .name("nino")
-                     .unique(true))
+                     .unique(true)
+                  )
       )
     ) {
 
@@ -60,8 +63,8 @@ class P800CacheMongo @Inject() (
       .insertOne(p800Cache)
       .toFuture()
       .map(_ => Right(p800Cache))
-      .recover {
-        case _ => Left(MongoDBError("Unexpected error while writing a document."))
+      .recover { case _ =>
+        Left(MongoDBError("Unexpected error while writing a document."))
       }
 
   def selectByNino(nino: Nino): Future[Seq[P800Cache]] =

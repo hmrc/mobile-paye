@@ -23,29 +23,35 @@ import uk.gov.hmrc.mobilepaye.domain.citizendetails.Person
 import uk.gov.hmrc.mobilepaye.domain.simpleassessment.ReasonType.UNDERPAYMENT
 import uk.gov.hmrc.mobilepaye.domain.simpleassessment.{MobileSAReconciliation, MobileSATaxYearReconciliation, MobileSimpleAssessmentResponse, Reason, Receipts}
 import uk.gov.hmrc.mobilepaye.domain.{HistoricTaxCodeIncome, IncomeSource, IncomeTaxYear, MobilePayePreviousYearSummaryResponse, MobilePayeSummaryResponse, OtherIncome, P800Repayment, PayeIncome, TaxCodeChange}
-import uk.gov.hmrc.mobilepaye.domain.tai._
+import uk.gov.hmrc.mobilepaye.domain.tai.*
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status.{NotSupported, Underpaid}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus.{ChequeSent, PaymentDue, PaymentPaid, SaUser}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.{P800Status, P800Summary, RepaymentStatus, TaxYearReconciliation}
 import uk.gov.hmrc.time.TaxYear
 
 trait MobilePayeTestData {
-  val currentTaxYear:  Int = TaxYear.current.startYear
-  val endOfTaxYear:    Int = TaxYear.current.finishYear
+  val currentTaxYear: Int = TaxYear.current.startYear
+  val endOfTaxYear: Int = TaxYear.current.finishYear
   val previousTaxYear: Int = currentTaxYear - 1
-  val cyMinus2:        Int = currentTaxYear - 2
-  val cyMinus3:        Int = currentTaxYear - 3
+  val cyMinus2: Int = currentTaxYear - 2
+  val cyMinus3: Int = currentTaxYear - 3
 
-  val nino:           Nino          = Nino("CS700100A")
-  val taxCodeIncome:  TaxCodeIncome = TaxCodeIncome(EmploymentIncome, Live, Some(3), "The Best Shop Ltd", 1000, "S1150L")
+  val nino: Nino = Nino("CS700100A")
+  val taxCodeIncome: TaxCodeIncome = TaxCodeIncome(componentType = EmploymentIncome,
+                                                   status        = Live,
+                                                   employmentId  = Some(3),
+                                                   name          = "The Best Shop Ltd",
+                                                   amount        = 1000,
+                                                   taxCode       = "S1150L"
+                                                  )
   val taxCodeIncome2: TaxCodeIncome = taxCodeIncome.copy(name = "The Worst Shop Ltd", employmentId = Some(4))
 
   val taxCodeIncome3: TaxCodeIncome =
     taxCodeIncome.copy(componentType = PensionIncome, name = "Prestige Pensions", employmentId = Some(5))
 
-  val otherNonTaxCodeIncome: OtherNonTaxCodeIncome   = OtherNonTaxCodeIncome(StatePension, BigDecimal(250.0))
-  val untaxedIncome:         Option[UntaxedInterest] = Some(UntaxedInterest(UntaxedInterestIncome, BigDecimal(250.0)))
-  val nonTaxCodeIncome:      NonTaxCodeIncome        = NonTaxCodeIncome(None, Seq(otherNonTaxCodeIncome))
+  val otherNonTaxCodeIncome: OtherNonTaxCodeIncome = OtherNonTaxCodeIncome(StatePension, BigDecimal(250.0))
+  val untaxedIncome: Option[UntaxedInterest] = Some(UntaxedInterest(UntaxedInterestIncome, BigDecimal(250.0)))
+  val nonTaxCodeIncome: NonTaxCodeIncome = NonTaxCodeIncome(None, Seq(otherNonTaxCodeIncome))
 
   val nonTaxCodeIncomeWithUntaxedInterest: NonTaxCodeIncome =
     NonTaxCodeIncome(untaxedIncome, Seq(otherNonTaxCodeIncome))
@@ -68,16 +74,7 @@ trait MobilePayeTestData {
   val annualAccount2: AnnualAccount = AnnualAccount(TaxYear(LocalDate.now().getYear), payments2)
 
   def taiEmployment(taxYear: Int = LocalDate.now().getYear): Employment =
-    Employment("TESCO",
-               Live,
-               Some("ABC123"),
-               3,
-               "P12345",
-               Some(LocalDate.now().minusYears(4)),
-               None,
-               Seq(annualAccount(taxYear)),
-               "123",
-               false)
+    Employment("TESCO", Live, Some("ABC123"), 3, "P12345", Some(LocalDate.now().minusYears(4)), None, Seq(annualAccount(taxYear)), "123", false)
 
   val taiEmployment2: Employment = Employment(
     name             = "ASDA",
@@ -88,10 +85,24 @@ trait MobilePayeTestData {
     startDate        = Some(TaxYear.current.back(5).starts),
     endDate          = Some(TaxYear.current.back(3).starts),
     annualAccounts = Seq(
-      AnnualAccount(TaxYear(TaxYear.current.back(4).currentYear),
-                    Seq(Payment(LocalDate.now().minusDays(63), 50, 20, 10, 30, 5, 2))),
-      AnnualAccount(TaxYear(TaxYear.current.back(5).currentYear),
-                    Seq(Payment(LocalDate.now().minusDays(63), 50, 20, 10, 30, 5, 2)))
+      AnnualAccount(TaxYear(TaxYear.current.back(4).currentYear), Seq(Payment(LocalDate.now().minusDays(63), 50, 20, 10, 30, 5, 2))),
+      AnnualAccount(TaxYear(TaxYear.current.back(5).currentYear), Seq(Payment(LocalDate.now().minusDays(63), 50, 20, 10, 30, 5, 2)))
+    ),
+    taxDistrictNumber            = "123",
+    receivingOccupationalPension = false
+  )
+
+  val taiEmploymentLatest = Employment(
+    name             = "ASDA",
+    employmentStatus = Live,
+    payrollNumber    = Some("DEF456"),
+    sequenceNumber   = 4,
+    payeNumber       = "P54321",
+    startDate        = Some(TaxYear.current.back(5).starts),
+    endDate          = Some(TaxYear.current.back(3).starts),
+    annualAccounts = Seq(
+      AnnualAccount(TaxYear(TaxYear.current.currentYear), Seq(Payment(LocalDate.now().minusDays(63), 50, 20, 10, 30, 5, 2))),
+      AnnualAccount(TaxYear(TaxYear.current.currentYear), Seq(Payment(LocalDate.now().minusDays(63), 50, 20, 10, 30, 5, 2)))
     ),
     taxDistrictNumber            = "123",
     receivingOccupationalPension = false
@@ -131,12 +142,10 @@ trait MobilePayeTestData {
     Seq(IncomeSource(taxCodeIncome, taiEmployment5))
 
   val employmentIncomeSourceWelsh: Seq[IncomeSource] =
-    Seq(IncomeSource(taxCodeIncome.copy(taxCode = "C1150L"), taiEmployment()),
-        IncomeSource(taxCodeIncome2, taiEmployment2))
+    Seq(IncomeSource(taxCodeIncome.copy(taxCode = "C1150L"), taiEmployment()), IncomeSource(taxCodeIncome2, taiEmployment2))
 
   val employmentIncomeSourceUK: Seq[IncomeSource] =
-    Seq(IncomeSource(taxCodeIncome.copy(taxCode = "1150L"), taiEmployment()),
-        IncomeSource(taxCodeIncome2, taiEmployment2))
+    Seq(IncomeSource(taxCodeIncome.copy(taxCode = "1150L"), taiEmployment()), IncomeSource(taxCodeIncome2, taiEmployment2))
   val pensionIncomeSource: Seq[IncomeSource] = Seq(IncomeSource(taxCodeIncome3, taiEmployment3))
 
   val pensionIncomeSourceNoPension: Seq[IncomeSource] = Seq.empty
@@ -154,15 +163,15 @@ trait MobilePayeTestData {
     pensionIncomeSource.map(ic => PayeIncome.fromIncomeSource(ic, employment = false))
 
   val taxAccountSummary: TaxAccountSummary = TaxAccountSummary(BigDecimal(250), BigDecimal(10000))
-  val person:            Person            = Person(nino, "Carrot", "Smith")
-  val otherIncome:       OtherIncome       = OtherIncome("STATE PENSION", 250.0, None)
+  val person: Person = Person(nino, "Carrot", "Smith")
+  val otherIncome: OtherIncome = OtherIncome("STATE PENSION", 250.0, None)
 
   def repayment(
-    p800Status:    P800Status,
+    p800Status: P800Status,
     paymentStatus: RepaymentStatus,
-    taxYear:       Int,
-    amount:        BigDecimal,
-    time:          LocalDate
+    taxYear: Int,
+    amount: BigDecimal,
+    time: LocalDate
   ): Option[P800Repayment] = {
     def withPaidDate(): Option[LocalDate] =
       paymentStatus match {
@@ -196,10 +205,7 @@ trait MobilePayeTestData {
             multiYearRecIndicator    = None,
             p800Reasons = Some(
               List(
-                Reason(reasonType      = UNDERPAYMENT,
-                       reasonCode      = 45,
-                       estimatedAmount = Some(175),
-                       actualAmount    = Some(185))
+                Reason(reasonType = UNDERPAYMENT, reasonCode = 45, estimatedAmount = Some(175), actualAmount = Some(185))
               )
             ),
             businessReason   = "P302",
@@ -244,10 +250,7 @@ trait MobilePayeTestData {
             multiYearRecIndicator    = None,
             p800Reasons = Some(
               List(
-                Reason(reasonType      = UNDERPAYMENT,
-                       reasonCode      = 45,
-                       estimatedAmount = Some(175),
-                       actualAmount    = Some(185))
+                Reason(reasonType = UNDERPAYMENT, reasonCode = 45, estimatedAmount = Some(175), actualAmount = Some(185))
               )
             ),
             businessReason   = "P302",
@@ -321,13 +324,12 @@ trait MobilePayeTestData {
   )
 
   val fullMobilePayeAudit: MobilePayeSummaryResponseAudit = MobilePayeSummaryResponseAudit(
-    taxYear = Some(TaxYear.current.currentYear),
-    employments =
-      Some(employments.map(employment => PayeIncomeAudit.fromPayeIncome(employment.copy(payrollNumber = None)))),
+    taxYear             = Some(TaxYear.current.currentYear),
+    employments         = Some(employments.map(employment => PayeIncomeAudit.fromPayeIncome(employment.copy(payrollNumber = None)))),
     previousEmployments = None,
     repayment           = None,
     pensions            = Some(pensions.map(pension => PayeIncomeAudit.fromPayeIncome(pension.copy(payrollNumber = None)))),
-    otherIncomes        = Some(otherIncomes.map(otherIncs => OtherIncomeAudit.fromOtherIncome((otherIncs)))),
+    otherIncomes        = Some(otherIncomes.map(otherIncs => OtherIncomeAudit.fromOtherIncome(otherIncs))),
     taxCodeChange       = Some(TaxCodeChange(hasChanged = true, Some(LocalDate.now().minusYears(2)))),
     simpleAssessment    = None,
     taxFreeAmount       = Some(10000),
@@ -404,10 +406,7 @@ trait MobilePayeTestData {
       ),
       pensions = Some(
         Seq(
-          PayeIncome.fromEmployment(taiEmployment3.copy(name = "ALDI", receivingOccupationalPension = true),
-                                    None,
-                                    None,
-                                    taxYear)
+          PayeIncome.fromEmployment(taiEmployment3.copy(name = "ALDI", receivingOccupationalPension = true), None, None, taxYear)
         )
       ),
       otherIncomes           = Some(otherIncomes),
@@ -440,14 +439,11 @@ trait MobilePayeTestData {
         Seq(
           PayeIncomeAudit
             .fromPayeIncome(
-              PayeIncome.fromEmployment(taiEmployment3.copy(name = "ALDI", receivingOccupationalPension = true),
-                                        None,
-                                        None,
-                                        taxYear)
+              PayeIncome.fromEmployment(taiEmployment3.copy(name = "ALDI", receivingOccupationalPension = true), None, None, taxYear)
             )
         )
       ),
-      otherIncomes       = Some(otherIncomes.map(otherIncs => OtherIncomeAudit.fromOtherIncome((otherIncs)))),
+      otherIncomes       = Some(otherIncomes.map(otherIncs => OtherIncomeAudit.fromOtherIncome(otherIncs))),
       taxCodeChange      = None,
       simpleAssessment   = None,
       taxFreeAmount      = Some(10000),

@@ -26,16 +26,19 @@ import uk.gov.hmrc.mobilepaye.domain.audit.MobilePayeSummaryResponseAudit
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
+import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait AuditMock extends MockFactory {
+trait AuditMock extends BaseSpec {
 
   def dataEventWith(
-    auditSource:     String,
-    auditType:       String,
+    auditSource: String,
+    auditType: String,
     transactionName: String,
-    detail:          JsValue
+    detail: JsValue
   ): MatcherBase =
     argThat { (dataEvent: ExtendedDataEvent) =>
       dataEvent.auditSource.equals(auditSource) &&
@@ -51,19 +54,20 @@ trait AuditMock extends MockFactory {
     }
 
   def mockAudit(
-    nino:                    Nino,
-    expectedDetails:         MobilePayeSummaryResponseAudit,
-    journeyId:               String
-  )(implicit auditConnector: AuditConnector
-  ): Unit = {
+    nino: Nino,
+    expectedDetails: MobilePayeSummaryResponseAudit,
+    journeyId: String
+  )(implicit auditConnector: AuditConnector): Unit = {
     (auditConnector
       .sendExtendedEvent(_: ExtendedDataEvent)(_: HeaderCarrier, _: ExecutionContext))
       .expects(dataEventWith("mobile-paye",
                              "viewPayeSummary",
                              "view-paye-summary",
-                             obj("nino" -> nino.value, "journeyId" -> journeyId, "data" -> expectedDetails)),
+                             obj("nino" -> nino.value, "journeyId" -> journeyId, "data" -> expectedDetails)
+                            ),
                *,
-               *)
+               *
+              )
       .returning(Future successful Success)
     ()
   }

@@ -16,37 +16,35 @@
 
 package uk.gov.hmrc.mobilepaye.domain
 
-import ai.x.play.json.Encoders.encoder
-import ai.x.play.json.Jsonx
-import play.api.libs.json.OFormat
+import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.mobilepaye.domain.simpleassessment.MobileSimpleAssessmentResponse
 import uk.gov.hmrc.time.TaxYear
 
-case class MobilePayeSummaryResponse(
-  taxYear:                   Option[Int],
-  employments:               Option[Seq[PayeIncome]],
-  previousEmployments:       Option[Seq[PayeIncome]],
-  pensions:                  Option[Seq[PayeIncome]],
-  repayment:                 Option[P800Repayment],
-  otherIncomes:              Option[Seq[OtherIncome]],
-  taxCodeChange:             Option[TaxCodeChange],
-  simpleAssessment:          Option[MobileSimpleAssessmentResponse],
-  taxFreeAmount:             Option[BigDecimal],
-  taxFreeAmountLink:         Option[String] = Some("/check-income-tax/tax-free-allowance"),
-  estimatedTaxAmount:        Option[BigDecimal],
-  estimatedTaxAmountLink:    Option[String] = Some("/check-income-tax/paye-income-tax-estimate"),
-  understandYourTaxCodeLink: Option[String] = Some("/check-income-tax/tax-codes"),
-  addMissingEmployerLink:    String = "/check-income-tax/add-employment/employment-name",
-  addMissingPensionLink:     String = "/check-income-tax/add-pension-provider/name",
-  addMissingIncomeLink:      String = "/digital-forms/form/tell-us-about-other-income/draft/guide",
-  addMissingBenefitLink:      String = "/digital-forms/form/tell-us-about-company-benefits/draft/guide",
-  addMissingCompanyCarLink:  String = "/paye/company-car/do-you-pay-towards-car/",
-  previousTaxYearLink:       String = "/check-income-tax/income-tax-history",
-  updateEstimatedIncomeLink: String = "/check-income-tax/update-income/start",
-  updateEmployerLink:        String = "/check-income-tax/update-remove-employment/decision-page",
-  currentYearPlusOneLink:    Option[String] = Some("/check-income-tax/income-tax-comparison"),
-  taxCodeLocation:           Option[String] = None,
-  incomeTaxHistoricPayeUrl:  String = "/check-income-tax/historic-paye/")
+case class MobilePayeSummaryResponse(taxYear: Option[Int],
+                                     employments: Option[Seq[PayeIncome]],
+                                     previousEmployments: Option[Seq[PayeIncome]],
+                                     pensions: Option[Seq[PayeIncome]],
+                                     repayment: Option[P800Repayment],
+                                     otherIncomes: Option[Seq[OtherIncome]],
+                                     taxCodeChange: Option[TaxCodeChange],
+                                     simpleAssessment: Option[MobileSimpleAssessmentResponse],
+                                     taxFreeAmount: Option[BigDecimal],
+                                     taxFreeAmountLink: Option[String] = Some("/check-income-tax/tax-free-allowance"),
+                                     estimatedTaxAmount: Option[BigDecimal],
+                                     estimatedTaxAmountLink: Option[String] = Some("/check-income-tax/paye-income-tax-estimate"),
+                                     understandYourTaxCodeLink: Option[String] = Some("/check-income-tax/tax-codes"),
+                                     addMissingEmployerLink: String = "/check-income-tax/add-employment/employment-name",
+                                     addMissingPensionLink: String = "/check-income-tax/add-pension-provider/name",
+                                     addMissingIncomeLink: String = "/digital-forms/form/tell-us-about-other-income/draft/guide",
+                                     addMissingBenefitLink: String = "/digital-forms/form/tell-us-about-company-benefits/draft/guide",
+                                     addMissingCompanyCarLink: String = "/paye/company-car/do-you-pay-towards-car/",
+                                     previousTaxYearLink: String = "/check-income-tax/income-tax-history",
+                                     updateEstimatedIncomeLink: String = "/check-income-tax/update-income/start",
+                                     updateEmployerLink: String = "/check-income-tax/update-remove-employment/decision-page",
+                                     currentYearPlusOneLink: Option[String] = Some("/check-income-tax/income-tax-comparison"),
+                                     taxCodeLocation: Option[String] = None,
+                                     incomeTaxHistoricPayeUrl: String = "/check-income-tax/historic-paye/"
+                                    )
 
 object MobilePayeSummaryResponse {
 
@@ -68,5 +66,5 @@ object MobilePayeSummaryResponse {
       currentYearPlusOneLink    = None
     )
 
-  implicit val format: OFormat[MobilePayeSummaryResponse] = Jsonx.formatCaseClass
+  implicit val format: OFormat[MobilePayeSummaryResponse] = Json.format[MobilePayeSummaryResponse]
 }
