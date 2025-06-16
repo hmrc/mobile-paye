@@ -1,20 +1,19 @@
 package stubs
 
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.libs.json.Json
 import uk.gov.hmrc.mobilepaye.domain.IncomeSource
-import uk.gov.hmrc.mobilepaye.domain.citizendetails.Person
-import uk.gov.hmrc.mobilepaye.domain.tai._
+import uk.gov.hmrc.mobilepaye.domain.tai.*
 import uk.gov.hmrc.time.TaxYear
 
 object TaiStub {
 
   def stubForEmploymentIncome(
-    nino:        String,
+    nino: String,
     employments: Seq[IncomeSource] = Seq.empty,
-    status:      TaxCodeIncomeStatus = Live,
-    taxYear:     Int = TaxYear.current.currentYear
+    status: TaxCodeIncomeStatus = Live,
+    taxYear: Int = TaxYear.current.currentYear
   ): StubMapping =
     stubFor(
       get(
@@ -25,15 +24,15 @@ object TaiStub {
           .withBody(s"""
                        |{
                        |  "data": ${Json.toJson(
-                         employments.map(emp => emp.copy(taxCodeIncome = emp.taxCodeIncome.copy(status = status)))
-                       )}
+                        employments.map(emp => emp.copy(taxCodeIncome = emp.taxCodeIncome.copy(status = status)))
+                      )}
                        |}
           """.stripMargin)
       )
     )
 
   def employmentsNotCalled(
-    nino:    String,
+    nino: String,
     taxYear: Int = TaxYear.current.currentYear
   ): Unit =
     verify(
@@ -44,9 +43,9 @@ object TaiStub {
     )
 
   def stubForPensions(
-    nino:     String,
+    nino: String,
     pensions: Seq[IncomeSource],
-    taxYear:  Int = TaxYear.current.currentYear
+    taxYear: Int = TaxYear.current.currentYear
   ): StubMapping =
     stubFor(
       get(urlEqualTo(s"/tai/$nino/tax-account/year/$taxYear/income/PensionIncome/status/Live"))
@@ -62,18 +61,19 @@ object TaiStub {
     )
 
   def pensionsNotCalled(
-    nino:    String,
+    nino: String,
     taxYear: Int = TaxYear.current.currentYear
   ): Unit =
     verify(0,
            getRequestedFor(
              urlEqualTo(s"/tai/$nino/tax-account/year/$taxYear/income/PensionIncome/status/Live")
-           ))
+           )
+          )
 
   def nonTaxCodeIncomeIsFound(
-    nino:             String,
+    nino: String,
     nonTaxCodeIncome: NonTaxCodeIncome,
-    taxYear:          Int = TaxYear.current.currentYear
+    taxYear: Int = TaxYear.current.currentYear
   ): StubMapping =
     stubFor(
       get(urlEqualTo(s"/tai/$nino/tax-account/$taxYear/income"))
@@ -91,16 +91,16 @@ object TaiStub {
     )
 
   def nonTaxCodeIncomeNotCalled(
-    nino:    String,
+    nino: String,
     taxYear: Int = TaxYear.current.currentYear
   ): Unit =
     verify(0, getRequestedFor(urlEqualTo(s"/tai/$nino/tax-account/$taxYear/income")))
 
   def taxAccountSummaryIsFound(
-    nino:              String,
+    nino: String,
     taxAccountSummary: TaxAccountSummary,
-    cyPlusone:         Boolean = false,
-    taxYear:           Int = TaxYear.current.currentYear
+    cyPlusone: Boolean = false,
+    taxYear: Int = TaxYear.current.currentYear
   ): StubMapping = {
     val adjustedTaxYear = if (cyPlusone) taxYear + 1 else taxYear
     stubFor(
@@ -118,9 +118,9 @@ object TaiStub {
   }
 
   def taxAccountSummaryNotFound(
-    nino:      String,
+    nino: String,
     cyPlusone: Boolean = false,
-    taxYear:   Int = TaxYear.current.currentYear
+    taxYear: Int = TaxYear.current.currentYear
   ): StubMapping = {
     val adjustedTaxYear = if (cyPlusone) taxYear + 1 else taxYear
     stubFor(
@@ -133,15 +133,15 @@ object TaiStub {
   }
 
   def taxAccountSummaryNotCalled(
-    nino:    String,
+    nino: String,
     taxYear: Int = TaxYear.current.currentYear
   ): Unit =
     verify(0, getRequestedFor(urlEqualTo(s"/tai/$nino/tax-account/$taxYear/summary")))
 
   def stubForBenefits(
-    nino:               String,
+    nino: String,
     employmentBenefits: Benefits,
-    taxYear:            Int = TaxYear.current.currentYear
+    taxYear: Int = TaxYear.current.currentYear
   ): StubMapping =
     stubFor(
       get(urlEqualTo(s"/tai/$nino/tax-account/$taxYear/benefits"))
@@ -157,7 +157,7 @@ object TaiStub {
     )
 
   def stubForTaxCodeIncomes(
-    nino:    String,
+    nino: String,
     taxYear: Int,
     incomes: Seq[TaxCodeIncome]
   ): StubMapping =
@@ -175,8 +175,8 @@ object TaiStub {
     )
 
   def stubForEmployments(
-    nino:        String,
-    taxYear:     Int,
+    nino: String,
+    taxYear: Int,
     employments: Seq[Employment]
   ): StubMapping =
     stubFor(
@@ -195,7 +195,7 @@ object TaiStub {
     )
 
   def stubForTaxCodeChangeExists(
-    nino:       String,
+    nino: String,
     hasChanged: Boolean = true
   ): StubMapping =
     stubFor(
@@ -208,8 +208,8 @@ object TaiStub {
     )
 
   def stubForTaxCodes(
-    nino:           String,
-    taxYear:        Int,
+    nino: String,
+    taxYear: Int,
     taxCodeRecords: Seq[TaxCodeRecord]
   ): StubMapping =
     stubFor(
@@ -226,7 +226,7 @@ object TaiStub {
     )
 
   def stubForTaxCodeChange(
-    nino:                 String,
+    nino: String,
     taxCodeChangeDetails: TaxCodeChangeDetails
   ): StubMapping =
     stubFor(
