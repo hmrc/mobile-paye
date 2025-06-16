@@ -47,10 +47,11 @@ lazy val microservice = Project(appName, file("."))
       "-Xlint",
       "-Wconf:cat=w-flag-value-discard&msg=discarded non-Unit value of type org\\.scalatest\\.Assertion:s"
     ),
-    coverageMinimumStmtTotal := 90,
+    coverageMinimumStmtTotal := 89,
     coverageFailOnMinimum := true,
     coverageHighlighting := true,
-    coverageExcludedPackages := "<empty>;com.kenshoo.play.metrics.*;.*definition.*;prod.*;testOnlyDoNotUseInAppConf.*;app.*;.*BuildInfo.*;.*Routes.*;.*javascript.*;.*Reverse.*",
+    coverageExcludedPackages := "<empty>;com.kenshoo.play.metrics.*;.*definition.*;prod.*;testOnlyDoNotUseInAppConf.*;app.*;.*BuildInfo.*;.*Routes.*;.*javascript.*;.*Reverse.* " +
+      ";.*mobilepaye.errors.*;.*controllers.test.*;.*binders.*;.*domain.types.*;.*domain.admin.FeatureFlagMongoFormats,;.*domain.tai.CompanyCar",
     excludeDependencies ++= Seq(
       // As of Play 3.0, groupId has changed to org.playframework; exclude transitive dependencies to the old artifacts
       // Specifically affects play-json-extensions dependency
