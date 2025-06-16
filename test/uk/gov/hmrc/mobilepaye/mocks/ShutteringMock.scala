@@ -16,10 +16,7 @@
 
 package uk.gov.hmrc.mobilepaye.mocks
 
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
 import org.scalamock.handlers.CallHandler
-import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mobilepaye.connectors.ShutteringConnector
 import uk.gov.hmrc.mobilepaye.domain.Shuttering
@@ -37,14 +34,5 @@ trait ShutteringMock extends BaseSpec {
       .getShutteringStatus(_: JourneyId, _: String)(_: HeaderCarrier, _: ExecutionContext))
       .expects(*, *, *, *)
       .returning(Future successful response)
-
-//  def mockShutteringResponse(
-//    response: Shuttering
-//  )(implicit shutteringConnector: ShutteringConnector) =
-//    when(
-//      shutteringConnector
-//        .getShutteringStatus(any(), any())(any(), any())
-//    )
-//      .thenReturn(Future successful response)
 
 }

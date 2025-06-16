@@ -17,7 +17,6 @@
 package uk.gov.hmrc.mobilepaye.mocks
 
 import org.scalamock.matchers.MatcherBase
-import org.scalamock.scalatest.MockFactory
 import play.api.libs.json.JsValue
 import play.api.libs.json.Json.obj
 import uk.gov.hmrc.domain.Nino
@@ -26,8 +25,6 @@ import uk.gov.hmrc.mobilepaye.domain.audit.MobilePayeSummaryResponseAudit
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 
 import scala.concurrent.{ExecutionContext, Future}

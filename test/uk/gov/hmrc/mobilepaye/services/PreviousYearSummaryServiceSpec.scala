@@ -22,8 +22,6 @@ import uk.gov.hmrc.mobilepaye.connectors.{TaiConnector, TaxCalcConnector}
 import uk.gov.hmrc.mobilepaye.domain.tai.{Benefits, Ceased, Employment, NonTaxCodeIncome, TaxAccountSummary, TaxCodeRecord}
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 import uk.gov.hmrc.time.TaxYear
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
 
 import scala.concurrent.{ExecutionContext, Future}
 

@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.mobilepaye.connectors
 
-import org.mockito.ArgumentMatchers
-import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.*
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, HttpReads, InternalServerException, StringContextOps, TooManyRequestException, UnauthorizedException}
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
@@ -42,7 +40,7 @@ class CitizenDetailsConnectorSpec extends BaseSpec {
       .expects(*, *)
       .returns(f)
   }
-  
+
   "throw UnauthorisedException for valid nino but unauthorized user" in {
     mockCiDGet(Future.failed(new UnauthorizedException("Unauthorized")))
 

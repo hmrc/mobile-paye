@@ -19,22 +19,20 @@ package uk.gov.hmrc.mobilepaye.controllers
 import play.api.libs.json.Json.toJson
 import play.api.mvc.Result
 import play.api.{Logger, mvc}
-import uk.gov.hmrc.api.controllers._
+import uk.gov.hmrc.api.controllers.*
 import uk.gov.hmrc.auth.core.AuthorisationException
-import uk.gov.hmrc.http._
+import uk.gov.hmrc.http.*
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendBaseController
 
 import scala.concurrent.{ExecutionContext, Future}
 
 case object ErrorUnauthorizedNoNino extends ErrorResponse(401, "UNAUTHORIZED", "NINO does not exist on account")
 
-case object ErrorUnauthorizedUpstream
-    extends ErrorResponse(401, "UNAUTHORIZED", "Upstream service such as auth returned 401")
+case object ErrorUnauthorizedUpstream extends ErrorResponse(401, "UNAUTHORIZED", "Upstream service such as auth returned 401")
 
 case object ErrorBadRequest extends ErrorResponse(400, "BAD_REQUEST", "Invalid POST request")
 
-case object LockedUserRequest
-    extends ErrorResponse(423, "LOCKED", "Locked! User is locked due to manual correspondence indicator flag being set")
+case object LockedUserRequest extends ErrorResponse(423, "LOCKED", "Locked! User is locked due to manual correspondence indicator flag being set")
 
 case object ForbiddenAccess extends ErrorResponse(403, "UNAUTHORIZED", "Access denied!")
 
@@ -48,8 +46,7 @@ class NinoNotFoundOnAccount extends GrantAccessException("Unauthorised! NINO not
 
 class AccountWithLowCL extends GrantAccessException("Unauthorised! Account with low CL!")
 
-case object ErrorTooManyRequests
-    extends ErrorResponse(429, "TOO_MANY_REQUESTS", "Too many requests made to mobile-paye please try again later")
+case object ErrorTooManyRequests extends ErrorResponse(429, "TOO_MANY_REQUESTS", "Too many requests made to mobile-paye please try again later")
 
 trait ErrorHandling {
   self: BackendBaseController =>
@@ -60,9 +57,14 @@ trait ErrorHandling {
 
   def errorWrapper(func: => Future[mvc.Result])(implicit ec: ExecutionContext): Future[Result] =
     func.recover {
+
       case _: NotFoundException =>
         log("Resource not found!")
         Status(ErrorNotFound.httpStatusCode)(toJson[ErrorResponse](ErrorNotFound))
+
+      case ex: uk.gov.hmrc.http.BadRequestException if ex.responseCode == 400 =>
+        log("BadRequest!")
+        Status(ErrorBadRequest.httpStatusCode)(toJson[ErrorResponse](ErrorBadRequest))
 
       case ex: BadRequestException if ex.responseCode == 400 =>
         log("BadRequest!")

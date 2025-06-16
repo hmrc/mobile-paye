@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.mobilepaye.domain
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.*
 import uk.gov.hmrc.mobilepaye.domain.simpleassessment.MobileSimpleAssessmentResponse
 import uk.gov.hmrc.time.TaxYear
 
@@ -47,6 +47,61 @@ case class MobilePayeSummaryResponse(taxYear: Option[Int],
                                     )
 
 object MobilePayeSummaryResponse {
+  implicit val reads: Reads[MobilePayeSummaryResponse] = for {
+    taxYear                   <- (__ \ "taxYear").readNullable[Int]
+    employments               <- (__ \ "employments").readNullable[Seq[PayeIncome]]
+    previousEmployments       <- (__ \ "previousEmployments").readNullable[Seq[PayeIncome]]
+    pensions                  <- (__ \ "pensions").readNullable[Seq[PayeIncome]]
+    repayment                 <- (__ \ "repayment").readNullable[P800Repayment]
+    otherIncomes              <- (__ \ "otherIncomes").readNullable[Seq[OtherIncome]]
+    taxCodeChange             <- (__ \ "taxCodeChange").readNullable[TaxCodeChange]
+    simpleAssessment          <- (__ \ "simpleAssessment").readNullable[MobileSimpleAssessmentResponse]
+    taxFreeAmount             <- (__ \ "taxFreeAmount").readNullable[BigDecimal]
+    taxFreeAmountLink         <- (__ \ "taxFreeAmountLink").readNullable[String]
+    estimatedTaxAmount        <- (__ \ "estimatedTaxAmount").readNullable[BigDecimal]
+    estimatedTaxAmountLink    <- (__ \ "estimatedTaxAmountLink").readNullable[String]
+    understandYourTaxCodeLink <- (__ \ "understandYourTaxCodeLink").readNullable[String]
+    addMissingEmployerLink    <- (__ \ "addMissingEmployerLink").read[String]
+    addMissingPensionLink     <- (__ \ "addMissingPensionLink").read[String]
+    addMissingIncomeLink      <- (__ \ "addMissingIncomeLink").read[String]
+    addMissingBenefitLink     <- (__ \ "addMissingBenefitLink").read[String]
+    addMissingCompanyCarLink  <- (__ \ "addMissingCompanyCarLink").read[String]
+    previousTaxYearLink       <- (__ \ "previousTaxYearLink").read[String]
+    updateEstimatedIncomeLink <- (__ \ "updateEstimatedIncomeLink").read[String]
+    updateEmployerLink        <- (__ \ "updateEmployerLink").read[String]
+    currentYearPlusOneLink    <- (__ \ "currentYearPlusOneLink").readNullable[String]
+    taxCodeLocation           <- (__ \ "taxCodeLocation").readNullable[String]
+    incomeTaxHistoricPayeUrl  <- (__ \ "incomeTaxHistoricPayeUrl").read[String]
+  } yield MobilePayeSummaryResponse(
+    taxYear,
+    employments,
+    previousEmployments,
+    pensions,
+    repayment,
+    otherIncomes,
+    taxCodeChange,
+    simpleAssessment,
+    taxFreeAmount,
+    taxFreeAmountLink,
+    estimatedTaxAmount,
+    estimatedTaxAmountLink,
+    understandYourTaxCodeLink,
+    addMissingEmployerLink,
+    addMissingPensionLink,
+    addMissingIncomeLink,
+    addMissingBenefitLink,
+    addMissingCompanyCarLink,
+    previousTaxYearLink,
+    updateEstimatedIncomeLink,
+    updateEmployerLink,
+    currentYearPlusOneLink,
+    taxCodeLocation,
+    incomeTaxHistoricPayeUrl
+  )
+
+  implicit val writes: OWrites[MobilePayeSummaryResponse] = Json.writes[MobilePayeSummaryResponse]
+
+  implicit val format: OFormat[MobilePayeSummaryResponse] = OFormat(reads, writes)
 
   def empty: MobilePayeSummaryResponse =
     MobilePayeSummaryResponse(
@@ -66,5 +121,4 @@ object MobilePayeSummaryResponse {
       currentYearPlusOneLink    = None
     )
 
-  implicit val format: OFormat[MobilePayeSummaryResponse] = Json.format[MobilePayeSummaryResponse]
 }

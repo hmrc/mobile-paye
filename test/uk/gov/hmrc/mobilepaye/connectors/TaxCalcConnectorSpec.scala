@@ -20,12 +20,10 @@ import uk.gov.hmrc.http.*
 import uk.gov.hmrc.mobilepaye.domain.admin.OnlinePaymentIntegration
 import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, FeatureFlagName}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.TaxYearReconciliation
-import uk.gov.hmrc.mobilepaye.services.admin.FeatureFlagService
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import java.net.URL
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
 
 class TaxCalcConnectorSpec extends BaseSpec {
   override val mockHttpClient: HttpClientV2 = mock[HttpClientV2]

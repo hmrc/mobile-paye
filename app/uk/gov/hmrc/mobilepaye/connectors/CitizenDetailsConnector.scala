@@ -19,7 +19,7 @@ package uk.gov.hmrc.mobilepaye.connectors
 import com.google.inject.{Inject, Singleton}
 import com.google.inject.name.Named
 import play.api.Logger
-import play.api.http.Status.{LOCKED, NOT_FOUND}
+import play.api.http.Status.{BAD_REQUEST, LOCKED, NOT_FOUND}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}

@@ -16,10 +16,7 @@
 
 package uk.gov.hmrc.mobilepaye.mocks
 
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
 import org.scalamock.handlers.CallHandler
-import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.{Retrieval, ~}
 import uk.gov.hmrc.auth.core.{AuthConnector, ConfidenceLevel}

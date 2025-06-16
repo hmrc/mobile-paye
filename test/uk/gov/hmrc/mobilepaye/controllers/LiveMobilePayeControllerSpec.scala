@@ -21,25 +21,21 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import play.api.libs.json.JsValue
-import play.api.libs.json.Json.obj
 import uk.gov.hmrc.auth.core.ConfidenceLevel.{L200, L50}
 import uk.gov.hmrc.auth.core.syntax.retrieved.*
-import uk.gov.hmrc.auth.core.{AuthConnector, MissingBearerToken}
+import uk.gov.hmrc.auth.core.MissingBearerToken
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.*
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
-import uk.gov.hmrc.mobilepaye.controllers.BadRequestException
 import uk.gov.hmrc.mobilepaye.domain.{IncomeTaxYear, MobilePayePreviousYearSummaryResponse, MobilePayeSummaryResponse, Shuttering}
 import uk.gov.hmrc.mobilepaye.services.{IncomeTaxHistoryService, MobilePayeService, PreviousYearSummaryService}
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import eu.timepit.refined.auto.*
-import org.scalamock.handlers.CallHandler
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.{Retrieval, ~}
 import uk.gov.hmrc.mobilepaye.domain.citizendetails.Person
 import uk.gov.hmrc.mobilepaye.domain.types.JourneyId
-import uk.gov.hmrc.mobilepaye.mocks.{AuditMock, AuthorisationMock, ShutteringMock}
 import uk.gov.hmrc.auth.core.{AuthConnector, ConfidenceLevel}
 import org.scalamock.matchers.MatcherBase
 import uk.gov.hmrc.mobilepaye.connectors.ShutteringConnector
@@ -282,11 +278,11 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
     }
 
     "return 400 when handling BadRequestException" in {
-      mockShutteringResponse(notShuttered)
+      import scala.util.{Success, Failure}
       mockAuthorisationGrantAccess(grantAccessWithCL200)
+      mockShutteringResponse(notShuttered)
       mockGetPerson(Future.failed(new BadRequestException("Bad Request Exception")))
       val result = controller.getPayeSummary(nino, jId1, currentTaxYear)(fakeRequest)
-
       status(result) shouldBe 400
     }
 
@@ -442,8 +438,8 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
     }
 
     "return 400 when handling BadRequestException" in {
-      mockShutteringResponse(notShuttered)
       mockAuthorisationGrantAccess(grantAccessWithCL200)
+      mockShutteringResponse(notShuttered)
       mockGetMobilePayePreviousYearResponse(Future.failed(new BadRequestException("Bad Request Exception")))
 
       val result = controller.getPreviousYearPayeSummary(nino, jId1, previousTaxYear)(

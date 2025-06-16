@@ -12,15 +12,11 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Helpers.{await, running}
 import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, OnlinePaymentIntegration}
 import uk.gov.hmrc.mobilepaye.repository.admin.AdminRepository
+import org.mongodb.scala.{ObservableFuture, SingleObservableFuture}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class AdminRepositorySpec
-  extends AnyFreeSpec
-    with Matchers
-    with ScalaFutures
-    with OptionValues
-    with IntegrationPatience {
+class AdminRepositorySpec extends AnyFreeSpec with Matchers with ScalaFutures with OptionValues with IntegrationPatience {
 
   "Admin data repo" - {
     "getFeatureFlag must return None if there is no record" in {
@@ -30,18 +26,15 @@ class AdminRepositorySpec
         val repo = app.injector.instanceOf[AdminRepository]
 
         whenReady(
-          repo
-            .collection
+          repo.collection
             .drop()
             .toFuture()
-            .flatMap(
-              _ =>
-                repo
-                  .getFeatureFlag(OnlinePaymentIntegration)
+            .flatMap(_ =>
+              repo
+                .getFeatureFlag(OnlinePaymentIntegration)
             )
-        ) {
-          result =>
-            result mustBe None
+        ) { result =>
+          result mustBe None
         }
       }
     }
@@ -59,10 +52,9 @@ class AdminRepositorySpec
             _   <- repo.setFeatureFlag(OnlinePaymentIntegration, enabled = false)
             res <- repo.collection.find(Filters.equal("name", OnlinePaymentIntegration.toString)).toFuture()
           } yield res
-        ) {
-          result =>
-            result.length mustBe 1
-            result.head.isEnabled mustBe false
+        ) { result =>
+          result.length mustBe 1
+          result.head.isEnabled mustBe false
         }
       }
     }
@@ -78,10 +70,9 @@ class AdminRepositorySpec
             _   <- repo.setFeatureFlags(Map(OnlinePaymentIntegration -> true, OnlinePaymentIntegration -> false))
             res <- repo.collection.find(Filters.equal("name", OnlinePaymentIntegration.toString)).toFuture()
           } yield res
-        ) {
-          result =>
-            result.length mustBe 1
-            result.head.isEnabled mustBe false
+        ) { result =>
+          result.length mustBe 1
+          result.head.isEnabled mustBe false
         }
       }
     }
@@ -98,15 +89,14 @@ class AdminRepositorySpec
             _   <- repo.setFeatureFlag(OnlinePaymentIntegration, enabled = true)
             res <- repo.getFeatureFlags
           } yield res
-        ) {
-          result =>
-            result mustBe List(
-              FeatureFlag(
-                name        = OnlinePaymentIntegration,
-                isEnabled   = true,
-                description = OnlinePaymentIntegration.description
-              )
+        ) { result =>
+          result mustBe List(
+            FeatureFlag(
+              name        = OnlinePaymentIntegration,
+              isEnabled   = true,
+              description = OnlinePaymentIntegration.description
             )
+          )
         }
       }
     }
@@ -134,10 +124,9 @@ class AdminRepositorySpec
           repo
             .setFeatureFlags(Map(flag.name -> flag.isEnabled))
             .flatMap(_ => repo.getFeatureFlags)
-        ) {
-            result =>
-              result mustBe data
-          }
+        ) { result =>
+          result mustBe data
+        }
       }
     }
 

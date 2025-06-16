@@ -1,6 +1,8 @@
 import play.api.libs.json.Json
 import play.api.libs.ws.WSRequest
 import utils.BaseISpec
+import play.api.libs.ws.WSBodyWritables._
+
 
 /**
   * Need two separate tests so that the servers can be run with different system

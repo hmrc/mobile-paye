@@ -16,11 +16,10 @@
 
 package uk.gov.hmrc.mobilepaye.utils
 
-import play.api.Logging
 import play.api.libs.json.*
 
 import scala.language.{implicitConversions, postfixOps}
-import scala.util.{Failure, Try}
+import scala.util.Try
 
 class InvalidEnumException(className: String, input: String)
     extends RuntimeException(s"Enumeration expected of type: '$className', but it does not contain '$input'")

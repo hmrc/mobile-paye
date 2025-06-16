@@ -17,7 +17,7 @@
 package uk.gov.hmrc.mobilepaye.services
 
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, HttpResponse, InternalServerException, UnauthorizedException}
+import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, InternalServerException, UnauthorizedException}
 import uk.gov.hmrc.mobilepaye.connectors.*
 import uk.gov.hmrc.mobilepaye.domain.simpleassessment.MobileSimpleAssessmentResponse
 import uk.gov.hmrc.mobilepaye.domain.tai.*

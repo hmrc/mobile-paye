@@ -17,7 +17,7 @@
 package uk.gov.hmrc.mobilepaye.utils
 
 import org.apache.pekko.actor.ActorSystem
-import org.apache.pekko.stream.{ActorMaterializer, Materializer}
+import org.apache.pekko.stream.ActorMaterializer
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpecLike
 import play.api.{Configuration, Environment}
@@ -26,11 +26,9 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mobilepaye.MobilePayeTestData
 import uk.gov.hmrc.mobilepaye.config.MobilePayeConfig
 import uk.gov.hmrc.mobilepaye.domain.types.JourneyId
-import uk.gov.hmrc.mobilepaye.mocks.{AuditMock, AuthorisationMock, ShutteringMock}
 import eu.timepit.refined.auto.*
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.{Args, Outcome, Status}
-import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.Outcome
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 import uk.gov.hmrc.mobilepaye.services.admin.FeatureFlagService

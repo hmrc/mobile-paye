@@ -7,6 +7,7 @@ import org.scalatestplus.play.WsScalaTestClient
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.inject.bind
 import play.api.Application
+import play.api.libs.ws.WSBodyWritables.*
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.JsValue
 import play.api.libs.ws.{WSClient, WSResponse}
@@ -30,7 +31,7 @@ abstract class BaseISpec
 
   override implicit lazy val app: Application = appBuilder.build()
 
-  protected val acceptJsonHeader:        (String, String) = "Accept"        -> "application/vnd.hmrc.1.0+json"
+  protected val acceptJsonHeader: (String, String) = "Accept"               -> "application/vnd.hmrc.1.0+json"
   protected val authorisationJsonHeader: (String, String) = "AUTHORIZATION" -> "Bearer 123"
 
   def config: Map[String, Any] =
@@ -61,7 +62,7 @@ abstract class BaseISpec
     wsUrl(url).addHttpHeaders(acceptJsonHeader, authorisationJsonHeader).get()
 
   def postRequestWithAuthHeaders(
-    url:      String,
+    url: String,
     feedback: JsValue
   ): Future[WSResponse] =
     wsUrl(url).withHttpHeaders(acceptJsonHeader, authorisationJsonHeader).post(feedback)

@@ -19,9 +19,7 @@ package uk.gov.hmrc.mobilepaye.connectors
 import uk.gov.hmrc.http.*
 import uk.gov.hmrc.mobilepaye.domain.Shuttering
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
-import eu.timepit.refined.auto.*
-import org.mockito.ArgumentMatchers.{any, anyBoolean}
-import org.mockito.Mockito
+import org.mockito.ArgumentMatchers.*
 import org.mockito.Mockito.*
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import uk.gov.hmrc.mobilepaye.domain.types.JourneyId

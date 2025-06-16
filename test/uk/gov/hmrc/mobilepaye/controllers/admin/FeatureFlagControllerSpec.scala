@@ -16,14 +16,13 @@
 
 package uk.gov.hmrc.mobilepaye.controllers.admin
 
-import org.mockito.ArgumentMatchers.{any, eq => meq}
+import org.mockito.ArgumentMatchers.{any, eq as meq}
 import org.mockito.Mockito
 import org.mockito.Mockito.{reset, when}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures.whenReady
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.cache.AsyncCacheApi
-import play.api.http.Status.OK
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsBoolean, Json}
