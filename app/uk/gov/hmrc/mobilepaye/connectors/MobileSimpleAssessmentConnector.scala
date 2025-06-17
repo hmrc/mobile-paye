@@ -39,7 +39,7 @@ case class MobileSimpleAssessmentConnector @Inject() (
   def getSimpleAssessmentLiabilities(
     journeyId: JourneyId
   )(implicit hc: HeaderCarrier): Future[Option[MobileSimpleAssessmentResponse]] = {
-    val url = baseUrl + s"/liabilities?journeyId=${journeyId.value}"
+    val url = baseUrl + s"/liabilities?journeyId=${journeyId.value.toString}"
     featureFlagService.get(OnlinePaymentIntegration) flatMap { onlinePaymentIntegration =>
       if (onlinePaymentIntegration.isEnabled) {
         httpGet

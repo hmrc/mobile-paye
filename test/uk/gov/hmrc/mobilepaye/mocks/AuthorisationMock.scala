@@ -37,11 +37,4 @@ trait AuthorisationMock extends BaseSpec {
       .expects(*, *, *, *)
       .returning(Future successful response)
 
-//  def mockAuthorisationGrantAccess(
-//    response: GrantAccess
-//  )(implicit authConnector: AuthConnector) =
-//    when(
-//      authConnector
-//        .authorise[GrantAccess](any(), any())(any(), any())
-//    ).thenReturn(Future successful response)
 }

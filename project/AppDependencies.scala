@@ -11,7 +11,7 @@ object AppDependencies {
   private val scalaMockVersion = "7.3.2"
   private val hmrcMongoVersion = "2.6.0"
   private val refinedVersion = "0.11.3"
-  private val authClientVersion = "4.0.0."
+  private val authClientVersion = "4.0.0"
   private val jsonExtensionsVersion = "0.42.0"
 
   val compile: Seq[ModuleID] = Seq(

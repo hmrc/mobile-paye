@@ -37,7 +37,7 @@ class ShutteringConnector @Inject() (http: HttpClientV2, @Named("mobile-shutteri
     service: String = "mobile-paye"
   )(implicit headerCarrier: HeaderCarrier, ex: ExecutionContext): Future[Shuttering] =
     http
-      .get(url"$serviceUrl/mobile-shuttering/service/$service/shuttered-status?journeyId=${journeyId.value}")
+      .get(url"$serviceUrl/mobile-shuttering/service/$service/shuttered-status?journeyId=${journeyId.value.toString}")
       .execute[Shuttering]
       .recover {
         case e: UpstreamErrorResponse =>

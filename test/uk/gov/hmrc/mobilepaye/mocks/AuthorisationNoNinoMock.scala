@@ -33,20 +33,11 @@ trait AuthorisationNoNinoMock extends BaseSpec {
   type GrantAccessNoNino = ConfidenceLevel
 
   def mockAuthorisationNoNinoGrantAccess(
-                                          response: GrantAccessNoNino
-                                        )(implicit authConnector: AuthConnector
-                                        ): CallHandler[Future[GrantAccessNoNino]] =
+    response: GrantAccessNoNino
+  )(implicit authConnector: AuthConnector): CallHandler[Future[GrantAccessNoNino]] =
     (authConnector
       .authorise(_: Predicate, _: Retrieval[GrantAccessNoNino])(_: HeaderCarrier, _: ExecutionContext))
       .expects(*, *, *, *)
       .returning(Future successful response)
 
-//  def mockAuthorisationNoNinoGrantAccess(
-//    response: GrantAccessNoNino
-//  )(implicit authConnector: AuthConnector) =
-//    when(
-//      authConnector
-//        .authorise[GrantAccessNoNino](any(), any())(any(), any())
-//    )
-//      .thenReturn(Future successful response)
 }

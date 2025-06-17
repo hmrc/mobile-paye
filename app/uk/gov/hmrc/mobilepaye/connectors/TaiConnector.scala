@@ -169,6 +169,7 @@ class TaiConnector @Inject() (http: HttpClientV2, @Named("tai") serviceUrl: Stri
       .get(url"${url(nino, s"tax-account/tax-code-change")}")
       .execute[JsValue]
       .map { json =>
+        println(" json in tax code change is ::"+json)
         (json \ "data").as[TaxCodeChangeDetails]
       }
 }

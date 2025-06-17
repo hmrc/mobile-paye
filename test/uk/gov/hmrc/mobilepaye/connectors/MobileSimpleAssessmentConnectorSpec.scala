@@ -55,7 +55,7 @@ class MobileSimpleAssessmentConnectorSpec extends BaseSpec with LogCapturing {
   def mockMobileSimpleAssessmentGet[T](f: Future[T]) = {
     (mockHttpClient
       .get(_: URL)(_: HeaderCarrier))
-      .expects(url"$serviceUrl/liabilities?journeyId=${journeyId.value}", *)
+      .expects(url"$serviceUrl/liabilities?journeyId=${journeyId.value.toString}", *)
       .returning(mockRequestBuilder)
 
     (mockRequestBuilder

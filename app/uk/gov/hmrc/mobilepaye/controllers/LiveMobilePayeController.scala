@@ -120,7 +120,7 @@ class LiveMobilePayeController @Inject() (
     journeyId: JourneyId
   ): Action[AnyContent] = validateAcceptWithAuth(acceptHeaderValidationRules, Option(nino)).async { implicit request =>
     implicit val hc: HeaderCarrier =
-      fromRequest(request).withExtraHeaders(HeaderNames.xSessionId -> journeyId.value.toString.toString)
+      fromRequest(request).withExtraHeaders(HeaderNames.xSessionId -> journeyId.value.toString)
     shutteringConnector.getShutteringStatus(journeyId, "mobile-paye-income-tax-history").flatMap { shuttered =>
       withShuttering(shuttered) {
         errorWrapper {
