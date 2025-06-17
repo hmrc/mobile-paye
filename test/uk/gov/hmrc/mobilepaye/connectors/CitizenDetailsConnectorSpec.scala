@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.mobilepaye.connectors
 
+import org.mockito.Mockito.*
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, HttpReads, InternalServerException, StringContextOps, TooManyRequestException, UnauthorizedException}
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 
@@ -25,8 +26,8 @@ import scala.util.{Failure, Success}
 
 class CitizenDetailsConnectorSpec extends BaseSpec {
 
-  val serviceUrl: String                  = "https://www.tst-url.com"
-  val connector:  CitizenDetailsConnector = new CitizenDetailsConnector(serviceUrl, mockHttpClient)
+  val serviceUrl: String = "https://www.tst-url.com"
+  val connector: CitizenDetailsConnector = new CitizenDetailsConnector(serviceUrl, mockHttpClient)
 
   def mockCiDGet[T](f: Future[T]) = {
     (mockHttpClient
@@ -35,7 +36,7 @@ class CitizenDetailsConnectorSpec extends BaseSpec {
       .returning(mockRequestBuilder)
 
     (mockRequestBuilder
-      .execute[T](_: HttpReads[T], _: ExecutionContext))
+      .execute[T](using _: HttpReads[T], _: ExecutionContext))
       .expects(*, *)
       .returns(f)
   }

@@ -23,30 +23,27 @@ import play.api.libs.json.JsValue
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, StringContextOps}
-import uk.gov.hmrc.mobilepaye.domain._
-import uk.gov.hmrc.mobilepaye.domain.tai._
+import uk.gov.hmrc.mobilepaye.domain.*
+import uk.gov.hmrc.mobilepaye.domain.tai.*
+import uk.gov.hmrc.http.HttpReads.Implicits.*
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
 @Singleton
-class TaiConnector @Inject() (
-  http:                     HttpClientV2,
-  @Named("tai") serviceUrl: String) {
+class TaiConnector @Inject() (http: HttpClientV2, @Named("tai") serviceUrl: String) {
 
   val logger: Logger = Logger(this.getClass)
 
   private def url(
-    nino:  Nino,
+    nino: Nino,
     route: String
   ) = s"$serviceUrl/tai/${nino.value}/$route"
 
   def getNonTaxCodeIncome(
-    nino:        Nino,
-    taxYear:     Int
-  )(implicit hc: HeaderCarrier,
-    ex:          ExecutionContext
-  ): Future[NonTaxCodeIncome] =
+    nino: Nino,
+    taxYear: Int
+  )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[NonTaxCodeIncome] =
     http
       .get(url"${url(nino, s"tax-account/$taxYear/income")}")
       .execute[JsValue]
@@ -55,11 +52,9 @@ class TaiConnector @Inject() (
       }
 
   def getTaxAccountSummary(
-    nino:        Nino,
-    taxYear:     Int
-  )(implicit hc: HeaderCarrier,
-    ex:          ExecutionContext
-  ): Future[TaxAccountSummary] =
+    nino: Nino,
+    taxYear: Int
+  )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[TaxAccountSummary] =
     http
       .get(url"${url(nino, s"tax-account/$taxYear/summary")}")
       .execute[JsValue]
@@ -68,31 +63,26 @@ class TaiConnector @Inject() (
       }
 
   def getCYPlusOneAccountSummary(
-    nino:        Nino,
-    taxYear:     Int
-  )(implicit hc: HeaderCarrier,
-    ex:          ExecutionContext
-  ): Future[Boolean] =
+    nino: Nino,
+    taxYear: Int
+  )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Boolean] =
     http
       .get(url"${url(nino, s"tax-account/${taxYear + 1}/summary")}")
       .execute[JsValue]
       .map { json =>
         (json \ "data").as[TaxAccountSummary]
         true
-      } recover {
-      case NonFatal(e) =>
-        logger.warn(s"Couldn't retrieve tax summary for $nino with exception:${e.getMessage}")
-        false
+      } recover { case NonFatal(e) =>
+      logger.warn(s"Couldn't retrieve tax summary for $nino with exception:${e.getMessage}")
+      false
     }
 
   def getMatchingTaxCodeIncomes(
-    nino:        Nino,
-    taxYear:     Int,
-    incomeType:  String,
-    status:      String
-  )(implicit hc: HeaderCarrier,
-    ex:          ExecutionContext
-  ): Future[Seq[IncomeSource]] =
+    nino: Nino,
+    taxYear: Int,
+    incomeType: String,
+    status: String
+  )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Seq[IncomeSource]] =
     http
       .get(url"${url(nino, s"tax-account/year/$taxYear/income/$incomeType/status/$status")}")
       .execute[JsValue]
@@ -101,15 +91,13 @@ class TaiConnector @Inject() (
       }
       .recover {
         case _: NotFoundException => Seq.empty[IncomeSource]
-        case e => throw e
+        case e                    => throw e
       }
 
   def getBenefits(
-    nino:        Nino,
-    taxYear:     Int
-  )(implicit hc: HeaderCarrier,
-    ex:          ExecutionContext
-  ): Future[Benefits] =
+    nino: Nino,
+    taxYear: Int
+  )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Benefits] =
     http
       .get(url"${url(nino, s"tax-account/$taxYear/benefits")}")
       .execute[JsValue]
@@ -118,11 +106,9 @@ class TaiConnector @Inject() (
       }
 
   def getTaxCodeIncomes(
-    nino:        Nino,
-    taxYear:     Int
-  )(implicit hc: HeaderCarrier,
-    ex:          ExecutionContext
-  ): Future[Seq[TaxCodeIncome]] =
+    nino: Nino,
+    taxYear: Int
+  )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Seq[TaxCodeIncome]] =
     http
       .get(url"${url(nino, s"tax-account/$taxYear/income/tax-code-incomes")}")
       .execute[JsValue]
@@ -131,15 +117,13 @@ class TaiConnector @Inject() (
       }
       .recover {
         case _: NotFoundException => Seq.empty[TaxCodeIncome]
-        case e => throw e
+        case e                    => throw e
       }
 
   def getEmployments(
-    nino:        Nino,
-    taxYear:     Int
-  )(implicit hc: HeaderCarrier,
-    ex:          ExecutionContext
-  ): Future[Seq[Employment]] =
+    nino: Nino,
+    taxYear: Int
+  )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Seq[Employment]] =
     http
       .get(url"${url(nino, s"employments/years/$taxYear")}")
       .execute[JsValue]
@@ -148,29 +132,25 @@ class TaiConnector @Inject() (
       }
       .recover {
         case _: NotFoundException => Seq.empty[Employment]
-        case e => throw e
+        case e                    => throw e
       }
 
   def getTaxCodeChangeExists(
-    nino:        Nino
-  )(implicit hc: HeaderCarrier,
-    ex:          ExecutionContext
-  ): Future[Boolean] =
+    nino: Nino
+  )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Boolean] =
     http
       .get(url"${url(nino, s"tax-account/tax-code-change/exists")}")
       .execute[JsValue]
       .map(_.as[Boolean])
       .recover {
         case _: NotFoundException => false
-        case e => throw e
+        case e                    => throw e
       }
 
   def getTaxCodesForYear(
-    nino:        Nino,
-    taxYear:     Int
-  )(implicit hc: HeaderCarrier,
-    ex:          ExecutionContext
-  ): Future[Seq[TaxCodeRecord]] =
+    nino: Nino,
+    taxYear: Int
+  )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Seq[TaxCodeRecord]] =
     http
       .get(url"${url(nino, s"tax-account/$taxYear/tax-code/latest")}")
       .execute[JsValue]
@@ -179,14 +159,12 @@ class TaiConnector @Inject() (
       }
       .recover {
         case _: NotFoundException => Seq.empty[TaxCodeRecord]
-        case e => throw e
+        case e                    => throw e
       }
 
   def getTaxCodeChange(
-    nino:        Nino
-  )(implicit hc: HeaderCarrier,
-    ex:          ExecutionContext
-  ): Future[TaxCodeChangeDetails] =
+    nino: Nino
+  )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[TaxCodeChangeDetails] =
     http
       .get(url"${url(nino, s"tax-account/tax-code-change")}")
       .execute[JsValue]

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,26 @@
 
 package uk.gov.hmrc.mobilepaye.connectors
 
-import uk.gov.hmrc.http._
+import uk.gov.hmrc.http.*
 import uk.gov.hmrc.mobilepaye.domain.Shuttering
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
-import eu.timepit.refined.auto._
+import org.mockito.ArgumentMatchers.*
+import org.mockito.Mockito.*
+import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
+import uk.gov.hmrc.mobilepaye.domain.types.JourneyId
 
 import java.net.URL
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 class ShutteringConnectorSpec extends BaseSpec {
-  val serviceUrl: String              = "https://mobile-simple-assessment"
-  val connector:  ShutteringConnector = new ShutteringConnector(mockHttpClient, serviceUrl)
+
+  override val mockHttpClient: HttpClientV2 = mock[HttpClientV2]
+  override val mockRequestBuilder: RequestBuilder = mock[RequestBuilder]
+  val serviceUrl: String = "https://mobile-simple-assessment"
+  val connector: ShutteringConnector = new ShutteringConnector(mockHttpClient, serviceUrl)
+
+  val jid: JourneyId = JourneyId.from("27085215-69a4-4027-8f72-b04b10ec16b0").toOption.get
 
   def mockShutteringGet[T](f: Future[T]) = {
     (mockHttpClient
@@ -38,7 +46,7 @@ class ShutteringConnectorSpec extends BaseSpec {
       )
       .returning(mockRequestBuilder)
     (mockRequestBuilder
-      .execute[T](_: HttpReads[T], _: ExecutionContext))
+      .execute[T](using _: HttpReads[T], _: ExecutionContext))
       .expects(*, *)
       .returns(f)
   }
@@ -46,7 +54,7 @@ class ShutteringConnectorSpec extends BaseSpec {
   "getTaxReconciliations" should {
     "Assume unshuttered for InternalServerException response" in {
       mockShutteringGet(Future.successful(new InternalServerException("")))
-      connector.getShutteringStatus("27085215-69a4-4027-8f72-b04b10ec16b0") onComplete {
+      connector.getShutteringStatus(jid) onComplete {
         case Success(value) => value shouldBe Shuttering.shutteringDisabled
         case Failure(_)     =>
       }
@@ -56,7 +64,7 @@ class ShutteringConnectorSpec extends BaseSpec {
     "Assume unshuttered for BadGatewayException response" in {
       mockShutteringGet(Future.successful(new BadGatewayException("")))
 
-      connector.getShutteringStatus("27085215-69a4-4027-8f72-b04b10ec16b0") onComplete {
+      connector.getShutteringStatus(jid) onComplete {
         case Success(value) => value shouldBe Shuttering.shutteringDisabled
         case Failure(_)     =>
       }

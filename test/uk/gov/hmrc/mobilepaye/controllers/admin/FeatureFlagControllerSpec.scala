@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,22 @@
 
 package uk.gov.hmrc.mobilepaye.controllers.admin
 
-import org.mockito.ArgumentMatchers.{any, eq => meq}
+import org.mockito.ArgumentMatchers.{any, eq as meq}
 import org.mockito.Mockito
 import org.mockito.Mockito.{reset, when}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures.whenReady
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.cache.AsyncCacheApi
-import play.api.http.Status.OK
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsBoolean, Json}
 import play.api.mvc.{AnyContentAsEmpty, ControllerComponents}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.internalauth.client.Predicate.Permission
-import uk.gov.hmrc.internalauth.client._
+import uk.gov.hmrc.internalauth.client.*
 import uk.gov.hmrc.internalauth.client.test.{BackendAuthComponentsStub, StubBehaviour}
 import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, OnlinePaymentIntegration}
 import uk.gov.hmrc.mobilepaye.repository.admin.AdminRepository
@@ -42,10 +41,7 @@ import uk.gov.hmrc.mobilepaye.utils.{BaseSpec, MockAsyncCacheApi}
 import scala.concurrent.Future
 import scala.reflect.ClassTag
 
-class FeatureFlagControllerSpec
-  extends BaseSpec
-    with GuiceOneAppPerSuite
-    with BeforeAndAfterEach {
+class FeatureFlagControllerSpec extends BaseSpec with GuiceOneAppPerSuite with BeforeAndAfterEach {
 
   def fakeRequest(method: String, uri: String): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest(method, uri)
@@ -59,7 +55,7 @@ class FeatureFlagControllerSpec
 
   val mockAdminRepository: AdminRepository = mock[AdminRepository]
 
-  val mockFeatureFlagService: FeatureFlagService = mock[FeatureFlagService]
+  override val mockFeatureFlagService: FeatureFlagService = mock[FeatureFlagService]
 
   val mockCacheApi: MockAsyncCacheApi = new MockAsyncCacheApi()
 
@@ -69,7 +65,7 @@ class FeatureFlagControllerSpec
   val permission: Permission =
     Permission(
       resource = Resource(
-        resourceType = ResourceType("ddcn-live-admin-frontend"),
+        resourceType     = ResourceType("ddcn-live-admin-frontend"),
         resourceLocation = ResourceLocation("*")
       ),
       action = IAAction("ADMIN")
@@ -165,9 +161,8 @@ class FeatureFlagControllerSpec
 
         val result = route(app, request).head
 
-        whenReady(result.failed) {
-          case e: UpstreamErrorResponse =>
-            e.statusCode shouldBe UNAUTHORIZED
+        whenReady(result.failed) { case e: UpstreamErrorResponse =>
+          e.statusCode shouldBe UNAUTHORIZED
         }
       }
     }

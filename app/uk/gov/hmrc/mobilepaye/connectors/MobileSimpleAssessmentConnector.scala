@@ -19,28 +19,27 @@ package uk.gov.hmrc.mobilepaye.connectors
 import play.api.Logger
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, StringContextOps}
 import uk.gov.hmrc.mobilepaye.domain.admin.OnlinePaymentIntegration
-import uk.gov.hmrc.mobilepaye.domain.types.ModelTypes.JourneyId
 import uk.gov.hmrc.mobilepaye.services.admin.FeatureFlagService
-import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.mobilepaye.domain.simpleassessment.MobileSimpleAssessmentResponse
+import uk.gov.hmrc.mobilepaye.domain.types.JourneyId
 
 import javax.inject.{Inject, Named}
 import scala.concurrent.{ExecutionContext, Future}
 
 case class MobileSimpleAssessmentConnector @Inject() (
-  httpGet:                                    HttpClientV2,
+  httpGet: HttpClientV2,
   @Named("mobile-simple-assessment") baseUrl: String,
-  featureFlagService:                         FeatureFlagService
-)(implicit ec:                                ExecutionContext) {
+  featureFlagService: FeatureFlagService
+)(implicit ec: ExecutionContext) {
 
   val logger: Logger = Logger(this.getClass)
 
   def getSimpleAssessmentLiabilities(
-    journeyId:   JourneyId
-  )(implicit hc: HeaderCarrier
-  ): Future[Option[MobileSimpleAssessmentResponse]] = {
-    val url = baseUrl + s"/liabilities?journeyId=$journeyId"
+    journeyId: JourneyId
+  )(implicit hc: HeaderCarrier): Future[Option[MobileSimpleAssessmentResponse]] = {
+    val url = baseUrl + s"/liabilities?journeyId=${journeyId.value.toString}"
     featureFlagService.get(OnlinePaymentIntegration) flatMap { onlinePaymentIntegration =>
       if (onlinePaymentIntegration.isEnabled) {
         httpGet

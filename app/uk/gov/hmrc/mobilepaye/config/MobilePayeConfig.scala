@@ -22,5 +22,5 @@ case class MobilePayeConfig @Inject() (configuration: Configuration) {
 
   val internalAuthResourceType: String = configuration.get[String]("microservice.services.internal-auth.resource-type")
 
-  val mongoTtl: Int = configuration.get[Int]("mongodb.ttlSecond")
+  val mongoTtl: Long = configuration.get[Long]("mongodb.ttlSecond")
 }

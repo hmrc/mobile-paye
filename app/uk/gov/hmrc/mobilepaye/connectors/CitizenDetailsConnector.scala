@@ -19,27 +19,24 @@ package uk.gov.hmrc.mobilepaye.connectors
 import com.google.inject.{Inject, Singleton}
 import com.google.inject.name.Named
 import play.api.Logger
-import play.api.http.Status.{LOCKED, NOT_FOUND}
+import play.api.http.Status.{BAD_REQUEST, LOCKED, NOT_FOUND}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
 import uk.gov.hmrc.mobilepaye.domain.citizendetails.Person
-import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
+import uk.gov.hmrc.http.StringContextOps
+import uk.gov.hmrc.http.HttpReads.Implicits.*
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class CitizenDetailsConnector @Inject() (
-  @Named("citizen-details") citizenDetailsConnectorUrl: String,
-  http:                                                 HttpClientV2) {
+class CitizenDetailsConnector @Inject() (@Named("citizen-details") citizenDetailsConnectorUrl: String, http: HttpClientV2) {
 
   val logger: Logger = Logger(this.getClass)
 
   def getPerson(
-    nino:        Nino
-  )(implicit hc: HeaderCarrier,
-    ec:          ExecutionContext
-  ): Future[Person] =
+    nino: Nino
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Person] =
     http
       .get(url"$citizenDetailsConnectorUrl/citizen-details/$nino/designatory-details/basic")
       .execute[Person]

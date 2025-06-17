@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,21 +17,23 @@
 package uk.gov.hmrc.mobilepaye.connectors
 
 import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.http._
+import uk.gov.hmrc.http.*
 import uk.gov.hmrc.mobilepaye.domain.tai.{EmploymentIncome, Live, PensionIncome}
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
+import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 
 import java.net.URL
 import scala.concurrent.{ExecutionContext, Future}
 
 class TaiConnectorSpec extends BaseSpec {
-
-  val serviceUrl: String       = "https://tst-url"
-  val connector:  TaiConnector = new TaiConnector(mockHttpClient, serviceUrl)
+  override val mockHttpClient: HttpClientV2 = mock[HttpClientV2]
+  override val mockRequestBuilder: RequestBuilder = mock[RequestBuilder]
+  val serviceUrl: String = "https://tst-url"
+  val connector: TaiConnector = new TaiConnector(mockHttpClient, serviceUrl)
 
   def mockTaiGet[T](
     url1: String,
-    f:    Future[T]
+    f: Future[T]
   ) = {
 
     val urlNew = s"$serviceUrl/tai/${nino.value}/$url1"
@@ -41,7 +43,7 @@ class TaiConnectorSpec extends BaseSpec {
       .returning(mockRequestBuilder)
 
     (mockRequestBuilder
-      .execute[T](_: HttpReads[T], _: ExecutionContext))
+      .execute[T](using _: HttpReads[T], _: ExecutionContext))
       .expects(*, *)
       .returns(f)
   }
@@ -80,8 +82,7 @@ class TaiConnectorSpec extends BaseSpec {
     }
 
     "throw InternalServerErrorException for valid nino for authorised user when receiving a 500 response from tai" in {
-      mockTaiGet(s"tax-account/$currentTaxYear/income",
-                 Future.failed(new InternalServerException("Internal Server Error")))
+      mockTaiGet(s"tax-account/$currentTaxYear/income", Future.failed(new InternalServerException("Internal Server Error")))
 
       intercept[InternalServerException] {
         await(connector.getNonTaxCodeIncome(nino, currentTaxYear))
@@ -107,7 +108,8 @@ class TaiConnectorSpec extends BaseSpec {
           """.stripMargin)
 
       mockTaiGet(s"tax-account/year/$currentTaxYear/income/${EmploymentIncome.toString}/status/${Live.toString}",
-                 Future.successful(taiEmploymentsJson))
+                 Future.successful(taiEmploymentsJson)
+                )
 
       val result =
         await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear, EmploymentIncome.toString, Live.toString))
@@ -126,8 +128,7 @@ class TaiConnectorSpec extends BaseSpec {
                       |}
           """.stripMargin)
 
-      mockTaiGet(s"tax-account/year/$currentTaxYear/income/${PensionIncome.toString}/status/${Live.toString}",
-                 Future.successful(taiJson))
+      mockTaiGet(s"tax-account/year/$currentTaxYear/income/${PensionIncome.toString}/status/${Live.toString}", Future.successful(taiJson))
 
       val result =
         await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear, PensionIncome.toString, Live.toString))
@@ -136,7 +137,8 @@ class TaiConnectorSpec extends BaseSpec {
 
     "return an empty Seq[IncomeSource] when receiving when a NotFoundException is thrown for an authorised user" in {
       mockTaiGet(s"tax-account/year/$currentTaxYear/income/${EmploymentIncome.toString}/status/${Live.toString}",
-                 Future.failed(new NotFoundException("Not Found")))
+                 Future.failed(new NotFoundException("Not Found"))
+                )
 
       val result =
         await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear, EmploymentIncome.toString, Live.toString))
@@ -156,7 +158,8 @@ class TaiConnectorSpec extends BaseSpec {
 
     "throw ForbiddenException for valid nino for authorised user but for a different nino" in {
       mockTaiGet(s"tax-account/year/$currentTaxYear/income/${EmploymentIncome.toString}/status/${Live.toString}",
-                 Future.failed(new ForbiddenException("Forbidden")))
+                 Future.failed(new ForbiddenException("Forbidden"))
+                )
 
       intercept[ForbiddenException] {
         await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear, EmploymentIncome.toString, Live.toString))
@@ -207,8 +210,7 @@ class TaiConnectorSpec extends BaseSpec {
     }
 
     "throw InternalServerErrorException for valid nino for authorised user when receiving a 500 response from tai" in {
-      mockTaiGet(s"tax-account/$currentTaxYear/summary",
-                 Future.failed(new InternalServerException("Internal Server Error")))
+      mockTaiGet(s"tax-account/$currentTaxYear/summary", Future.failed(new InternalServerException("Internal Server Error")))
 
       intercept[InternalServerException] {
         await(connector.getTaxAccountSummary(nino, currentTaxYear))
@@ -234,8 +236,7 @@ class TaiConnectorSpec extends BaseSpec {
     }
 
     "throw InternalServerErrorException for valid nino for authorised user when receiving a 500 response from tai" in {
-      mockTaiGet(s"tax-account/tax-code-change/exists",
-                 Future.failed(new InternalServerException("Internal Server Error")))
+      mockTaiGet(s"tax-account/tax-code-change/exists", Future.failed(new InternalServerException("Internal Server Error")))
 
       intercept[InternalServerException] {
         await(connector.getTaxCodeChangeExists(nino))

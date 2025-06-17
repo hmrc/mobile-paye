@@ -17,20 +17,19 @@
 package uk.gov.hmrc.mobilepaye.mocks
 
 import org.scalamock.handlers.CallHandler
-import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mobilepaye.connectors.ShutteringConnector
 import uk.gov.hmrc.mobilepaye.domain.Shuttering
-import uk.gov.hmrc.mobilepaye.domain.types.ModelTypes.JourneyId
+import uk.gov.hmrc.mobilepaye.domain.types.JourneyId
+import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait ShutteringMock extends MockFactory {
+trait ShutteringMock extends BaseSpec {
 
   def mockShutteringResponse(
-    response:                     Shuttering
-  )(implicit shutteringConnector: ShutteringConnector
-  ): CallHandler[Future[Shuttering]] =
+    response: Shuttering
+  )(implicit shutteringConnector: ShutteringConnector): CallHandler[Future[Shuttering]] =
     (shutteringConnector
       .getShutteringStatus(_: JourneyId, _: String)(_: HeaderCarrier, _: ExecutionContext))
       .expects(*, *, *, *)

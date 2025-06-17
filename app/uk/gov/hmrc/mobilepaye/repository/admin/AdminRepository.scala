@@ -16,13 +16,14 @@
 
 package uk.gov.hmrc.mobilepaye.repository.admin
 
-import org.mongodb.scala.model.Filters._
-import org.mongodb.scala.model.Indexes._
+import org.mongodb.scala.model.Filters.*
+import org.mongodb.scala.model.Indexes.*
 import org.mongodb.scala.model.{IndexModel, IndexOptions, ReplaceOptions}
-import uk.gov.hmrc.mobilepaye.domain.admin._
+import uk.gov.hmrc.mobilepaye.domain.admin.*
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 import uk.gov.hmrc.mongo.transaction.{TransactionConfiguration, Transactions}
+import org.mongodb.scala.{ObservableFuture, SingleObservableFuture}
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -30,23 +31,23 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class AdminRepository @Inject() (
   val mongoComponent: MongoComponent
-)(
-  implicit ec: ExecutionContext
+)(implicit
+  ec: ExecutionContext
 ) extends PlayMongoRepository[FeatureFlag](
-  collectionName = "admin-feature-flags",
-  mongoComponent = mongoComponent,
-  domainFormat   = FeatureFlag.format,
-  indexes = Seq(
-    IndexModel(
-      keys         = ascending("name"),
-      indexOptions = IndexOptions()
-        .name("name")
-        .unique(true)
+      collectionName = "admin-feature-flags",
+      mongoComponent = mongoComponent,
+      domainFormat   = FeatureFlag.format,
+      indexes = Seq(
+        IndexModel(
+          keys = ascending("name"),
+          indexOptions = IndexOptions()
+            .name("name")
+            .unique(true)
+        )
+      ),
+      extraCodecs = Codecs.playFormatSumCodecs(FeatureFlagName.formats)
     )
-  ),
-  extraCodecs = Codecs.playFormatSumCodecs(FeatureFlagName.formats)
-
-) with Transactions {
+    with Transactions {
 
   private implicit val tc: TransactionConfiguration =
     TransactionConfiguration.strict
@@ -74,25 +75,22 @@ class AdminRepository @Inject() (
         options = ReplaceOptions().upsert(true)
       )
       .map(_.wasAcknowledged())
-      .toSingle()
-      .toFuture()
+      .head()
 
   def setFeatureFlags(featureFlags: Map[FeatureFlagName, Boolean]): Future[Unit] = {
-    val flags: List[FeatureFlag] = featureFlags.map {
-      case (flag, status) =>
-        FeatureFlag(
-          name        = flag,
-          isEnabled   = status,
-          description = flag.description
-        )
+    val flags: List[FeatureFlag] = featureFlags.map { case (flag, status) =>
+      FeatureFlag(
+        name        = flag,
+        isEnabled   = status,
+        description = flag.description
+      )
     }.toList
 
-    withSessionAndTransaction(
-      session =>
-        for {
-          _ <- collection.deleteMany(session, filter = in("name", featureFlags.keys.toSeq: _*)).toFuture()
-          _ <- collection.insertMany(session, flags).toFuture()
-        } yield ()
+    withSessionAndTransaction(session =>
+      for {
+        _ <- collection.deleteMany(session, filter = in("name", featureFlags.keys.toSeq*)).toFuture()
+        _ <- collection.insertMany(session, flags).toFuture()
+      } yield ()
     )
   }
 }

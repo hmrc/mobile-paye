@@ -17,24 +17,24 @@
 package uk.gov.hmrc.mobilepaye.mocks
 
 import org.scalamock.handlers.CallHandler
-import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.{Retrieval, ~}
 import uk.gov.hmrc.auth.core.{AuthConnector, ConfidenceLevel}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait AuthorisationMock extends MockFactory {
+trait AuthorisationMock extends BaseSpec {
 
   type GrantAccess = Option[String] ~ ConfidenceLevel
 
   def mockAuthorisationGrantAccess(
-    response:               GrantAccess
-  )(implicit authConnector: AuthConnector
-  ): CallHandler[Future[GrantAccess]] =
+    response: GrantAccess
+  )(implicit authConnector: AuthConnector): CallHandler[Future[GrantAccess]] =
     (authConnector
       .authorise(_: Predicate, _: Retrieval[GrantAccess])(_: HeaderCarrier, _: ExecutionContext))
       .expects(*, *, *, *)
       .returning(Future successful response)
+
 }

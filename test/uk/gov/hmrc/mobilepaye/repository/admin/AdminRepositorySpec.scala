@@ -25,12 +25,12 @@ import scala.concurrent.Future
 
 class AdminRepositorySpec extends BaseSpec with PlayMongoRepositorySupport[FeatureFlag] {
 
-  override lazy val repository: AdminRepository =
+  val repository: AdminRepository =
     new AdminRepository(mongoComponent)
 
   def insertRecord(
-    flag:    FeatureFlagName = OnlinePaymentIntegration,
-    enabled: Boolean         = true
+    flag: FeatureFlagName = OnlinePaymentIntegration,
+    enabled: Boolean = true
   ): Future[Boolean] =
     insert(
       FeatureFlag(flag, enabled, flag.description)
@@ -114,7 +114,7 @@ class AdminRepositorySpec extends BaseSpec with PlayMongoRepositorySupport[Featu
 
       result.getCode shouldBe 11000
       result.getError.getMessage shouldBe
-      s"""E11000 duplicate key error collection: test-AdminRepositorySpec.admin-feature-flags index: name dup key: { name: "$OnlinePaymentIntegration" }"""
+        s"""E11000 duplicate key error collection: test-AdminRepositorySpec.admin-feature-flags index: name dup key: { name: "$OnlinePaymentIntegration" }"""
     }
   }
 }

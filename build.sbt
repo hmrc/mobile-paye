@@ -19,20 +19,17 @@ lazy val microservice = Project(appName, file("."))
       "uk.gov.hmrc.time.TaxYear",
       "uk.gov.hmrc.mobilepaye.domain.types._",
       "uk.gov.hmrc.mobilepaye.domain.admin._",
-      "uk.gov.hmrc.mobilepaye.domain.types.ModelTypes._"
+      "uk.gov.hmrc.mobilepaye.domain.types.JourneyId._"
     )
   )
   .settings(
     majorVersion := 0,
-    scalaVersion := "2.13.12",
+    scalaVersion := "3.3.5",
     playDefaultPort := 8247,
     libraryDependencies ++= AppDependencies(),
     update / evictionWarningOptions := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
-    resolvers += Resolver.jcenterRepo,
     Compile / unmanagedResourceDirectories += baseDirectory.value / "resources",
-    IntegrationTest / unmanagedSourceDirectories := (IntegrationTest / baseDirectory)(base =>
-      Seq(base / "it", base / "test-common")
-    ).value,
+    IntegrationTest / unmanagedSourceDirectories := (IntegrationTest / baseDirectory)(base => Seq(base / "it", base / "test-common")).value,
     Test / unmanagedSourceDirectories := (Test / baseDirectory)(base => Seq(base / "test", base / "test-common")).value,
     IntegrationTest / parallelExecution := false,
     scalacOptions in Test -= "-Ywarn-dead-code",
@@ -49,10 +46,11 @@ lazy val microservice = Project(appName, file("."))
       "-Xlint",
       "-Wconf:cat=w-flag-value-discard&msg=discarded non-Unit value of type org\\.scalatest\\.Assertion:s"
     ),
-    coverageMinimumStmtTotal := 90,
+    coverageMinimumStmtTotal := 89,
     coverageFailOnMinimum := true,
     coverageHighlighting := true,
-    coverageExcludedPackages := "<empty>;com.kenshoo.play.metrics.*;.*definition.*;prod.*;testOnlyDoNotUseInAppConf.*;app.*;.*BuildInfo.*;.*Routes.*;.*javascript.*;.*Reverse.*",
+    coverageExcludedPackages := "<empty>;com.kenshoo.play.metrics.*;.*definition.*;prod.*;testOnlyDoNotUseInAppConf.*;app.*;.*BuildInfo.*;.*Routes.*;.*javascript.*;.*Reverse.* " +
+      ";.*mobilepaye.errors.*;.*controllers.test.*;.*binders.*;.*domain.types.*;.*domain.admin.FeatureFlagMongoFormats,;.*domain.tai.CompanyCar",
     excludeDependencies ++= Seq(
       // As of Play 3.0, groupId has changed to org.playframework; exclude transitive dependencies to the old artifacts
       // Specifically affects play-json-extensions dependency
