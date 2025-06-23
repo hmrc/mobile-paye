@@ -146,6 +146,27 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
                                                  )
     }
 
+    "return full MobilePayeResponse with isRTIDown as true when all data is available and RTi is down for oneEmployemnt " in {
+      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSourceWithRtiUnavail))
+      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
+      mockMatchingTaxCodeNotLive(Future successful employmentIncomeSource ++ employmentIncomeSource)
+      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
+      mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockGetBenefits(Future.successful(noBenefits))
+      mockGetTaxCodeChangeExists(Future.successful(true))
+      mockGetTaxCodeChange(Future successful taxCodeChangeDetails)
+      mockGetSimpleAssessmentLiabilities(Future successful Some(fullMobileSimpleAssessmentResponse))
+      mockShutteringResponse(Shuttering.shutteringDisabled)
+      mockP800Summary(Some(taxCalcTaxYearReconciliationResponse))
+
+      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
+
+      result shouldBe fullMobilePayeResponse.copy(previousEmployments = Some(employments ++ employments),
+                                                  simpleAssessment = Some(fullMobileSimpleAssessmentResponse),
+                                                  isRTIDown        = true
+                                                 )
+    }
+
     "return full MobilePayeResponse with tax comparison link during Welsh active period" in {
       mockMatchingTaxCodeLive(Future.successful(employmentIncomeSourceWelsh))
       mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))

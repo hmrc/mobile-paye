@@ -43,7 +43,8 @@ case class MobilePayeSummaryResponse(taxYear: Option[Int],
                                      updateEmployerLink: String = "/check-income-tax/update-remove-employment/decision-page",
                                      currentYearPlusOneLink: Option[String] = Some("/check-income-tax/income-tax-comparison"),
                                      taxCodeLocation: Option[String] = None,
-                                     incomeTaxHistoricPayeUrl: String = "/check-income-tax/historic-paye/"
+                                     incomeTaxHistoricPayeUrl: String = "/check-income-tax/historic-paye/",
+                                     isRTIDown: Boolean = false
                                     )
 
 object MobilePayeSummaryResponse {
@@ -72,6 +73,8 @@ object MobilePayeSummaryResponse {
     currentYearPlusOneLink    <- (__ \ "currentYearPlusOneLink").readNullable[String]
     taxCodeLocation           <- (__ \ "taxCodeLocation").readNullable[String]
     incomeTaxHistoricPayeUrl  <- (__ \ "incomeTaxHistoricPayeUrl").read[String]
+    isRTIDown                 <- (__ \ "isRTIDown").read[Boolean]
+
   } yield MobilePayeSummaryResponse(
     taxYear,
     employments,

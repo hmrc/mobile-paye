@@ -227,6 +227,9 @@ class MobilePayeService @Inject() (taiConnector: TaiConnector,
       s"Number of previous employments sent to ap for tax year $taxYear: ${previousEmploymentPayeIncomes.size}"
     )
 
+    val realTimeStatus: Seq[RealTimeStatus] =
+      incomeSourceEmployment.flatMap(_.employment.annualAccounts.map(_.realTimeStatus))
+
     MobilePayeSummaryResponse(
       taxYear             = Some(taxYear),
       employments         = employmentPayeIncomes,
@@ -237,7 +240,8 @@ class MobilePayeService @Inject() (taiConnector: TaiConnector,
       simpleAssessment    = simpleAssessment,
       taxCodeChange       = taxCodeChange,
       taxFreeAmount       = taxFreeAmount,
-      estimatedTaxAmount  = estimatedTaxAmount
+      estimatedTaxAmount  = estimatedTaxAmount,
+      isRTIDown           = realTimeStatus.contains(TemporarilyUnavailable)
     )
   }
 

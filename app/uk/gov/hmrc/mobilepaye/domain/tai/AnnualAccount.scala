@@ -19,9 +19,7 @@ package uk.gov.hmrc.mobilepaye.domain.tai
 import play.api.libs.json.{Format, JsError, JsNumber, JsResult, JsSuccess, JsValue, Json}
 import uk.gov.hmrc.time.TaxYear
 
-case class AnnualAccount(
-  taxYear:  TaxYear,
-  payments: Seq[Payment]) {
+case class AnnualAccount(taxYear: TaxYear, payments: Seq[Payment], realTimeStatus: RealTimeStatus) {
 
   lazy val totalIncomeYearToDate: BigDecimal =
     if (payments.isEmpty) 0 else payments.max.amountYearToDate
