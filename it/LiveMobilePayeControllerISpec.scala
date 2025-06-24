@@ -125,6 +125,71 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
 
     }
 
+    "return OK and a full valid MobilePayeResponse json with Rti down" in {
+      when(mockFeatureFlagService.get(any()))
+        .thenReturn(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = true)))
+
+      stubForShutteringDisabled()
+      grantAccess(nino)
+      personalDetailsAreFound(nino, person)
+      stubForPensions(nino, pensionIncomeSource)
+      stubForEmploymentIncome(nino, employmentIncomeSourceWithRtiUnavail)
+      stubForEmploymentIncome(
+        nino,
+        employmentIncomeSource.map(incSrc => incSrc.copy(employment = incSrc.employment.copy(employmentStatus = NotLive))) ++ employmentIncomeSource
+          .map(incSrc => incSrc.copy(employment = incSrc.employment.copy(endDate = Some(LocalDate.of(2022, 2, 1)), employmentStatus = NotLive))),
+        status = NotLive
+      )
+      nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+      taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxAccountSummaryIsFound(nino, taxAccountSummary, cyPlusone = true)
+      taxCalcWithNoDate(nino, currentTaxYear)
+      stubForBenefits(nino, noBenefits)
+      stubForTaxCodeChangeExists(nino)
+      stubForTaxCodeChange(nino, taxCodeChangeDetails)
+      stubSimpleAssessmentResponse
+
+      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
+      response.status shouldBe 200
+      response.body[JsValue] shouldBe Json
+        .toJson(
+          fullMobilePayeResponseWithCY1Link
+            .copy(
+              previousEmployments = Some(
+                employments.map(emp =>
+                  emp.copy(
+                    status                           = NotLive,
+                    incomeDetailsLink                = s"/check-income-tax/your-income-calculation-details/${emp.incomeDetailsLink.last}",
+                    yourIncomeCalculationDetailsLink = s"/check-income-tax/your-income-calculation-details/${emp.incomeDetailsLink.last}",
+                    updateIncomeLink                 = None
+                  )
+                ) ++
+                  employments.map(emp =>
+                    emp.copy(
+                      status                           = NotLive,
+                      incomeDetailsLink                = s"/check-income-tax/your-income-calculation-details/${emp.incomeDetailsLink.last}",
+                      yourIncomeCalculationDetailsLink = s"/check-income-tax/your-income-calculation-details/${emp.incomeDetailsLink.last}",
+                      updateIncomeLink                 = None,
+                      endDate                          = Some(LocalDate.of(2022, 2, 1))
+                    )
+                  )
+              ),
+              simpleAssessment = Some(fullMobileSimpleAssessmentResponse),
+              repayment = Some(
+                P800Repayment(
+                  amount          = Some(1000),
+                  paymentStatus   = Some(Refund),
+                  datePaid        = None,
+                  taxYear         = previousTaxYear,
+                  claimRefundLink = Some(s"/tax-you-paid/$previousTaxYear-$currentTaxYear/paid-too-much")
+                )
+              ),
+              isRTIDown = true
+            )
+        )
+
+    }
+
     "return OK and a full valid MobilePayeResponse json with no comparison link if data not found" in {
       stubForShutteringDisabled()
       grantAccess(nino)
@@ -295,6 +360,26 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
   s"GET /nino/$nino/tax-year/current/summary" should {
 
     "return OK and a full valid MobilePayeResponse json" in {
+      stubForShutteringDisabled()
+      grantAccess(nino)
+      personalDetailsAreFound(nino, person)
+      nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+      taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxAccountSummaryNotFound(nino, cyPlusone = true)
+      stubForPensions(nino, pensionIncomeSource)
+      stubForEmploymentIncome(nino, employmentIncomeSource)
+      stubForEmploymentIncome(nino, status = NotLive)
+      taxCalcNoResponse(nino, currentTaxYear)
+      stubForBenefits(nino, noBenefits)
+      stubForTaxCodeChangeExists(nino)
+      stubForTaxCodeChange(nino, taxCodeChangeDetails)
+
+      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
+      response.status        shouldBe 200
+      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse)
+    }
+
+    "return OK and a full valid MobilePayeResponse json with Rti down" in {
       stubForShutteringDisabled()
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
