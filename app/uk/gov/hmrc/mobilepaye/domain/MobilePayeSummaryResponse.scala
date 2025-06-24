@@ -99,12 +99,49 @@ object MobilePayeSummaryResponse {
     updateEmployerLink,
     currentYearPlusOneLink,
     taxCodeLocation,
-    incomeTaxHistoricPayeUrl
+    incomeTaxHistoricPayeUrl,
+    isRTIDown
   )
 
-  implicit val writes: OWrites[MobilePayeSummaryResponse] = Json.writes[MobilePayeSummaryResponse]
+  // implicit val writes: OWrites[MobilePayeSummaryResponse] = Json.writes[MobilePayeSummaryResponse]
+  implicit val writes: Writes[MobilePayeSummaryResponse] = new Writes[MobilePayeSummaryResponse] {
+    def writes(response: MobilePayeSummaryResponse): JsValue = {
 
-  implicit val format: OFormat[MobilePayeSummaryResponse] = OFormat(reads, writes)
+      // Collect fields into a Seq of tuples, filtering out None values
+      val fields = Seq(
+        response.taxYear.map("taxYear" -> Json.toJson(_)),
+        response.employments.map("employments" -> Json.toJson(_)),
+        response.previousEmployments.map("previousEmployments" -> Json.toJson(_)),
+        response.pensions.map("pensions" -> Json.toJson(_)),
+        response.repayment.map("repayment" -> Json.toJson(_)),
+        response.otherIncomes.map("otherIncomes" -> Json.toJson(_)),
+        response.taxCodeChange.map("taxCodeChange" -> Json.toJson(_)),
+        response.simpleAssessment.map("simpleAssessment" -> Json.toJson(_)),
+        response.taxFreeAmount.map("taxFreeAmount" -> Json.toJson(_)),
+        response.taxFreeAmountLink.map("taxFreeAmountLink" -> JsString(_)),
+        response.estimatedTaxAmount.map("estimatedTaxAmount" -> Json.toJson(_)),
+        response.estimatedTaxAmountLink.map("estimatedTaxAmountLink" -> JsString(_)),
+        response.understandYourTaxCodeLink.map("understandYourTaxCodeLink" -> JsString(_))
+      ).flatten ++ Seq(
+        Some("addMissingEmployerLink"    -> JsString(response.addMissingEmployerLink)),
+        Some("addMissingPensionLink"     -> JsString(response.addMissingPensionLink)),
+        Some("addMissingIncomeLink"      -> JsString(response.addMissingIncomeLink)),
+        Some("addMissingBenefitLink"     -> JsString(response.addMissingBenefitLink)),
+        Some("addMissingCompanyCarLink"  -> JsString(response.addMissingCompanyCarLink)),
+        Some("previousTaxYearLink"       -> JsString(response.previousTaxYearLink)),
+        Some("updateEstimatedIncomeLink" -> JsString(response.updateEstimatedIncomeLink)),
+        Some("updateEmployerLink"        -> JsString(response.updateEmployerLink)),
+        response.currentYearPlusOneLink.map("currentYearPlusOneLink" -> JsString(_)),
+        response.taxCodeLocation.map("taxCodeLocation" -> JsString(_)),
+        Some("incomeTaxHistoricPayeUrl" -> JsString(response.incomeTaxHistoricPayeUrl)),
+        Some("isRTIDown"                -> JsBoolean(response.isRTIDown))
+      ).flatten
+
+      JsObject(fields)
+    }
+  }
+
+  implicit val format: Format[MobilePayeSummaryResponse] = Format(reads, writes)
 
   def empty: MobilePayeSummaryResponse =
     MobilePayeSummaryResponse(
