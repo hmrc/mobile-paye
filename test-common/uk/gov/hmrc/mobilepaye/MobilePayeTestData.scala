@@ -29,6 +29,8 @@ import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus.{ChequeSent, Paymen
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.{P800Status, P800Summary, RepaymentStatus, TaxYearReconciliation}
 import uk.gov.hmrc.time.TaxYear
 
+import scala.collection.immutable.Seq
+
 trait MobilePayeTestData {
   val currentTaxYear: Int = TaxYear.current.startYear
   val endOfTaxYear: Int = TaxYear.current.finishYear
@@ -74,17 +76,18 @@ trait MobilePayeTestData {
   val annualAccount2: AnnualAccount = AnnualAccount(taxYear = TaxYear(startYear = LocalDate.now().getYear), payments2, realTimeStatus = Available)
 
   def taiEmployment(taxYear: Int = LocalDate.now().getYear, rtiStatus: RealTimeStatus = Available): Employment =
-    Employment(name = "TESCO",
-               employmentStatus = Live,
-               payrollNumber = Some("ABC123"),
-               sequenceNumber = 3,
-               payeNumber = "P12345",
-               startDate = Some(LocalDate.now().minusYears(4)),
-               endDate = None,
-               annualAccounts = Seq(annualAccount(taxYear, rtiStatus)),
-               taxDistrictNumber = "123",
-               receivingOccupationalPension = false
-              )
+    Employment(
+      name                         = "TESCO",
+      employmentStatus             = Live,
+      payrollNumber                = Some("ABC123"),
+      sequenceNumber               = 3,
+      payeNumber                   = "P12345",
+      startDate                    = Some(LocalDate.now().minusYears(4)),
+      endDate                      = None,
+      annualAccounts               = Seq(annualAccount(taxYear, rtiStatus)),
+      taxDistrictNumber            = "123",
+      receivingOccupationalPension = false
+    )
 
   val taiEmployment2: Employment = Employment(
     name             = "ASDA",
@@ -407,6 +410,17 @@ trait MobilePayeTestData {
         TaxYear.current.back(4),
         Some(Seq(historicTaxCodeIncome2.copy(amount = Some(50), taxAmount = Some(20)), historicTaxCodeIncome3))
       ),
+      IncomeTaxYear(TaxYear.current.back(5), None)
+    )
+  }
+
+  val fullIncomeTaxHistoryListParsingError: List[IncomeTaxYear] = {
+    List(
+      IncomeTaxYear(TaxYear.current, None),
+      IncomeTaxYear(TaxYear.current.back(1), Some(Seq(historicTaxCodeIncome1))),
+      IncomeTaxYear(TaxYear.current.back(2), None),
+      IncomeTaxYear(TaxYear.current.back(3), None),
+      IncomeTaxYear(TaxYear.current.back(4), None),
       IncomeTaxYear(TaxYear.current.back(5), None)
     )
   }

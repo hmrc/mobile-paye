@@ -19,7 +19,7 @@ package uk.gov.hmrc.mobilepaye.connectors
 import com.google.inject.name.Named
 import com.google.inject.{Inject, Singleton}
 import play.api.Logger
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsResultException, JsValue}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, StringContextOps}
@@ -91,7 +91,9 @@ class TaiConnector @Inject() (http: HttpClientV2, @Named("tai") serviceUrl: Stri
       }
       .recover {
         case _: NotFoundException => Seq.empty[IncomeSource]
-        case e                    => throw e
+        case _: JsResultException =>
+          throw NotFoundException(s"GET of tax-account/year/$taxYear/income/$incomeType/status/$status Failed with 404")
+        case e => throw e
       }
 
   def getBenefits(
@@ -117,6 +119,7 @@ class TaiConnector @Inject() (http: HttpClientV2, @Named("tai") serviceUrl: Stri
       }
       .recover {
         case _: NotFoundException => Seq.empty[TaxCodeIncome]
+        case _: JsResultException => Seq.empty[TaxCodeIncome]
         case e                    => throw e
       }
 
@@ -132,6 +135,7 @@ class TaiConnector @Inject() (http: HttpClientV2, @Named("tai") serviceUrl: Stri
       }
       .recover {
         case _: NotFoundException => Seq.empty[Employment]
+        case _: JsResultException => Seq.empty[Employment]
         case e                    => throw e
       }
 
@@ -159,6 +163,7 @@ class TaiConnector @Inject() (http: HttpClientV2, @Named("tai") serviceUrl: Stri
       }
       .recover {
         case _: NotFoundException => Seq.empty[TaxCodeRecord]
+        case _: JsResultException => Seq.empty[TaxCodeRecord]
         case e                    => throw e
       }
 
