@@ -39,6 +39,7 @@ import uk.gov.hmrc.mobilepaye.domain.types.JourneyId
 import uk.gov.hmrc.auth.core.{AuthConnector, ConfidenceLevel}
 import org.scalamock.matchers.MatcherBase
 import uk.gov.hmrc.mobilepaye.connectors.ShutteringConnector
+import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, OnlinePaymentIntegration}
 import uk.gov.hmrc.mobilepaye.domain.audit.MobilePayeSummaryResponseAudit
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 

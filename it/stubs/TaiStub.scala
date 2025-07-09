@@ -31,6 +31,27 @@ object TaiStub {
       )
     )
 
+  def stubForJsonErrorEmploymentIncome(
+    nino: String,
+    employments: Seq[IncomeSource] = Seq.empty,
+    status: TaxCodeIncomeStatus = Live,
+    taxYear: Int = TaxYear.current.currentYear
+  ): StubMapping =
+    stubFor(
+      get(
+        urlEqualTo(s"/tai/$nino/tax-account/year/$taxYear/income/EmploymentIncome/status/$status")
+      ).willReturn(
+        aResponse()
+          .withStatus(0)
+          .withBody(s"""
+               |{
+               |  
+               |}
+
+             """.stripMargin)
+      )
+    )
+
   def employmentsNotCalled(
     nino: String,
     taxYear: Int = TaxYear.current.currentYear
@@ -173,6 +194,24 @@ object TaiStub {
           """.stripMargin)
         )
     )
+  def stubForErrorJsonTaxCodeIncomes(
+    nino: String,
+    taxYear: Int,
+    incomes: Seq[TaxCodeIncome] = Seq.empty
+  ): StubMapping =
+    stubFor(
+      get(urlEqualTo(s"/tai/$nino/tax-account/$taxYear/income/tax-code-incomes"))
+        .willReturn(
+          aResponse()
+            .withStatus(200)
+            .withBody(s"""
+                   |{
+                   |
+                   |}
+
+                 """.stripMargin)
+        )
+    )
 
   def stubForEmployments(
     nino: String,
@@ -193,6 +232,24 @@ object TaiStub {
           """.stripMargin)
         )
     )
+  def stubForEmploymentsJsonError(
+      nino: String,
+      taxYear: Int,
+      employments: Seq[Employment]
+    ): StubMapping =
+      stubFor(
+        get(urlEqualTo(s"/tai/$nino/employments/years/$taxYear"))
+          .willReturn(
+            aResponse()
+              .withStatus(200)
+              .withBody(s"""
+                   |{
+                   |  
+                   |}
+
+                 """.stripMargin)
+          )
+      )
 
   def stubForTaxCodeChangeExists(
     nino: String,

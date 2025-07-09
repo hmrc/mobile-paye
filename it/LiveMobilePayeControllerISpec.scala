@@ -333,6 +333,8 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
 
+      response.status shouldBe 429
+
     }
 
     "return 400 when no journeyId supplied" in {
@@ -354,6 +356,19 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
           .get()
       )
       response.status shouldBe 400
+    }
+
+    "return 404 when json validation happen for get matching tax codes" in {
+      when(mockFeatureFlagService.get(any()))
+        .thenReturn(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = true)))
+
+      stubForShutteringDisabled()
+      grantAccess(nino)
+      personalDetailsAreFound(nino, person)
+      stubForJsonErrorEmploymentIncome(nino)
+
+      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
+      response.status shouldBe 404
     }
   }
 
@@ -977,6 +992,20 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       val response = await(getRequestWithAuthHeaders(incomeTaxHistoryUrl))
       response.status                                   shouldBe 200
       Json.parse(response.body).as[List[IncomeTaxYear]] shouldBe fullIncomeTaxHistoryList
+    }
+
+    "return OK and None  income tax history if parsing error  json" in {
+      stubForShutteringDisabled("mobile-paye-income-tax-history")
+      grantAccess(nino)
+      personalDetailsAreFound(nino, person)
+      stubForErrorJsonTaxCodeIncomes(nino, TaxYear.current.startYear, Seq.empty)
+      stubForTaxCodeIncomes(nino, TaxYear.current.startYear - 1, Seq(taxCodeIncome, taxCodeIncome2))
+      stubForEmploymentsJsonError(nino, TaxYear.current.startYear, Seq.empty)
+      stubForEmployments(nino, TaxYear.current.startYear - 1, Seq(taiEmployment(TaxYear.current.startYear - 1)))
+
+      val response = await(getRequestWithAuthHeaders(incomeTaxHistoryUrl))
+      response.status                                   shouldBe 200
+      Json.parse(response.body).as[List[IncomeTaxYear]] shouldBe fullIncomeTaxHistoryListParsingError
     }
 
     "return OK and a empty valid income tax history json" in {
