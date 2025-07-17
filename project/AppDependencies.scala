@@ -4,7 +4,7 @@ object AppDependencies {
 
   import play.sbt.PlayImport.*
 
-  private val playBootstrapVersion = "9.13.0"
+  private val playBootstrapVersion = "9.16.0"
   private val playHmrcVersion = "8.2.0"
   private val domainVersion = "12.1.0"
   private val taxYearVersion = "6.0.0"
