@@ -18,7 +18,7 @@ package uk.gov.hmrc.mobilepaye.connectors
 
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.*
-import uk.gov.hmrc.mobilepaye.domain.tai.{EmploymentIncome, Live, PensionIncome}
+import uk.gov.hmrc.mobilepaye.domain.tai.{EmploymentIncome, Live, PensionIncome, TaxCodeChangeDetails, TaxCodeRecord}
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 
@@ -266,6 +266,21 @@ class TaiConnectorSpec extends BaseSpec {
       intercept[UnauthorizedException] {
         await(connector.getTaxCodeChange(nino))
       }
+    }
+
+    "return empty response for json parse error" in {
+      val taiTaxCodeChangeJson: JsValue =
+        Json.parse(s"""
+             |{
+             |  
+             |}
+                    
+           """.stripMargin)
+
+      mockTaiGet(s"tax-account/tax-code-change", Future.successful(Json.toJson(taiTaxCodeChangeJson)))
+
+      val result = await(connector.getTaxCodeChange(nino))
+      result shouldBe TaxCodeChangeDetails(Seq.empty[TaxCodeRecord], Seq.empty[TaxCodeRecord])
     }
 
     "throw InternalServerErrorException for valid nino for authorised user when receiving a 500 response from tai" in {

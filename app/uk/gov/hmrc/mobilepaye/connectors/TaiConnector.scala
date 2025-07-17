@@ -176,4 +176,7 @@ class TaiConnector @Inject() (http: HttpClientV2, @Named("tai") serviceUrl: Stri
       .map { json =>
         (json \ "data").as[TaxCodeChangeDetails]
       }
+      .recover { case _: JsResultException =>
+        TaxCodeChangeDetails(Seq.empty[TaxCodeRecord], Seq.empty[TaxCodeRecord])
+      }
 }
