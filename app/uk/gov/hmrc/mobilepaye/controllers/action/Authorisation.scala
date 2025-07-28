@@ -18,14 +18,14 @@ package uk.gov.hmrc.mobilepaye.controllers.action
 
 import play.api.Logger
 import play.api.libs.json.Json
-import play.api.mvc._
-import uk.gov.hmrc.api.controllers._
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals._
+import play.api.mvc.*
+import uk.gov.hmrc.api.controllers.*
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.*
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.auth.core.{AuthorisedFunctions, Enrolment, EnrolmentIdentifier}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.mobilepaye.controllers._
+import uk.gov.hmrc.mobilepaye.controllers.*
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -39,14 +39,12 @@ trait Authorisation extends Results with AuthorisedFunctions {
 
   lazy val requiresAuth: Boolean = true
   lazy val ninoNotFoundOnAccount = new NinoNotFoundOnAccount
-  lazy val failedToMatchNino     = new FailToMatchTaxIdOnAuth
-  lazy val lowConfidenceLevel    = new AccountWithLowCL
+  lazy val failedToMatchNino = new FailToMatchTaxIdOnAuth
+  lazy val lowConfidenceLevel = new AccountWithLowCL
 
   def grantAccess(
     requestedNino: Nino
-  )(implicit hc:   HeaderCarrier,
-    ec:            ExecutionContext
-  ): Future[Authority] =
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Authority] =
     authorised(Enrolment("HMRC-NI", Seq(EnrolmentIdentifier("NINO", requestedNino.value)), "Activated", None))
       .retrieve(nino and confidenceLevel) {
         case Some(foundNino) ~ foundConfidenceLevel =>
@@ -59,11 +57,10 @@ trait Authorisation extends Results with AuthorisedFunctions {
       }
 
   def invokeAuthBlock[A](
-    request:     Request[A],
-    block:       Request[A] => Future[Result],
-    taxId:       Option[Nino]
-  )(implicit ec: ExecutionContext
-  ): Future[Result] = {
+    request: Request[A],
+    block: Request[A] => Future[Result],
+    taxId: Option[Nino]
+  )(implicit ec: ExecutionContext): Future[Result] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
 
     grantAccess(taxId.getOrElse(Nino("")))
@@ -95,18 +92,17 @@ trait AccessControl extends HeaderValidator with Authorisation {
   def parser: BodyParser[AnyContent]
 
   def validateAcceptWithAuth(
-    rules:       Option[String] => Boolean,
-    taxId:       Option[Nino]
-  )(implicit ec: ExecutionContext
-  ): ActionBuilder[Request, AnyContent] =
+    rules: Option[String] => Boolean,
+    taxId: Option[Nino]
+  )(implicit ec: ExecutionContext): ActionBuilder[Request, AnyContent] =
     new ActionBuilder[Request, AnyContent] {
 
-      override def parser:                     BodyParser[AnyContent] = outer.parser
-      override protected def executionContext: ExecutionContext       = outer.executionContext
+      override def parser: BodyParser[AnyContent] = outer.parser
+      override protected def executionContext: ExecutionContext = outer.executionContext
 
       def invokeBlock[A](
         request: Request[A],
-        block:   Request[A] => Future[Result]
+        block: Request[A] => Future[Result]
       ): Future[Result] =
         if (rules(request.headers.get("Accept"))) {
           if (requiresAuth) invokeAuthBlock(request, block, taxId)

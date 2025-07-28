@@ -25,14 +25,14 @@ import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 class TestController @Inject() (
-  adminRepo:                AdminRepository,
+  adminRepo: AdminRepository,
   val controllerComponents: ControllerComponents
-)(implicit ec:              ExecutionContext)
+)(implicit ec: ExecutionContext)
     extends BackendBaseController {
 
   def setFlag(
     flagName: FeatureFlagName,
-    enabled:  Boolean
+    enabled: Boolean
   ): Action[AnyContent] = Action.async {
     adminRepo.setFeatureFlag(flagName, enabled).map {
       case true  => Created

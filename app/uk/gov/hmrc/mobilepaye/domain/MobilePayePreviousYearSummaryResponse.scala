@@ -18,16 +18,16 @@ package uk.gov.hmrc.mobilepaye.domain
 
 import play.api.libs.json.{Json, OFormat}
 
-case class MobilePayePreviousYearSummaryResponse(
-  taxYear:                   Option[Int],
-  employments:               Option[Seq[PayeIncome]],
-  previousEmployments:       Option[Seq[PayeIncome]],
-  pensions:                  Option[Seq[PayeIncome]],
-  otherIncomes:              Option[Seq[OtherIncome]],
-  taxFreeAmount:             Option[BigDecimal],
-  estimatedTaxAmount:        Option[BigDecimal],
-  understandYourTaxCodeLink: String = "/check-income-tax/tax-codes",
-  payeSomethingWrongLink:    String)
+case class MobilePayePreviousYearSummaryResponse(taxYear: Option[Int],
+                                                 employments: Option[Seq[PayeIncome]],
+                                                 previousEmployments: Option[Seq[PayeIncome]],
+                                                 pensions: Option[Seq[PayeIncome]],
+                                                 otherIncomes: Option[Seq[OtherIncome]],
+                                                 taxFreeAmount: Option[BigDecimal],
+                                                 estimatedTaxAmount: Option[BigDecimal],
+                                                 understandYourTaxCodeLink: String = "/check-income-tax/tax-codes",
+                                                 payeSomethingWrongLink: String
+                                                )
 
 object MobilePayePreviousYearSummaryResponse {
 

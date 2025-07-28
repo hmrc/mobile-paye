@@ -30,18 +30,16 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.math.BigDecimal.RoundingMode
 
 @Singleton
-class PreviousYearSummaryService @Inject() (
-  taiConnector:                                                                  TaiConnector,
-  @Named("numberOfPreviousYearsToShowPayeSummary") previousYearPayeSummaryYears: Int) {
+class PreviousYearSummaryService @Inject() (taiConnector: TaiConnector,
+                                            @Named("numberOfPreviousYearsToShowPayeSummary") previousYearPayeSummaryYears: Int
+                                           ) {
 
   val logger: Logger = Logger(this.getClass)
 
   def getMobilePayePreviousYearSummaryResponse(
-    nino:        Nino,
-    taxYear:     Int
-  )(implicit hc: HeaderCarrier,
-    ec:          ExecutionContext
-  ): Future[MobilePayePreviousYearSummaryResponse] =
+    nino: Nino,
+    taxYear: Int
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[MobilePayePreviousYearSummaryResponse] =
     if (taxYear < TaxYear.current.currentYear - previousYearPayeSummaryYears) {
       logger.warn(
         s"Tax Year requested ($taxYear) is older than the current limit of $previousYearPayeSummaryYears years"
@@ -55,25 +53,19 @@ class PreviousYearSummaryService @Inject() (
         employmentBenefits <- taiConnector.getBenefits(nino, taxYear)
         taxCodes           <- taiConnector.getTaxCodesForYear(nino, taxYear)
       } yield {
-        buildMobilePayePreviousYearResponse(taxYear,
-                                            allEmploymentData,
-                                            nonTaxCodeIncomes,
-                                            taxAccountSummary,
-                                            employmentBenefits,
-                                            taxCodes)
-      }) recover {
-        case ex =>
-          logger.warn(s"Error retrieving previous PAYE summary info: ${ex.printStackTrace()}")
-          throw new NotFoundException(ex.getMessage)
+        buildMobilePayePreviousYearResponse(taxYear, allEmploymentData, nonTaxCodeIncomes, taxAccountSummary, employmentBenefits, taxCodes)
+      }) recover { case ex =>
+        logger.warn(s"Error retrieving previous PAYE summary info: ${ex.printStackTrace()}")
+        throw new NotFoundException(ex.getMessage)
       }
 
   private def buildMobilePayePreviousYearResponse(
-    taxYear:            Int,
-    employmentData:     Seq[Employment],
-    nonTaxCodeIncomes:  NonTaxCodeIncome,
-    taxAccountSummary:  TaxAccountSummary,
+    taxYear: Int,
+    employmentData: Seq[Employment],
+    nonTaxCodeIncomes: NonTaxCodeIncome,
+    taxAccountSummary: TaxAccountSummary,
     employmentBenefits: Benefits,
-    taxCodes:           Seq[TaxCodeRecord]
+    taxCodes: Seq[TaxCodeRecord]
   ): MobilePayePreviousYearSummaryResponse = {
 
     val liveEmployments =
@@ -113,10 +105,10 @@ class PreviousYearSummaryService @Inject() (
   }
 
   private def buildPayeIncomes(
-    incomes:            Seq[Employment],
-    taxCodes:           Seq[TaxCodeRecord],
+    incomes: Seq[Employment],
+    taxCodes: Seq[TaxCodeRecord],
     employmentBenefits: Option[Benefits],
-    taxYear:            Int
+    taxYear: Int
   ): Option[Seq[PayeIncome]] =
     incomes.map { inc =>
       PayeIncome.fromEmployment(inc, findTaxCode(inc, taxCodes), employmentBenefits, taxYear)
@@ -126,7 +118,7 @@ class PreviousYearSummaryService @Inject() (
     }
 
   private def findTaxCode(
-    emp:      Employment,
+    emp: Employment,
     taxCodes: Seq[TaxCodeRecord]
   ): Option[String] =
     taxCodes.find(_.employerName == emp.name).map(_.taxCode)

@@ -28,10 +28,7 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.audit.DefaultAuditConnector
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
-class GuiceModule(
-  environment:   Environment,
-  configuration: Configuration)
-    extends AbstractModule {
+class GuiceModule(environment: Environment, configuration: Configuration) extends AbstractModule {
 
   val servicesConfig = new ServicesConfig(
     configuration

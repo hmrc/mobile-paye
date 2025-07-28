@@ -18,8 +18,7 @@ package uk.gov.hmrc.mobilepaye.domain.simpleassessment
 
 import play.api.libs.json.{Json, OFormat}
 
-case class MobileSimpleAssessmentResponse(
-  taxYears: List[MobileSATaxYearReconciliation])
+case class MobileSimpleAssessmentResponse(taxYears: List[MobileSATaxYearReconciliation])
 
 object MobileSimpleAssessmentResponse {
   implicit val format: OFormat[MobileSimpleAssessmentResponse] =

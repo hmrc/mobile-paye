@@ -17,24 +17,20 @@
 package uk.gov.hmrc.mobilepaye.domain.taxcalc
 
 import java.time.LocalDate
-import play.api.libs.json._
+import play.api.libs.json.*
 import uk.gov.hmrc.mobilepaye.domain.P800Repayment
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status.Overpaid
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus.{Refund, SaUser, UnableToClaim}
 
 import scala.util.{Failure, Success, Try}
 
-case class P800Summary(
-  _type:    P800Status,
-  status:   Option[RepaymentStatus],
-  amount:   Option[BigDecimal],
-  datePaid: Option[LocalDate])
+case class P800Summary(_type: P800Status, status: Option[RepaymentStatus], amount: Option[BigDecimal], datePaid: Option[LocalDate])
 
 object P800Summary {
 
   def toP800Repayment(
     p800Summary: P800Summary,
-    taxYear:     Int
+    taxYear: Int
   ): Option[P800Repayment] = {
 
     val previousTaxYear = taxYear - 1
@@ -97,9 +93,7 @@ object P800Summary {
   }
 }
 
-case class TaxYearReconciliation(
-  taxYear:        Int,
-  reconciliation: P800Summary)
+case class TaxYearReconciliation(taxYear: Int, reconciliation: P800Summary)
 
 object TaxYearReconciliation {
 

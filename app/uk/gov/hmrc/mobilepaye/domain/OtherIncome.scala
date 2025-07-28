@@ -18,22 +18,21 @@ package uk.gov.hmrc.mobilepaye.domain
 
 import play.api.libs.json.{Json, OFormat}
 
-case class OtherIncome(
-  name:   String,
-  amount: BigDecimal,
-  link:   Option[String] = None,
-  incomeDetailsLink: Option[String] = None)
+case class OtherIncome(name: String, amount: BigDecimal, link: Option[String] = None, incomeDetailsLink: Option[String] = None)
 
 object OtherIncome {
   implicit val format: OFormat[OtherIncome] = Json.format[OtherIncome]
 
   def withMaybeLink(
-    name:   String,
+    name: String,
     amount: BigDecimal
   ): OtherIncome =
     if (name == "UNTAXED INTEREST INCOME")
-      OtherIncome(name, amount, Some("/check-income-tax/income/bank-building-society-savings"), Some("/check-income-tax/income/bank-building-society-savings"))
+      OtherIncome(name,
+                  amount,
+                  Some("/check-income-tax/income/bank-building-society-savings"),
+                  Some("/check-income-tax/income/bank-building-society-savings")
+                 )
     else
       OtherIncome(name, amount)
 }
-

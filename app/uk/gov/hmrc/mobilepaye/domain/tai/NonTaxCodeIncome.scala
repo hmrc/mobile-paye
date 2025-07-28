@@ -18,9 +18,7 @@ package uk.gov.hmrc.mobilepaye.domain.tai
 
 import play.api.libs.json.{Format, Json}
 
-case class UntaxedInterest(
-  incomeComponentType: NonTaxCodeIncomeComponentType,
-  amount:              BigDecimal) {
+case class UntaxedInterest(incomeComponentType: NonTaxCodeIncomeComponentType, amount: BigDecimal) {
 
   def getFormattedIncomeComponentType: String =
     incomeComponentType.toString.replaceAll("(\\p{Ll})(\\p{Lu})", "$1 $2").toUpperCase
@@ -30,9 +28,7 @@ object UntaxedInterest {
   implicit val format: Format[UntaxedInterest] = Json.format[UntaxedInterest]
 }
 
-case class OtherNonTaxCodeIncome(
-  incomeComponentType: NonTaxCodeIncomeComponentType,
-  amount:              BigDecimal) {
+case class OtherNonTaxCodeIncome(incomeComponentType: NonTaxCodeIncomeComponentType, amount: BigDecimal) {
 
   def getFormattedIncomeComponentType: String =
     incomeComponentType.toString.replaceAll("(\\p{Ll})(\\p{Lu})", "$1 $2").toUpperCase
@@ -42,9 +38,7 @@ object OtherNonTaxCodeIncome {
   implicit val format: Format[OtherNonTaxCodeIncome] = Json.format[OtherNonTaxCodeIncome]
 }
 
-case class NonTaxCodeIncome(
-  untaxedInterest:        Option[UntaxedInterest],
-  otherNonTaxCodeIncomes: Seq[OtherNonTaxCodeIncome])
+case class NonTaxCodeIncome(untaxedInterest: Option[UntaxedInterest], otherNonTaxCodeIncomes: Seq[OtherNonTaxCodeIncome])
 
 object NonTaxCodeIncome {
   implicit val format: Format[NonTaxCodeIncome] = Json.format[NonTaxCodeIncome]

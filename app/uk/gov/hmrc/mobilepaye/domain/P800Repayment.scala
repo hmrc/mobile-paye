@@ -21,12 +21,12 @@ import java.time.LocalDate
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus
 
-case class P800Repayment(
-  amount:          Option[BigDecimal],
-  paymentStatus:   Option[RepaymentStatus],
-  datePaid:        Option[LocalDate],
-  taxYear:         Int,
-  claimRefundLink: Option[String])
+case class P800Repayment(amount: Option[BigDecimal],
+                         paymentStatus: Option[RepaymentStatus],
+                         datePaid: Option[LocalDate],
+                         taxYear: Int,
+                         claimRefundLink: Option[String]
+                        )
 
 object P800Repayment {
   implicit val format: Format[P800Repayment] = Json.format

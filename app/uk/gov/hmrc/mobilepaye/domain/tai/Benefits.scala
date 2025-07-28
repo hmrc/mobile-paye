@@ -20,40 +20,31 @@ import play.api.libs.json.{Json, OFormat}
 
 import java.time.LocalDate
 
-case class Benefits(
-  companyCarBenefits: Seq[CompanyCarBenefit],
-  otherBenefits:      Seq[GenericBenefit])
+case class Benefits(companyCarBenefits: Seq[CompanyCarBenefit], otherBenefits: Seq[GenericBenefit])
 
 object Benefits {
   implicit val format: OFormat[Benefits] = Json.format[Benefits]
 }
 
-case class CompanyCarBenefit(
-  employmentSeqNo: Int,
-  grossAmount:     BigDecimal,
-  companyCars:     Seq[CompanyCar],
-  version:         Option[Int] = None)
+case class CompanyCarBenefit(employmentSeqNo: Int, grossAmount: BigDecimal, companyCars: Seq[CompanyCar], version: Option[Int] = None)
 
 object CompanyCarBenefit {
   implicit val format: OFormat[CompanyCarBenefit] = Json.format[CompanyCarBenefit]
 }
 
-case class CompanyCar(
-  carSeqNo:                           Int,
-  makeModel:                          String,
-  hasActiveFuelBenefit:               Boolean,
-  dateMadeAvailable:                  Option[LocalDate],
-  dateActiveFuelBenefitMadeAvailable: Option[LocalDate],
-  dateWithdrawn:                      Option[LocalDate])
+case class CompanyCar(carSeqNo: Int,
+                      makeModel: String,
+                      hasActiveFuelBenefit: Boolean,
+                      dateMadeAvailable: Option[LocalDate],
+                      dateActiveFuelBenefitMadeAvailable: Option[LocalDate],
+                      dateWithdrawn: Option[LocalDate]
+                     )
 
 object CompanyCar {
   implicit val format: OFormat[CompanyCar] = Json.format[CompanyCar]
 }
 
-case class GenericBenefit(
-  benefitType:   BenefitComponentType,
-  employmentId: Option[Int],
-  amount:       BigDecimal)
+case class GenericBenefit(benefitType: BenefitComponentType, employmentId: Option[Int], amount: BigDecimal)
 
 object GenericBenefit {
   implicit val format: OFormat[GenericBenefit] = Json.format[GenericBenefit]

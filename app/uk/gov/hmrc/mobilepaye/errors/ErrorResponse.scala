@@ -16,21 +16,19 @@
 
 package uk.gov.hmrc.mobilepaye.errors
 
-import play.api.libs.json._
+import play.api.libs.json.*
 
-case class ErrorResponse(
-  httpStatusCode: Int,
-  error:          String)
+case class ErrorResponse(httpStatusCode: Int, error: String)
 
 trait ServiceResponseError extends Product with Serializable {
   def message: String
 }
 
 case class MalformedRequest(message: String = "Malformed request") extends ServiceResponseError
-case class MongoDBError(message:     String) extends ServiceResponseError // logged at repository level
-case class MongoDBNoResults(message: String) extends ServiceResponseError
+case class MongoDBError(message: String)                           extends ServiceResponseError // logged at repository level
+case class MongoDBNoResults(message: String)                       extends ServiceResponseError
 
 object ErrorResponse {
   implicit val writes: Writes[ErrorResponse] = Json.writes[ErrorResponse]
-  implicit val reads:  Reads[ErrorResponse]  = Json.reads[ErrorResponse]
+  implicit val reads: Reads[ErrorResponse] = Json.reads[ErrorResponse]
 }

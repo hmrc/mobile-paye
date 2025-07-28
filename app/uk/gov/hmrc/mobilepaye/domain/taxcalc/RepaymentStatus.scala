@@ -16,22 +16,22 @@
 
 package uk.gov.hmrc.mobilepaye.domain.taxcalc
 
-import play.api.libs.json._
+import play.api.libs.json.*
 
 sealed trait RepaymentStatus
 
 object RepaymentStatus {
-  case object Refund extends RepaymentStatus
+  case object Refund            extends RepaymentStatus
   case object PaymentProcessing extends RepaymentStatus
-  case object PaymentPaid extends RepaymentStatus
-  case object ChequeSent extends RepaymentStatus
-  case object SaUser extends RepaymentStatus
-  case object UnableToClaim extends RepaymentStatus
-  case object PaymentDue extends RepaymentStatus
-  case object PartPaid extends RepaymentStatus
-  case object PaidAll extends RepaymentStatus
-  case object PaymentsDown extends RepaymentStatus
-  case object Unknown extends RepaymentStatus
+  case object PaymentPaid       extends RepaymentStatus
+  case object ChequeSent        extends RepaymentStatus
+  case object SaUser            extends RepaymentStatus
+  case object UnableToClaim     extends RepaymentStatus
+  case object PaymentDue        extends RepaymentStatus
+  case object PartPaid          extends RepaymentStatus
+  case object PaidAll           extends RepaymentStatus
+  case object PaymentsDown      extends RepaymentStatus
+  case object Unknown           extends RepaymentStatus
 
   implicit val format: Format[RepaymentStatus] = new Format[RepaymentStatus] {
 

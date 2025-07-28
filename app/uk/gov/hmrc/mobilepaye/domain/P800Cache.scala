@@ -22,9 +22,7 @@ import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
 import java.time.Instant
 
-case class P800Cache(
-  nino:      Nino,
-  createdAt: Instant = Instant.now())
+case class P800Cache(nino: Nino, createdAt: Instant = Instant.now())
 
 object P800Cache {
 

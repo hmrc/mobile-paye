@@ -19,9 +19,9 @@ package uk.gov.hmrc.mobilepaye.domain.tai
 import play.api.libs.json.{Format, JsString, JsSuccess, JsValue}
 
 sealed trait RealTimeStatus
-case object Available extends RealTimeStatus
+case object Available              extends RealTimeStatus
 case object TemporarilyUnavailable extends RealTimeStatus
-case object Unavailable extends RealTimeStatus
+case object Unavailable            extends RealTimeStatus
 
 object RealTimeStatus extends RealTimeStatus {
 

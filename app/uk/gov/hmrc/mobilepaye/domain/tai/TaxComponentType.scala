@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.mobilepaye.domain.tai
 
-import play.api.libs.json._
+import play.api.libs.json.*
 
 sealed trait TaxComponentType
 
@@ -358,7 +358,7 @@ object TaxComponentType {
 
     override def reads(json: JsValue): JsResult[TaxComponentType] = {
       val taxComponentType = json.as[String]
-      val component        = taxComponentTypeMap(taxComponentType)
+      val component = taxComponentTypeMap(taxComponentType)
       JsSuccess(component)
     }
 
@@ -403,8 +403,7 @@ object BenefitComponentType {
   implicit val formatBenefitTaxComponentType: Format[BenefitComponentType] = new Format[BenefitComponentType] {
 
     override def reads(json: JsValue): JsSuccess[BenefitComponentType] = JsSuccess(
-      benefitComponentTypeMap.getOrElse(json.as[String],
-                                        throw new IllegalArgumentException("Invalid Benefit component type"))
+      benefitComponentTypeMap.getOrElse(json.as[String], throw new IllegalArgumentException("Invalid Benefit component type"))
     )
     override def writes(benefitComponentType: BenefitComponentType): JsString = JsString(benefitComponentType.toString)
   }
@@ -449,8 +448,7 @@ object NonTaxCodeIncomeComponentType {
 
       override def reads(json: JsValue): JsSuccess[NonTaxCodeIncomeComponentType] =
         JsSuccess(
-          nonTaxCodeIncomesMap.getOrElse(json.as[String],
-                                         throw new IllegalArgumentException("Invalid Non tax code component type"))
+          nonTaxCodeIncomesMap.getOrElse(json.as[String], throw new IllegalArgumentException("Invalid Non tax code component type"))
         )
 
       override def writes(nonTaxCodeIncomeComponentType: NonTaxCodeIncomeComponentType): JsString =

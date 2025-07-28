@@ -20,17 +20,17 @@ import play.api.libs.json.{Format, Json}
 
 import java.time.LocalDate
 
-case class Employment(
-  name:                         String,
-  employmentStatus:             TaxCodeIncomeStatus,
-  payrollNumber:                Option[String],
-  sequenceNumber:               Int,
-  payeNumber:                   String,
-  startDate:                    Option[LocalDate],
-  endDate:                      Option[LocalDate],
-  annualAccounts:               Seq[AnnualAccount],
-  taxDistrictNumber:            String,
-  receivingOccupationalPension: Boolean)
+case class Employment(name: String,
+                      employmentStatus: TaxCodeIncomeStatus,
+                      payrollNumber: Option[String],
+                      sequenceNumber: Int,
+                      payeNumber: String,
+                      startDate: Option[LocalDate],
+                      endDate: Option[LocalDate],
+                      annualAccounts: Seq[AnnualAccount],
+                      taxDistrictNumber: String,
+                      receivingOccupationalPension: Boolean
+                     )
 
 object Employment {
   implicit val employmentFormats: Format[Employment] = Json.format[Employment]

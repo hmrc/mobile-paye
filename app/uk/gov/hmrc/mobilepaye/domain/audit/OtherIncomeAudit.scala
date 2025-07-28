@@ -19,9 +19,7 @@ package uk.gov.hmrc.mobilepaye.domain.audit
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.mobilepaye.domain.OtherIncome
 
-case class OtherIncomeAudit(
-  name:   String,
-  amount: BigDecimal)
+case class OtherIncomeAudit(name: String, amount: BigDecimal)
 
 object OtherIncomeAudit {
   implicit val format: OFormat[OtherIncomeAudit] = Json.format[OtherIncomeAudit]

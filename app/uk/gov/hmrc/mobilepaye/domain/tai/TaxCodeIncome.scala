@@ -17,7 +17,7 @@
 package uk.gov.hmrc.mobilepaye.domain.tai
 
 import play.api.Logger
-import play.api.libs.json._
+import play.api.libs.json.*
 
 sealed trait TaxCodeIncomeStatus
 
@@ -29,13 +29,13 @@ case object Ceased extends TaxCodeIncomeStatus
 
 case object NotLive extends TaxCodeIncomeStatus
 
-case class TaxCodeIncome(
-  componentType: TaxComponentType,
-  status:        TaxCodeIncomeStatus,
-  employmentId:  Option[Int],
-  name:          String,
-  amount:        BigDecimal,
-  taxCode:       String)
+case class TaxCodeIncome(componentType: TaxComponentType,
+                         status: TaxCodeIncomeStatus,
+                         employmentId: Option[Int],
+                         name: String,
+                         amount: BigDecimal,
+                         taxCode: String
+                        )
 
 object TaxCodeIncome {
   implicit val format: Format[TaxCodeIncome] = Json.format[TaxCodeIncome]

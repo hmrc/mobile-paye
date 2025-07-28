@@ -18,19 +18,17 @@ package uk.gov.hmrc.mobilepaye.domain
 
 import play.api.libs.json.{Format, JsString, JsSuccess, JsValue, Json, OFormat}
 
-case class EmploymentBenefits(
-  benefits:                 Seq[Benefit],
-  changeCarBenefitLink:     String = "/paye/company-car/details",
-  changeMedicalBenefitLink: String = "/paye/benefits/medical-benefit",
-  changeOtherBenefitLink:   String = "/digital-forms/form/tell-us-about-company-benefits/draft/guide")
+case class EmploymentBenefits(benefits: Seq[Benefit],
+                              changeCarBenefitLink: String = "/paye/company-car/details",
+                              changeMedicalBenefitLink: String = "/paye/benefits/medical-benefit",
+                              changeOtherBenefitLink: String = "/digital-forms/form/tell-us-about-company-benefits/draft/guide"
+                             )
 
 object EmploymentBenefits {
   implicit val format: OFormat[EmploymentBenefits] = Json.format[EmploymentBenefits]
 }
 
-case class Benefit(
-  benefitType: BenefitComponentType,
-  amount:      BigDecimal)
+case class Benefit(benefitType: BenefitComponentType, amount: BigDecimal)
 
 object Benefit {
   implicit val format: OFormat[Benefit] = Json.format[Benefit]
@@ -51,5 +49,5 @@ object BenefitComponentType {
 
 sealed trait BenefitComponentType
 case object MedicalInsurance extends BenefitComponentType
-case object CarBenefit extends BenefitComponentType
-case object OtherBenefits extends BenefitComponentType
+case object CarBenefit       extends BenefitComponentType
+case object OtherBenefits    extends BenefitComponentType
