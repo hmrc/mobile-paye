@@ -17,20 +17,20 @@
 package uk.gov.hmrc.mobilepaye.domain.audit
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.mobilepaye.domain._
+import uk.gov.hmrc.mobilepaye.domain.*
 import uk.gov.hmrc.mobilepaye.domain.simpleassessment.MobileSimpleAssessmentResponse
 
-case class MobilePayeSummaryResponseAudit(
-  taxYear:             Option[Int],
-  employments:         Option[Seq[PayeIncomeAudit]],
-  previousEmployments: Option[Seq[PayeIncomeAudit]],
-  pensions:            Option[Seq[PayeIncomeAudit]],
-  repayment:           Option[P800Repayment],
-  otherIncomes:        Option[Seq[OtherIncomeAudit]],
-  taxCodeChange:       Option[TaxCodeChange],
-  simpleAssessment:    Option[MobileSimpleAssessmentResponse],
-  taxFreeAmount:       Option[BigDecimal],
-  estimatedTaxAmount:  Option[BigDecimal])
+case class MobilePayeSummaryResponseAudit(taxYear: Option[Int],
+                                          employments: Option[Seq[PayeIncomeAudit]],
+                                          previousEmployments: Option[Seq[PayeIncomeAudit]],
+                                          pensions: Option[Seq[PayeIncomeAudit]],
+                                          repayment: Option[P800Repayment],
+                                          otherIncomes: Option[Seq[OtherIncomeAudit]],
+                                          taxCodeChange: Option[TaxCodeChange],
+                                          simpleAssessment: Option[MobileSimpleAssessmentResponse],
+                                          taxFreeAmount: Option[BigDecimal],
+                                          estimatedTaxAmount: Option[BigDecimal]
+                                         )
 
 object MobilePayeSummaryResponseAudit {
 

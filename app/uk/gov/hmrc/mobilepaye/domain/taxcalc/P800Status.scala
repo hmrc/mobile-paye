@@ -21,8 +21,8 @@ import play.api.libs.json.{Format, JsResult, JsString, JsValue}
 sealed trait P800Status
 
 object P800Status {
-  case object Underpaid extends P800Status
-  case object Overpaid extends P800Status
+  case object Underpaid    extends P800Status
+  case object Overpaid     extends P800Status
   case object NotSupported extends P800Status
 
   implicit val format: Format[P800Status] = new Format[P800Status] {

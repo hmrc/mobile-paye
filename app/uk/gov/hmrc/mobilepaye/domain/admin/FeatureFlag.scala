@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.mobilepaye.domain.admin
 
-import play.api.libs.json._
+import play.api.libs.json.*
 import play.api.mvc.PathBindable
 
 case class FeatureFlag(

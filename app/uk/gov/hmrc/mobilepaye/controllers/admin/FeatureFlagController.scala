@@ -25,48 +25,42 @@ import uk.gov.hmrc.mobilepaye.services.admin.FeatureFlagService
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class FeatureFlagController @Inject()(
+class FeatureFlagController @Inject() (
   val auth: InternalAuthAction,
   featureFlagService: FeatureFlagService,
   cc: ControllerComponents
-)(
-  implicit ec: ExecutionContext
+)(implicit
+  ec: ExecutionContext
 ) extends AbstractController(cc) {
 
   def get(): Action[AnyContent] =
     auth().async {
-      featureFlagService
-        .getAll
+      featureFlagService.getAll
         .map(flags => Ok(Json.toJson(flags)))
     }
 
   def put(flagName: FeatureFlagName): Action[AnyContent] =
-    auth().async {
-      request =>
-        request
-          .body
-          .asJson match {
-          case Some(JsBoolean(enabled)) =>
-            featureFlagService
-              .set(flagName, enabled)
-              .map(_ => NoContent)
-          case _ =>
-            Future.successful(BadRequest)
-        }
+    auth().async { request =>
+      request.body.asJson match {
+        case Some(JsBoolean(enabled)) =>
+          featureFlagService
+            .set(flagName, enabled)
+            .map(_ => NoContent)
+        case _ =>
+          Future.successful(BadRequest)
+      }
     }
 
   def putAll: Action[AnyContent] =
-    auth().async {
-      request =>
-        featureFlagService
-          .setAll(
-            request
-              .body
-              .asJson
-              .map(_.as[Seq[FeatureFlag]])
-              .getOrElse(Seq.empty)
-              .map(flag => flag.name -> flag.isEnabled)
-              .toMap
-          ).map(_ => NoContent)
+    auth().async { request =>
+      featureFlagService
+        .setAll(
+          request.body.asJson
+            .map(_.as[Seq[FeatureFlag]])
+            .getOrElse(Seq.empty)
+            .map(flag => flag.name -> flag.isEnabled)
+            .toMap
+        )
+        .map(_ => NoContent)
     }
 }

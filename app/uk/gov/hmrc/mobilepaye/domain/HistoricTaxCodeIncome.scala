@@ -20,16 +20,16 @@ import play.api.libs.json.{Json, OFormat}
 
 import java.time.LocalDate
 
-case class HistoricTaxCodeIncome(
-  name:          String,
-  payrollNumber: String,
-  payeReference: String,
-  startDate:     Option[LocalDate],
-  endDate:       Option[LocalDate],
-  amount:        Option[BigDecimal],
-  taxAmount:     Option[BigDecimal],
-  taxCode:       Option[String],
-  isPension:     Boolean = false)
+case class HistoricTaxCodeIncome(name: String,
+                                 payrollNumber: String,
+                                 payeReference: String,
+                                 startDate: Option[LocalDate],
+                                 endDate: Option[LocalDate],
+                                 amount: Option[BigDecimal],
+                                 taxAmount: Option[BigDecimal],
+                                 taxCode: Option[String],
+                                 isPension: Boolean = false
+                                )
 
 object HistoricTaxCodeIncome {
   implicit val format: OFormat[HistoricTaxCodeIncome] = Json.format[HistoricTaxCodeIncome]

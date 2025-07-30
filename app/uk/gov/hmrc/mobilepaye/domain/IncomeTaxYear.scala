@@ -19,9 +19,7 @@ package uk.gov.hmrc.mobilepaye.domain
 import play.api.libs.json.{Format, JsError, JsNumber, JsResult, JsSuccess, JsValue, Json, OFormat}
 import uk.gov.hmrc.time.TaxYear
 
-case class IncomeTaxYear(
-  taxYear: TaxYear,
-  incomes: Option[Seq[HistoricTaxCodeIncome]])
+case class IncomeTaxYear(taxYear: TaxYear, incomes: Option[Seq[HistoricTaxCodeIncome]])
 
 object IncomeTaxYear {
 

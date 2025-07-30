@@ -22,26 +22,26 @@ import uk.gov.hmrc.mobilepaye.domain.tai.{Benefits, Employment, Live, Payment, T
 import java.time.LocalDate
 import scala.math.BigDecimal.RoundingMode
 
-case class PayeIncome(
-  name:                             String,
-  status:                           TaxCodeIncomeStatus,
-  payrollNumber:                    Option[String] = None,
-  taxCode:                          String,
-  amount:                           BigDecimal,
-  payeNumber:                       String,
-  incomeDetailsLink:                String,
-  yourIncomeCalculationDetailsLink: String,
-  updateIncomeLink:                 Option[String],
-  updateEmployerLink:               Option[String],
-  payments:                         Option[Seq[Payment]],
-  employmentBenefits:               Option[EmploymentBenefits],
-  endDate:                          Option[LocalDate])
+case class PayeIncome(name: String,
+                      status: TaxCodeIncomeStatus,
+                      payrollNumber: Option[String] = None,
+                      taxCode: String,
+                      amount: BigDecimal,
+                      payeNumber: String,
+                      incomeDetailsLink: String,
+                      yourIncomeCalculationDetailsLink: String,
+                      updateIncomeLink: Option[String],
+                      updateEmployerLink: Option[String],
+                      payments: Option[Seq[Payment]],
+                      employmentBenefits: Option[EmploymentBenefits],
+                      endDate: Option[LocalDate]
+                     )
 
 object PayeIncome {
 
   def fromIncomeSource(
-    incomeSource:       IncomeSource,
-    employment:         Boolean,
+    incomeSource: IncomeSource,
+    employment: Boolean,
     employmentBenefits: Option[Benefits] = None
   ): PayeIncome = {
     val empId = incomeSource.taxCodeIncome.employmentId.getOrElse(throw new Exception("Employment ID not found"))
@@ -72,10 +72,10 @@ object PayeIncome {
   }
 
   def fromEmployment(
-    employment:         Employment,
-    taxCode:            Option[String],
+    employment: Employment,
+    taxCode: Option[String],
     employmentBenefits: Option[Benefits] = None,
-    taxYear:            Int
+    taxYear: Int
   ): PayeIncome =
     PayeIncome(
       name          = employment.name,
@@ -85,13 +85,11 @@ object PayeIncome {
       amount = employment.annualAccounts.headOption
         .flatMap(accounts => accounts.latestPayment.map(_.taxAmountYearToDate))
         .getOrElse(BigDecimal(0)),
-      payeNumber = s"${employment.taxDistrictNumber}/${employment.payeNumber}",
-      incomeDetailsLink =
-        s"/check-income-tax/your-income-calculation-previous-year/$taxYear/${employment.sequenceNumber}",
-      yourIncomeCalculationDetailsLink =
-        s"/check-income-tax/your-income-calculation-details/${employment.sequenceNumber}",
-      updateIncomeLink   = None,
-      updateEmployerLink = Some(s"/check-income-tax/update-remove-employment/decision/${employment.sequenceNumber}"),
+      payeNumber                       = s"${employment.taxDistrictNumber}/${employment.payeNumber}",
+      incomeDetailsLink                = s"/check-income-tax/your-income-calculation-previous-year/$taxYear/${employment.sequenceNumber}",
+      yourIncomeCalculationDetailsLink = s"/check-income-tax/your-income-calculation-details/${employment.sequenceNumber}",
+      updateIncomeLink                 = None,
+      updateEmployerLink               = Some(s"/check-income-tax/update-remove-employment/decision/${employment.sequenceNumber}"),
       payments =
         if (employment.annualAccounts.headOption.map(_.payments).getOrElse(Seq.empty).isEmpty) None
         else employment.annualAccounts.headOption.map(_.payments.sorted(Payment.dateOrdering.reverse)),
@@ -103,7 +101,7 @@ object PayeIncome {
 
   private def buildEmploymentBenefits(
     benefits: Benefits,
-    empId:    Option[Int]
+    empId: Option[Int]
   ): Option[EmploymentBenefits] = {
     val carBenefit =
       empId.map(empId => benefits.companyCarBenefits.filter(_.employmentSeqNo == empId)).getOrElse(Seq.empty)
@@ -129,7 +127,7 @@ object PayeIncome {
       s"/check-income-tax/income-details/${incomeSource.taxCodeIncome.employmentId.getOrElse(throw new Exception("Employment ID not found"))}"
     else
       s"/check-income-tax/your-income-calculation-details/${incomeSource.taxCodeIncome.employmentId
-        .getOrElse(throw new Exception("Employment ID not found"))}"
+          .getOrElse(throw new Exception("Employment ID not found"))}"
 
   implicit val format: OFormat[PayeIncome] = Json.format[PayeIncome]
 }

@@ -31,11 +31,7 @@ object ApiAccess {
 }
 
 @Singleton
-class DocumentationController @Inject() (
-  apiAccess:    ApiAccess,
-  cc:           ControllerComponents,
-  assets:       Assets,
-  errorHandler: HttpErrorHandler)
+class DocumentationController @Inject() (apiAccess: ApiAccess, cc: ControllerComponents, assets: Assets, errorHandler: HttpErrorHandler)
     extends uk.gov.hmrc.api.controllers.DocumentationController(
       cc,
       assets,

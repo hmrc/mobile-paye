@@ -21,15 +21,15 @@ import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, FeatureFlagName}
 import uk.gov.hmrc.mobilepaye.repository.admin.AdminRepository
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.duration.{Duration, FiniteDuration, SECONDS => Seconds}
+import scala.concurrent.duration.{Duration, FiniteDuration, SECONDS as Seconds}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class FeatureFlagService @Inject()(
+class FeatureFlagService @Inject() (
   adminRepository: AdminRepository,
   cache: AsyncCacheApi
-)(
-  implicit ec: ExecutionContext
+)(implicit
+  ec: ExecutionContext
 ) {
   val cacheValidFor: FiniteDuration =
     Duration(2, Seconds)
@@ -39,19 +39,16 @@ class FeatureFlagService @Inject()(
   def getAll: Future[List[FeatureFlag]] =
     cache
       .getOrElseUpdate(allFeatureFlagsCacheKey, cacheValidFor) {
-        adminRepository
-          .getFeatureFlags
-          .map {
-            flagsFromMongo =>
-              FeatureFlagName
-                .flags
-                .foldLeft(flagsFromMongo) {
-                  (featureFlags, missingFlag) =>
-                    if (featureFlags.map(_.name).contains(missingFlag))
-                      featureFlags
-                    else
-                      FeatureFlag(name = missingFlag, isEnabled = false) :: featureFlags
-                }.reverse
+        adminRepository.getFeatureFlags
+          .map { flagsFromMongo =>
+            FeatureFlagName.flags
+              .foldLeft(flagsFromMongo) { (featureFlags, missingFlag) =>
+                if (featureFlags.map(_.name).contains(missingFlag))
+                  featureFlags
+                else
+                  FeatureFlag(name = missingFlag, isEnabled = false) :: featureFlags
+              }
+              .reverse
           }
       }
 
@@ -59,23 +56,21 @@ class FeatureFlagService @Inject()(
     Future
       .sequence(
         flags.keys.map(flag => cache.remove(flag.toString))
-      ) flatMap {
-        _ =>
-          cache.remove(allFeatureFlagsCacheKey)
-          adminRepository.setFeatureFlags(flags)
-      } map {
-        _ =>
-          //blocking thread to allow other containers to update their cache
-          Thread.sleep(5000)
-          ()
-      }
+      ) flatMap { _ =>
+      cache.remove(allFeatureFlagsCacheKey)
+      adminRepository.setFeatureFlags(flags)
+    } map { _ =>
+      // blocking thread to allow other containers to update their cache
+      Thread.sleep(5000)
+      ()
+    }
 
   def set(flagName: FeatureFlagName, enabled: Boolean): Future[Boolean] =
     for {
-      _ <- cache.remove(flagName.toString)
-      _ <- cache.remove(allFeatureFlagsCacheKey)
+      _      <- cache.remove(flagName.toString)
+      _      <- cache.remove(allFeatureFlagsCacheKey)
       result <- adminRepository.setFeatureFlag(flagName, enabled)
-      //blocking thread to allow other containers to update their cache
+      // blocking thread to allow other containers to update their cache
       _ <- Future.successful(Thread.sleep(5000))
     } yield result
 
