@@ -21,7 +21,7 @@ import play.api.libs.json.{Format, JsString, JsSuccess, JsValue, Json, OFormat}
 case class EmploymentBenefits(benefits: Seq[Benefit],
                               changeCarBenefitLink: String = "/paye/company-car/details",
                               changeMedicalBenefitLink: String = "/paye/benefits/medical-benefit",
-                              changeOtherBenefitLink: String = "/digital-forms/form/tell-us-about-company-benefits/draft/guide"
+                              changeOtherBenefitLink: String = "/submissions/new-form/tell-hmrc-about-your-company-benefits/"
                              )
 
 object EmploymentBenefits {

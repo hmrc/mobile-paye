@@ -130,7 +130,7 @@ paths:
                       addMissingEmployerLink: /check-income-tax/add-employment/employment-name
                       addMissingPensionLink: /check-income-tax/add-pension-provider/name
                       addMissingIncomeLink: /digital-forms/form//tell-us-about-other-income/draft/guide
-                      addMissingBenefitLink: /digital-forms/form/tell-us-about-company-benefits/draft/guide
+                      addMissingBenefitLink: /submissions/new-form/tell-hmrc-about-your-company-benefits/
                       addMissingCompanyCarLink: /paye/company-car/do-you-pay-towards-car/
                       previousTaxYearLink: /check-income-tax/historic-paye/2017
                       updateEstimatedIncomeLink: /check-income-tax/check-income-tax/update-income/start
@@ -217,7 +217,7 @@ paths:
                     addMissingEmployerLink: /check-income-tax/add-employment/employment-name
                     addMissingPensionLink: /check-income-tax/add-pension-provider/name
                     addMissingIncomeLink: /digital-forms/form//tell-us-about-other-income/draft/guide
-                    addMissingBenefitLink: /digital-forms/form/tell-us-about-company-benefits/draft/guide
+                    addMissingBenefitLink: /submissions/new-form/tell-hmrc-about-your-company-benefits/
                     addMissingCompanyCarLink: /paye/company-car/do-you-pay-towards-car/
                     previousTaxYearLink: /check-income-tax/historic-paye/2017
                     updateEstimatedIncomeLink: /check-income-tax/check-income-tax/update-income/start
@@ -795,7 +795,7 @@ components:
         addMissingEmployerLink: /check-income-tax/add-employment/employment-name
         addMissingPensionLink: /check-income-tax/add-pension-provider/name
         addMissingIncomeLink: /digital-forms/form//tell-us-about-other-income/draft/guide
-        addMissingBenefitLink: /digital-forms/form/tell-us-about-company-benefits/draft/guide
+        addMissingBenefitLink: /submissions/new-form/tell-hmrc-about-your-company-benefits/
         addMissingCompanyCarLink: /paye/company-car/do-you-pay-towards-car/
         previousTaxYearLink: /check-income-tax/historic-paye/2017
         updateEstimatedIncomeLink: /check-income-tax/check-income-tax/update-income/start
