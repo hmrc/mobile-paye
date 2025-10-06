@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.mobilepaye.connectors
 
+import com.fasterxml.jackson.core.JsonParseException
 import com.google.inject.name.Named
 import com.google.inject.{Inject, Singleton}
 import play.api.Logger
@@ -90,6 +91,8 @@ class TaiConnector @Inject() (http: HttpClientV2, @Named("tai") serviceUrl: Stri
         (json \ "data").as[Seq[IncomeSource]]
       }
       .recover {
+        case jex: JsonParseException =>
+          throw new JsonParseException(s"GET of tax-account/year/$taxYear/income/$incomeType/status/$status Failed with ${jex.getMessage}")
         case _: NotFoundException => Seq.empty[IncomeSource]
         case _: JsResultException =>
           throw NotFoundException(s"GET of tax-account/year/$taxYear/income/$incomeType/status/$status Failed with 404")
@@ -117,10 +120,8 @@ class TaiConnector @Inject() (http: HttpClientV2, @Named("tai") serviceUrl: Stri
       .map { json =>
         (json \ "data").as[Seq[TaxCodeIncome]]
       }
-      .recover {
-        case _: NotFoundException => Seq.empty[TaxCodeIncome]
-        case _: JsResultException => Seq.empty[TaxCodeIncome]
-        case e                    => throw e
+      .recover { case e =>
+        Seq.empty[TaxCodeIncome]
       }
 
   def getEmployments(
@@ -134,9 +135,10 @@ class TaiConnector @Inject() (http: HttpClientV2, @Named("tai") serviceUrl: Stri
         (json \ "data" \ "employments").as[Seq[Employment]]
       }
       .recover {
-        case _: NotFoundException => Seq.empty[Employment]
-        case _: JsResultException => Seq.empty[Employment]
-        case e                    => throw e
+        case jex: JsonParseException => throw new JsonParseException(s"GET of employments/years/$taxYear Failed with ${jex.getMessage}")
+        case _: NotFoundException    => Seq.empty[Employment]
+        case _: JsResultException    => Seq.empty[Employment]
+        case e                       => throw e
       }
 
   def getTaxCodeChangeExists(
@@ -147,8 +149,9 @@ class TaiConnector @Inject() (http: HttpClientV2, @Named("tai") serviceUrl: Stri
       .execute[JsValue]
       .map(_.as[Boolean])
       .recover {
-        case _: NotFoundException => false
-        case e                    => throw e
+        case jex: JsonParseException => throw new JsonParseException(s"GET of tax-account/tax-code-change/exists Failed with ${jex.getMessage}")
+        case _: NotFoundException    => false
+        case e                       => throw e
       }
 
   def getTaxCodesForYear(

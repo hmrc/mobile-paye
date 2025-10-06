@@ -31,7 +31,7 @@ import uk.gov.hmrc.mobilepaye.domain.{IncomeTaxYear, MobilePayePreviousYearSumma
 import uk.gov.hmrc.mobilepaye.services.{IncomeTaxHistoryService, MobilePayeService, PreviousYearSummaryService}
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import eu.timepit.refined.auto.*
+import org.bson.json.JsonParseException
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.{Retrieval, ~}
 import uk.gov.hmrc.mobilepaye.domain.citizendetails.Person
@@ -39,7 +39,7 @@ import uk.gov.hmrc.mobilepaye.domain.types.JourneyId
 import uk.gov.hmrc.auth.core.{AuthConnector, ConfidenceLevel}
 import org.scalamock.matchers.MatcherBase
 import uk.gov.hmrc.mobilepaye.connectors.ShutteringConnector
-import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, OnlinePaymentIntegration}
+import uk.gov.hmrc.mobilepaye.domain.admin.*
 import uk.gov.hmrc.mobilepaye.domain.audit.MobilePayeSummaryResponseAudit
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 
@@ -237,6 +237,17 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       mockAuthorisationGrantAccess(grantAccessWithCL200)
       mockGetPerson(Future.successful(person))
       mockGetMobilePayeResponse(Future.failed(new InternalServerException("Internal Server Error")))
+
+      val result = controller.getPayeSummary(nino, jId1, currentTaxYear)(fakeRequest)
+
+      status(result) shouldBe 500
+    }
+
+    "return 500 when MobilePayeService throws an JsonParseException" in {
+      mockShutteringResponse(notShuttered)
+      mockAuthorisationGrantAccess(grantAccessWithCL200)
+      mockGetPerson(Future.successful(person))
+      mockGetMobilePayeResponse(Future.failed(new JsonParseException(s"GET of employments/years/$currentTaxYear Failed with MIC_RECORD")))
 
       val result = controller.getPayeSummary(nino, jId1, currentTaxYear)(fakeRequest)
 
