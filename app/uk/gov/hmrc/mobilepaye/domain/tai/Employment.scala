@@ -29,7 +29,7 @@ case class Employment(name: String,
                       endDate: Option[LocalDate],
                       annualAccounts: Seq[AnnualAccount],
                       taxDistrictNumber: String,
-                      receivingOccupationalPension: Boolean
+                      employmentType: TaxComponentType
                      )
 
 object Employment {

@@ -14,7 +14,7 @@ import stubs.CitizenDetailsStub.*
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, OnlinePaymentIntegration}
 import uk.gov.hmrc.mobilepaye.config.MobilePayeConfig
-import uk.gov.hmrc.mobilepaye.domain.tai.{CarBenefit, Ceased, MedicalInsurance, NotLive, TaxCodeChangeDetails}
+import uk.gov.hmrc.mobilepaye.domain.tai.{CarBenefit, Ceased, MedicalInsurance, NotLive, PensionIncome, TaxCodeChangeDetails}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status.{Overpaid, Underpaid}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus.*
@@ -1044,7 +1044,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     "return OK and a valid MobilePayeResponse json without employments" in {
       stubForShutteringDisabled()
       grantAccess(nino)
-      stubForEmployments(nino, previousTaxYear, Seq(taiEmployment3.copy(name = "ALDI", receivingOccupationalPension = true)))
+      stubForEmployments(nino, previousTaxYear, Seq(taiEmployment3.copy(name = "ALDI", employmentType = PensionIncome)))
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome, previousTaxYear)
       taxAccountSummaryIsFound(nino, taxAccountSummary, taxYear = previousTaxYear)
       stubForBenefits(nino, noBenefits, previousTaxYear)

@@ -71,22 +71,22 @@ trait MobilePayeTestData {
     Payment(LocalDate.now().minusDays(20), 50, 20, 10, 30, 5, 2)
   )
 
-  def annualAccount(taxYear: Int = LocalDate.now().getYear, rtiStatus: RealTimeStatus = Available): AnnualAccount =
-    AnnualAccount(TaxYear(taxYear), payments, rtiStatus)
-  val annualAccount2: AnnualAccount = AnnualAccount(taxYear = TaxYear(startYear = LocalDate.now().getYear), payments2, realTimeStatus = Available)
+  def annualAccount(taxYear: Int = LocalDate.now().getYear, rtiStatus: RealTimeStatus = Available, seqNo: Int): AnnualAccount =
+    AnnualAccount(seqNo, TaxYear(taxYear), payments, rtiStatus)
+  val annualAccount2: AnnualAccount = AnnualAccount(1, taxYear = TaxYear(startYear = LocalDate.now().getYear), payments2, realTimeStatus = Available)
 
   def taiEmployment(taxYear: Int = LocalDate.now().getYear, rtiStatus: RealTimeStatus = Available): Employment =
     Employment(
-      name                         = "TESCO",
-      employmentStatus             = Live,
-      payrollNumber                = Some("ABC123"),
-      sequenceNumber               = 3,
-      payeNumber                   = "P12345",
-      startDate                    = Some(LocalDate.now().minusYears(4)),
-      endDate                      = None,
-      annualAccounts               = Seq(annualAccount(taxYear, rtiStatus)),
-      taxDistrictNumber            = "123",
-      receivingOccupationalPension = false
+      name              = "TESCO",
+      employmentStatus  = Live,
+      payrollNumber     = Some("ABC123"),
+      sequenceNumber    = 3,
+      payeNumber        = "P12345",
+      startDate         = Some(LocalDate.now().minusYears(4)),
+      endDate           = None,
+      annualAccounts    = Seq(annualAccount(taxYear, rtiStatus, seqNo = 3)),
+      taxDistrictNumber = "123",
+      employmentType    = EmploymentIncome
     )
 
   val taiEmployment2: Employment = Employment(
@@ -98,14 +98,15 @@ trait MobilePayeTestData {
     startDate        = Some(TaxYear.current.back(5).starts),
     endDate          = Some(TaxYear.current.back(3).starts),
     annualAccounts = Seq(
-      AnnualAccount(TaxYear(startYear = TaxYear.current.back(4).currentYear),
+      AnnualAccount(4,
+                    TaxYear(startYear = TaxYear.current.back(4).currentYear),
                     Seq(Payment(LocalDate.now().minusDays(63), 50, 20, 10, 30, 5, 2)),
                     Available
                    ),
-      AnnualAccount(TaxYear(TaxYear.current.back(5).currentYear), Seq(Payment(LocalDate.now().minusDays(63), 50, 20, 10, 30, 5, 2)), Available)
+      AnnualAccount(4, TaxYear(TaxYear.current.back(5).currentYear), Seq(Payment(LocalDate.now().minusDays(63), 50, 20, 10, 30, 5, 2)), Available)
     ),
-    taxDistrictNumber            = "123",
-    receivingOccupationalPension = false
+    taxDistrictNumber = "123",
+    employmentType    = EmploymentIncome
   )
 
   val taiEmploymentLatest: Employment = Employment(
@@ -117,11 +118,11 @@ trait MobilePayeTestData {
     startDate        = Some(TaxYear.current.back(5).starts),
     endDate          = Some(TaxYear.current.back(3).starts),
     annualAccounts = Seq(
-      AnnualAccount(TaxYear(TaxYear.current.currentYear), Seq(Payment(LocalDate.now().minusDays(63), 50, 20, 10, 30, 5, 2)), Available),
-      AnnualAccount(TaxYear(TaxYear.current.currentYear), Seq(Payment(LocalDate.now().minusDays(63), 50, 20, 10, 30, 5, 2)), Available)
+      AnnualAccount(1, TaxYear(TaxYear.current.currentYear), Seq(Payment(LocalDate.now().minusDays(63), 50, 20, 10, 30, 5, 2)), Available),
+      AnnualAccount(2, TaxYear(TaxYear.current.currentYear), Seq(Payment(LocalDate.now().minusDays(63), 50, 20, 10, 30, 5, 2)), Available)
     ),
-    taxDistrictNumber            = "123",
-    receivingOccupationalPension = false
+    taxDistrictNumber = "123",
+    employmentType    = EmploymentIncome
   )
 
   val taiEmployment3: Employment =
@@ -131,7 +132,7 @@ trait MobilePayeTestData {
     taiEmployment3.copy(annualAccounts = Seq(annualAccount2))
 
   val taiEmployment5: Employment = taiEmployment2.copy(
-    annualAccounts = Seq(AnnualAccount(TaxYear(LocalDate.now().getYear), Seq.empty, Available))
+    annualAccounts = Seq(AnnualAccount(1, TaxYear(LocalDate.now().getYear), Seq.empty, Available))
   )
 
   val noBenefits: Benefits = Benefits(Seq.empty, Seq.empty)
@@ -436,7 +437,7 @@ trait MobilePayeTestData {
       ),
       pensions = Some(
         Seq(
-          PayeIncome.fromEmployment(taiEmployment3.copy(name = "ALDI", receivingOccupationalPension = true), None, None, taxYear)
+          PayeIncome.fromEmployment(taiEmployment3.copy(name = "ALDI", employmentType = PensionIncome), None, None, taxYear)
         )
       ),
       otherIncomes           = Some(otherIncomes),
@@ -469,7 +470,7 @@ trait MobilePayeTestData {
         Seq(
           PayeIncomeAudit
             .fromPayeIncome(
-              PayeIncome.fromEmployment(taiEmployment3.copy(name = "ALDI", receivingOccupationalPension = true), None, None, taxYear)
+              PayeIncome.fromEmployment(taiEmployment3.copy(name = "ALDI", employmentType = PensionIncome), None, None, taxYear)
             )
         )
       ),
@@ -503,7 +504,7 @@ trait MobilePayeTestData {
   val employmentData: Seq[Employment] = Seq(
     taiEmployment(TaxYear.current.previous.startYear),
     taiEmployment2.copy(employmentStatus = Ceased),
-    taiEmployment3.copy(name             = "ALDI", receivingOccupationalPension = true)
+    taiEmployment3.copy(name             = "ALDI", employmentType = PensionIncome)
   )
 
   val taxCodeData: Seq[TaxCodeRecord] = Seq(taxCodeRecord, taxCodeRecord2)
