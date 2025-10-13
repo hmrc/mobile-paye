@@ -129,28 +129,29 @@ class TaiConnector @Inject() (http: HttpClientV2, @Named("tai") serviceUrl: Stri
     taxYear: Int
   )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Seq[Employment]] = {
     for {
-      employments    <- getEmploymentsNew(nino, taxYear)
+      employments    <- getEmploymentsOnly(nino, taxYear)
       annualAccounts <- getAnnualAccounts(nino, taxYear)
     } yield {
       employments.map { employment =>
         val accounts = annualAccounts.filter(_.sequenceNumber == employment.sequenceNumber)
         employment.copy(annualAccounts = accounts)
+
       }
     }
   }
 
-  def getEmploymentsNew(
+  def getEmploymentsOnly(
     nino: Nino,
     taxYear: Int
   )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Seq[Employment]] =
     http
-      .get(url"${url(nino, s"employments/years/$taxYear")}")
+      .get(url"${url(nino, s"employments-only/years/$taxYear")}")
       .execute[JsValue]
       .map { json =>
         (json \ "data" \ "employments").as[Seq[Employment]]
       }
       .recover {
-        case jex: JsonParseException => throw new JsonParseException(s"GET of employments/years/$taxYear Failed with ${jex.getMessage}")
+        case jex: JsonParseException => throw new JsonParseException(s"GET of employments-only/years/$taxYear Failed with ${jex.getMessage}")
         case _: NotFoundException    => Seq.empty[Employment]
         case _: JsResultException    => Seq.empty[Employment]
         case e                       => throw e
@@ -167,7 +168,7 @@ class TaiConnector @Inject() (http: HttpClientV2, @Named("tai") serviceUrl: Stri
         (json \ "data").as[Seq[AnnualAccount]]
       }
       .recover {
-        case jex: JsonParseException => throw new JsonParseException(s"GET of employments/years/$taxYear Failed with ${jex.getMessage}")
+        case jex: JsonParseException => throw new JsonParseException(s"GET of rti-payments/years/$taxYear Failed with ${jex.getMessage}")
         case _: NotFoundException    => Seq.empty[AnnualAccount]
         case _: JsResultException    => Seq.empty[AnnualAccount]
         case e                       => throw e

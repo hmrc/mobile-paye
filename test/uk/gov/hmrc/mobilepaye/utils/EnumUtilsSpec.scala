@@ -38,11 +38,11 @@ class EnumUtilsSpec extends AnyWordSpec with Matchers {
 
     "fail to read an invalid enum string from JSON with appropriate error" in {
       val json = JsString("InvalidValue")
-      val result = json.validate[TestEnum.Value](enumReads(TestEnum))
+      val result: JsResult[TestEnum.Value] = json.validate[TestEnum.Value](enumReads(TestEnum))
 
       result mustBe a[JsError]
-      result.asEither.left.get.head._2.head.message must include("Expected an enumeration of type")
-      result.asEither.left.get.head._2.head.message must include("InvalidValue")
+      result.asEither.swap.getOrElse(Nil).head._2.head.message must include("Expected an enumeration of type")
+      result.asEither.swap.getOrElse(Nil).head._2.head.message must include("InvalidValue")
     }
 
     "fail to read a non-string JSON value" in {

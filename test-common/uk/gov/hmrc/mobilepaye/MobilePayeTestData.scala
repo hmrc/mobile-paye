@@ -75,38 +75,46 @@ trait MobilePayeTestData {
     AnnualAccount(seqNo, TaxYear(taxYear), payments, rtiStatus)
   val annualAccount2: AnnualAccount = AnnualAccount(1, taxYear = TaxYear(startYear = LocalDate.now().getYear), payments2, realTimeStatus = Available)
 
-  def taiEmployment(taxYear: Int = LocalDate.now().getYear, rtiStatus: RealTimeStatus = Available): Employment =
+  def taiEmployment(taxYear: Int = LocalDate.now().getYear, rtiStatus: RealTimeStatus = Available, seqNo: Int = 3): Employment =
     Employment(
       name              = "TESCO",
       employmentStatus  = Live,
       payrollNumber     = Some("ABC123"),
-      sequenceNumber    = 3,
+      sequenceNumber    = seqNo,
       payeNumber        = "P12345",
       startDate         = Some(LocalDate.now().minusYears(4)),
       endDate           = None,
-      annualAccounts    = Seq(annualAccount(taxYear, rtiStatus, seqNo = 3)),
+      annualAccounts    = Seq(annualAccount(taxYear, rtiStatus, seqNo)),
       taxDistrictNumber = "123",
       employmentType    = EmploymentIncome
     )
 
+  val annualAccounts2 = Seq(
+    AnnualAccount(4,
+                  TaxYear(startYear = TaxYear.current.back(4).currentYear),
+                  Seq(Payment(LocalDate.now().minusDays(63), 50, 20, 10, 30, 5, 2)),
+                  Available
+                 ),
+    AnnualAccount(4, TaxYear(TaxYear.current.back(5).currentYear), Seq(Payment(LocalDate.now().minusDays(63), 50, 20, 10, 30, 5, 2)), Available)
+  )
   val taiEmployment2: Employment = Employment(
-    name             = "ASDA",
-    employmentStatus = Live,
-    payrollNumber    = Some("DEF456"),
-    sequenceNumber   = 4,
-    payeNumber       = "P54321",
-    startDate        = Some(TaxYear.current.back(5).starts),
-    endDate          = Some(TaxYear.current.back(3).starts),
-    annualAccounts = Seq(
-      AnnualAccount(4,
-                    TaxYear(startYear = TaxYear.current.back(4).currentYear),
-                    Seq(Payment(LocalDate.now().minusDays(63), 50, 20, 10, 30, 5, 2)),
-                    Available
-                   ),
-      AnnualAccount(4, TaxYear(TaxYear.current.back(5).currentYear), Seq(Payment(LocalDate.now().minusDays(63), 50, 20, 10, 30, 5, 2)), Available)
-    ),
+    name              = "ASDA",
+    employmentStatus  = Live,
+    payrollNumber     = Some("DEF456"),
+    sequenceNumber    = 4,
+    payeNumber        = "P54321",
+    startDate         = Some(TaxYear.current.back(5).starts),
+    endDate           = Some(TaxYear.current.back(3).starts),
+    annualAccounts    = annualAccounts2,
     taxDistrictNumber = "123",
     employmentType    = EmploymentIncome
+  )
+
+  val taiEmploymentOnly = taiEmployment2.copy(annualAccounts = Seq.empty)
+
+  val annualAccountsRtiSeq = Seq(
+    AnnualAccount(1, TaxYear(TaxYear.current.currentYear), Seq(Payment(LocalDate.now().minusDays(63), 50, 20, 10, 30, 5, 2)), Available),
+    AnnualAccount(2, TaxYear(TaxYear.current.currentYear), Seq(Payment(LocalDate.now().minusDays(63), 50, 20, 10, 30, 5, 2)), Available)
   )
 
   val taiEmploymentLatest: Employment = Employment(
@@ -505,6 +513,23 @@ trait MobilePayeTestData {
     taiEmployment(TaxYear.current.previous.startYear),
     taiEmployment2.copy(employmentStatus = Ceased),
     taiEmployment3.copy(name             = "ALDI", employmentType = PensionIncome)
+  )
+
+  val employmentOnlyData = Seq(
+    taiEmployment(TaxYear.current.previous.startYear).copy(annualAccounts = Seq.empty),
+    taiEmployment2.copy(employmentStatus                                  = Ceased, annualAccounts = Seq.empty),
+    taiEmployment3.copy(name                                              = "ALDI", employmentType = PensionIncome, annualAccounts = Seq.empty)
+  )
+
+  val annualAccountsIt = Seq(
+    annualAccount(TaxYear.current.previous.startYear, Available, seqNo = 3),
+    AnnualAccount(4,
+                  TaxYear(startYear = TaxYear.current.back(4).currentYear),
+                  Seq(Payment(LocalDate.now().minusDays(63), 50, 20, 10, 30, 5, 2)),
+                  Available
+                 ),
+    AnnualAccount(4, TaxYear(TaxYear.current.back(5).currentYear), Seq(Payment(LocalDate.now().minusDays(63), 50, 20, 10, 30, 5, 2)), Available),
+    annualAccount(TaxYear.current.previous.startYear, Available, seqNo = 5)
   )
 
   val taxCodeData: Seq[TaxCodeRecord] = Seq(taxCodeRecord, taxCodeRecord2)

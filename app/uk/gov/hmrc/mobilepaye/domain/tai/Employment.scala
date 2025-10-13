@@ -27,7 +27,7 @@ case class Employment(name: String,
                       payeNumber: String,
                       startDate: Option[LocalDate],
                       endDate: Option[LocalDate],
-                      annualAccounts: Seq[AnnualAccount],
+                      annualAccounts: Seq[AnnualAccount] = Seq.empty,
                       taxDistrictNumber: String,
                       employmentType: TaxComponentType
                      )
