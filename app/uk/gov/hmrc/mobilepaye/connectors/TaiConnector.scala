@@ -143,19 +143,22 @@ class TaiConnector @Inject() (http: HttpClientV2, @Named("tai") serviceUrl: Stri
   def getEmploymentsOnly(
     nino: Nino,
     taxYear: Int
-  )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Seq[Employment]] =
-    http
+  )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Seq[Employment]] = {
+    val employmentList = http
       .get(url"${url(nino, s"employments-only/years/$taxYear")}")
       .execute[JsValue]
       .map { json =>
         (json \ "data" \ "employments").as[Seq[Employment]]
       }
-      .recover {
-        case jex: JsonParseException => throw new JsonParseException(s"GET of employments-only/years/$taxYear Failed with ${jex.getMessage}")
-        case _: NotFoundException    => Seq.empty[Employment]
-        case _: JsResultException    => Seq.empty[Employment]
-        case e                       => throw e
-      }
+      .map(_.sortBy(_.payrollNumber))
+
+    employmentList.recover {
+      case jex: JsonParseException => throw new JsonParseException(s"GET of employments-only/years/$taxYear Failed with ${jex.getMessage}")
+      case _: NotFoundException    => Seq.empty[Employment]
+      case _: JsResultException    => Seq.empty[Employment]
+      case e                       => throw e
+    }
+  }
 
   def getAnnualAccounts(
     nino: Nino,

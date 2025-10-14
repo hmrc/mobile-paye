@@ -110,7 +110,7 @@ trait MobilePayeTestData {
     employmentType    = EmploymentIncome
   )
 
-  val taiEmploymentOnly = taiEmployment2.copy(annualAccounts = Seq.empty)
+  val taiEmploymentOnly: Employment = taiEmployment2.copy(annualAccounts = Seq.empty)
 
   val annualAccountsRtiSeq = Seq(
     AnnualAccount(1, TaxYear(TaxYear.current.currentYear), Seq(Payment(LocalDate.now().minusDays(63), 50, 20, 10, 30, 5, 2)), Available),
