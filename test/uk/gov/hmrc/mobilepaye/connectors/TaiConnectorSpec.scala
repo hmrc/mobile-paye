@@ -16,9 +16,10 @@
 
 package uk.gov.hmrc.mobilepaye.connectors
 
-import play.api.libs.json.{JsValue, Json}
+import com.fasterxml.jackson.core.JsonParseException
+import play.api.libs.json.{JsResultException, JsValue, Json}
 import uk.gov.hmrc.http.*
-import uk.gov.hmrc.mobilepaye.domain.tai.{EmploymentIncome, Live, PensionIncome, TaxCodeChangeDetails, TaxCodeRecord}
+import uk.gov.hmrc.mobilepaye.domain.tai.{AnnualAccount, Employment, EmploymentIncome, Live, PensionIncome, TaxCodeChangeDetails, TaxCodeRecord}
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 
@@ -290,5 +291,95 @@ class TaiConnectorSpec extends BaseSpec {
         await(connector.getTaxCodeChange(nino))
       }
     }
+  }
+
+  "Employments only APi - GET /employments-only/years/:taxYear " should {
+
+    "return 200 and a valid response" in {
+
+      val employmentOnlyJson: JsValue =
+        Json.parse(s"""
+             |{
+             |  "data":{
+             |   "employments" : [${Json.toJson(taiEmploymentOnly)}]
+             |   }
+             |}
+
+           """.stripMargin)
+
+      mockTaiGet(s"employments-only/years/2025", Future.successful(Json.toJson(employmentOnlyJson)))
+
+      val result = await(connector.getEmploymentsOnly(nino, 2025))
+
+      result shouldBe List(taiEmploymentOnly)
+
+    }
+
+    "throw UnauthorisedException for valid nino but unauthorized user" in {
+      mockTaiGet(s"employments-only/years/2025", Future.failed(new UnauthorizedException("Unauthorized")))
+
+      intercept[UnauthorizedException] {
+        await(connector.getEmploymentsOnly(nino, 2025))
+      }
+    }
+
+    "return empty List if Not found exception is thrown" in {
+      mockTaiGet(s"employments-only/years/2025", Future.failed(new NotFoundException("Not Found")))
+      val result = await(connector.getEmploymentsOnly(nino, 2025))
+      result shouldBe Seq.empty[Employment]
+
+    }
+
+    "return empty List if Js result  exception is thrown" in {
+      mockTaiGet(s"employments-only/years/2025", Future.failed(new JsResultException(collection.Seq.empty)))
+      val result = await(connector.getEmploymentsOnly(nino, 2025))
+      result shouldBe Seq.empty[Employment]
+
+    }
+
+  }
+
+  "Annual Accounts APi- GET rti-payments/years/:taxYear" should {
+
+    "return 200 and a valid response" in {
+
+      val annualAccountsJson: JsValue =
+        Json.parse(s"""
+             |{
+             |  "data":${Json.toJson(annualAccountsRtiSeq)}
+             |
+             |}
+ """.stripMargin)
+
+      mockTaiGet(s"rti-payments/years/2025", Future.successful(Json.toJson(annualAccountsJson)))
+
+      val result = await(connector.getAnnualAccounts(nino, 2025))
+
+      result shouldBe annualAccountsRtiSeq
+
+    }
+
+    "throw UnauthorisedException for valid nino but unauthorized user" in {
+      mockTaiGet(s"rti-payments/years/2025", Future.failed(new UnauthorizedException("Unauthorized")))
+
+      intercept[UnauthorizedException] {
+        await(connector.getAnnualAccounts(nino, 2025))
+      }
+    }
+
+    "return empty List if Not found exception is thrown" in {
+      mockTaiGet(s"rti-payments/years/2025", Future.failed(new NotFoundException("Not Found")))
+      val result = await(connector.getAnnualAccounts(nino, 2025))
+      result shouldBe Seq.empty[AnnualAccount]
+
+    }
+
+    "return empty List if Js result  exception is thrown" in {
+      mockTaiGet(s"rti-payments/years/2025", Future.failed(new JsResultException(collection.Seq.empty)))
+      val result = await(connector.getAnnualAccounts(nino, 2025))
+      result shouldBe Seq.empty[AnnualAccount]
+
+    }
+
   }
 }

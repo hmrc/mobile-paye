@@ -19,7 +19,7 @@ package uk.gov.hmrc.mobilepaye.services
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException, NotFoundException}
 import uk.gov.hmrc.mobilepaye.connectors.{TaiConnector, TaxCalcConnector}
-import uk.gov.hmrc.mobilepaye.domain.tai.{Benefits, Ceased, Employment, NonTaxCodeIncome, TaxAccountSummary, TaxCodeRecord}
+import uk.gov.hmrc.mobilepaye.domain.tai.{Benefits, Ceased, Employment, NonTaxCodeIncome, PensionIncome, TaxAccountSummary, TaxCodeRecord}
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 import uk.gov.hmrc.time.TaxYear
 
@@ -77,7 +77,7 @@ class PreviousYearSummaryServiceSpec extends BaseSpec {
     }
 
     "return MobilePayePreviousYearSummaryResponse with no employments when employment data is missing" in {
-      mockEmployments(Future successful Seq(taiEmployment3.copy(name = "ALDI", receivingOccupationalPension = true)))
+      mockEmployments(Future successful Seq(taiEmployment3.copy(name = "ALDI", employmentType = PensionIncome)))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockGetBenefits(Future.successful(noBenefits))

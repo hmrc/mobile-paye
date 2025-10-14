@@ -22,7 +22,7 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.mobilepaye.connectors.TaiConnector
 import uk.gov.hmrc.mobilepaye.domain.{MobilePayePreviousYearSummaryResponse, OtherIncome, PayeIncome}
-import uk.gov.hmrc.mobilepaye.domain.tai.{BankOrBuildingSocietyInterest, Benefits, Employment, Live, NonTaxCodeIncome, TaxAccountSummary, TaxCodeRecord}
+import uk.gov.hmrc.mobilepaye.domain.tai.{BankOrBuildingSocietyInterest, Benefits, Employment, EmploymentIncome, Live, NonTaxCodeIncome, PensionIncome, TaxAccountSummary, TaxCodeRecord}
 import uk.gov.hmrc.time.TaxYear
 
 import javax.inject.Named
@@ -69,11 +69,11 @@ class PreviousYearSummaryService @Inject() (taiConnector: TaiConnector,
   ): MobilePayePreviousYearSummaryResponse = {
 
     val liveEmployments =
-      employmentData.filter(emp => emp.employmentStatus.equals(Live) && !emp.receivingOccupationalPension)
+      employmentData.filter(emp => emp.employmentStatus.equals(Live) && emp.employmentType == EmploymentIncome)
     val notLiveEmployments =
-      employmentData.filter(emp => !emp.employmentStatus.equals(Live) && !emp.receivingOccupationalPension)
+      employmentData.filter(emp => !emp.employmentStatus.equals(Live) && emp.employmentType == EmploymentIncome)
     val pensions =
-      employmentData.filter(_.receivingOccupationalPension)
+      employmentData.filter(emp => emp.employmentStatus.equals(Live) && emp.employmentType == PensionIncome)
 
     val otherNonTaxCodeIncomes: Option[Seq[OtherIncome]] = nonTaxCodeIncomes.otherNonTaxCodeIncomes
       .filter(_.incomeComponentType != BankOrBuildingSocietyInterest)

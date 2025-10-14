@@ -14,7 +14,7 @@ import stubs.CitizenDetailsStub.*
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, OnlinePaymentIntegration}
 import uk.gov.hmrc.mobilepaye.config.MobilePayeConfig
-import uk.gov.hmrc.mobilepaye.domain.tai.{CarBenefit, Ceased, MedicalInsurance, NotLive, TaxCodeChangeDetails}
+import uk.gov.hmrc.mobilepaye.domain.tai.{AnnualAccount, Available, CarBenefit, Ceased, MedicalInsurance, NotLive, Payment, PensionIncome, TaxCodeChangeDetails}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status.{Overpaid, Underpaid}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus.*
@@ -983,11 +983,27 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeIncomes(nino, TaxYear.current.startYear - 2, Seq(taxCodeIncome, taxCodeIncome2))
       stubForTaxCodeIncomes(nino, TaxYear.current.startYear - 3, Seq(taxCodeIncome2, taxCodeIncome3))
       stubForTaxCodeIncomes(nino, TaxYear.current.startYear - 4, Seq(taxCodeIncome2, taxCodeIncome3))
-      stubForEmployments(nino, TaxYear.current.startYear, Seq(taiEmployment(TaxYear.current.startYear)))
-      stubForEmployments(nino, TaxYear.current.startYear - 1, Seq(taiEmployment(TaxYear.current.startYear - 1)))
-      stubForEmployments(nino, TaxYear.current.startYear - 2, Seq(taiEmployment(TaxYear.current.startYear - 2), taiEmployment2))
-      stubForEmployments(nino, TaxYear.current.startYear - 3, Seq(taiEmployment2))
-      stubForEmployments(nino, TaxYear.current.startYear - 4, Seq(taiEmployment2, taiEmployment3))
+      stubForEmploymentsOnly(nino, TaxYear.current.startYear, Seq(taiEmployment(TaxYear.current.startYear).copy(annualAccounts = Seq.empty)))
+      stubForAnnualAccounts(nino, TaxYear.current.startYear, Seq(annualAccount(TaxYear.current.startYear, Available, 3)))
+
+      stubForEmploymentsOnly(nino, TaxYear.current.startYear - 1, Seq(taiEmployment(TaxYear.current.startYear - 1).copy(annualAccounts = Seq.empty)))
+      stubForAnnualAccounts(nino, TaxYear.current.startYear - 1, Seq(annualAccount(TaxYear.current.startYear - 1, Available, 3)))
+
+      stubForEmploymentsOnly(
+        nino,
+        TaxYear.current.startYear - 2,
+        Seq(taiEmployment(TaxYear.current.startYear - 2).copy(annualAccounts = Seq.empty), taiEmployment2.copy(annualAccounts = Seq.empty))
+      )
+      stubForAnnualAccounts(nino, TaxYear.current.startYear - 2, Seq(annualAccount(TaxYear.current.startYear - 2, Available, 3)) ++ annualAccounts2)
+
+      stubForEmploymentsOnly(nino, TaxYear.current.startYear - 3, Seq(taiEmployment2.copy(annualAccounts = Seq.empty)))
+      stubForAnnualAccounts(nino, TaxYear.current.startYear - 3, annualAccounts2)
+
+      stubForEmploymentsOnly(nino,
+                             TaxYear.current.startYear - 4,
+                             Seq(taiEmployment2.copy(annualAccounts = Seq.empty), taiEmployment3.copy(annualAccounts = Seq.empty))
+                            )
+      stubForAnnualAccounts(nino, TaxYear.current.startYear - 4, annualAccounts2 ++ Seq(annualAccount(LocalDate.now().getYear, Available, 5)))
 
       val response = await(getRequestWithAuthHeaders(incomeTaxHistoryUrl))
       response.status                                   shouldBe 200
@@ -1000,8 +1016,11 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       personalDetailsAreFound(nino, person)
       stubForErrorJsonTaxCodeIncomes(nino, TaxYear.current.startYear, Seq.empty)
       stubForTaxCodeIncomes(nino, TaxYear.current.startYear - 1, Seq(taxCodeIncome, taxCodeIncome2))
-      stubForEmploymentsJsonError(nino, TaxYear.current.startYear, Seq.empty)
-      stubForEmployments(nino, TaxYear.current.startYear - 1, Seq(taiEmployment(TaxYear.current.startYear - 1)))
+      stubForEmploymentsOnlyJsonError(nino, TaxYear.current.startYear, Seq.empty)
+      stubForAnnualAccounts(nino, TaxYear.current.startYear, Seq.empty)
+
+      stubForEmploymentsOnly(nino, TaxYear.current.startYear - 1, Seq(taiEmployment(TaxYear.current.startYear - 1)))
+      stubForAnnualAccounts(nino, TaxYear.current.startYear - 1, Seq(annualAccount(TaxYear.current.startYear - 1, Available, 3)))
 
       val response = await(getRequestWithAuthHeaders(incomeTaxHistoryUrl))
       response.status                                   shouldBe 200
@@ -1028,7 +1047,8 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     "return OK and a full valid MobilePayeResponse json" in {
       stubForShutteringDisabled()
       grantAccess(nino)
-      stubForEmployments(nino, previousTaxYear, employmentData)
+      stubForEmploymentsOnly(nino, previousTaxYear, employmentOnlyData)
+      stubForAnnualAccounts(nino, previousTaxYear, annualAccountsIt)
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome, previousTaxYear)
       taxAccountSummaryIsFound(nino, taxAccountSummary, taxYear = previousTaxYear)
       stubForBenefits(nino, noBenefits, previousTaxYear)
@@ -1044,7 +1064,11 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     "return OK and a valid MobilePayeResponse json without employments" in {
       stubForShutteringDisabled()
       grantAccess(nino)
-      stubForEmployments(nino, previousTaxYear, Seq(taiEmployment3.copy(name = "ALDI", receivingOccupationalPension = true)))
+      stubForEmploymentsOnly(nino,
+                             previousTaxYear,
+                             Seq(taiEmployment3.copy(name = "ALDI", employmentType = PensionIncome, annualAccounts = Seq.empty))
+                            )
+      stubForAnnualAccounts(nino, previousTaxYear, Seq(annualAccount(LocalDate.now().getYear, Available, seqNo = 5)))
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome, previousTaxYear)
       taxAccountSummaryIsFound(nino, taxAccountSummary, taxYear = previousTaxYear)
       stubForBenefits(nino, noBenefits, previousTaxYear)
@@ -1060,10 +1084,27 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     "return OK and a valid MobilePayeResponse json without pensions" in {
       stubForShutteringDisabled()
       grantAccess(nino)
-      stubForEmployments(nino,
-                         previousTaxYear,
-                         Seq(taiEmployment(TaxYear.current.previous.startYear), taiEmployment2.copy(employmentStatus = Ceased))
-                        )
+      stubForEmploymentsOnly(
+        nino,
+        previousTaxYear,
+        Seq(
+          taiEmployment(TaxYear.current.previous.startYear).copy(annualAccounts = Seq.empty),
+          taiEmployment2.copy(employmentStatus                                  = Ceased, annualAccounts = Seq.empty)
+        )
+      )
+      stubForAnnualAccounts(
+        nino,
+        previousTaxYear,
+        Seq(
+          annualAccount(TaxYear.current.previous.startYear, Available, seqNo = 3),
+          AnnualAccount(4,
+                        TaxYear(startYear = TaxYear.current.back(4).currentYear),
+                        Seq(Payment(LocalDate.now().minusDays(63), 50, 20, 10, 30, 5, 2)),
+                        Available
+                       ),
+          AnnualAccount(4, TaxYear(TaxYear.current.back(5).currentYear), Seq(Payment(LocalDate.now().minusDays(63), 50, 20, 10, 30, 5, 2)), Available)
+        )
+      )
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome, previousTaxYear)
       taxAccountSummaryIsFound(nino, taxAccountSummary, taxYear = previousTaxYear)
       stubForBenefits(nino, noBenefits, previousTaxYear)
@@ -1079,7 +1120,8 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     "return OK and a valid MobilePayeResponse json without otherIncomes" in {
       stubForShutteringDisabled()
       grantAccess(nino)
-      stubForEmployments(nino, previousTaxYear, employmentData)
+      stubForEmploymentsOnly(nino, previousTaxYear, employmentOnlyData)
+      stubForAnnualAccounts(nino, previousTaxYear, annualAccountsIt)
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome.copy(otherNonTaxCodeIncomes = Nil), previousTaxYear)
       taxAccountSummaryIsFound(nino, taxAccountSummary, taxYear = previousTaxYear)
       stubForBenefits(nino, noBenefits, previousTaxYear)
