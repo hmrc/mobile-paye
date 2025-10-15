@@ -417,7 +417,7 @@ trait MobilePayeTestData {
       IncomeTaxYear(TaxYear.current.back(3), Some(Seq(historicTaxCodeIncome2))),
       IncomeTaxYear(
         TaxYear.current.back(4),
-        Some(Seq(historicTaxCodeIncome2.copy(amount = Some(50), taxAmount = Some(20)), historicTaxCodeIncome3))
+        Some(Seq(historicTaxCodeIncome3, historicTaxCodeIncome2.copy(amount = Some(50), taxAmount = Some(20))))
       ),
       IncomeTaxYear(TaxYear.current.back(5), None)
     )

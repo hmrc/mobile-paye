@@ -44,13 +44,20 @@ class IncomeTaxHistoryService @Inject() (taiConnector: TaiConnector,
         .map(TaxYear(_))
         .toList
 
-    taxYears traverse (taxYear => {
+    val incomeTaxYearList: Future[List[IncomeTaxYear]] = taxYears traverse (taxYear => {
       getIncomeTaxYear(nino, taxYear).recover { case e: Exception =>
         logger.info(s"Couldn't get taxYear info for $taxYear due to: \n$e")
         IncomeTaxYear(taxYear, None)
       }
     })
-
+    incomeTaxYearList.map { list =>
+      list
+        .sortBy(-_.taxYear.startYear)
+        .map { taxEntry =>
+          val sortedIncome = taxEntry.incomes.map(_.sortBy(_.payrollNumber))
+          taxEntry.copy(incomes = sortedIncome)
+        }
+    }
   }
 
   private def getCurrentTaxYear: TaxYear = {
