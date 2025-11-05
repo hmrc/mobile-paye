@@ -45,7 +45,7 @@ object PayeIncome {
     employmentBenefits: Option[Benefits] = None,
     taxYear: Int
   ): PayeIncome = {
-    val empId = Option(employment.sequenceNumber).getOrElse(throw new Exception("Employment ID not found"))
+    val empId = employment.sequenceNumber
     PayeIncome(
       name                             = employment.name,
       status                           = employment.employmentStatus,
@@ -127,10 +127,9 @@ object PayeIncome {
 
   private def getIncomeDetailsLink(employment: Employment): String =
     if (employment.employmentStatus.equals(Live))
-      s"/check-income-tax/income-details/${Option(employment.sequenceNumber).getOrElse(throw new Exception("Employment ID not found"))}"
+      s"/check-income-tax/income-details/${employment.sequenceNumber}"
     else
-      s"/check-income-tax/your-income-calculation-details/${Option(employment.sequenceNumber)
-          .getOrElse(throw new Exception("Employment ID not found"))}"
+      s"/check-income-tax/your-income-calculation-details/${employment.sequenceNumber}"
 
   implicit val format: OFormat[PayeIncome] = Json.format[PayeIncome]
 }

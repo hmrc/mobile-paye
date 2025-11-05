@@ -83,7 +83,6 @@ class MobilePayeService @Inject() (taiConnector: TaiConnector,
                               else Future successful None
       simpleAssessment <- getSimpleAssessmentData(journeyId, reconciliations)
       p800Summary      <- getP800Summary(reconciliations, taxYear, journeyId)
-      rtiStatus <- taiConnector.getAnnualAccounts(nino, taxYear)
       mobilePayeResponse = buildMobilePayeResponse(
                              taxYear,
         allEmploymentData,
@@ -93,8 +92,7 @@ class MobilePayeService @Inject() (taiConnector: TaiConnector,
                              employmentBenefits,
                              Some(TaxCodeChange(taxCodeChangeExists, taxCodeChangeDetails.iterator.map(_.startDate).nextOption())),
                              simpleAssessment,
-                             taxCodes,
-                             rtiStatus
+                             taxCodes
                            )
     } yield {
       if (cy1InfoAvailable) mobilePayeResponse.copy(taxCodeLocation = getTaxCodeLocation(allEmploymentData, taxCodes))
@@ -189,7 +187,6 @@ class MobilePayeService @Inject() (taiConnector: TaiConnector,
     taxCodeChange: Option[TaxCodeChange],
     simpleAssessment: Option[MobileSimpleAssessmentResponse],
     taxCodes: Seq[TaxCodeRecord],
-    rtiStatus: Seq[AnnualAccount]
   ): MobilePayeSummaryResponse = {
 
 //    logger.info(s"Number of employments received from TAI for tax year $taxYear: ${incomeSourceEmployment.size}")
@@ -199,7 +196,7 @@ class MobilePayeService @Inject() (taiConnector: TaiConnector,
       if (p800Summary.exists(_._type == Overpaid)) getP800Repayment(taxYear, p800Summary) else None
 
     val realTimeStatus: Seq[RealTimeStatus] =
-          rtiStatus.map(_.realTimeStatus)
+          employmentData.flatMap(_.annualAccounts.map(_.realTimeStatus))
 
     val liveEmployments =
       employmentData.filter(emp => emp.employmentStatus.equals(Live) && emp.employmentType == EmploymentIncome)
