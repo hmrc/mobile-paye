@@ -65,16 +65,17 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
     true
   )
 
-  def mockMatchingTaxCodeLive(f: Future[Seq[IncomeSource]]) =
+  def mockAllEmploymentsData(f: Future[Seq[Employment]]) =
     (mockTaiConnector
-      .getMatchingTaxCodeIncomes(_: Nino, _: Int, _: String, _: String)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(*, *, *, "Live", *, *)
+      .getEmployments(_: Nino, _: Int)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *, *, *)
       .returning(f)
 
-  def mockMatchingTaxCodeNotLive(f: Future[Seq[IncomeSource]]) =
+
+  def mockTaxCodes(f: Future[Seq[TaxCodeRecord]]) =
     (mockTaiConnector
-      .getMatchingTaxCodeIncomes(_: Nino, _: Int, _: String, _: String)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(*, *, *, "NotLive", *, *)
+      .getTaxCodesForYear(_: Nino, _: Int)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *, *, *)
       .returning(f)
 
   def mockNonTaxCodeIncomes(f: Future[NonTaxCodeIncome]) =
@@ -127,9 +128,10 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
 
   "getMobilePayeSummaryResponse" should {
     "return full MobilePayeResponse when all data is available" in {
-      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource))
-      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
-      mockMatchingTaxCodeNotLive(Future successful employmentIncomeSource ++ employmentIncomeSource)
+      mockAllEmploymentsData(Future.successful(employmentIncomeSource ++ pensionIncomeSource ++ employmentIncomeSource))
+//      mockAllEmploymentsData(Future.successful(pensionIncomeSource))
+//      mockAllEmploymentsData(Future successful employmentIncomeSource ++ employmentIncomeSource)
+      mockTaxCodes(Future.successful(Seq(taxCodeRecord)))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockGetBenefits(Future.successful(noBenefits))
@@ -146,407 +148,407 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
                                                  )
     }
 
-    "return full MobilePayeResponse with isRTIDown as true when all data is available and RTi is down for oneEmployemnt " in {
-      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSourceWithRtiUnavail))
-      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
-      mockMatchingTaxCodeNotLive(Future successful employmentIncomeSource ++ employmentIncomeSource)
-      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
-      mockTaxAccountSummary(Future.successful(taxAccountSummary))
-      mockGetBenefits(Future.successful(noBenefits))
-      mockGetTaxCodeChangeExists(Future.successful(true))
-      mockGetTaxCodeChange(Future successful taxCodeChangeDetails)
-      mockGetSimpleAssessmentLiabilities(Future successful Some(fullMobileSimpleAssessmentResponse))
-      mockShutteringResponse(Shuttering.shutteringDisabled)
-      mockP800Summary(Some(taxCalcTaxYearReconciliationResponse))
-
-      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
-
-      result shouldBe fullMobilePayeResponse.copy(previousEmployments = Some(employments ++ employments),
-                                                  simpleAssessment = Some(fullMobileSimpleAssessmentResponse),
-                                                  isRTIDown        = true
-                                                 )
-    }
-
-    "return full MobilePayeResponse with tax comparison link during Welsh active period" in {
-      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSourceWelsh))
-      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
-      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
-      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
-      mockTaxAccountSummary(Future.successful(taxAccountSummary))
-      mockCYPlusOneAccountSummary(Future successful true)
-      mockGetBenefits(Future.successful(noBenefits))
-      mockGetTaxCodeChangeExists(Future.successful(true))
-      mockGetTaxCodeChange(Future successful taxCodeChangeDetails)
-      mockP800Summary()
-
-      val service = new MobilePayeService(
-        mockTaiConnector,
-        mockTaxCalcConnector,
-        p800CacheMongo,
-        mockMobileSimpleAssessmentConnector,
-        mockCitizenDetailsConnector,
-        mockShutteringConnector,
-        inactiveDate,
-        inactiveDate,
-        activeStartDate,
-        activeEndDate,
-        inactiveDate,
-        inactiveDate,
-        true,
-        true,
-        true
-      )
-
-      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
-
-      result shouldBe fullMobilePayeResponseWithCY1Link.copy(taxCodeLocation = Some("Welsh"), employments = Some(welshEmployments))
-    }
-
-    "return full MobilePayeResponse with tax comparison link during UK active period" in {
-      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSourceUK))
-      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
-      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
-      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
-      mockTaxAccountSummary(Future.successful(taxAccountSummary))
-      mockP800Summary()
-      mockCYPlusOneAccountSummary(Future successful true)
-      mockGetBenefits(Future.successful(noBenefits))
-      mockGetTaxCodeChangeExists(Future.successful(true))
-      mockGetTaxCodeChange(Future successful taxCodeChangeDetails)
-
-      val service = new MobilePayeService(
-        mockTaiConnector,
-        mockTaxCalcConnector,
-        p800CacheMongo,
-        mockMobileSimpleAssessmentConnector,
-        mockCitizenDetailsConnector,
-        mockShutteringConnector,
-        activeStartDate,
-        activeEndDate,
-        inactiveDate,
-        inactiveDate,
-        inactiveDate,
-        inactiveDate,
-        true,
-        true,
-        true
-      )
-
-      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
-
-      result shouldBe fullMobilePayeResponseWithCY1Link.copy(taxCodeLocation = Some("rUK"), employments = Some(ukEmployments))
-    }
-
-    "return full MobilePayeResponse with tax comparison link during Scottish active period" in {
-      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource))
-      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
-      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
-      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
-      mockTaxAccountSummary(Future.successful(taxAccountSummary))
-      mockCYPlusOneAccountSummary(Future successful true)
-      mockGetBenefits(Future.successful(noBenefits))
-      mockGetTaxCodeChangeExists(Future.successful(true))
-      mockGetTaxCodeChange(Future successful taxCodeChangeDetails)
-      mockP800Summary()
-
-      val service = new MobilePayeService(
-        mockTaiConnector,
-        mockTaxCalcConnector,
-        p800CacheMongo,
-        mockMobileSimpleAssessmentConnector,
-        mockCitizenDetailsConnector,
-        mockShutteringConnector,
-        inactiveDate,
-        inactiveDate,
-        inactiveDate,
-        inactiveDate,
-        activeStartDate,
-        activeEndDate,
-        true,
-        true,
-        true
-      )
-
-      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
-
-      result shouldBe fullMobilePayeResponseWithCY1Link
-    }
-
-    "return full MobilePayeResponse with no tax comparison link if not in active period" in {
-      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSourceWelsh))
-      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
-      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
-      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
-      mockTaxAccountSummary(Future.successful(taxAccountSummary))
-      mockGetBenefits(Future.successful(noBenefits))
-      mockGetTaxCodeChangeExists(Future.successful(true))
-      mockGetTaxCodeChange(Future successful taxCodeChangeDetails)
-      mockP800Summary()
-
-      val service = new MobilePayeService(
-        mockTaiConnector,
-        mockTaxCalcConnector,
-        p800CacheMongo,
-        mockMobileSimpleAssessmentConnector,
-        mockCitizenDetailsConnector,
-        mockShutteringConnector,
-        activeStartDate,
-        activeEndDate,
-        inactiveDate,
-        inactiveDate,
-        activeStartDate,
-        activeEndDate,
-        true,
-        true,
-        true
-      )
-
-      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
-
-      result shouldBe fullMobilePayeResponse.copy(employments = Some(welshEmployments))
-    }
-
-    "return MobilePayeResponse with no untaxed interest" in {
-      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource))
-      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
-      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
-      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithoutUntaxedInterest))
-      mockTaxAccountSummary(Future.successful(taxAccountSummary))
-      mockGetBenefits(Future.successful(noBenefits))
-      mockGetTaxCodeChangeExists(Future.successful(true))
-      mockGetTaxCodeChange(Future successful taxCodeChangeDetails)
-      mockP800Summary()
-
-      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
-
-      result shouldBe fullMobilePayeResponse.copy(otherIncomes = Some(Seq(otherIncome)))
-    }
-
-    "return MobilePayeResponse with no employments when employment data is missing" in {
-      mockMatchingTaxCodeLive(Future.successful(Seq.empty[IncomeSource]))
-      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
-      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
-      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
-      mockTaxAccountSummary(Future.successful(taxAccountSummary))
-      mockGetBenefits(Future.successful(noBenefits))
-      mockGetTaxCodeChangeExists(Future.successful(true))
-      mockGetTaxCodeChange(Future successful taxCodeChangeDetails)
-      mockP800Summary()
-
-      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
-
-      result shouldBe fullMobilePayeResponse.copy(employments = None)
-    }
-
-    "return MobilePayeResponse with no pensions when pension data is missing" in {
-      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource))
-      mockMatchingTaxCodeLive(Future.successful(Seq.empty[IncomeSource]))
-      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
-      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
-      mockTaxAccountSummary(Future.successful(taxAccountSummary))
-      mockGetBenefits(Future.successful(noBenefits))
-      mockGetTaxCodeChangeExists(Future.successful(true))
-      mockGetTaxCodeChange(Future successful taxCodeChangeDetails)
-      mockP800Summary()
-
-      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
-
-      result shouldBe fullMobilePayeResponse.copy(pensions = None)
-    }
-
-    "return MobilePayeResponse with no otherIncomes when OtherIncome data is missing" in {
-      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource))
-      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
-      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
-      mockNonTaxCodeIncomes(
-        Future.successful(nonTaxCodeIncomeWithoutUntaxedInterest.copy(otherNonTaxCodeIncomes = Nil))
-      )
-      mockTaxAccountSummary(Future.successful(taxAccountSummary))
-      mockGetBenefits(Future.successful(noBenefits))
-      mockGetTaxCodeChangeExists(Future.successful(true))
-      mockGetTaxCodeChange(Future successful taxCodeChangeDetails)
-      mockP800Summary()
-
-      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
-
-      result shouldBe fullMobilePayeResponse.copy(otherIncomes = None)
-    }
-
-    "return MobilePayeResponse with correct Payments" in {
-      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource2))
-      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
-      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
-      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
-      mockTaxAccountSummary(Future.successful(taxAccountSummary))
-      mockGetBenefits(Future.successful(noBenefits))
-      mockGetTaxCodeChangeExists(Future.successful(true))
-      mockGetTaxCodeChange(Future successful taxCodeChangeDetails)
-      mockP800Summary()
-
-      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
-      result.employments.get.head.payments.get.size shouldBe 3
-    }
-
-    "return MobilePayeResponse with no payments node for employment with no payments" in {
-      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSourceNoPayments))
-      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSourceNoPension))
-      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
-      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
-      mockTaxAccountSummary(Future.successful(taxAccountSummary))
-      mockGetBenefits(Future.successful(noBenefits))
-      mockGetTaxCodeChangeExists(Future.successful(true))
-      mockGetTaxCodeChange(Future successful taxCodeChangeDetails)
-      mockP800Summary()
-
-      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
-
-      val payments = result.employments.get.head.payments
-
-      payments shouldBe None
-    }
-
-    "return full MobilePayeResponse with employment benefits data totalled correctly" in {
-      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource))
-      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
-      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
-      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
-      mockTaxAccountSummary(Future.successful(taxAccountSummary))
-      mockGetBenefits(Future.successful(allBenefits))
-      mockGetTaxCodeChangeExists(Future.successful(true))
-      mockGetTaxCodeChange(Future successful taxCodeChangeDetails)
-      mockP800Summary()
-
-      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
-
-      val employment1 = result.employments.get.head
-      val employment2 = result.employments.get.last
-      employment1.employmentBenefits.get.benefits.size shouldBe 3
-      employment1.employmentBenefits.get.benefits
-        .filter(_.benefitType.toString == CarBenefit.toString)
-        .head
-        .amount shouldBe BigDecimal(20000)
-      employment1.employmentBenefits.get.benefits
-        .filter(_.benefitType.toString == MedicalInsurance.toString)
-        .head
-        .amount shouldBe BigDecimal(650)
-      employment1.employmentBenefits.get.benefits
-        .filter(_.benefitType.toString == OtherBenefits.toString)
-        .head
-        .amount                                        shouldBe BigDecimal(450)
-      employment2.employmentBenefits.get.benefits.size shouldBe 2
-      employment2.employmentBenefits.get.benefits
-        .filter(_.benefitType.toString == MedicalInsurance.toString)
-        .head
-        .amount shouldBe BigDecimal(350)
-      employment2.employmentBenefits.get.benefits
-        .filter(_.benefitType.toString == OtherBenefits.toString)
-        .head
-        .amount shouldBe BigDecimal(100)
-
-    }
-
-    "return tax code change as false if flag disabled" in {
-      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource))
-      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
-      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
-      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
-      mockTaxAccountSummary(Future.successful(taxAccountSummary))
-      mockGetBenefits(Future.successful(noBenefits))
-      mockP800Summary()
-
-      val service = new MobilePayeService(
-        mockTaiConnector,
-        mockTaxCalcConnector,
-        p800CacheMongo,
-        mockMobileSimpleAssessmentConnector,
-        mockCitizenDetailsConnector,
-        mockShutteringConnector,
-        inactiveDate,
-        inactiveDate,
-        inactiveDate,
-        inactiveDate,
-        inactiveDate,
-        inactiveDate,
-        true,
-        false,
-        true
-      )
-
-      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
-
-      result shouldBe fullMobilePayeResponse.copy(taxCodeChange = Some(TaxCodeChange(hasChanged = false)))
-    }
-
-    "throw UnauthorizedException when receiving UnauthorizedException from taiConnector" in {
-      mockMatchingTaxCodeLive(Future.failed(new UnauthorizedException("Unauthorized")))
-
-      intercept[UnauthorizedException] {
-        await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
-      }
-    }
-
-    "throw ForbiddenException when receiving ForbiddenException from taiConnector" in {
-      mockMatchingTaxCodeLive(Future.failed(new ForbiddenException("Forbidden")))
-
-      intercept[ForbiddenException] {
-        await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
-      }
-    }
-
-    "throw InternalServerError when receiving InternalServerError from taiConnector" in {
-      mockMatchingTaxCodeLive(Future.failed(new InternalServerException("Internal Server Error")))
-
-      intercept[InternalServerException] {
-        await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
-      }
-    }
-
-    "return an empty MobilePayeResponse when an exception is thrown that contains 'no employments recorded for current tax year'" in {
-      mockMatchingTaxCodeLive(Future.failed(new Exception("no employments recorded for current tax year")))
-
-      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
-
-      result shouldBe MobilePayeSummaryResponse.empty
-    }
-
-    "return an empty MobilePayeResponse when an exception is thrown from NPS that contains 'cannot complete a coding calculation without a primary employment'" in {
-      mockMatchingTaxCodeLive(
-        Future.failed(new Exception("cannot complete a coding calculation without a primary employment"))
-      )
-
-      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
-
-      result shouldBe MobilePayeSummaryResponse.empty
-    }
-
-    "return an empty MobilePayeResponse when an exception is thrown from NPS that contains 'no employments recorded for this individual'" in {
-      mockMatchingTaxCodeLive(Future.failed(new Exception("no employments recorded for this individual")))
-
-      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
-
-      result shouldBe MobilePayeSummaryResponse.empty
-    }
-
-    "return full MobilePayeResponse without repayment data when p800 is shuttered" in {
-      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource))
-      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
-      mockMatchingTaxCodeNotLive(Future successful employmentIncomeSource ++ employmentIncomeSource)
-      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
-      mockTaxAccountSummary(Future.successful(taxAccountSummary))
-      mockGetBenefits(Future.successful(noBenefits))
-      mockGetTaxCodeChangeExists(Future.successful(true))
-      mockGetTaxCodeChange(Future successful taxCodeChangeDetails)
-      mockP800Summary(Some(taxCalcTaxYearReconciliationResponse))
-      mockGetSimpleAssessmentLiabilities(Future successful Some(fullMobileSimpleAssessmentResponse))
-      mockShutteringResponse(Shuttering(shuttered = true))
-
-      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
-
-      result shouldBe fullMobilePayeResponse.copy(previousEmployments = Some(employments ++ employments),
-                                                  simpleAssessment = Some(fullMobileSimpleAssessmentResponse),
-                                                  repayment        = None
-                                                 )
-    }
+//    "return full MobilePayeResponse with isRTIDown as true when all data is available and RTi is down for oneEmployemnt " in {
+//      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSourceWithRtiUnavail))
+//      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
+//      mockMatchingTaxCodeNotLive(Future successful employmentIncomeSource ++ employmentIncomeSource)
+//      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
+//      mockTaxAccountSummary(Future.successful(taxAccountSummary))
+//      mockGetBenefits(Future.successful(noBenefits))
+//      mockGetTaxCodeChangeExists(Future.successful(true))
+//      mockGetTaxCodeChange(Future successful taxCodeChangeDetails)
+//      mockGetSimpleAssessmentLiabilities(Future successful Some(fullMobileSimpleAssessmentResponse))
+//      mockShutteringResponse(Shuttering.shutteringDisabled)
+//      mockP800Summary(Some(taxCalcTaxYearReconciliationResponse))
+//
+//      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
+//
+//      result shouldBe fullMobilePayeResponse.copy(previousEmployments = Some(employments ++ employments),
+//                                                  simpleAssessment = Some(fullMobileSimpleAssessmentResponse),
+//                                                  isRTIDown        = true
+//                                                 )
+//    }
+//
+//    "return full MobilePayeResponse with tax comparison link during Welsh active period" in {
+//      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSourceWelsh))
+//      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
+//      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
+//      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
+//      mockTaxAccountSummary(Future.successful(taxAccountSummary))
+//      mockCYPlusOneAccountSummary(Future successful true)
+//      mockGetBenefits(Future.successful(noBenefits))
+//      mockGetTaxCodeChangeExists(Future.successful(true))
+//      mockGetTaxCodeChange(Future successful taxCodeChangeDetails)
+//      mockP800Summary()
+//
+//      val service = new MobilePayeService(
+//        mockTaiConnector,
+//        mockTaxCalcConnector,
+//        p800CacheMongo,
+//        mockMobileSimpleAssessmentConnector,
+//        mockCitizenDetailsConnector,
+//        mockShutteringConnector,
+//        inactiveDate,
+//        inactiveDate,
+//        activeStartDate,
+//        activeEndDate,
+//        inactiveDate,
+//        inactiveDate,
+//        true,
+//        true,
+//        true
+//      )
+//
+//      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
+//
+//      result shouldBe fullMobilePayeResponseWithCY1Link.copy(taxCodeLocation = Some("Welsh"), employments = Some(welshEmployments))
+//    }
+//
+//    "return full MobilePayeResponse with tax comparison link during UK active period" in {
+//      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSourceUK))
+//      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
+//      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
+//      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
+//      mockTaxAccountSummary(Future.successful(taxAccountSummary))
+//      mockP800Summary()
+//      mockCYPlusOneAccountSummary(Future successful true)
+//      mockGetBenefits(Future.successful(noBenefits))
+//      mockGetTaxCodeChangeExists(Future.successful(true))
+//      mockGetTaxCodeChange(Future successful taxCodeChangeDetails)
+//
+//      val service = new MobilePayeService(
+//        mockTaiConnector,
+//        mockTaxCalcConnector,
+//        p800CacheMongo,
+//        mockMobileSimpleAssessmentConnector,
+//        mockCitizenDetailsConnector,
+//        mockShutteringConnector,
+//        activeStartDate,
+//        activeEndDate,
+//        inactiveDate,
+//        inactiveDate,
+//        inactiveDate,
+//        inactiveDate,
+//        true,
+//        true,
+//        true
+//      )
+//
+//      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
+//
+//      result shouldBe fullMobilePayeResponseWithCY1Link.copy(taxCodeLocation = Some("rUK"), employments = Some(ukEmployments))
+//    }
+//
+//    "return full MobilePayeResponse with tax comparison link during Scottish active period" in {
+//      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource))
+//      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
+//      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
+//      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
+//      mockTaxAccountSummary(Future.successful(taxAccountSummary))
+//      mockCYPlusOneAccountSummary(Future successful true)
+//      mockGetBenefits(Future.successful(noBenefits))
+//      mockGetTaxCodeChangeExists(Future.successful(true))
+//      mockGetTaxCodeChange(Future successful taxCodeChangeDetails)
+//      mockP800Summary()
+//
+//      val service = new MobilePayeService(
+//        mockTaiConnector,
+//        mockTaxCalcConnector,
+//        p800CacheMongo,
+//        mockMobileSimpleAssessmentConnector,
+//        mockCitizenDetailsConnector,
+//        mockShutteringConnector,
+//        inactiveDate,
+//        inactiveDate,
+//        inactiveDate,
+//        inactiveDate,
+//        activeStartDate,
+//        activeEndDate,
+//        true,
+//        true,
+//        true
+//      )
+//
+//      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
+//
+//      result shouldBe fullMobilePayeResponseWithCY1Link
+//    }
+//
+//    "return full MobilePayeResponse with no tax comparison link if not in active period" in {
+//      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSourceWelsh))
+//      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
+//      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
+//      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
+//      mockTaxAccountSummary(Future.successful(taxAccountSummary))
+//      mockGetBenefits(Future.successful(noBenefits))
+//      mockGetTaxCodeChangeExists(Future.successful(true))
+//      mockGetTaxCodeChange(Future successful taxCodeChangeDetails)
+//      mockP800Summary()
+//
+//      val service = new MobilePayeService(
+//        mockTaiConnector,
+//        mockTaxCalcConnector,
+//        p800CacheMongo,
+//        mockMobileSimpleAssessmentConnector,
+//        mockCitizenDetailsConnector,
+//        mockShutteringConnector,
+//        activeStartDate,
+//        activeEndDate,
+//        inactiveDate,
+//        inactiveDate,
+//        activeStartDate,
+//        activeEndDate,
+//        true,
+//        true,
+//        true
+//      )
+//
+//      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
+//
+//      result shouldBe fullMobilePayeResponse.copy(employments = Some(welshEmployments))
+//    }
+//
+//    "return MobilePayeResponse with no untaxed interest" in {
+//      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource))
+//      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
+//      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
+//      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithoutUntaxedInterest))
+//      mockTaxAccountSummary(Future.successful(taxAccountSummary))
+//      mockGetBenefits(Future.successful(noBenefits))
+//      mockGetTaxCodeChangeExists(Future.successful(true))
+//      mockGetTaxCodeChange(Future successful taxCodeChangeDetails)
+//      mockP800Summary()
+//
+//      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
+//
+//      result shouldBe fullMobilePayeResponse.copy(otherIncomes = Some(Seq(otherIncome)))
+//    }
+//
+//    "return MobilePayeResponse with no employments when employment data is missing" in {
+//      mockMatchingTaxCodeLive(Future.successful(Seq.empty[IncomeSource]))
+//      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
+//      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
+//      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
+//      mockTaxAccountSummary(Future.successful(taxAccountSummary))
+//      mockGetBenefits(Future.successful(noBenefits))
+//      mockGetTaxCodeChangeExists(Future.successful(true))
+//      mockGetTaxCodeChange(Future successful taxCodeChangeDetails)
+//      mockP800Summary()
+//
+//      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
+//
+//      result shouldBe fullMobilePayeResponse.copy(employments = None)
+//    }
+//
+//    "return MobilePayeResponse with no pensions when pension data is missing" in {
+//      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource))
+//      mockMatchingTaxCodeLive(Future.successful(Seq.empty[IncomeSource]))
+//      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
+//      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
+//      mockTaxAccountSummary(Future.successful(taxAccountSummary))
+//      mockGetBenefits(Future.successful(noBenefits))
+//      mockGetTaxCodeChangeExists(Future.successful(true))
+//      mockGetTaxCodeChange(Future successful taxCodeChangeDetails)
+//      mockP800Summary()
+//
+//      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
+//
+//      result shouldBe fullMobilePayeResponse.copy(pensions = None)
+//    }
+//
+//    "return MobilePayeResponse with no otherIncomes when OtherIncome data is missing" in {
+//      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource))
+//      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
+//      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
+//      mockNonTaxCodeIncomes(
+//        Future.successful(nonTaxCodeIncomeWithoutUntaxedInterest.copy(otherNonTaxCodeIncomes = Nil))
+//      )
+//      mockTaxAccountSummary(Future.successful(taxAccountSummary))
+//      mockGetBenefits(Future.successful(noBenefits))
+//      mockGetTaxCodeChangeExists(Future.successful(true))
+//      mockGetTaxCodeChange(Future successful taxCodeChangeDetails)
+//      mockP800Summary()
+//
+//      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
+//
+//      result shouldBe fullMobilePayeResponse.copy(otherIncomes = None)
+//    }
+//
+//    "return MobilePayeResponse with correct Payments" in {
+//      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource2))
+//      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
+//      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
+//      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
+//      mockTaxAccountSummary(Future.successful(taxAccountSummary))
+//      mockGetBenefits(Future.successful(noBenefits))
+//      mockGetTaxCodeChangeExists(Future.successful(true))
+//      mockGetTaxCodeChange(Future successful taxCodeChangeDetails)
+//      mockP800Summary()
+//
+//      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
+//      result.employments.get.head.payments.get.size shouldBe 3
+//    }
+//
+//    "return MobilePayeResponse with no payments node for employment with no payments" in {
+//      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSourceNoPayments))
+//      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSourceNoPension))
+//      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
+//      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
+//      mockTaxAccountSummary(Future.successful(taxAccountSummary))
+//      mockGetBenefits(Future.successful(noBenefits))
+//      mockGetTaxCodeChangeExists(Future.successful(true))
+//      mockGetTaxCodeChange(Future successful taxCodeChangeDetails)
+//      mockP800Summary()
+//
+//      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
+//
+//      val payments = result.employments.get.head.payments
+//
+//      payments shouldBe None
+//    }
+//
+//    "return full MobilePayeResponse with employment benefits data totalled correctly" in {
+//      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource))
+//      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
+//      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
+//      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
+//      mockTaxAccountSummary(Future.successful(taxAccountSummary))
+//      mockGetBenefits(Future.successful(allBenefits))
+//      mockGetTaxCodeChangeExists(Future.successful(true))
+//      mockGetTaxCodeChange(Future successful taxCodeChangeDetails)
+//      mockP800Summary()
+//
+//      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
+//
+//      val employment1 = result.employments.get.head
+//      val employment2 = result.employments.get.last
+//      employment1.employmentBenefits.get.benefits.size shouldBe 3
+//      employment1.employmentBenefits.get.benefits
+//        .filter(_.benefitType.toString == CarBenefit.toString)
+//        .head
+//        .amount shouldBe BigDecimal(20000)
+//      employment1.employmentBenefits.get.benefits
+//        .filter(_.benefitType.toString == MedicalInsurance.toString)
+//        .head
+//        .amount shouldBe BigDecimal(650)
+//      employment1.employmentBenefits.get.benefits
+//        .filter(_.benefitType.toString == OtherBenefits.toString)
+//        .head
+//        .amount                                        shouldBe BigDecimal(450)
+//      employment2.employmentBenefits.get.benefits.size shouldBe 2
+//      employment2.employmentBenefits.get.benefits
+//        .filter(_.benefitType.toString == MedicalInsurance.toString)
+//        .head
+//        .amount shouldBe BigDecimal(350)
+//      employment2.employmentBenefits.get.benefits
+//        .filter(_.benefitType.toString == OtherBenefits.toString)
+//        .head
+//        .amount shouldBe BigDecimal(100)
+//
+//    }
+//
+//    "return tax code change as false if flag disabled" in {
+//      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource))
+//      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
+//      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
+//      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
+//      mockTaxAccountSummary(Future.successful(taxAccountSummary))
+//      mockGetBenefits(Future.successful(noBenefits))
+//      mockP800Summary()
+//
+//      val service = new MobilePayeService(
+//        mockTaiConnector,
+//        mockTaxCalcConnector,
+//        p800CacheMongo,
+//        mockMobileSimpleAssessmentConnector,
+//        mockCitizenDetailsConnector,
+//        mockShutteringConnector,
+//        inactiveDate,
+//        inactiveDate,
+//        inactiveDate,
+//        inactiveDate,
+//        inactiveDate,
+//        inactiveDate,
+//        true,
+//        false,
+//        true
+//      )
+//
+//      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
+//
+//      result shouldBe fullMobilePayeResponse.copy(taxCodeChange = Some(TaxCodeChange(hasChanged = false)))
+//    }
+//
+//    "throw UnauthorizedException when receiving UnauthorizedException from taiConnector" in {
+//      mockMatchingTaxCodeLive(Future.failed(new UnauthorizedException("Unauthorized")))
+//
+//      intercept[UnauthorizedException] {
+//        await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
+//      }
+//    }
+//
+//    "throw ForbiddenException when receiving ForbiddenException from taiConnector" in {
+//      mockMatchingTaxCodeLive(Future.failed(new ForbiddenException("Forbidden")))
+//
+//      intercept[ForbiddenException] {
+//        await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
+//      }
+//    }
+//
+//    "throw InternalServerError when receiving InternalServerError from taiConnector" in {
+//      mockMatchingTaxCodeLive(Future.failed(new InternalServerException("Internal Server Error")))
+//
+//      intercept[InternalServerException] {
+//        await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
+//      }
+//    }
+//
+//    "return an empty MobilePayeResponse when an exception is thrown that contains 'no employments recorded for current tax year'" in {
+//      mockMatchingTaxCodeLive(Future.failed(new Exception("no employments recorded for current tax year")))
+//
+//      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
+//
+//      result shouldBe MobilePayeSummaryResponse.empty
+//    }
+//
+//    "return an empty MobilePayeResponse when an exception is thrown from NPS that contains 'cannot complete a coding calculation without a primary employment'" in {
+//      mockMatchingTaxCodeLive(
+//        Future.failed(new Exception("cannot complete a coding calculation without a primary employment"))
+//      )
+//
+//      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
+//
+//      result shouldBe MobilePayeSummaryResponse.empty
+//    }
+//
+//    "return an empty MobilePayeResponse when an exception is thrown from NPS that contains 'no employments recorded for this individual'" in {
+//      mockMatchingTaxCodeLive(Future.failed(new Exception("no employments recorded for this individual")))
+//
+//      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
+//
+//      result shouldBe MobilePayeSummaryResponse.empty
+//    }
+//
+//    "return full MobilePayeResponse without repayment data when p800 is shuttered" in {
+//      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource))
+//      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
+//      mockMatchingTaxCodeNotLive(Future successful employmentIncomeSource ++ employmentIncomeSource)
+//      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
+//      mockTaxAccountSummary(Future.successful(taxAccountSummary))
+//      mockGetBenefits(Future.successful(noBenefits))
+//      mockGetTaxCodeChangeExists(Future.successful(true))
+//      mockGetTaxCodeChange(Future successful taxCodeChangeDetails)
+//      mockP800Summary(Some(taxCalcTaxYearReconciliationResponse))
+//      mockGetSimpleAssessmentLiabilities(Future successful Some(fullMobileSimpleAssessmentResponse))
+//      mockShutteringResponse(Shuttering(shuttered = true))
+//
+//      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
+//
+//      result shouldBe fullMobilePayeResponse.copy(previousEmployments = Some(employments ++ employments),
+//                                                  simpleAssessment = Some(fullMobileSimpleAssessmentResponse),
+//                                                  repayment        = None
+//                                                 )
+//    }
 
   }
 

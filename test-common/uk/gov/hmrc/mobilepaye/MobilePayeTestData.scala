@@ -157,38 +157,38 @@ trait MobilePayeTestData {
     Seq(CompanyCarBenefit(3, BigDecimal(20000), Seq.empty), CompanyCarBenefit(5, BigDecimal(15000), Seq.empty))
   val allBenefits: Benefits = Benefits(companyCarBenefits, otherBenefits)
 
-  val employmentIncomeSource: Seq[IncomeSource] =
-    Seq(IncomeSource(taxCodeIncome, taiEmployment()), IncomeSource(taxCodeIncome2, taiEmployment2))
+  val employmentIncomeSource: Seq[Employment] =
+    Seq(taiEmployment(), taiEmployment2)
 
-  val employmentIncomeSourceWithRtiUnavail: Seq[IncomeSource] =
-    Seq(IncomeSource(taxCodeIncome, taiEmployment(rtiStatus = TemporarilyUnavailable)), IncomeSource(taxCodeIncome2, taiEmployment2))
+  val employmentIncomeSourceWithRtiUnavail: Seq[Employment] =
+    Seq(taiEmployment(rtiStatus = TemporarilyUnavailable), taiEmployment2)
 
-  val employmentIncomeSource2: Seq[IncomeSource] =
-    Seq(IncomeSource(taxCodeIncome, taiEmployment4))
+  val employmentIncomeSource2: Seq[Employment] =
+    Seq(taiEmployment4)
 
-  val employmentIncomeSourceNoPayments: Seq[IncomeSource] =
-    Seq(IncomeSource(taxCodeIncome, taiEmployment5))
+  val employmentIncomeSourceNoPayments: Seq[Employment] =
+    Seq(taiEmployment5)
 
-  val employmentIncomeSourceWelsh: Seq[IncomeSource] =
-    Seq(IncomeSource(taxCodeIncome.copy(taxCode = "C1150L"), taiEmployment()), IncomeSource(taxCodeIncome2, taiEmployment2))
+  val employmentIncomeSourceWelsh: Seq[Employment] =
+    Seq(taiEmployment(), taiEmployment2)
 
-  val employmentIncomeSourceUK: Seq[IncomeSource] =
-    Seq(IncomeSource(taxCodeIncome.copy(taxCode = "1150L"), taiEmployment()), IncomeSource(taxCodeIncome2, taiEmployment2))
-  val pensionIncomeSource: Seq[IncomeSource] = Seq(IncomeSource(taxCodeIncome3, taiEmployment3))
+  val employmentIncomeSourceUK: Seq[Employment] =
+    Seq(taiEmployment(), taiEmployment2)
+  val pensionIncomeSource: Seq[Employment] = Seq(taiEmployment3)
 
-  val pensionIncomeSourceNoPension: Seq[IncomeSource] = Seq.empty
+  val pensionIncomeSourceNoPension: Seq[Employment] = Seq.empty
 
   val employments: Seq[PayeIncome] =
-    employmentIncomeSource.map(ic => PayeIncome.fromIncomeSource(ic, employment = true))
+    employmentIncomeSource.map(ic => PayeIncome.fromIncomeSource(ic,taxCode  = Some("S1150L"),Some(noBenefits),2025))
 
   val welshEmployments: Seq[PayeIncome] =
-    employmentIncomeSourceWelsh.map(ic => PayeIncome.fromIncomeSource(ic, employment = true))
+    employmentIncomeSourceWelsh.map(ic => PayeIncome.fromIncomeSource(ic,taxCode  = Some("C1150L"),Some(noBenefits),2025))
 
   val ukEmployments: Seq[PayeIncome] =
-    employmentIncomeSourceUK.map(ic => PayeIncome.fromIncomeSource(ic, employment = true))
+    employmentIncomeSourceUK.map(ic => PayeIncome.fromIncomeSource(ic,taxCode  = Some("1150L"),Some(noBenefits),2025))
 
   val pensions: Seq[PayeIncome] =
-    pensionIncomeSource.map(ic => PayeIncome.fromIncomeSource(ic, employment = false))
+    pensionIncomeSource.map(ic => PayeIncome.fromIncomeSource(ic,taxCode  = Some("1150L"),Some(noBenefits),2025))
 
   val taxAccountSummary: TaxAccountSummary = TaxAccountSummary(BigDecimal(250), BigDecimal(10000))
   val person: Person = Person(nino, "Carrot", "Smith")

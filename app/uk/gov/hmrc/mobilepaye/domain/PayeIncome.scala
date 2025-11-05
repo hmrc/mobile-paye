@@ -40,34 +40,37 @@ case class PayeIncome(name: String,
 object PayeIncome {
 
   def fromIncomeSource(
-    incomeSource: IncomeSource,
-    employment: Boolean,
-    employmentBenefits: Option[Benefits] = None
+                        employment: Employment,
+    taxCode: Option[String],
+    employmentBenefits: Option[Benefits] = None,
+    taxYear: Int
   ): PayeIncome = {
-    val empId = incomeSource.taxCodeIncome.employmentId.getOrElse(throw new Exception("Employment ID not found"))
+    val empId = Option(employment.sequenceNumber).getOrElse(throw new Exception("Employment ID not found"))
     PayeIncome(
-      name                             = incomeSource.taxCodeIncome.name,
-      status                           = incomeSource.employment.employmentStatus,
-      payrollNumber                    = incomeSource.employment.payrollNumber,
-      taxCode                          = incomeSource.taxCodeIncome.taxCode,
-      amount                           = incomeSource.taxCodeIncome.amount.setScale(0, RoundingMode.FLOOR),
-      payeNumber                       = s"${incomeSource.employment.taxDistrictNumber}/${incomeSource.employment.payeNumber}",
-      incomeDetailsLink                = getIncomeDetailsLink(incomeSource),
+      name                             = employment.name,
+      status                           = employment.employmentStatus,
+      payrollNumber                    = employment.payrollNumber,
+      taxCode                          = taxCode.getOrElse(""),
+      amount                           = employment.annualAccounts.headOption
+        .flatMap(accounts => accounts.latestPayment.map(_.taxAmountYearToDate))
+        .getOrElse(BigDecimal(0)),
+      payeNumber                       = s"${employment.taxDistrictNumber}/${employment.payeNumber}",
+      incomeDetailsLink                = getIncomeDetailsLink(employment),
       updateEmployerLink               = Some(s"/check-income-tax/update-remove-employment/decision/$empId"),
       yourIncomeCalculationDetailsLink = s"/check-income-tax/your-income-calculation-details/$empId",
       updateIncomeLink =
-        if (employment && incomeSource.employment.employmentStatus.equals(Live))
+        if (employment.employmentStatus.equals(Live))
           Some(
             s"/check-income-tax/update-income/load/$empId"
           )
         else None,
       payments =
-        if (incomeSource.employment.annualAccounts.headOption.map(_.payments).getOrElse(Seq.empty).isEmpty) None
-        else incomeSource.employment.annualAccounts.headOption.map(_.payments.sorted(Payment.dateOrdering.reverse)),
+        if (employment.annualAccounts.headOption.map(_.payments).getOrElse(Seq.empty).isEmpty) None
+        else employment.annualAccounts.headOption.map(_.payments.sorted(Payment.dateOrdering.reverse)),
       employmentBenefits = employmentBenefits.flatMap(
-        buildEmploymentBenefits(_, incomeSource.taxCodeIncome.employmentId)
+        buildEmploymentBenefits(_, Some(employment.sequenceNumber))
       ),
-      endDate = incomeSource.employment.endDate
+      endDate = employment.endDate
     )
   }
 
@@ -122,11 +125,11 @@ object PayeIncome {
 
   }
 
-  private def getIncomeDetailsLink(incomeSource: IncomeSource): String =
-    if (incomeSource.taxCodeIncome.status.equals(Live))
-      s"/check-income-tax/income-details/${incomeSource.taxCodeIncome.employmentId.getOrElse(throw new Exception("Employment ID not found"))}"
+  private def getIncomeDetailsLink(employment: Employment): String =
+    if (employment.employmentStatus.equals(Live))
+      s"/check-income-tax/income-details/${Option(employment.sequenceNumber).getOrElse(throw new Exception("Employment ID not found"))}"
     else
-      s"/check-income-tax/your-income-calculation-details/${incomeSource.taxCodeIncome.employmentId
+      s"/check-income-tax/your-income-calculation-details/${Option(employment.sequenceNumber)
           .getOrElse(throw new Exception("Employment ID not found"))}"
 
   implicit val format: OFormat[PayeIncome] = Json.format[PayeIncome]
