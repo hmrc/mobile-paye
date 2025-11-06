@@ -66,11 +66,12 @@ class MobilePayeService @Inject() (taiConnector: TaiConnector,
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[MobilePayeSummaryResponse] =
     (for {
       allEmploymentData <- taiConnector.getEmployments(nino, taxYear)
-      taxCodes           <- taiConnector.getTaxCodesForYear(nino, taxYear)
+//      taxCodes           <- taiConnector.getTaxCodesForYear(nino, taxYear)
+      taxCodeIncome <- taiConnector.getTaxCodeIncomes(nino, taxYear)
       nonTaxCodeIncomes        <- taiConnector.getNonTaxCodeIncome(nino, taxYear)
       taxAccountSummary        <- taiConnector.getTaxAccountSummary(nino, taxYear)
       reconciliations          <- getTaxYearReconciliation(nino)
-      tcComparisonPeriodActive <- cyPlus1InfoCheck(allEmploymentData, taxCodes)
+      tcComparisonPeriodActive <- cyPlus1InfoCheck(allEmploymentData, taxCodeIncome)
       cy1InfoAvailable <- if (tcComparisonPeriodActive) taiConnector.getCYPlusOneAccountSummary(nino, taxYear)
                           else Future successful false
       employmentBenefits <- taiConnector.getBenefits(nino, taxYear)
@@ -92,10 +93,10 @@ class MobilePayeService @Inject() (taiConnector: TaiConnector,
                              employmentBenefits,
                              Some(TaxCodeChange(taxCodeChangeExists, taxCodeChangeDetails.iterator.map(_.startDate).nextOption())),
                              simpleAssessment,
-                             taxCodes
+        taxCodeIncome
                            )
     } yield {
-      if (cy1InfoAvailable) mobilePayeResponse.copy(taxCodeLocation = getTaxCodeLocation(allEmploymentData, taxCodes))
+      if (cy1InfoAvailable) mobilePayeResponse.copy(taxCodeLocation = getTaxCodeLocation(allEmploymentData, taxCodeIncome))
       else mobilePayeResponse.copy(currentYearPlusOneLink           = None)
     }) recover {
       case ex if knownException(ex, nino) => MobilePayeSummaryResponse.empty
@@ -186,7 +187,7 @@ class MobilePayeService @Inject() (taiConnector: TaiConnector,
     employmentBenefits: Benefits,
     taxCodeChange: Option[TaxCodeChange],
     simpleAssessment: Option[MobileSimpleAssessmentResponse],
-    taxCodes: Seq[TaxCodeRecord],
+    taxCodesIncome: Seq[TaxCodeIncome],
   ): MobilePayeSummaryResponse = {
 
 //    logger.info(s"Number of employments received from TAI for tax year $taxYear: ${incomeSourceEmployment.size}")
@@ -224,10 +225,10 @@ class MobilePayeService @Inject() (taiConnector: TaiConnector,
 
     MobilePayeSummaryResponse(
       taxYear             = Some(taxYear),
-      employments         = buildPayeIncomes(liveEmployments, taxCodes, Some(employmentBenefits), taxYear),
-      previousEmployments = buildPayeIncomes(notLiveEmployments, taxCodes, Some(employmentBenefits), taxYear),
+      employments         = buildPayeIncomes(liveEmployments, taxCodesIncome, Some(employmentBenefits), taxYear),
+      previousEmployments = buildPayeIncomes(notLiveEmployments, taxCodesIncome, Some(employmentBenefits), taxYear),
       repayment           = repayment,
-      pensions            = buildPayeIncomes(pensions, taxCodes, None, taxYear),
+      pensions            = buildPayeIncomes(pensions, taxCodesIncome, None, taxYear),
       otherIncomes        = otherNonTaxCodeIncomes,
       simpleAssessment    = simpleAssessment,
       taxCodeChange       = taxCodeChange,
@@ -239,7 +240,7 @@ class MobilePayeService @Inject() (taiConnector: TaiConnector,
 
   private def buildPayeIncomes(
                                 incomes: Seq[Employment],
-                                taxCodes: Seq[TaxCodeRecord],
+                                taxCodes: Seq[TaxCodeIncome],
                                 employmentBenefits: Option[Benefits],
                                 taxYear: Int
                               ): Option[Seq[PayeIncome]] =
@@ -252,11 +253,11 @@ class MobilePayeService @Inject() (taiConnector: TaiConnector,
 
   private def findTaxCode(
                            emp: Employment,
-                           taxCodes: Seq[TaxCodeRecord]
+                           taxCodes: Seq[TaxCodeIncome]
                          ): Option[String] =
-    taxCodes.find(_.employerName == emp.name).map(_.taxCode)
+    taxCodes.find(_.employmentId == Option(emp.sequenceNumber)).map(_.taxCode)
 
-  private def cyPlus1InfoCheck(employments: Seq[Employment], taxCodes: Seq[TaxCodeRecord]): Future[Boolean] =
+  private def cyPlus1InfoCheck(employments: Seq[Employment], taxCodes: Seq[TaxCodeIncome]): Future[Boolean] =
     getTaxCodeLocation(employments, taxCodes) match {
       case Some("Welsh") => Future successful isComparisonPeriodActive(walesComparisonStartDate, walesComparisonEndDate)
       case Some("Scottish") =>
@@ -278,10 +279,10 @@ class MobilePayeService @Inject() (taiConnector: TaiConnector,
     }
   }
 
-  private def getTaxCodeLocation(employments: Seq[Employment], taxCodes: Seq[TaxCodeRecord]): Option[String] = {
+  private def getTaxCodeLocation(employments: Seq[Employment], taxCodes: Seq[TaxCodeIncome]): Option[String] = {
 
     val latestEmployment: Option[Employment] = employments.headOption
-    val latestTaxCodes: Option[TaxCodeRecord] = taxCodes.headOption
+    val latestTaxCodes: Option[TaxCodeIncome] = taxCodes.headOption
     if (latestEmployment.isDefined) {
       latestTaxCodes.map(emp => emp.taxCode.charAt(0).toLower) match {
         case Some('c') => Some("Welsh")

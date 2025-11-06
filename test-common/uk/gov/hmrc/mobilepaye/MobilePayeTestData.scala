@@ -46,6 +46,8 @@ trait MobilePayeTestData {
                                                    amount        = 1000,
                                                    taxCode       = "S1150L"
                                                   )
+
+  val taxCodeIncomeFullResponse: Seq[TaxCodeIncome] = Seq(taxCodeIncome, taxCodeIncome2, taxCodeIncome3)
   val taxCodeIncome2: TaxCodeIncome = taxCodeIncome.copy(name = "The Worst Shop Ltd", employmentId = Some(4))
 
   val taxCodeIncome3: TaxCodeIncome =
@@ -157,6 +159,8 @@ trait MobilePayeTestData {
     Seq(CompanyCarBenefit(3, BigDecimal(20000), Seq.empty), CompanyCarBenefit(5, BigDecimal(15000), Seq.empty))
   val allBenefits: Benefits = Benefits(companyCarBenefits, otherBenefits)
 
+  val previousIncomeSource: Seq[Employment] =
+    Seq(taiEmployment().copy(employmentStatus= NotLive), taiEmployment2.copy(employmentStatus = NotLive))
   val employmentIncomeSource: Seq[Employment] =
     Seq(taiEmployment(), taiEmployment2)
 
@@ -178,21 +182,24 @@ trait MobilePayeTestData {
 
   val pensionIncomeSourceNoPension: Seq[Employment] = Seq.empty
 
+  val previousEmployments : Seq[PayeIncome] =
+    previousIncomeSource.map(ic => PayeIncome.fromIncomeSource(ic,taxCode  = Some("S1150L"),None,TaxYear.current.currentYear))
+    
   val employments: Seq[PayeIncome] =
-    employmentIncomeSource.map(ic => PayeIncome.fromIncomeSource(ic,taxCode  = Some("S1150L"),Some(noBenefits),2025))
+    employmentIncomeSource.map(ic => PayeIncome.fromIncomeSource(ic,taxCode  = Some("S1150L"),None,TaxYear.current.currentYear))
 
   val welshEmployments: Seq[PayeIncome] =
-    employmentIncomeSourceWelsh.map(ic => PayeIncome.fromIncomeSource(ic,taxCode  = Some("C1150L"),Some(noBenefits),2025))
+    employmentIncomeSourceWelsh.map(ic => PayeIncome.fromIncomeSource(ic,taxCode  = Some("C1150L"),None,TaxYear.current.currentYear))
 
   val ukEmployments: Seq[PayeIncome] =
-    employmentIncomeSourceUK.map(ic => PayeIncome.fromIncomeSource(ic,taxCode  = Some("1150L"),Some(noBenefits),2025))
+    employmentIncomeSourceUK.map(ic => PayeIncome.fromIncomeSource(ic,taxCode  = Some("1150L"),None,TaxYear.current.currentYear))
 
   val pensions: Seq[PayeIncome] =
-    pensionIncomeSource.map(ic => PayeIncome.fromIncomeSource(ic,taxCode  = Some("1150L"),Some(noBenefits),2025))
+    pensionIncomeSource.map(ic => PayeIncome.fromIncomeSource(ic,taxCode  = Some("1150L"),Some(noBenefits),TaxYear.current.currentYear))
 
   val taxAccountSummary: TaxAccountSummary = TaxAccountSummary(BigDecimal(250), BigDecimal(10000))
   val person: Person = Person(nino, "Carrot", "Smith")
-  val otherIncome: OtherIncome = OtherIncome("STATE PENSION", 250.0, None)
+  val otherIncome: OtherIncome = OtherIncome("STATE PENSION", 250, None)
 
   def repayment(
     p800Status: P800Status,
@@ -434,6 +441,8 @@ trait MobilePayeTestData {
     )
   }
 
+
+
   def fullMobilePayePreviousYearResponse(taxYear: Int = previousTaxYear): MobilePayePreviousYearSummaryResponse =
     MobilePayePreviousYearSummaryResponse(
       taxYear = Some(taxYear),
@@ -509,11 +518,30 @@ trait MobilePayeTestData {
     primary          = true
   )
 
+  val newTaxCodeRecord: TaxCodeRecord = TaxCodeRecord( // taxCodeIncome transformed
+    taxCode = "S1150L",
+    startDate = LocalDate.now().minusYears(2),
+    endDate = LocalDate.now().minusYears(1),
+    employerName = "ASDA",
+    pensionIndicator = false,
+    payrollNumber = Some("4321"),
+    primary = true
+  )
+
   val employmentData: Seq[Employment] = Seq(
     taiEmployment(TaxYear.current.previous.startYear),
     taiEmployment2.copy(employmentStatus = Ceased),
     taiEmployment3.copy(name             = "ALDI", employmentType = PensionIncome)
   )
+
+  val employmentDataNotIncomeSource: Seq[Employment] = Seq(taiEmployment(), taiEmployment2,
+    taiEmployment3.copy(employmentType = PensionIncome)) ++
+    employmentIncomeSource.map(_.copy(employmentStatus = NotLive)) ++ employmentIncomeSource.map(_.copy(employmentStatus = NotLive))
+//  , taiEmployment(), taiEmployment2 , taiEmployment(), taiEmployment2)
+
+
+
+  val taxCodeDataNotIncomecource: Seq[TaxCodeRecord] = Seq(taxCodeRecord.copy(taxCode = "S1150L"))
 
   val employmentOnlyData = Seq(
     taiEmployment(TaxYear.current.previous.startYear).copy(annualAccounts = Seq.empty),
