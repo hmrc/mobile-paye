@@ -18,12 +18,14 @@ package uk.gov.hmrc.mobilepaye.connectors
 
 import com.fasterxml.jackson.core.JsonParseException
 import play.api.libs.json.{JsResultException, JsValue, Json}
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.*
-import uk.gov.hmrc.mobilepaye.domain.tai.{AnnualAccount, Employment, EmploymentIncome, Live, PensionIncome, TaxCodeChangeDetails, TaxCodeRecord}
+import uk.gov.hmrc.mobilepaye.domain.tai.{AnnualAccount, Available, Employment, EmploymentIncome, Live, PensionIncome, TaxCodeChangeDetails, TaxCodeRecord}
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 
 import java.net.URL
+import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
 
 class TaiConnectorSpec extends BaseSpec {
@@ -92,89 +94,114 @@ class TaiConnectorSpec extends BaseSpec {
   }
 
   "Matching Tax Code Employments - GET /tai/tax-account/year/:taxYear/income/:incomeType/status/:status" should {
+    // TODO include pension ,ceased as well
     "return a valid Seq[IncomeSource] when receiving a valid 200 response for an authorised user for Employment" in {
-      val taiEmploymentsJson: JsValue =
+      val taiEmploymentsOnlyJson: JsValue =
         Json.parse(s"""
-                      |{
-                      |  "data": [{
-                      |    "taxCodeIncome": ${Json.toJson(taxCodeIncome)},
-                      |    "employment": ${Json.toJson(taiEmployment())}
-                      |  },
-                      |  {
-                      |    "taxCodeIncome": ${Json.toJson(taxCodeIncome2)},
-                      |    "employment": ${Json.toJson(taiEmployment2)}
-                      |  }
-                      |   ]
-                      |}
-          """.stripMargin)
+             |{
+             |  "data": {
+             |  "employments" : [${Json.toJson(taiEmployment().copy(annualAccounts = Seq.empty))}, ${Json.toJson(
+                       taiEmployment2.copy(annualAccounts = Seq.empty)
+                     )}, ${Json.toJson(taiEmploymentNew3.copy(annualAccounts = Seq.empty))}]
+             |}
+             |}
 
-      mockTaiGet(s"tax-account/year/$currentTaxYear/income/${EmploymentIncome.toString}/status/${Live.toString}",
-                 Future.successful(taiEmploymentsJson)
-                )
+           """.stripMargin)
+      val anualAccountsjson: JsValue =
+        Json.parse(s"""
+               |{
+               |  "data": [${Json.toJson(annualAccountsNew1)}, ${Json.toJson(annualAccountsNew2)},
+               |  ${Json.toJson(annualAccountsNew3)}, ${Json.toJson(annualAccountsNew5)}]
+               |
+               |}
+""".stripMargin)
+
+      val incomeTaxCodeJson: JsValue =
+        Json.parse(s"""
+             |{
+             |  "data": [${Json.toJson(taxCodeIncomeNew1)}, ${Json.toJson(taxCodeIncomeNew2)} , ${Json.toJson(taxCodeIncome3)}]
+             |
+             |}
+                    
+           """.stripMargin)
+
+      mockTaiGet(
+        s"employments-only/years/$currentTaxYear",
+        Future.successful(taiEmploymentsOnlyJson)
+      )
+      mockTaiGet(
+        s"rti-payments/years/$currentTaxYear",
+        Future.successful(anualAccountsjson)
+      )
+      mockTaiGet(s"tax-account/$currentTaxYear/income/tax-code-incomes", Future.successful(incomeTaxCodeJson))
 
       val result =
-        await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear, EmploymentIncome.toString, Live.toString))
-      result shouldBe employmentIncomeSource
-    }
-
-    "return a valid Seq[IncomeSource] when receiving a valid 200 response for an authorised user for Pensions" in {
-      val taiJson: JsValue =
-        Json.parse(s"""
-                      |{
-                      |  "data": [{
-                      |    "taxCodeIncome": ${Json.toJson(taxCodeIncome3)},
-                      |    "employment": ${Json.toJson(taiEmployment3)}
-                      |  }
-                      | ]
-                      |}
-          """.stripMargin)
-
-      mockTaiGet(s"tax-account/year/$currentTaxYear/income/${PensionIncome.toString}/status/${Live.toString}", Future.successful(taiJson))
-
-      val result =
-        await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear, PensionIncome.toString, Live.toString))
-      result shouldBe pensionIncomeSource
+        await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear))
+      result shouldBe employmentIncomeSourceNew
     }
 
     "return an empty Seq[IncomeSource] when receiving when a NotFoundException is thrown for an authorised user" in {
-      mockTaiGet(s"tax-account/year/$currentTaxYear/income/${EmploymentIncome.toString}/status/${Live.toString}",
-                 Future.failed(new NotFoundException("Not Found"))
-                )
+
+      val anualAccountsjson: JsValue =
+        Json.parse(s"""
+             |{
+             |  "data": [${Json.toJson(annualAccountsNew1)}, ${Json.toJson(annualAccountsNew2)}, ${Json.toJson(annualAccountsNew3)}]
+             |
+             |}
+
+           """.stripMargin)
+      val incomeTaxCodeJson: JsValue =
+        Json.parse(s"""
+             |{
+             |  "data": [${Json.toJson(taxCodeIncomeNew1)}, ${Json.toJson(taxCodeIncomeNew2)} ]
+             |
+             |}""".stripMargin)
+
+      mockTaiGet(
+        s"employments-only/years/$currentTaxYear",
+        Future.failed(new NotFoundException("Not Found"))
+      )
+      mockTaiGet(
+        s"rti-payments/years/$currentTaxYear",
+        Future.successful(anualAccountsjson)
+      )
+      mockTaiGet(s"tax-account/$currentTaxYear/income/tax-code-incomes", Future.successful(incomeTaxCodeJson))
 
       val result =
-        await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear, EmploymentIncome.toString, Live.toString))
+        await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear))
       result shouldBe Seq.empty
     }
 
     "throw UnauthorisedException for valid nino but unauthorized user" in {
       mockTaiGet(
-        s"tax-account/year/$currentTaxYear/income/${EmploymentIncome.toString}/status/${Live.toString}",
+        s"employments-only/years/$currentTaxYear",
         Future.failed(new UnauthorizedException("Unauthorized"))
       )
 
       intercept[UnauthorizedException] {
-        await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear, EmploymentIncome.toString, Live.toString))
+        await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear))
       }
     }
 
     "throw ForbiddenException for valid nino for authorised user but for a different nino" in {
-      mockTaiGet(s"tax-account/year/$currentTaxYear/income/${EmploymentIncome.toString}/status/${Live.toString}",
-                 Future.failed(new ForbiddenException("Forbidden"))
-                )
+      mockTaiGet(
+        s"employments-only/years/$currentTaxYear",
+        Future.failed(new ForbiddenException("Forbidden"))
+      )
 
       intercept[ForbiddenException] {
-        await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear, EmploymentIncome.toString, Live.toString))
+        await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear))
       }
     }
 
     "throw InternalServerErrorException for valid nino for authorised user when receiving a 500 response from tai" in {
       mockTaiGet(
-        s"tax-account/year/$currentTaxYear/income/${EmploymentIncome.toString}/status/${Live.toString}",
+        s"employments-only/years/$currentTaxYear",
         Future.failed(new InternalServerException("Internal Server Error"))
       )
 
       intercept[InternalServerException] {
-        await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear, EmploymentIncome.toString, Live.toString))
+        await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear))
       }
     }
   }

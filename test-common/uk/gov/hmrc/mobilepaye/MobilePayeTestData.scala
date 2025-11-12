@@ -39,6 +39,15 @@ trait MobilePayeTestData {
   val cyMinus3: Int = currentTaxYear - 3
 
   val nino: Nino = Nino("CS700100A")
+
+  def taxCodeIncomeNew1(employmentType: TaxComponentType = EmploymentIncome,
+                        status: TaxCodeIncomeStatus = Live,
+                        empId: Int = 3,
+                        name: String,
+                        amount: BigDecimal = 1000,
+                        taxCode: String
+                       ): TaxCodeIncome =
+    TaxCodeIncome(componentType = employmentType, status = status, employmentId = Some(empId), name = name, amount = amount, taxCode = taxCode)
   val taxCodeIncome: TaxCodeIncome = TaxCodeIncome(componentType = EmploymentIncome,
                                                    status        = Live,
                                                    employmentId  = Some(3),
@@ -46,7 +55,10 @@ trait MobilePayeTestData {
                                                    amount        = 1000,
                                                    taxCode       = "S1150L"
                                                   )
+  val taxCodeIncomeNew1 = taxCodeIncome.copy(name = "TESCO")
+
   val taxCodeIncome2: TaxCodeIncome = taxCodeIncome.copy(name = "The Worst Shop Ltd", employmentId = Some(4))
+  val taxCodeIncomeNew2 = taxCodeIncome2.copy(name = "ASDA")
 
   val taxCodeIncome3: TaxCodeIncome =
     taxCodeIncome.copy(componentType = PensionIncome, name = "Prestige Pensions", employmentId = Some(5))
@@ -89,6 +101,20 @@ trait MobilePayeTestData {
       employmentType    = EmploymentIncome
     )
 
+  val annualAccountsNew1 =
+    annualAccount(LocalDate.now().getYear, Available, 3)
+
+  val annualAccountsNew2 =
+    AnnualAccount(4,
+                  TaxYear(startYear = TaxYear.current.back(4).currentYear),
+                  Seq(Payment(LocalDate.now().minusDays(63), 50, 20, 10, 30, 5, 2)),
+                  Available
+                 )
+
+  val annualAccountsNew3 =
+    AnnualAccount(4, TaxYear(TaxYear.current.back(5).currentYear), Seq(Payment(LocalDate.now().minusDays(63), 50, 20, 10, 30, 5, 2)), Available)
+  val annualAccountsNew5 =
+    annualAccount(LocalDate.now().getYear, Available, 5)
   val annualAccounts2 = Seq(
     AnnualAccount(4,
                   TaxYear(startYear = TaxYear.current.back(4).currentYear),
@@ -136,6 +162,9 @@ trait MobilePayeTestData {
   val taiEmployment3: Employment =
     taiEmployment().copy(payrollNumber = None, sequenceNumber = 5)
 
+  val taiEmploymentNew3: Employment =
+    taiEmployment().copy(payrollNumber = None, sequenceNumber = 5, name = "Prestige Pensions", annualAccounts = Seq(annualAccountsNew5))
+
   val taiEmployment4: Employment =
     taiEmployment3.copy(annualAccounts = Seq(annualAccount2))
 
@@ -159,6 +188,11 @@ trait MobilePayeTestData {
 
   val employmentIncomeSource: Seq[IncomeSource] =
     Seq(IncomeSource(taxCodeIncome, taiEmployment()), IncomeSource(taxCodeIncome2, taiEmployment2))
+
+  val employmentIncomeSourceNew = Seq(IncomeSource(taxCodeIncomeNew1, taiEmployment()),
+                                      IncomeSource(taxCodeIncomeNew2, taiEmployment2),
+                                      IncomeSource(taxCodeIncome3, taiEmploymentNew3)
+                                     )
 
   val employmentIncomeSourceWithRtiUnavail: Seq[IncomeSource] =
     Seq(IncomeSource(taxCodeIncome, taiEmployment(rtiStatus = TemporarilyUnavailable)), IncomeSource(taxCodeIncome2, taiEmployment2))

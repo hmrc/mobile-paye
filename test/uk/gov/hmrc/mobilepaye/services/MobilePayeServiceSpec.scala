@@ -67,14 +67,14 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
 
   def mockMatchingTaxCodeLive(f: Future[Seq[IncomeSource]]) =
     (mockTaiConnector
-      .getMatchingTaxCodeIncomes(_: Nino, _: Int, _: String, _: String)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(*, *, *, "Live", *, *)
+      .getMatchingTaxCodeIncomes(_: Nino, _: Int)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *, *, *)
       .returning(f)
 
   def mockMatchingTaxCodeNotLive(f: Future[Seq[IncomeSource]]) =
     (mockTaiConnector
-      .getMatchingTaxCodeIncomes(_: Nino, _: Int, _: String, _: String)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(*, *, *, "NotLive", *, *)
+      .getMatchingTaxCodeIncomes(_: Nino, _: Int)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *, *, *)
       .returning(f)
 
   def mockNonTaxCodeIncomes(f: Future[NonTaxCodeIncome]) =

@@ -95,7 +95,7 @@ class TaiConnector @Inject() (http: HttpClientV2, @Named("tai") serviceUrl: Stri
       } yield IncomeSource(taxCode, employment)
     }
   }
-
+  
   def getBenefits(
     nino: Nino,
     taxYear: Int
