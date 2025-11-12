@@ -65,11 +65,17 @@ class MobilePayeService @Inject() (taiConnector: TaiConnector,
     journeyId: JourneyId
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[MobilePayeSummaryResponse] =
     (for {
-      taxCodeIncomesEmployment <- taiConnector
-                                    .getMatchingTaxCodeIncomes(nino, taxYear, EmploymentIncome.toString, Live.toString)
-      previousEmployments <- getPreviousEmployments(nino, taxYear)
-      taxCodeIncomesPension <- taiConnector
-                                 .getMatchingTaxCodeIncomes(nino, taxYear, PensionIncome.toString, Live.toString)
+      allEmploymentIncome <- taiConnector
+                               .getMatchingTaxCodeIncomes(nino, taxYear)
+      taxCodeIncomesEmployment = allEmploymentIncome.filter(incomeSource =>
+                                   incomeSource.employment.employmentStatus.equals(Live) && incomeSource.employment.employmentType == EmploymentIncome
+                                 )
+      previousEmployments = allEmploymentIncome.filter(incomeSource =>
+                              !incomeSource.employment.employmentStatus.equals(Live) && incomeSource.employment.employmentType == EmploymentIncome
+                            )
+      taxCodeIncomesPension = allEmploymentIncome.filter(incomeSource =>
+                                incomeSource.employment.employmentStatus.equals(Live) && incomeSource.employment.employmentType == PensionIncome
+                              )
       nonTaxCodeIncomes        <- taiConnector.getNonTaxCodeIncome(nino, taxYear)
       taxAccountSummary        <- taiConnector.getTaxAccountSummary(nino, taxYear)
       reconciliations          <- getTaxYearReconciliation(nino)
@@ -290,14 +296,6 @@ class MobilePayeService @Inject() (taiConnector: TaiConnector,
     } else None
   }
 
-  private def getPreviousEmployments(
-    nino: Nino,
-    taxYear: Int
-  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Seq[IncomeSource]] =
-    if (previousEmploymentsEnabled)
-      taiConnector
-        .getMatchingTaxCodeIncomes(nino, taxYear, EmploymentIncome.toString, NotLive.toString)
-    else Future successful Seq.empty
 
   private def getSimpleAssessmentData(
     journeyId: JourneyId,
