@@ -94,7 +94,7 @@ class TaiConnectorSpec extends BaseSpec {
   }
 
   "Matching Tax Code Employments - GET /tai/tax-account/year/:taxYear/income/:incomeType/status/:status" should {
-    
+
     "return a valid Seq[IncomeSource] when receiving a valid 200 response for an authorised user for Employment" in {
       val taiEmploymentsOnlyJson: JsValue =
         Json.parse(s"""
@@ -107,7 +107,7 @@ class TaiConnectorSpec extends BaseSpec {
              |}
 
            """.stripMargin)
-      val anualAccountsjson: JsValue =
+      val annualAccountsJson: JsValue =
         Json.parse(s"""
                |{
                |  "data": [${Json.toJson(annualAccountsNew1)}, ${Json.toJson(annualAccountsNew2)},
@@ -131,13 +131,13 @@ class TaiConnectorSpec extends BaseSpec {
       )
       mockTaiGet(
         s"rti-payments/years/$currentTaxYear",
-        Future.successful(anualAccountsjson)
+        Future.successful(annualAccountsJson)
       )
       mockTaiGet(s"tax-account/$currentTaxYear/income/tax-code-incomes", Future.successful(incomeTaxCodeJson))
 
       val result =
         await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear))
-      result shouldBe employmentIncomeSourceNew
+      result shouldBe employmentIncomeSourceNewUpdated
     }
 
     "return an empty Seq[IncomeSource] when receiving when a NotFoundException is thrown for an authorised user" in {

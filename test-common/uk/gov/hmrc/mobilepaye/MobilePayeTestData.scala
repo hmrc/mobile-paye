@@ -223,6 +223,7 @@ trait MobilePayeTestData {
     Seq(IncomeSource(taxCodeIncome, taiEmployment()), IncomeSource(taxCodeIncome2, taiEmployment2))
 
   val employmentIncomeSourceNew = Seq(IncomeSource(taxCodeIncomeNew1, taiEmployment()), IncomeSource(taxCodeIncomeNew2, taiEmployment2))
+  val employmentIncomeSourceNewUpdated = Seq(IncomeSource(taxCodeIncomeNew1, taiEmployment()), IncomeSource(taxCodeIncomeNew2, taiEmployment2), IncomeSource(taxCodeIncome3, taiEmploymentNew3))
   val previousEmpIncomeSource =
     Seq(IncomeSource(taxCodeIncome4, taiEmploymentNew4.copy(annualAccounts = Seq.empty)), IncomeSource(taxCodeIncome5, taiEmploymentNew5))
 
