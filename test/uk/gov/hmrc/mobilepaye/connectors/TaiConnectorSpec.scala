@@ -94,7 +94,7 @@ class TaiConnectorSpec extends BaseSpec {
   }
 
   "Matching Tax Code Employments - GET /tai/tax-account/year/:taxYear/income/:incomeType/status/:status" should {
-    // TODO include pension ,ceased as well
+    
     "return a valid Seq[IncomeSource] when receiving a valid 200 response for an authorised user for Employment" in {
       val taiEmploymentsOnlyJson: JsValue =
         Json.parse(s"""

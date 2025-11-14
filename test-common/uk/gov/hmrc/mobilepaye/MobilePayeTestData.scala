@@ -136,6 +136,39 @@ trait MobilePayeTestData {
     employmentType    = EmploymentIncome
   )
 
+  val taiEmploymentNew4: Employment = Employment(
+    name              = "HMRC",
+    employmentStatus  = Ceased,
+    payrollNumber     = Some("HM456"),
+    sequenceNumber    = 6,
+    payeNumber        = "P5HM234",
+    startDate         = Some(TaxYear.current.back(5).starts),
+    endDate           = Some(TaxYear.current.back(3).starts),
+    annualAccounts    = annualAccounts2,
+    taxDistrictNumber = "123456",
+    employmentType    = EmploymentIncome
+  )
+  val taiEmploymentNew5: Employment = Employment(
+    name              = "Sainsbury",
+    employmentStatus  = NotLive,
+    payrollNumber     = Some("SN456"),
+    sequenceNumber    = 7,
+    payeNumber        = "SNHM234",
+    startDate         = Some(TaxYear.current.back(5).starts),
+    endDate           = Some(TaxYear.current.back(3).starts),
+    annualAccounts    = Seq.empty,
+    taxDistrictNumber = "SN123456",
+    employmentType    = EmploymentIncome
+  )
+
+  val taxCodeIncome4: TaxCodeIncome =
+    TaxCodeIncome(componentType = EmploymentIncome, status = Ceased, employmentId = Some(6), name = "HMRC", amount = 1000, taxCode = "S1150L")
+
+  val taxCodeIncome5: TaxCodeIncome =
+    TaxCodeIncome(componentType = EmploymentIncome, status = NotLive, employmentId = Some(7), name = "Sainsbury", amount = 1000, taxCode = "S1150L")
+
+  val incomeSourceCeased: IncomeSource = IncomeSource(taxCodeIncome4, taiEmploymentNew4)
+
   val taiEmploymentOnly = taiEmployment2.copy(annualAccounts = Seq.empty)
 
   val annualAccountsRtiSeq = Seq(
@@ -189,10 +222,13 @@ trait MobilePayeTestData {
   val employmentIncomeSource: Seq[IncomeSource] =
     Seq(IncomeSource(taxCodeIncome, taiEmployment()), IncomeSource(taxCodeIncome2, taiEmployment2))
 
-  val employmentIncomeSourceNew = Seq(IncomeSource(taxCodeIncomeNew1, taiEmployment()),
-                                      IncomeSource(taxCodeIncomeNew2, taiEmployment2),
-                                      IncomeSource(taxCodeIncome3, taiEmploymentNew3)
-                                     )
+  val employmentIncomeSourceNew = Seq(IncomeSource(taxCodeIncomeNew1, taiEmployment()), IncomeSource(taxCodeIncomeNew2, taiEmployment2))
+  val previousEmpIncomeSource =
+    Seq(IncomeSource(taxCodeIncome4, taiEmploymentNew4.copy(annualAccounts = Seq.empty)), IncomeSource(taxCodeIncome5, taiEmploymentNew5))
+
+  val previousEmpIncomeSource4 = Seq(IncomeSource(taxCodeIncome5, taiEmploymentNew5))
+  val previousEmpIncomeSourceNew =
+    Seq(IncomeSource(taxCodeIncome4, taiEmploymentNew4.copy(annualAccounts = Seq.empty)), IncomeSource(taxCodeIncome5, taiEmploymentNew5))
 
   val employmentIncomeSourceWithRtiUnavail: Seq[IncomeSource] =
     Seq(IncomeSource(taxCodeIncome, taiEmployment(rtiStatus = TemporarilyUnavailable)), IncomeSource(taxCodeIncome2, taiEmployment2))
@@ -209,11 +245,17 @@ trait MobilePayeTestData {
   val employmentIncomeSourceUK: Seq[IncomeSource] =
     Seq(IncomeSource(taxCodeIncome.copy(taxCode = "1150L"), taiEmployment()), IncomeSource(taxCodeIncome2, taiEmployment2))
   val pensionIncomeSource: Seq[IncomeSource] = Seq(IncomeSource(taxCodeIncome3, taiEmployment3))
+  val pensionIncomeSourceNew: Seq[IncomeSource] = Seq(
+    IncomeSource(taxCodeIncome3, taiEmployment3.copy(name = "Prestige Pensions", employmentType = PensionIncome, sequenceNumber = 3))
+  )
 
   val pensionIncomeSourceNoPension: Seq[IncomeSource] = Seq.empty
 
   val employments: Seq[PayeIncome] =
     employmentIncomeSource.map(ic => PayeIncome.fromIncomeSource(ic, employment = true))
+
+  val employmentsNew = employmentIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = true))
+  val previosEmploymentNew = previousEmpIncomeSource.map(ic => PayeIncome.fromIncomeSource(ic, employment = true))
 
   val welshEmployments: Seq[PayeIncome] =
     employmentIncomeSourceWelsh.map(ic => PayeIncome.fromIncomeSource(ic, employment = true))
@@ -223,6 +265,9 @@ trait MobilePayeTestData {
 
   val pensions: Seq[PayeIncome] =
     pensionIncomeSource.map(ic => PayeIncome.fromIncomeSource(ic, employment = false))
+
+  val pensionsNew: Seq[PayeIncome] =
+    pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false))
 
   val taxAccountSummary: TaxAccountSummary = TaxAccountSummary(BigDecimal(250), BigDecimal(10000))
   val person: Person = Person(nino, "Carrot", "Smith")

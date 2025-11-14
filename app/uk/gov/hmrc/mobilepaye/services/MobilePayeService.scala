@@ -76,6 +76,7 @@ class MobilePayeService @Inject() (taiConnector: TaiConnector,
       taxCodeIncomesPension = allEmploymentIncome.filter(incomeSource =>
                                 incomeSource.employment.employmentStatus.equals(Live) && incomeSource.employment.employmentType == PensionIncome
                               )
+      _ = println(" pension is ::" + taxCodeIncomesPension)
       nonTaxCodeIncomes        <- taiConnector.getNonTaxCodeIncome(nino, taxYear)
       taxAccountSummary        <- taiConnector.getTaxAccountSummary(nino, taxYear)
       reconciliations          <- getTaxYearReconciliation(nino)
@@ -295,7 +296,6 @@ class MobilePayeService @Inject() (taiConnector: TaiConnector,
       }
     } else None
   }
-
 
   private def getSimpleAssessmentData(
     journeyId: JourneyId,
