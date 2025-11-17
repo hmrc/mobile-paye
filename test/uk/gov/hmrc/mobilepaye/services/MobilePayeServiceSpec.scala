@@ -65,16 +65,10 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
     true
   )
 
-  def mockMatchingTaxCodeLive(f: Future[Seq[IncomeSource]]) =
+  def mockMatchingTaxCodeAll(f: Future[Seq[IncomeSource]]) =
     (mockTaiConnector
-      .getMatchingTaxCodeIncomes(_: Nino, _: Int, _: String, _: String)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(*, *, *, "Live", *, *)
-      .returning(f)
-
-  def mockMatchingTaxCodeNotLive(f: Future[Seq[IncomeSource]]) =
-    (mockTaiConnector
-      .getMatchingTaxCodeIncomes(_: Nino, _: Int, _: String, _: String)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(*, *, *, "NotLive", *, *)
+      .getMatchingTaxCodeIncomes(_: Nino, _: Int)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *, *, *)
       .returning(f)
 
   def mockNonTaxCodeIncomes(f: Future[NonTaxCodeIncome]) =
@@ -127,9 +121,7 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
 
   "getMobilePayeSummaryResponse" should {
     "return full MobilePayeResponse when all data is available" in {
-      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource))
-      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
-      mockMatchingTaxCodeNotLive(Future successful employmentIncomeSource ++ employmentIncomeSource)
+      mockMatchingTaxCodeAll(Future.successful(employmentIncomeSource ++ pensionIncomeSourceNew ++ Seq(incomeSourceCeased)))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockGetBenefits(Future.successful(noBenefits))
@@ -141,15 +133,15 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
 
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
-      result shouldBe fullMobilePayeResponse.copy(previousEmployments = Some(employments ++ employments),
-                                                  simpleAssessment = Some(fullMobileSimpleAssessmentResponse)
-                                                 )
+      result shouldBe fullMobilePayeResponse.copy(
+        previousEmployments = Some(Seq(PayeIncome.fromIncomeSource(incomeSourceCeased, true))),
+        simpleAssessment    = Some(fullMobileSimpleAssessmentResponse),
+        pensions            = Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false)))
+      )
     }
 
     "return full MobilePayeResponse with isRTIDown as true when all data is available and RTi is down for oneEmployemnt " in {
-      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSourceWithRtiUnavail))
-      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
-      mockMatchingTaxCodeNotLive(Future successful employmentIncomeSource ++ employmentIncomeSource)
+      mockMatchingTaxCodeAll(Future.successful(employmentIncomeSourceWithRtiUnavail ++ pensionIncomeSourceNew ++ Seq(incomeSourceCeased)))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockGetBenefits(Future.successful(noBenefits))
@@ -161,23 +153,23 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
 
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
-      result shouldBe fullMobilePayeResponse.copy(previousEmployments = Some(employments ++ employments),
-                                                  simpleAssessment = Some(fullMobileSimpleAssessmentResponse),
-                                                  isRTIDown        = true
-                                                 )
+      result shouldBe fullMobilePayeResponse.copy(
+        previousEmployments = Some(Seq(PayeIncome.fromIncomeSource(incomeSourceCeased, true))),
+        simpleAssessment    = Some(fullMobileSimpleAssessmentResponse),
+        isRTIDown           = true,
+        pensions            = Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false)))
+      )
     }
 
     "return full MobilePayeResponse with tax comparison link during Welsh active period" in {
-      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSourceWelsh))
-      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
-      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
+      mockMatchingTaxCodeAll(Future.successful(employmentIncomeSourceWelsh ++ pensionIncomeSourceNew))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockP800Summary()
       mockCYPlusOneAccountSummary(Future successful true)
       mockGetBenefits(Future.successful(noBenefits))
       mockGetTaxCodeChangeExists(Future.successful(true))
       mockGetTaxCodeChange(Future successful taxCodeChangeDetails)
-      mockP800Summary()
 
       val service = new MobilePayeService(
         mockTaiConnector,
@@ -199,20 +191,22 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
 
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
-      result shouldBe fullMobilePayeResponseWithCY1Link.copy(taxCodeLocation = Some("Welsh"), employments = Some(welshEmployments))
+      result shouldBe fullMobilePayeResponseWithCY1Link.copy(
+        taxCodeLocation = Some("Welsh"),
+        employments     = Some(welshEmployments),
+        pensions        = Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false)))
+      )
     }
 
     "return full MobilePayeResponse with tax comparison link during UK active period" in {
-      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSourceUK))
-      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
-      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
+      mockMatchingTaxCodeAll(Future.successful(employmentIncomeSourceUK ++ pensionIncomeSourceNew))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
-      mockP800Summary()
       mockCYPlusOneAccountSummary(Future successful true)
       mockGetBenefits(Future.successful(noBenefits))
       mockGetTaxCodeChangeExists(Future.successful(true))
       mockGetTaxCodeChange(Future successful taxCodeChangeDetails)
+      mockP800Summary(None)
 
       val service = new MobilePayeService(
         mockTaiConnector,
@@ -234,13 +228,15 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
 
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
-      result shouldBe fullMobilePayeResponseWithCY1Link.copy(taxCodeLocation = Some("rUK"), employments = Some(ukEmployments))
+      result shouldBe fullMobilePayeResponseWithCY1Link.copy(
+        taxCodeLocation = Some("rUK"),
+        employments     = Some(ukEmployments),
+        pensions        = Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false)))
+      )
     }
 
     "return full MobilePayeResponse with tax comparison link during Scottish active period" in {
-      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource))
-      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
-      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
+      mockMatchingTaxCodeAll(Future.successful(employmentIncomeSource ++ pensionIncomeSourceNew))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockCYPlusOneAccountSummary(Future successful true)
@@ -269,13 +265,13 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
 
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
-      result shouldBe fullMobilePayeResponseWithCY1Link
+      result shouldBe fullMobilePayeResponseWithCY1Link.copy(pensions =
+        Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false)))
+      )
     }
 
     "return full MobilePayeResponse with no tax comparison link if not in active period" in {
-      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSourceWelsh))
-      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
-      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
+      mockMatchingTaxCodeAll(Future.successful(employmentIncomeSourceWelsh ++ pensionIncomeSourceNew))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockGetBenefits(Future.successful(noBenefits))
@@ -303,13 +299,14 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
 
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
-      result shouldBe fullMobilePayeResponse.copy(employments = Some(welshEmployments))
+      result shouldBe fullMobilePayeResponse.copy(employments = Some(welshEmployments),
+                                                  pensions =
+                                                    Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false)))
+                                                 )
     }
 
     "return MobilePayeResponse with no untaxed interest" in {
-      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource))
-      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
-      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
+      mockMatchingTaxCodeAll(Future.successful(employmentIncomeSource ++ pensionIncomeSourceNew))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithoutUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockGetBenefits(Future.successful(noBenefits))
@@ -319,13 +316,14 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
 
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
-      result shouldBe fullMobilePayeResponse.copy(otherIncomes = Some(Seq(otherIncome)))
+      result shouldBe fullMobilePayeResponse.copy(otherIncomes = Some(Seq(otherIncome)),
+                                                  pensions =
+                                                    Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false)))
+                                                 )
     }
 
     "return MobilePayeResponse with no employments when employment data is missing" in {
-      mockMatchingTaxCodeLive(Future.successful(Seq.empty[IncomeSource]))
-      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
-      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
+      mockMatchingTaxCodeAll(Future.successful(Seq.empty[IncomeSource] ++ pensionIncomeSourceNew))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockGetBenefits(Future.successful(noBenefits))
@@ -335,13 +333,14 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
 
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
-      result shouldBe fullMobilePayeResponse.copy(employments = None)
+      result shouldBe fullMobilePayeResponse.copy(employments = None,
+                                                  pensions =
+                                                    Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false)))
+                                                 )
     }
 
     "return MobilePayeResponse with no pensions when pension data is missing" in {
-      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource))
-      mockMatchingTaxCodeLive(Future.successful(Seq.empty[IncomeSource]))
-      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
+      mockMatchingTaxCodeAll(Future.successful(employmentIncomeSource))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockGetBenefits(Future.successful(noBenefits))
@@ -355,9 +354,7 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
     }
 
     "return MobilePayeResponse with no otherIncomes when OtherIncome data is missing" in {
-      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource))
-      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
-      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
+      mockMatchingTaxCodeAll(Future.successful(employmentIncomeSource ++ pensionIncomeSourceNew))
       mockNonTaxCodeIncomes(
         Future.successful(nonTaxCodeIncomeWithoutUntaxedInterest.copy(otherNonTaxCodeIncomes = Nil))
       )
@@ -369,13 +366,14 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
 
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
-      result shouldBe fullMobilePayeResponse.copy(otherIncomes = None)
+      result shouldBe fullMobilePayeResponse.copy(otherIncomes = None,
+                                                  pensions =
+                                                    Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false)))
+                                                 )
     }
 
     "return MobilePayeResponse with correct Payments" in {
-      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource2))
-      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
-      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
+      mockMatchingTaxCodeAll(Future.successful(employmentIncomeSource2 ++ pensionIncomeSourceNew))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockGetBenefits(Future.successful(noBenefits))
@@ -388,9 +386,7 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
     }
 
     "return MobilePayeResponse with no payments node for employment with no payments" in {
-      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSourceNoPayments))
-      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSourceNoPension))
-      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
+      mockMatchingTaxCodeAll(Future.successful(employmentIncomeSourceNoPayments))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockGetBenefits(Future.successful(noBenefits))
@@ -406,9 +402,7 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
     }
 
     "return full MobilePayeResponse with employment benefits data totalled correctly" in {
-      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource))
-      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
-      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
+      mockMatchingTaxCodeAll(Future.successful(employmentIncomeSource ++ pensionIncomeSourceNew))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockGetBenefits(Future.successful(allBenefits))
@@ -446,9 +440,7 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
     }
 
     "return tax code change as false if flag disabled" in {
-      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource))
-      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
-      mockMatchingTaxCodeNotLive(Future successful Seq.empty)
+      mockMatchingTaxCodeAll(Future.successful(employmentIncomeSource ++ pensionIncomeSourceNew))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockGetBenefits(Future.successful(noBenefits))
@@ -474,11 +466,14 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
 
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
-      result shouldBe fullMobilePayeResponse.copy(taxCodeChange = Some(TaxCodeChange(hasChanged = false)))
+      result shouldBe fullMobilePayeResponse.copy(taxCodeChange = Some(TaxCodeChange(hasChanged = false)),
+                                                  pensions =
+                                                    Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false)))
+                                                 )
     }
 
     "throw UnauthorizedException when receiving UnauthorizedException from taiConnector" in {
-      mockMatchingTaxCodeLive(Future.failed(new UnauthorizedException("Unauthorized")))
+      mockMatchingTaxCodeAll(Future.failed(new UnauthorizedException("Unauthorized")))
 
       intercept[UnauthorizedException] {
         await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
@@ -486,7 +481,7 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
     }
 
     "throw ForbiddenException when receiving ForbiddenException from taiConnector" in {
-      mockMatchingTaxCodeLive(Future.failed(new ForbiddenException("Forbidden")))
+      mockMatchingTaxCodeAll(Future.failed(new ForbiddenException("Forbidden")))
 
       intercept[ForbiddenException] {
         await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
@@ -494,7 +489,7 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
     }
 
     "throw InternalServerError when receiving InternalServerError from taiConnector" in {
-      mockMatchingTaxCodeLive(Future.failed(new InternalServerException("Internal Server Error")))
+      mockMatchingTaxCodeAll(Future.failed(new InternalServerException("Internal Server Error")))
 
       intercept[InternalServerException] {
         await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
@@ -502,7 +497,7 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
     }
 
     "return an empty MobilePayeResponse when an exception is thrown that contains 'no employments recorded for current tax year'" in {
-      mockMatchingTaxCodeLive(Future.failed(new Exception("no employments recorded for current tax year")))
+      mockMatchingTaxCodeAll(Future.failed(new Exception("no employments recorded for current tax year")))
 
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
@@ -510,7 +505,7 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
     }
 
     "return an empty MobilePayeResponse when an exception is thrown from NPS that contains 'cannot complete a coding calculation without a primary employment'" in {
-      mockMatchingTaxCodeLive(
+      mockMatchingTaxCodeAll(
         Future.failed(new Exception("cannot complete a coding calculation without a primary employment"))
       )
 
@@ -520,7 +515,7 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
     }
 
     "return an empty MobilePayeResponse when an exception is thrown from NPS that contains 'no employments recorded for this individual'" in {
-      mockMatchingTaxCodeLive(Future.failed(new Exception("no employments recorded for this individual")))
+      mockMatchingTaxCodeAll(Future.failed(new Exception("no employments recorded for this individual")))
 
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
@@ -528,9 +523,7 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
     }
 
     "return full MobilePayeResponse without repayment data when p800 is shuttered" in {
-      mockMatchingTaxCodeLive(Future.successful(employmentIncomeSource))
-      mockMatchingTaxCodeLive(Future.successful(pensionIncomeSource))
-      mockMatchingTaxCodeNotLive(Future successful employmentIncomeSource ++ employmentIncomeSource)
+      mockMatchingTaxCodeAll(Future.successful(employmentIncomeSource ++ pensionIncomeSourceNew ++ Seq(incomeSourceCeased)))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockGetBenefits(Future.successful(noBenefits))
@@ -542,10 +535,12 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
 
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
-      result shouldBe fullMobilePayeResponse.copy(previousEmployments = Some(employments ++ employments),
-                                                  simpleAssessment = Some(fullMobileSimpleAssessmentResponse),
-                                                  repayment        = None
-                                                 )
+      result shouldBe fullMobilePayeResponse.copy(
+        simpleAssessment    = Some(fullMobileSimpleAssessmentResponse),
+        repayment           = None,
+        previousEmployments = Some(Seq(PayeIncome.fromIncomeSource(incomeSourceCeased, true))),
+        pensions            = Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false)))
+      )
     }
 
   }

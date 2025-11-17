@@ -80,25 +80,22 @@ class TaiConnector @Inject() (http: HttpClientV2, @Named("tai") serviceUrl: Stri
 
   def getMatchingTaxCodeIncomes(
     nino: Nino,
-    taxYear: Int,
-    incomeType: String,
-    status: String
-  )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Seq[IncomeSource]] =
-    http
-      .get(url"${url(nino, s"tax-account/year/$taxYear/income/$incomeType/status/$status")}")
-      .execute[JsValue]
-      .map { json =>
-        (json \ "data").as[Seq[IncomeSource]]
-      }
-      .recover {
-        case jex: JsonParseException =>
-          throw new JsonParseException(s"GET of tax-account/year/$taxYear/income/$incomeType/status/$status Failed with ${jex.getMessage}")
-        case _: NotFoundException => Seq.empty[IncomeSource]
-        case _: JsResultException =>
-          throw NotFoundException(s"GET of tax-account/year/$taxYear/income/$incomeType/status/$status Failed with 404")
-        case e => throw e
-      }
+    taxYear: Int
+  )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Seq[IncomeSource]] = {
+    for {
+      employments <- getEmployments(nino, taxYear)
+      taxCodes    <- getTaxCodeIncomes(nino, taxYear)
+    } yield {
 
+      for {
+        employment <- employments
+        taxCode    <- taxCodes
+        // if employment.name.equalsIgnoreCase(taxCode.name) || employment.sequenceNumber == taxCode.employmentId.getOrElse(0)
+        if employment.name.equalsIgnoreCase(taxCode.name)
+      } yield IncomeSource(taxCode, employment)
+    }
+  }
+  
   def getBenefits(
     nino: Nino,
     taxYear: Int

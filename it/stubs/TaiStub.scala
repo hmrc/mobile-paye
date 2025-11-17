@@ -9,7 +9,7 @@ import uk.gov.hmrc.time.TaxYear
 
 object TaiStub {
 
-  def stubForEmploymentIncome(
+  def stubForJsonErrorEmploymentOnlyIncome(
     nino: String,
     employments: Seq[IncomeSource] = Seq.empty,
     status: TaxCodeIncomeStatus = Live,
@@ -17,29 +17,7 @@ object TaiStub {
   ): StubMapping =
     stubFor(
       get(
-        urlEqualTo(s"/tai/$nino/tax-account/year/$taxYear/income/EmploymentIncome/status/$status")
-      ).willReturn(
-        aResponse()
-          .withStatus(200)
-          .withBody(s"""
-                       |{
-                       |  "data": ${Json.toJson(
-                        employments.map(emp => emp.copy(taxCodeIncome = emp.taxCodeIncome.copy(status = status)))
-                      )}
-                       |}
-          """.stripMargin)
-      )
-    )
-
-  def stubForJsonErrorEmploymentIncome(
-    nino: String,
-    employments: Seq[IncomeSource] = Seq.empty,
-    status: TaxCodeIncomeStatus = Live,
-    taxYear: Int = TaxYear.current.currentYear
-  ): StubMapping =
-    stubFor(
-      get(
-        urlEqualTo(s"/tai/$nino/tax-account/year/$taxYear/income/EmploymentIncome/status/$status")
+        urlEqualTo(s"/tai/$nino/employments-only/years/$taxYear")
       ).willReturn(
         aResponse()
           .withStatus(0)
@@ -59,7 +37,7 @@ object TaiStub {
     verify(
       0,
       getRequestedFor(
-        urlEqualTo(s"/tai/$nino/tax-account/year/$taxYear/income/EmploymentIncome/status/Live")
+        urlEqualTo(s"/tai/$nino/employments-only/years/$taxYear")
       )
     )
 
@@ -81,13 +59,34 @@ object TaiStub {
         )
     )
 
-  def pensionsNotCalled(
+  def stubForAllEmploymentsOnly(
+    nino: String,
+    employmentOnly: Seq[Employment],
+    taxYear: Int = TaxYear.current.currentYear
+  ): StubMapping =
+    stubFor(
+      get(urlEqualTo(s"/tai/$nino/employments-only/years/$taxYear"))
+        .willReturn(
+          aResponse()
+            .withStatus(200)
+            .withBody(s"""
+                   |{
+                   |  "data": {
+                   |  "employments" : ${Json.toJson(employmentOnly)}
+                   |  }
+                   |}
+
+                 """.stripMargin)
+        )
+    )
+
+  def annualAccountsNotCalled(
     nino: String,
     taxYear: Int = TaxYear.current.currentYear
   ): Unit =
     verify(0,
            getRequestedFor(
-             urlEqualTo(s"/tai/$nino/tax-account/year/$taxYear/income/PensionIncome/status/Live")
+             urlEqualTo(s"/tai/$nino/rti-payments/years/$taxYear")
            )
           )
 
@@ -179,7 +178,7 @@ object TaiStub {
 
   def stubForTaxCodeIncomes(
     nino: String,
-    taxYear: Int,
+    taxYear: Int = TaxYear.current.currentYear,
     incomes: Seq[TaxCodeIncome]
   ): StubMapping =
     stubFor(
@@ -215,8 +214,8 @@ object TaiStub {
 
   def stubForEmploymentsOnly(
     nino: String,
-    taxYear: Int,
-    employments: Seq[Employment]
+    employments: Seq[Employment],
+    taxYear: Int = TaxYear.current.currentYear
   ): StubMapping =
     stubFor(
       get(urlEqualTo(s"/tai/$nino/employments-only/years/$taxYear"))
@@ -235,8 +234,8 @@ object TaiStub {
 
   def stubForAnnualAccounts(
     nino: String,
-    taxYear: Int,
-    annualAccounts: Seq[AnnualAccount]
+    annualAccounts: Seq[AnnualAccount],
+    taxYear: Int = TaxYear.current.currentYear
   ): StubMapping =
     stubFor(
       get(urlEqualTo(s"/tai/$nino/rti-payments/years/$taxYear"))

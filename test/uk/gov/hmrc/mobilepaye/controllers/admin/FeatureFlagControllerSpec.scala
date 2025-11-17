@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.mobilepaye.controllers.admin
 
-import org.mockito.ArgumentMatchers.{any, eq as meq}
+import org.mockito.ArgumentMatchers.{any, eq as meq, matches}
 import org.mockito.Mockito
 import org.mockito.Mockito.{reset, when}
 import org.scalatest.BeforeAndAfterEach
@@ -40,6 +40,7 @@ import uk.gov.hmrc.mobilepaye.utils.{BaseSpec, MockAsyncCacheApi}
 
 import scala.concurrent.Future
 import scala.reflect.ClassTag
+import scala.util.{Failure, Success}
 
 class FeatureFlagControllerSpec extends BaseSpec with GuiceOneAppPerSuite with BeforeAndAfterEach {
 
@@ -185,6 +186,10 @@ class FeatureFlagControllerSpec extends BaseSpec with GuiceOneAppPerSuite with B
           .withHeaders("Authorization" -> "some-token")
 
         val result = route(app, request).head
+        result onComplete {
+          case Success(v)            => println(s"Success: $v")
+          case Failure(e: Exception) => println(s"Error: ${e.getMessage}")
+        }
 
         status(result) shouldBe NO_CONTENT
       }

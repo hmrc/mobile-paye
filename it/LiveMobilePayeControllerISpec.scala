@@ -14,11 +14,11 @@ import stubs.CitizenDetailsStub.*
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, OnlinePaymentIntegration}
 import uk.gov.hmrc.mobilepaye.config.MobilePayeConfig
-import uk.gov.hmrc.mobilepaye.domain.tai.{AnnualAccount, Available, CarBenefit, Ceased, MedicalInsurance, NotLive, Payment, PensionIncome, TaxCodeChangeDetails}
+import uk.gov.hmrc.mobilepaye.domain.tai.{AnnualAccount, Available, CarBenefit, Ceased, MedicalInsurance, NotLive, Payment, PensionIncome, TaxCodeChangeDetails, TemporarilyUnavailable}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status.{Overpaid, Underpaid}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus.*
-import uk.gov.hmrc.mobilepaye.domain.{IncomeTaxYear, MobilePayeSummaryResponse, OtherBenefits, P800Cache, P800Repayment, Shuttering}
+import uk.gov.hmrc.mobilepaye.domain.{IncomeTaxYear, MobilePayeSummaryResponse, OtherBenefits, P800Cache, P800Repayment, PayeIncome, Shuttering}
 import uk.gov.hmrc.mobilepaye.repository.P800CacheMongo
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.mongo.test.PlayMongoRepositorySupport
@@ -57,6 +57,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       .thenReturn(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = false)))
     super.beforeEach()
   }
+
   implicit def ninoToString(nino: Nino): String = nino.toString()
 
   s"GET /nino/$nino/tax-year/$currentTaxYear/summary" should {
@@ -68,14 +69,18 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForShutteringDisabled()
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
-      stubForPensions(nino, pensionIncomeSource)
-      stubForEmploymentIncome(nino, employmentIncomeSource)
-      stubForEmploymentIncome(
+      stubForEmploymentsOnly(
         nino,
-        employmentIncomeSource.map(incSrc => incSrc.copy(employment = incSrc.employment.copy(employmentStatus = NotLive))) ++ employmentIncomeSource
-          .map(incSrc => incSrc.copy(employment = incSrc.employment.copy(endDate = Some(LocalDate.of(2022, 2, 1)), employmentStatus = NotLive))),
-        status = NotLive
+        employments = Seq(
+          taiEmployment().copy(annualAccounts   = Seq.empty), // live and EmploymentIncome
+          taiEmployment2.copy(annualAccounts    = Seq.empty), // live and EmploymentIncome
+          taiEmploymentNew4.copy(annualAccounts = Seq.empty), // Ceased
+          taiEmploymentNew5, // not Live
+          taiEmploymentNew3.copy(employmentType = PensionIncome) // pension and Live
+        )
       )
+      stubForAnnualAccounts(nino, Seq(annualAccountsNew1, annualAccountsNew5) ++ annualAccounts2)
+      stubForTaxCodeIncomes(nino, incomes = Seq(taxCodeIncomeNew1, taxCodeIncomeNew2, taxCodeIncome3, taxCodeIncome4, taxCodeIncome5))
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryIsFound(nino, taxAccountSummary, cyPlusone = true)
@@ -91,26 +96,10 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
         .toJson(
           fullMobilePayeResponseWithCY1Link
             .copy(
-              previousEmployments = Some(
-                employments.map(emp =>
-                  emp.copy(
-                    status                           = NotLive,
-                    incomeDetailsLink                = s"/check-income-tax/your-income-calculation-details/${emp.incomeDetailsLink.last}",
-                    yourIncomeCalculationDetailsLink = s"/check-income-tax/your-income-calculation-details/${emp.incomeDetailsLink.last}",
-                    updateIncomeLink                 = None
-                  )
-                ) ++
-                  employments.map(emp =>
-                    emp.copy(
-                      status                           = NotLive,
-                      incomeDetailsLink                = s"/check-income-tax/your-income-calculation-details/${emp.incomeDetailsLink.last}",
-                      yourIncomeCalculationDetailsLink = s"/check-income-tax/your-income-calculation-details/${emp.incomeDetailsLink.last}",
-                      updateIncomeLink                 = None,
-                      endDate                          = Some(LocalDate.of(2022, 2, 1))
-                    )
-                  )
-              ),
-              simpleAssessment = Some(fullMobileSimpleAssessmentResponse),
+              employments         = Some(employmentsNew),
+              previousEmployments = Some(previosEmploymentNew),
+              simpleAssessment    = Some(fullMobileSimpleAssessmentResponse),
+              pensions            = Some(pensionsNew),
               repayment = Some(
                 P800Repayment(
                   amount          = Some(1000),
@@ -132,14 +121,16 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForShutteringDisabled()
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
-      stubForPensions(nino, pensionIncomeSource)
-      stubForEmploymentIncome(nino, employmentIncomeSourceWithRtiUnavail)
-      stubForEmploymentIncome(
+      stubForEmploymentsOnly(
         nino,
-        employmentIncomeSource.map(incSrc => incSrc.copy(employment = incSrc.employment.copy(employmentStatus = NotLive))) ++ employmentIncomeSource
-          .map(incSrc => incSrc.copy(employment = incSrc.employment.copy(endDate = Some(LocalDate.of(2022, 2, 1)), employmentStatus = NotLive))),
-        status = NotLive
+        employments = Seq(
+          taiEmployment().copy(annualAccounts = Seq.empty), // live and EmploymentIncome
+          taiEmployment2.copy(annualAccounts  = Seq.empty), // live and EmploymentIncome
+          taiEmploymentNew5 // Not Live
+        )
       )
+      stubForAnnualAccounts(nino, Seq(annualAccountsNew1.copy(realTimeStatus = TemporarilyUnavailable)) ++ annualAccounts2)
+      stubForTaxCodeIncomes(nino, incomes = Seq(taxCodeIncomeNew1, taxCodeIncomeNew2, taxCodeIncome5))
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryIsFound(nino, taxAccountSummary, cyPlusone = true)
@@ -155,26 +146,10 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
         .toJson(
           fullMobilePayeResponseWithCY1Link
             .copy(
-              previousEmployments = Some(
-                employments.map(emp =>
-                  emp.copy(
-                    status                           = NotLive,
-                    incomeDetailsLink                = s"/check-income-tax/your-income-calculation-details/${emp.incomeDetailsLink.last}",
-                    yourIncomeCalculationDetailsLink = s"/check-income-tax/your-income-calculation-details/${emp.incomeDetailsLink.last}",
-                    updateIncomeLink                 = None
-                  )
-                ) ++
-                  employments.map(emp =>
-                    emp.copy(
-                      status                           = NotLive,
-                      incomeDetailsLink                = s"/check-income-tax/your-income-calculation-details/${emp.incomeDetailsLink.last}",
-                      yourIncomeCalculationDetailsLink = s"/check-income-tax/your-income-calculation-details/${emp.incomeDetailsLink.last}",
-                      updateIncomeLink                 = None,
-                      endDate                          = Some(LocalDate.of(2022, 2, 1))
-                    )
-                  )
-              ),
-              simpleAssessment = Some(fullMobileSimpleAssessmentResponse),
+              employments         = Some(employmentsNew),
+              previousEmployments = Some(previousEmpIncomeSource4.map(ic => PayeIncome.fromIncomeSource(ic, employment = true))),
+              pensions            = None,
+              simpleAssessment    = Some(fullMobileSimpleAssessmentResponse),
               repayment = Some(
                 P800Repayment(
                   amount          = Some(1000),
@@ -194,9 +169,16 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForShutteringDisabled()
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
-      stubForPensions(nino, pensionIncomeSource)
-      stubForEmploymentIncome(nino, employmentIncomeSource)
-      stubForEmploymentIncome(nino, status = NotLive)
+      stubForEmploymentsOnly(
+        nino,
+        employments = Seq(
+          taiEmployment().copy(annualAccounts   = Seq.empty), // live and EmploymentIncome
+          taiEmployment2.copy(annualAccounts    = Seq.empty), // live and EmploymentIncome
+          taiEmploymentNew3.copy(employmentType = PensionIncome) // pension and Live
+        )
+      )
+      stubForAnnualAccounts(nino, Seq(annualAccountsNew1, annualAccountsNew5) ++ annualAccounts2)
+      stubForTaxCodeIncomes(nino, incomes = Seq(taxCodeIncomeNew1, taxCodeIncomeNew2, taxCodeIncome3))
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryNotFound(nino, cyPlusone = true)
@@ -207,17 +189,24 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
       response.status        shouldBe 200
-      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse)
+      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse.copy(employments = Some(employmentsNew), pensions = Some(pensionsNew)))
 
     }
 
     "return OK and a valid MobilePayeResponse json without untaxed income but other income" in {
       stubForShutteringDisabled()
       grantAccess(nino)
-      stubForPensions(nino, pensionIncomeSource)
-      stubForEmploymentIncome(nino, employmentIncomeSource)
-      stubForEmploymentIncome(nino, status = NotLive)
       personalDetailsAreFound(nino, person)
+      stubForEmploymentsOnly(
+        nino,
+        employments = Seq(
+          taiEmployment().copy(annualAccounts   = Seq.empty), // live and EmploymentIncome
+          taiEmployment2.copy(annualAccounts    = Seq.empty), // live and EmploymentIncome
+          taiEmploymentNew3.copy(employmentType = PensionIncome) // pension and Live
+        )
+      )
+      stubForAnnualAccounts(nino, Seq(annualAccountsNew1, annualAccountsNew5) ++ annualAccounts2)
+      stubForTaxCodeIncomes(nino, incomes = Seq(taxCodeIncomeNew1, taxCodeIncomeNew2, taxCodeIncome3))
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryNotFound(nino, cyPlusone = true)
@@ -231,7 +220,9 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       response.body[JsValue] shouldBe Json.toJson(
         fullMobilePayeResponse
           .copy(
-            otherIncomes = Some(Seq(otherIncome))
+            otherIncomes = Some(Seq(otherIncome)),
+            employments  = Some(employmentsNew),
+            pensions     = Some(pensionsNew)
           )
       )
     }
@@ -240,9 +231,14 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForShutteringDisabled()
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
-      stubForPensions(nino, pensionIncomeSource)
-      stubForEmploymentIncome(nino, Seq.empty)
-      stubForEmploymentIncome(nino, status = NotLive)
+      stubForEmploymentsOnly(
+        nino,
+        employments = Seq(
+          taiEmploymentNew3.copy(employmentType = PensionIncome) // pension and Live
+        )
+      )
+      stubForAnnualAccounts(nino, Seq(annualAccountsNew5))
+      stubForTaxCodeIncomes(nino, incomes = Seq(taxCodeIncome3))
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryNotFound(nino, cyPlusone = true)
@@ -253,16 +249,22 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
       response.status        shouldBe 200
-      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse.copy(employments = None))
+      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse.copy(employments = None, pensions = Some(pensionsNew)))
     }
 
     "return OK and a valid MobilePayeResponse json without pensions" in {
       stubForShutteringDisabled()
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
-      stubForPensions(nino, Seq.empty)
-      stubForEmploymentIncome(nino, employmentIncomeSource)
-      stubForEmploymentIncome(nino, status = NotLive)
+      stubForEmploymentsOnly(
+        nino,
+        employments = Seq(
+          taiEmployment().copy(annualAccounts = Seq.empty), // live and EmploymentIncome
+          taiEmployment2.copy(annualAccounts  = Seq.empty) // live and EmploymentIncome
+        )
+      )
+      stubForAnnualAccounts(nino, Seq(annualAccountsNew1) ++ annualAccounts2)
+      stubForTaxCodeIncomes(nino, incomes = Seq(taxCodeIncomeNew1, taxCodeIncomeNew2))
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryNotFound(nino, cyPlusone = true)
@@ -273,16 +275,23 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
       response.status        shouldBe 200
-      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse.copy(pensions = None))
+      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse.copy(pensions = None, employments = Some(employmentsNew)))
     }
 
     "return OK and a valid MobilePayeResponse json without otherIncomes" in {
       stubForShutteringDisabled()
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
-      stubForEmploymentIncome(nino, employmentIncomeSource)
-      stubForEmploymentIncome(nino, status = NotLive)
-      stubForPensions(nino, pensionIncomeSource)
+      stubForEmploymentsOnly(
+        nino,
+        employments = Seq(
+          taiEmployment().copy(annualAccounts   = Seq.empty), // live and EmploymentIncome
+          taiEmployment2.copy(annualAccounts    = Seq.empty), // live and EmploymentIncome
+          taiEmploymentNew3.copy(employmentType = PensionIncome) // pension and Live
+        )
+      )
+      stubForAnnualAccounts(nino, Seq(annualAccountsNew1, annualAccountsNew5) ++ annualAccounts2)
+      stubForTaxCodeIncomes(nino, incomes = Seq(taxCodeIncomeNew1, taxCodeIncomeNew2, taxCodeIncome3))
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome.copy(otherNonTaxCodeIncomes = Nil))
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryNotFound(nino, cyPlusone = true)
@@ -292,8 +301,10 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
-      response.status        shouldBe 200
-      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse.copy(otherIncomes = None))
+      response.status shouldBe 200
+      response.body[JsValue] shouldBe Json.toJson(
+        fullMobilePayeResponse.copy(otherIncomes = None, employments = Some(employmentsNew), pensions = Some(pensionsNew))
+      )
     }
 
     "return GONE when person is deceased" in {
@@ -305,7 +316,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       response.status shouldBe 410
 
       employmentsNotCalled(nino)
-      pensionsNotCalled(nino)
+      annualAccountsNotCalled(nino)
       nonTaxCodeIncomeNotCalled(nino)
       taxAccountSummaryNotCalled(nino)
       taxCalcCalled(nino, currentTaxYear)
@@ -320,7 +331,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       response.status shouldBe 423
 
       employmentsNotCalled(nino)
-      pensionsNotCalled(nino)
+      annualAccountsNotCalled(nino)
       nonTaxCodeIncomeNotCalled(nino)
       taxAccountSummaryNotCalled(nino)
       taxCalcCalled(nino, currentTaxYear)
@@ -358,18 +369,6 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       response.status shouldBe 400
     }
 
-    "return 404 when json validation happen for get matching tax codes" in {
-      when(mockFeatureFlagService.get(any()))
-        .thenReturn(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = true)))
-
-      stubForShutteringDisabled()
-      grantAccess(nino)
-      personalDetailsAreFound(nino, person)
-      stubForJsonErrorEmploymentIncome(nino)
-
-      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
-      response.status shouldBe 404
-    }
   }
 
   s"GET /nino/$nino/tax-year/current/summary" should {
@@ -381,9 +380,16 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryNotFound(nino, cyPlusone = true)
-      stubForPensions(nino, pensionIncomeSource)
-      stubForEmploymentIncome(nino, employmentIncomeSource)
-      stubForEmploymentIncome(nino, status = NotLive)
+      stubForEmploymentsOnly(
+        nino,
+        employments = Seq(
+          taiEmployment().copy(annualAccounts   = Seq.empty), // live and EmploymentIncome
+          taiEmployment2.copy(annualAccounts    = Seq.empty), // live and EmploymentIncome
+          taiEmploymentNew3.copy(employmentType = PensionIncome) // pension and Live
+        )
+      )
+      stubForAnnualAccounts(nino, Seq(annualAccountsNew1, annualAccountsNew5) ++ annualAccounts2)
+      stubForTaxCodeIncomes(nino, incomes = Seq(taxCodeIncomeNew1, taxCodeIncomeNew2, taxCodeIncome3))
       taxCalcNoResponse(nino, currentTaxYear)
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
@@ -391,7 +397,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status        shouldBe 200
-      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse)
+      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse.copy(employments = Some(employmentsNew), pensions = Some(pensionsNew)))
     }
 
     "return OK and a full valid MobilePayeResponse json with Rti down" in {
@@ -401,26 +407,43 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryNotFound(nino, cyPlusone = true)
-      stubForPensions(nino, pensionIncomeSource)
-      stubForEmploymentIncome(nino, employmentIncomeSource)
-      stubForEmploymentIncome(nino, status = NotLive)
+      stubForEmploymentsOnly(
+        nino,
+        employments = Seq(
+          taiEmployment().copy(annualAccounts   = Seq.empty), // live and EmploymentIncome
+          taiEmployment2.copy(annualAccounts    = Seq.empty), // live and EmploymentIncome
+          taiEmploymentNew3.copy(employmentType = PensionIncome) // Not Live
+        )
+      )
+      stubForAnnualAccounts(nino, Seq(annualAccountsNew1.copy(realTimeStatus = TemporarilyUnavailable), annualAccountsNew5) ++ annualAccounts2)
+      stubForTaxCodeIncomes(nino, incomes = Seq(taxCodeIncomeNew1, taxCodeIncomeNew2, taxCodeIncome3))
+
       taxCalcNoResponse(nino, currentTaxYear)
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
       stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status        shouldBe 200
-      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse)
+      response.status shouldBe 200
+      response.body[JsValue] shouldBe Json.toJson(
+        fullMobilePayeResponse.copy(employments = Some(employmentsNew), pensions = Some(pensionsNew), isRTIDown = true)
+      )
     }
 
     "return OK and a valid MobilePayeResponse json without untaxed income but other income" in {
       stubForShutteringDisabled()
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
-      stubForPensions(nino, pensionIncomeSource)
-      stubForEmploymentIncome(nino, employmentIncomeSource)
-      stubForEmploymentIncome(nino, status = NotLive)
+      stubForEmploymentsOnly(
+        nino,
+        employments = Seq(
+          taiEmployment().copy(annualAccounts   = Seq.empty), // live and EmploymentIncome
+          taiEmployment2.copy(annualAccounts    = Seq.empty), // live and EmploymentIncome
+          taiEmploymentNew3.copy(employmentType = PensionIncome) // pension and Live
+        )
+      )
+      stubForAnnualAccounts(nino, Seq(annualAccountsNew1, annualAccountsNew5) ++ annualAccounts2)
+      stubForTaxCodeIncomes(nino, incomes = Seq(taxCodeIncomeNew1, taxCodeIncomeNew2, taxCodeIncome3))
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryNotFound(nino, cyPlusone = true)
@@ -433,7 +456,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       response.status shouldBe 200
       response.body[JsValue] shouldBe Json.toJson(
         fullMobilePayeResponse
-          .copy(otherIncomes = Some(Seq(otherIncome)))
+          .copy(otherIncomes = Some(Seq(otherIncome)), employments = Some(employmentsNew), pensions = Some(pensionsNew))
       )
     }
 
@@ -441,9 +464,14 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForShutteringDisabled()
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
-      stubForPensions(nino, pensionIncomeSource)
-      stubForEmploymentIncome(nino, Seq.empty)
-      stubForEmploymentIncome(nino, status = NotLive)
+      stubForEmploymentsOnly(
+        nino,
+        employments = Seq(
+          taiEmploymentNew3.copy(employmentType = PensionIncome) // pension and Live
+        )
+      )
+      stubForAnnualAccounts(nino, Seq(annualAccountsNew5))
+      stubForTaxCodeIncomes(nino, incomes = Seq(taxCodeIncome3))
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryNotFound(nino, cyPlusone = true)
@@ -454,16 +482,22 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status        shouldBe 200
-      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse.copy(employments = None))
+      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse.copy(employments = None, pensions = Some(pensionsNew)))
     }
 
     "return OK and a valid MobilePayeResponse json without pensions" in {
       stubForShutteringDisabled()
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
-      stubForPensions(nino, Seq.empty)
-      stubForEmploymentIncome(nino, employmentIncomeSource)
-      stubForEmploymentIncome(nino, status = NotLive)
+      stubForEmploymentsOnly(
+        nino,
+        employments = Seq(
+          taiEmployment().copy(annualAccounts = Seq.empty), // live and EmploymentIncome
+          taiEmployment2.copy(annualAccounts  = Seq.empty) // live and EmploymentIncome
+        )
+      )
+      stubForAnnualAccounts(nino, Seq(annualAccountsNew1) ++ annualAccounts2)
+      stubForTaxCodeIncomes(nino, incomes = Seq(taxCodeIncomeNew1, taxCodeIncomeNew2))
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryNotFound(nino, cyPlusone = true)
@@ -474,16 +508,23 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status        shouldBe 200
-      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse.copy(pensions = None))
+      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse.copy(pensions = None, employments = Some(employmentsNew)))
     }
 
     "return OK and a valid MobilePayeResponse json without otherIncomes" in {
       stubForShutteringDisabled()
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
-      stubForPensions(nino, pensionIncomeSource)
-      stubForEmploymentIncome(nino, employmentIncomeSource)
-      stubForEmploymentIncome(nino, status = NotLive)
+      stubForEmploymentsOnly(
+        nino,
+        employments = Seq(
+          taiEmployment().copy(annualAccounts   = Seq.empty), // live and EmploymentIncome
+          taiEmployment2.copy(annualAccounts    = Seq.empty), // live and EmploymentIncome
+          taiEmploymentNew3.copy(employmentType = PensionIncome) // pension and Live
+        )
+      )
+      stubForAnnualAccounts(nino, Seq(annualAccountsNew1, annualAccountsNew5) ++ annualAccounts2)
+      stubForTaxCodeIncomes(nino, incomes = Seq(taxCodeIncomeNew1, taxCodeIncomeNew2, taxCodeIncome3))
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome.copy(otherNonTaxCodeIncomes = Nil))
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryNotFound(nino, cyPlusone = true)
@@ -493,8 +534,10 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status        shouldBe 200
-      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse.copy(otherIncomes = None))
+      response.status shouldBe 200
+      response.body[JsValue] shouldBe Json.toJson(
+        fullMobilePayeResponse.copy(otherIncomes = None, employments = Some(employmentsNew), pensions = Some(pensionsNew))
+      )
     }
 
     "return OK with P800Repayments for Overpaid tax and accepted RepaymentStatus" in {
@@ -509,9 +552,16 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
 
           grantAccess(nino)
           personalDetailsAreFound(nino, person)
-          stubForPensions(nino, pensionIncomeSource)
-          stubForEmploymentIncome(nino, employmentIncomeSource)
-          stubForEmploymentIncome(nino, status = NotLive)
+          stubForEmploymentsOnly(
+            nino,
+            employments = Seq(
+              taiEmployment().copy(annualAccounts   = Seq.empty), // live and EmploymentIncome
+              taiEmployment2.copy(annualAccounts    = Seq.empty), // live and EmploymentIncome
+              taiEmploymentNew3.copy(employmentType = PensionIncome) // pension and Live
+            )
+          )
+          stubForAnnualAccounts(nino, Seq(annualAccountsNew1, annualAccountsNew5) ++ annualAccounts2)
+          stubForTaxCodeIncomes(nino, incomes = Seq(taxCodeIncomeNew1, taxCodeIncomeNew2, taxCodeIncome3))
           nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
           taxAccountSummaryIsFound(nino, taxAccountSummary)
           taxAccountSummaryNotFound(nino, cyPlusone = true)
@@ -528,7 +578,9 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
           response.body[JsValue] shouldBe Json.toJson(
             fullMobilePayeResponse
               .copy(
-                repayment = expectedRepayment
+                repayment   = expectedRepayment,
+                employments = Some(employmentsNew),
+                pensions    = Some(pensionsNew)
               )
           )
         }
@@ -543,9 +595,16 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
 
           grantAccess(nino)
           personalDetailsAreFound(nino, person)
-          stubForPensions(nino, pensionIncomeSource)
-          stubForEmploymentIncome(nino, employmentIncomeSource)
-          stubForEmploymentIncome(nino, status = NotLive)
+          stubForEmploymentsOnly(
+            nino,
+            employments = Seq(
+              taiEmployment().copy(annualAccounts   = Seq.empty), // live and EmploymentIncome
+              taiEmployment2.copy(annualAccounts    = Seq.empty), // live and EmploymentIncome
+              taiEmploymentNew3.copy(employmentType = PensionIncome) // pension and Live
+            )
+          )
+          stubForAnnualAccounts(nino, Seq(annualAccountsNew1, annualAccountsNew5) ++ annualAccounts2)
+          stubForTaxCodeIncomes(nino, incomes = Seq(taxCodeIncomeNew1, taxCodeIncomeNew2, taxCodeIncome3))
           nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
           taxAccountSummaryIsFound(nino, taxAccountSummary)
           taxAccountSummaryNotFound(nino, cyPlusone = true)
@@ -556,7 +615,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
 
           val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
           response.status        shouldBe 200
-          response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse)
+          response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse.copy(employments = Some(employmentsNew), pensions = Some(pensionsNew)))
         }
     }
 
@@ -569,9 +628,16 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
 
           grantAccess(nino)
           personalDetailsAreFound(nino, person)
-          stubForPensions(nino, pensionIncomeSource)
-          stubForEmploymentIncome(nino, employmentIncomeSource)
-          stubForEmploymentIncome(nino, status = NotLive)
+          stubForEmploymentsOnly(
+            nino,
+            employments = Seq(
+              taiEmployment().copy(annualAccounts   = Seq.empty), // live and EmploymentIncome
+              taiEmployment2.copy(annualAccounts    = Seq.empty), // live and EmploymentIncome
+              taiEmploymentNew3.copy(employmentType = PensionIncome) // pension and Live
+            )
+          )
+          stubForAnnualAccounts(nino, Seq(annualAccountsNew1, annualAccountsNew5) ++ annualAccounts2)
+          stubForTaxCodeIncomes(nino, incomes = Seq(taxCodeIncomeNew1, taxCodeIncomeNew2, taxCodeIncome3))
           nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
           taxAccountSummaryIsFound(nino, taxAccountSummary)
           taxAccountSummaryNotFound(nino, cyPlusone = true)
@@ -582,7 +648,8 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
 
           val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
           response.status        shouldBe 200
-          response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse)
+          response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse.copy(employments = Some(employmentsNew), pensions = Some(pensionsNew)))
+
         }
     }
 
@@ -596,9 +663,16 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
-      stubForPensions(nino, pensionIncomeSource)
-      stubForEmploymentIncome(nino, employmentIncomeSource)
-      stubForEmploymentIncome(nino, status = NotLive)
+      stubForEmploymentsOnly(
+        nino,
+        employments = Seq(
+          taiEmployment().copy(annualAccounts   = Seq.empty), // live and EmploymentIncome
+          taiEmployment2.copy(annualAccounts    = Seq.empty), // live and EmploymentIncome
+          taiEmploymentNew3.copy(employmentType = PensionIncome) // pension and Live
+        )
+      )
+      stubForAnnualAccounts(nino, Seq(annualAccountsNew1, annualAccountsNew5) ++ annualAccounts2)
+      stubForTaxCodeIncomes(nino, incomes = Seq(taxCodeIncomeNew1, taxCodeIncomeNew2, taxCodeIncome3))
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryNotFound(nino, cyPlusone = true)
       taxCalcWithInstantDate(nino, currentTaxYear, time)
@@ -637,7 +711,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       response.status shouldBe 423
 
       employmentsNotCalled(nino)
-      pensionsNotCalled(nino)
+      annualAccountsNotCalled(nino)
       nonTaxCodeIncomeNotCalled(nino)
       taxAccountSummaryNotCalled(nino)
       taxCalcCalled(nino, currentTaxYear)
@@ -650,9 +724,16 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryNotFound(nino, cyPlusone = true)
-      stubForPensions(nino, pensionIncomeSource)
-      stubForEmploymentIncome(nino, employmentIncomeSource)
-      stubForEmploymentIncome(nino, status = NotLive)
+      stubForEmploymentsOnly(
+        nino,
+        employments = Seq(
+          taiEmployment().copy(annualAccounts   = Seq.empty), // live and EmploymentIncome
+          taiEmployment2.copy(annualAccounts    = Seq.empty), // live and EmploymentIncome
+          taiEmploymentNew3.copy(employmentType = PensionIncome) // pension and Live
+        )
+      )
+      stubForAnnualAccounts(nino, Seq(annualAccountsNew1, annualAccountsNew5) ++ annualAccounts2)
+      stubForTaxCodeIncomes(nino, incomes = Seq(taxCodeIncomeNew1, taxCodeIncomeNew2, taxCodeIncome3))
       taxCalcNoResponse(nino, currentTaxYear)
       stubForBenefits(nino, allBenefits)
       stubForTaxCodeChangeExists(nino)
@@ -696,9 +777,16 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryNotFound(nino, cyPlusone = true)
-      stubForPensions(nino, pensionIncomeSource)
-      stubForEmploymentIncome(nino, employmentIncomeSource)
-      stubForEmploymentIncome(nino, status = NotLive)
+      stubForEmploymentsOnly(
+        nino,
+        employments = Seq(
+          taiEmployment().copy(annualAccounts   = Seq.empty), // live and EmploymentIncome
+          taiEmployment2.copy(annualAccounts    = Seq.empty), // live and EmploymentIncome
+          taiEmploymentNew3.copy(employmentType = PensionIncome) // pension and Live
+        )
+      )
+      stubForAnnualAccounts(nino, Seq(annualAccountsNew1, annualAccountsNew5) ++ annualAccounts2)
+      stubForTaxCodeIncomes(nino, incomes = Seq(taxCodeIncomeNew1, taxCodeIncomeNew2, taxCodeIncome3))
       taxCalcNoResponse(nino, currentTaxYear)
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
@@ -719,9 +807,16 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryNotFound(nino, cyPlusone = true)
-      stubForPensions(nino, pensionIncomeSource)
-      stubForEmploymentIncome(nino, employmentIncomeSource)
-      stubForEmploymentIncome(nino, status = NotLive)
+      stubForEmploymentsOnly(
+        nino,
+        employments = Seq(
+          taiEmployment().copy(annualAccounts   = Seq.empty), // live and EmploymentIncome
+          taiEmployment2.copy(annualAccounts    = Seq.empty), // live and EmploymentIncome
+          taiEmploymentNew3.copy(employmentType = PensionIncome) // pension and Live
+        )
+      )
+      stubForAnnualAccounts(nino, Seq(annualAccountsNew1, annualAccountsNew5) ++ annualAccounts2)
+      stubForTaxCodeIncomes(nino, incomes = Seq(taxCodeIncomeNew1, taxCodeIncomeNew2, taxCodeIncome3))
       taxCalcWithNoP800(nino, currentTaxYear, LocalDate.now)
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
@@ -729,7 +824,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status        shouldBe 200
-      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse)
+      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse.copy(employments = Some(employmentsNew), pensions = Some(pensionsNew)))
     }
 
     "return OK and no P800 when datePaid is more than 6 weeks ago" in {
@@ -739,9 +834,16 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryNotFound(nino, cyPlusone = true)
-      stubForPensions(nino, pensionIncomeSource)
-      stubForEmploymentIncome(nino, employmentIncomeSource)
-      stubForEmploymentIncome(nino, status = NotLive)
+      stubForEmploymentsOnly(
+        nino,
+        employments = Seq(
+          taiEmployment().copy(annualAccounts   = Seq.empty), // live and EmploymentIncome
+          taiEmployment2.copy(annualAccounts    = Seq.empty), // live and EmploymentIncome
+          taiEmploymentNew3.copy(employmentType = PensionIncome) // pension and Live
+        )
+      )
+      stubForAnnualAccounts(nino, Seq(annualAccountsNew1, annualAccountsNew5) ++ annualAccounts2)
+      stubForTaxCodeIncomes(nino, incomes = Seq(taxCodeIncomeNew1, taxCodeIncomeNew2, taxCodeIncome3))
       taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now.minusWeeks(6).minusDays(1))
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
@@ -749,7 +851,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status        shouldBe 200
-      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse)
+      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse.copy(employments = Some(employmentsNew), pensions = Some(pensionsNew)))
     }
 
     "return OK and a P800 when datePaid is less than 6 weeks ago" in {
@@ -762,9 +864,16 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryNotFound(nino, cyPlusone = true)
-      stubForPensions(nino, pensionIncomeSource)
-      stubForEmploymentIncome(nino, employmentIncomeSource)
-      stubForEmploymentIncome(nino, status = NotLive)
+      stubForEmploymentsOnly(
+        nino,
+        employments = Seq(
+          taiEmployment().copy(annualAccounts   = Seq.empty), // live and EmploymentIncome
+          taiEmployment2.copy(annualAccounts    = Seq.empty), // live and EmploymentIncome
+          taiEmploymentNew3.copy(employmentType = PensionIncome) // pension and Live
+        )
+      )
+      stubForAnnualAccounts(nino, Seq(annualAccountsNew1, annualAccountsNew5) ++ annualAccounts2)
+      stubForTaxCodeIncomes(nino, incomes = Seq(taxCodeIncomeNew1, taxCodeIncomeNew2, taxCodeIncome3))
       taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now.minusWeeks(6))
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
@@ -789,9 +898,16 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryNotFound(nino, cyPlusone = true)
-      stubForPensions(nino, pensionIncomeSource)
-      stubForEmploymentIncome(nino, employmentIncomeSource)
-      stubForEmploymentIncome(nino, status = NotLive)
+      stubForEmploymentsOnly(
+        nino,
+        employments = Seq(
+          taiEmployment().copy(annualAccounts   = Seq.empty), // live and EmploymentIncome
+          taiEmployment2.copy(annualAccounts    = Seq.empty), // live and EmploymentIncome
+          taiEmploymentNew3.copy(employmentType = PensionIncome) // pension and Live
+        )
+      )
+      stubForAnnualAccounts(nino, Seq(annualAccountsNew1, annualAccountsNew5) ++ annualAccounts2)
+      stubForTaxCodeIncomes(nino, incomes = Seq(taxCodeIncomeNew1, taxCodeIncomeNew2, taxCodeIncome3))
       taxCalcWithNoDate(nino, currentTaxYear)
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
@@ -813,9 +929,16 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryNotFound(nino, cyPlusone = true)
-      stubForPensions(nino, pensionIncomeSource)
-      stubForEmploymentIncome(nino, employmentIncomeSource)
-      stubForEmploymentIncome(nino, status                                    = NotLive)
+      stubForEmploymentsOnly(
+        nino,
+        employments = Seq(
+          taiEmployment().copy(annualAccounts   = Seq.empty), // live and EmploymentIncome
+          taiEmployment2.copy(annualAccounts    = Seq.empty), // live and EmploymentIncome
+          taiEmploymentNew3.copy(employmentType = PensionIncome) // pension and Live
+        )
+      )
+      stubForAnnualAccounts(nino, Seq(annualAccountsNew1, annualAccountsNew5) ++ annualAccounts2)
+      stubForTaxCodeIncomes(nino, incomes                                     = Seq(taxCodeIncomeNew1, taxCodeIncomeNew2, taxCodeIncome3))
       taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoType = "underpaid")
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
@@ -823,7 +946,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status        shouldBe 200
-      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse)
+      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse.copy(employments = Some(employmentsNew), pensions = Some(pensionsNew)))
     }
 
     "return OK and no P800 when type is not overpaid" in {
@@ -833,9 +956,16 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryNotFound(nino, cyPlusone = true)
-      stubForPensions(nino, pensionIncomeSource)
-      stubForEmploymentIncome(nino, employmentIncomeSource)
-      stubForEmploymentIncome(nino, status                                    = NotLive)
+      stubForEmploymentsOnly(
+        nino,
+        employments = Seq(
+          taiEmployment().copy(annualAccounts   = Seq.empty), // live and EmploymentIncome
+          taiEmployment2.copy(annualAccounts    = Seq.empty), // live and EmploymentIncome
+          taiEmploymentNew3.copy(employmentType = PensionIncome) // pension and Live
+        )
+      )
+      stubForAnnualAccounts(nino, Seq(annualAccountsNew1, annualAccountsNew5) ++ annualAccounts2)
+      stubForTaxCodeIncomes(nino, incomes                                     = Seq(taxCodeIncomeNew1, taxCodeIncomeNew2, taxCodeIncome3))
       taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoType = "balanced")
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
@@ -843,7 +973,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status        shouldBe 200
-      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse)
+      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse.copy(employments = Some(employmentsNew), pensions = Some(pensionsNew)))
     }
 
     "return OK and no P800 when status is sa_user" in {
@@ -853,9 +983,15 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryNotFound(nino, cyPlusone = true)
-      stubForPensions(nino, pensionIncomeSource)
-      stubForEmploymentIncome(nino, employmentIncomeSource)
-      stubForEmploymentIncome(nino, status                                      = NotLive)
+      stubForEmploymentsOnly(
+        nino,
+        employments = Seq(
+          taiEmployment().copy(annualAccounts = Seq.empty), // live and EmploymentIncome
+          taiEmployment2.copy(annualAccounts  = Seq.empty) // live and EmploymentIncome
+        )
+      )
+      stubForAnnualAccounts(nino, Seq(annualAccountsNew1) ++ annualAccounts2)
+      stubForTaxCodeIncomes(nino, incomes                                       = Seq(taxCodeIncomeNew1, taxCodeIncomeNew2))
       taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoStatus = "sa_user")
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
@@ -863,7 +999,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status        shouldBe 200
-      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse)
+      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse.copy(pensions = None, employments = Some(employmentsNew)))
     }
 
     "return OK and no P800 when status is unable_to_claim" in {
@@ -873,9 +1009,15 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryNotFound(nino, cyPlusone = true)
-      stubForPensions(nino, pensionIncomeSource)
-      stubForEmploymentIncome(nino, employmentIncomeSource)
-      stubForEmploymentIncome(nino, status                                      = NotLive)
+      stubForEmploymentsOnly(
+        nino,
+        employments = Seq(
+          taiEmployment().copy(annualAccounts = Seq.empty), // live and EmploymentIncome
+          taiEmployment2.copy(annualAccounts  = Seq.empty) // live and EmploymentIncome
+        )
+      )
+      stubForAnnualAccounts(nino, Seq(annualAccountsNew1) ++ annualAccounts2)
+      stubForTaxCodeIncomes(nino, incomes                                       = Seq(taxCodeIncomeNew1, taxCodeIncomeNew2))
       taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoStatus = "unable_to_claim")
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
@@ -883,7 +1025,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status        shouldBe 200
-      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse)
+      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse.copy(pensions = None, employments = Some(employmentsNew)))
     }
 
     "return OK and a P800 with link when status is refund" in {
@@ -896,9 +1038,16 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryNotFound(nino, cyPlusone = true)
-      stubForPensions(nino, pensionIncomeSource)
-      stubForEmploymentIncome(nino, employmentIncomeSource)
-      stubForEmploymentIncome(nino, status                                      = NotLive)
+      stubForEmploymentsOnly(
+        nino,
+        employments = Seq(
+          taiEmployment().copy(annualAccounts   = Seq.empty), // live and EmploymentIncome
+          taiEmployment2.copy(annualAccounts    = Seq.empty), // live and EmploymentIncome
+          taiEmploymentNew3.copy(employmentType = PensionIncome) // pension and Live
+        )
+      )
+      stubForAnnualAccounts(nino, Seq(annualAccountsNew1, annualAccountsNew5) ++ annualAccounts2)
+      stubForTaxCodeIncomes(nino, incomes                                       = Seq(taxCodeIncomeNew1, taxCodeIncomeNew2, taxCodeIncome3))
       taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now, yearTwoStatus = "refund")
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
@@ -924,9 +1073,16 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryNotFound(nino, cyPlusone = true)
-      stubForPensions(nino, pensionIncomeSource)
-      stubForEmploymentIncome(nino, employmentIncomeSource)
-      stubForEmploymentIncome(nino, status = NotLive)
+      stubForEmploymentsOnly(
+        nino,
+        employments = Seq(
+          taiEmployment().copy(annualAccounts   = Seq.empty), // live and EmploymentIncome
+          taiEmployment2.copy(annualAccounts    = Seq.empty), // live and EmploymentIncome
+          taiEmploymentNew3.copy(employmentType = PensionIncome) // pension and Live
+        )
+      )
+      stubForAnnualAccounts(nino, Seq(annualAccountsNew1, annualAccountsNew5) ++ annualAccounts2)
+      stubForTaxCodeIncomes(nino, incomes = Seq(taxCodeIncomeNew1, taxCodeIncomeNew2, taxCodeIncome3))
       taxCalcWithNoDate(nino, currentTaxYear)
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
@@ -953,9 +1109,16 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     "Assume unshuttered and return OK and a full valid MobilePayeResponse json if error returned from mobile-shuttering service" in {
       grantAccess(nino)
       personalDetailsAreFound(nino, person)
-      stubForPensions(nino, pensionIncomeSource)
-      stubForEmploymentIncome(nino, employmentIncomeSource)
-      stubForEmploymentIncome(nino, status = NotLive)
+      stubForEmploymentsOnly(
+        nino,
+        employments = Seq(
+          taiEmployment().copy(annualAccounts   = Seq.empty), // live and EmploymentIncome
+          taiEmployment2.copy(annualAccounts    = Seq.empty), // live and EmploymentIncome
+          taiEmploymentNew3.copy(employmentType = PensionIncome) // pension and Live
+        )
+      )
+      stubForAnnualAccounts(nino, Seq(annualAccountsNew1, annualAccountsNew5) ++ annualAccounts2)
+      stubForTaxCodeIncomes(nino, incomes = Seq(taxCodeIncomeNew1, taxCodeIncomeNew2, taxCodeIncome3))
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryNotFound(nino, cyPlusone = true)
@@ -967,7 +1130,7 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
 
       response.status        shouldBe 200
-      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse)
+      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse.copy(employments = Some(employmentsNew), pensions = Some(pensionsNew)))
 
     }
   }
@@ -983,27 +1146,27 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeIncomes(nino, TaxYear.current.startYear - 2, Seq(taxCodeIncome, taxCodeIncome2))
       stubForTaxCodeIncomes(nino, TaxYear.current.startYear - 3, Seq(taxCodeIncome2, taxCodeIncome3))
       stubForTaxCodeIncomes(nino, TaxYear.current.startYear - 4, Seq(taxCodeIncome2, taxCodeIncome3))
-      stubForEmploymentsOnly(nino, TaxYear.current.startYear, Seq(taiEmployment(TaxYear.current.startYear).copy(annualAccounts = Seq.empty)))
-      stubForAnnualAccounts(nino, TaxYear.current.startYear, Seq(annualAccount(TaxYear.current.startYear, Available, 3)))
+      stubForEmploymentsOnly(nino, Seq(taiEmployment(TaxYear.current.startYear).copy(annualAccounts = Seq.empty)), TaxYear.current.startYear)
+      stubForAnnualAccounts(nino, Seq(annualAccount(TaxYear.current.startYear, Available, 3)), TaxYear.current.startYear)
 
-      stubForEmploymentsOnly(nino, TaxYear.current.startYear - 1, Seq(taiEmployment(TaxYear.current.startYear - 1).copy(annualAccounts = Seq.empty)))
-      stubForAnnualAccounts(nino, TaxYear.current.startYear - 1, Seq(annualAccount(TaxYear.current.startYear - 1, Available, 3)))
+      stubForEmploymentsOnly(nino, Seq(taiEmployment(TaxYear.current.startYear - 1).copy(annualAccounts = Seq.empty)), TaxYear.current.startYear - 1)
+      stubForAnnualAccounts(nino, Seq(annualAccount(TaxYear.current.startYear - 1, Available, 3)), TaxYear.current.startYear - 1)
 
       stubForEmploymentsOnly(
         nino,
-        TaxYear.current.startYear - 2,
-        Seq(taiEmployment(TaxYear.current.startYear - 2).copy(annualAccounts = Seq.empty), taiEmployment2.copy(annualAccounts = Seq.empty))
+        Seq(taiEmployment(TaxYear.current.startYear - 2).copy(annualAccounts = Seq.empty), taiEmployment2.copy(annualAccounts = Seq.empty)),
+        TaxYear.current.startYear - 2
       )
-      stubForAnnualAccounts(nino, TaxYear.current.startYear - 2, Seq(annualAccount(TaxYear.current.startYear - 2, Available, 3)) ++ annualAccounts2)
+      stubForAnnualAccounts(nino, Seq(annualAccount(TaxYear.current.startYear - 2, Available, 3)) ++ annualAccounts2, TaxYear.current.startYear - 2)
 
-      stubForEmploymentsOnly(nino, TaxYear.current.startYear - 3, Seq(taiEmployment2.copy(annualAccounts = Seq.empty)))
-      stubForAnnualAccounts(nino, TaxYear.current.startYear - 3, annualAccounts2)
+      stubForEmploymentsOnly(nino, Seq(taiEmployment2.copy(annualAccounts = Seq.empty)), TaxYear.current.startYear - 3)
+      stubForAnnualAccounts(nino, annualAccounts2, TaxYear.current.startYear - 3)
 
       stubForEmploymentsOnly(nino,
-                             TaxYear.current.startYear - 4,
-                             Seq(taiEmployment2.copy(annualAccounts = Seq.empty), taiEmployment3.copy(annualAccounts = Seq.empty))
+                             Seq(taiEmployment2.copy(annualAccounts = Seq.empty), taiEmployment3.copy(annualAccounts = Seq.empty)),
+                             TaxYear.current.startYear - 4
                             )
-      stubForAnnualAccounts(nino, TaxYear.current.startYear - 4, annualAccounts2 ++ Seq(annualAccount(LocalDate.now().getYear, Available, 5)))
+      stubForAnnualAccounts(nino, annualAccounts2 ++ Seq(annualAccount(LocalDate.now().getYear, Available, 5)), TaxYear.current.startYear - 4)
 
       val response = await(getRequestWithAuthHeaders(incomeTaxHistoryUrl))
       response.status                                   shouldBe 200
@@ -1017,10 +1180,10 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForErrorJsonTaxCodeIncomes(nino, TaxYear.current.startYear, Seq.empty)
       stubForTaxCodeIncomes(nino, TaxYear.current.startYear - 1, Seq(taxCodeIncome, taxCodeIncome2))
       stubForEmploymentsOnlyJsonError(nino, TaxYear.current.startYear, Seq.empty)
-      stubForAnnualAccounts(nino, TaxYear.current.startYear, Seq.empty)
+      stubForAnnualAccounts(nino, Seq.empty, TaxYear.current.startYear)
 
-      stubForEmploymentsOnly(nino, TaxYear.current.startYear - 1, Seq(taiEmployment(TaxYear.current.startYear - 1)))
-      stubForAnnualAccounts(nino, TaxYear.current.startYear - 1, Seq(annualAccount(TaxYear.current.startYear - 1, Available, 3)))
+      stubForEmploymentsOnly(nino, Seq(taiEmployment(TaxYear.current.startYear - 1)), TaxYear.current.startYear - 1)
+      stubForAnnualAccounts(nino, Seq(annualAccount(TaxYear.current.startYear - 1, Available, 3)), TaxYear.current.startYear - 1)
 
       val response = await(getRequestWithAuthHeaders(incomeTaxHistoryUrl))
       response.status                                   shouldBe 200
@@ -1047,8 +1210,8 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     "return OK and a full valid MobilePayeResponse json" in {
       stubForShutteringDisabled()
       grantAccess(nino)
-      stubForEmploymentsOnly(nino, previousTaxYear, employmentOnlyData)
-      stubForAnnualAccounts(nino, previousTaxYear, annualAccountsIt)
+      stubForEmploymentsOnly(nino, employmentOnlyData, previousTaxYear)
+      stubForAnnualAccounts(nino, annualAccountsIt, previousTaxYear)
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome, previousTaxYear)
       taxAccountSummaryIsFound(nino, taxAccountSummary, taxYear = previousTaxYear)
       stubForBenefits(nino, noBenefits, previousTaxYear)
@@ -1065,10 +1228,10 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForShutteringDisabled()
       grantAccess(nino)
       stubForEmploymentsOnly(nino,
-                             previousTaxYear,
-                             Seq(taiEmployment3.copy(name = "ALDI", employmentType = PensionIncome, annualAccounts = Seq.empty))
+                             Seq(taiEmployment3.copy(name = "ALDI", employmentType = PensionIncome, annualAccounts = Seq.empty)),
+                             previousTaxYear
                             )
-      stubForAnnualAccounts(nino, previousTaxYear, Seq(annualAccount(LocalDate.now().getYear, Available, seqNo = 5)))
+      stubForAnnualAccounts(nino, Seq(annualAccount(LocalDate.now().getYear, Available, seqNo = 5)), previousTaxYear)
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome, previousTaxYear)
       taxAccountSummaryIsFound(nino, taxAccountSummary, taxYear = previousTaxYear)
       stubForBenefits(nino, noBenefits, previousTaxYear)
@@ -1086,15 +1249,14 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       grantAccess(nino)
       stubForEmploymentsOnly(
         nino,
-        previousTaxYear,
         Seq(
           taiEmployment(TaxYear.current.previous.startYear).copy(annualAccounts = Seq.empty),
           taiEmployment2.copy(employmentStatus                                  = Ceased, annualAccounts = Seq.empty)
-        )
+        ),
+        previousTaxYear
       )
       stubForAnnualAccounts(
         nino,
-        previousTaxYear,
         Seq(
           annualAccount(TaxYear.current.previous.startYear, Available, seqNo = 3),
           AnnualAccount(4,
@@ -1103,7 +1265,8 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
                         Available
                        ),
           AnnualAccount(4, TaxYear(TaxYear.current.back(5).currentYear), Seq(Payment(LocalDate.now().minusDays(63), 50, 20, 10, 30, 5, 2)), Available)
-        )
+        ),
+        previousTaxYear
       )
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome, previousTaxYear)
       taxAccountSummaryIsFound(nino, taxAccountSummary, taxYear = previousTaxYear)
@@ -1120,8 +1283,8 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
     "return OK and a valid MobilePayeResponse json without otherIncomes" in {
       stubForShutteringDisabled()
       grantAccess(nino)
-      stubForEmploymentsOnly(nino, previousTaxYear, employmentOnlyData)
-      stubForAnnualAccounts(nino, previousTaxYear, annualAccountsIt)
+      stubForEmploymentsOnly(nino, employmentOnlyData, previousTaxYear)
+      stubForAnnualAccounts(nino, annualAccountsIt, previousTaxYear)
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome.copy(otherNonTaxCodeIncomes = Nil), previousTaxYear)
       taxAccountSummaryIsFound(nino, taxAccountSummary, taxYear = previousTaxYear)
       stubForBenefits(nino, noBenefits, previousTaxYear)
@@ -1234,7 +1397,7 @@ class LiveMobilePayeControllerShutteredISpec extends BaseISpec {
 
       nonTaxCodeIncomeNotCalled(nino)
       employmentsNotCalled(nino)
-      pensionsNotCalled(nino)
+      annualAccountsNotCalled(nino)
       taxAccountSummaryNotCalled(nino)
       taxCalcCalled(nino, currentTaxYear)
     }
@@ -1271,9 +1434,16 @@ class LiveMobilePayeControllerp800CacheEnabledISpec extends BaseISpec with Injec
       nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
       taxAccountSummaryIsFound(nino, taxAccountSummary)
       taxAccountSummaryNotFound(nino, cyPlusone = true)
-      stubForPensions(nino, pensionIncomeSource)
-      stubForEmploymentIncome(nino, employmentIncomeSource)
-      stubForEmploymentIncome(nino, status                                                  = NotLive)
+      stubForEmploymentsOnly(
+        nino,
+        employments = Seq(
+          taiEmployment().copy(annualAccounts   = Seq.empty), // live and EmploymentIncome
+          taiEmployment2.copy(annualAccounts    = Seq.empty), // live and EmploymentIncome
+          taiEmploymentNew3.copy(employmentType = PensionIncome) // pension and Live
+        )
+      )
+      stubForAnnualAccounts(nino, Seq(annualAccountsNew1, annualAccountsNew5) ++ annualAccounts2)
+      stubForTaxCodeIncomes(nino, incomes = Seq(taxCodeIncomeNew1, taxCodeIncomeNew2, taxCodeIncome3))
       taxCalcWithInstantDate(nino, currentTaxYear, LocalDate.now.minusYears(1), yearTwoType = "balanced")
       stubForBenefits(nino, noBenefits)
       stubForTaxCodeChangeExists(nino)
@@ -1285,8 +1455,10 @@ class LiveMobilePayeControllerp800CacheEnabledISpec extends BaseISpec with Injec
         )
       )
 
-      response.status                       shouldBe 200
-      Json.parse(response.body).as[JsValue] shouldBe Json.toJson(fullMobilePayeResponse)
+      response.status shouldBe 200
+      Json.parse(response.body).as[JsValue] shouldBe Json.toJson(
+        fullMobilePayeResponse.copy(employments = Some(employmentsNew), pensions = Some(pensionsNew))
+      )
 
       Thread.sleep(2000)
 
@@ -1295,8 +1467,10 @@ class LiveMobilePayeControllerp800CacheEnabledISpec extends BaseISpec with Injec
           s"/nino/$nino/tax-year/current/summary?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0"
         )
       )
-      response2.status                      shouldBe 200
-      Json.parse(response.body).as[JsValue] shouldBe Json.toJson(fullMobilePayeResponse)
+      response2.status shouldBe 200
+      Json.parse(response.body).as[JsValue] shouldBe Json.toJson(
+        fullMobilePayeResponse.copy(employments = Some(employmentsNew), pensions = Some(pensionsNew))
+      )
 
       dropCollection()
     }
