@@ -86,16 +86,13 @@ class TaiConnector @Inject() (http: HttpClientV2, @Named("tai") serviceUrl: Stri
       employments <- getEmployments(nino, taxYear)
       taxCodes    <- getTaxCodeIncomes(nino, taxYear)
     } yield {
-
-      for {
-        employment <- employments
-        taxCode    <- taxCodes
-        // if employment.name.equalsIgnoreCase(taxCode.name) || employment.sequenceNumber == taxCode.employmentId.getOrElse(0)
-        if employment.name.equalsIgnoreCase(taxCode.name)
-      } yield IncomeSource(taxCode, employment)
+      employments.map { employment =>
+        val taxCode: Seq[TaxCodeIncome] = taxCodes.filter(_.name.equalsIgnoreCase(employment.name))
+        IncomeSource(taxCode.headOption, employment)
+      }
     }
   }
-  
+
   def getBenefits(
     nino: Nino,
     taxYear: Int

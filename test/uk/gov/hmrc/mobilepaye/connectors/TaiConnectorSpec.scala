@@ -93,7 +93,7 @@ class TaiConnectorSpec extends BaseSpec {
     }
   }
 
-  "Matching Tax Code Employments - GET /tai/tax-account/year/:taxYear/income/:incomeType/status/:status" should {
+  "Matching Tax Code Employments - GEt employmenmts only, accounts and tax code income" should {
 
     "return a valid Seq[IncomeSource] when receiving a valid 200 response for an authorised user for Employment" in {
       val taiEmploymentsOnlyJson: JsValue =
@@ -138,6 +138,49 @@ class TaiConnectorSpec extends BaseSpec {
       val result =
         await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear))
       result shouldBe employmentIncomeSourceNewUpdated
+    }
+
+    "return a valid Seq[IncomeSource] with employments even if no tax code income is present  when receiving a valid 200 response for an authorised user for Employment" in {
+      val taiEmploymentsOnlyJson: JsValue =
+        Json.parse(s"""
+             |{
+             |  "data": {
+             |  "employments" : [${Json.toJson(taiEmployment().copy(annualAccounts = Seq.empty))}, ${Json.toJson(
+                       taiEmployment2.copy(annualAccounts = Seq.empty)
+                     )}, ${Json.toJson(taiEmploymentNew3.copy(annualAccounts = Seq.empty))}]
+             |}
+             |}
+
+
+
+           """.stripMargin)
+      val annualAccountsJson: JsValue =
+        Json.parse(s"""{
+                      |  "data": [${Json.toJson(annualAccountsNew1)}, ${Json.toJson(annualAccountsNew2)},
+                      |  ${Json.toJson(annualAccountsNew3)}, ${Json
+                       .toJson(annualAccountsNew5)}]
+                      |}
+                      |""".stripMargin)
+
+      val incomeTaxCodeJson: JsValue =
+        Json.parse(s"""| { "data": []
+                      |}
+
+                    """.stripMargin)
+
+      mockTaiGet(
+        s"employments-only/years/$currentTaxYear",
+        Future.successful(taiEmploymentsOnlyJson)
+      )
+      mockTaiGet(
+        s"rti-payments/years/$currentTaxYear",
+        Future.successful(annualAccountsJson)
+      )
+      mockTaiGet(s"tax-account/$currentTaxYear/income/tax-code-incomes", Future.successful(incomeTaxCodeJson))
+
+      val result =
+        await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear))
+      result shouldBe employmentIncomeSourceNewUpdatedNoTaxCode
     }
 
     "return an empty Seq[IncomeSource] when receiving when a NotFoundException is thrown for an authorised user" in {

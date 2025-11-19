@@ -140,6 +140,27 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
       )
     }
 
+    "return full MobilePayeResponse when tax codes are not available for 1 employment" in {
+      mockMatchingTaxCodeAll(Future.successful(employmentIncomeSourceNoTax ++ pensionIncomeSourceNew ++ Seq(incomeSourceCeased)))
+      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
+      mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockGetBenefits(Future.successful(noBenefits))
+      mockGetTaxCodeChangeExists(Future.successful(true))
+      mockGetTaxCodeChange(Future successful taxCodeChangeDetails)
+      mockGetSimpleAssessmentLiabilities(Future successful Some(fullMobileSimpleAssessmentResponse))
+      mockShutteringResponse(Shuttering.shutteringDisabled)
+      mockP800Summary(Some(taxCalcTaxYearReconciliationResponse))
+
+      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
+
+      result shouldBe fullMobilePayeResponse.copy(
+        previousEmployments = Some(Seq(PayeIncome.fromIncomeSource(incomeSourceCeased, true))),
+        simpleAssessment    = Some(fullMobileSimpleAssessmentResponse),
+        pensions            = Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false))),
+        employments         = Some(employmentIncomeSourceNoTax.map(ic => PayeIncome.fromIncomeSource(ic, employment = true)))
+      )
+    }
+
     "return full MobilePayeResponse with isRTIDown as true when all data is available and RTi is down for oneEmployemnt " in {
       mockMatchingTaxCodeAll(Future.successful(employmentIncomeSourceWithRtiUnavail ++ pensionIncomeSourceNew ++ Seq(incomeSourceCeased)))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))

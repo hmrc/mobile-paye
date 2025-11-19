@@ -167,7 +167,7 @@ trait MobilePayeTestData {
   val taxCodeIncome5: TaxCodeIncome =
     TaxCodeIncome(componentType = EmploymentIncome, status = NotLive, employmentId = Some(7), name = "Sainsbury", amount = 1000, taxCode = "S1150L")
 
-  val incomeSourceCeased: IncomeSource = IncomeSource(taxCodeIncome4, taiEmploymentNew4)
+  val incomeSourceCeased: IncomeSource = IncomeSource(Some(taxCodeIncome4), taiEmploymentNew4)
 
   val taiEmploymentOnly = taiEmployment2.copy(annualAccounts = Seq.empty)
 
@@ -220,34 +220,47 @@ trait MobilePayeTestData {
   val allBenefits: Benefits = Benefits(companyCarBenefits, otherBenefits)
 
   val employmentIncomeSource: Seq[IncomeSource] =
-    Seq(IncomeSource(taxCodeIncome, taiEmployment()), IncomeSource(taxCodeIncome2, taiEmployment2))
+    Seq(IncomeSource(Some(taxCodeIncome), taiEmployment()), IncomeSource(Some(taxCodeIncome2), taiEmployment2))
 
-  val employmentIncomeSourceNew = Seq(IncomeSource(taxCodeIncomeNew1, taiEmployment()), IncomeSource(taxCodeIncomeNew2, taiEmployment2))
-  val employmentIncomeSourceNewUpdated = Seq(IncomeSource(taxCodeIncomeNew1, taiEmployment()), IncomeSource(taxCodeIncomeNew2, taiEmployment2), IncomeSource(taxCodeIncome3, taiEmploymentNew3))
+  val employmentIncomeSourceNoTax: Seq[IncomeSource] =
+    Seq(IncomeSource(None, taiEmployment()), IncomeSource(Some(taxCodeIncome2), taiEmployment2))
+
+  val employmentIncomeSourceNew = Seq(IncomeSource(Some(taxCodeIncomeNew1), taiEmployment()), IncomeSource(Some(taxCodeIncomeNew2), taiEmployment2))
+  val employmentIncomeSourceNewUpdated = Seq(
+    IncomeSource(Some(taxCodeIncomeNew1), taiEmployment()),
+    IncomeSource(Some(taxCodeIncomeNew2), taiEmployment2),
+    IncomeSource(Some(taxCodeIncome3), taiEmploymentNew3)
+  )
+
+  val employmentIncomeSourceNewUpdatedNoTaxCode = Seq(
+    IncomeSource(None, taiEmployment()),
+    IncomeSource(None, taiEmployment2),
+    IncomeSource(None, taiEmploymentNew3)
+  )
   val previousEmpIncomeSource =
-    Seq(IncomeSource(taxCodeIncome4, taiEmploymentNew4.copy(annualAccounts = Seq.empty)), IncomeSource(taxCodeIncome5, taiEmploymentNew5))
+    Seq(IncomeSource(Some(taxCodeIncome4), taiEmploymentNew4.copy(annualAccounts = Seq.empty)), IncomeSource(Some(taxCodeIncome5), taiEmploymentNew5))
 
-  val previousEmpIncomeSource4 = Seq(IncomeSource(taxCodeIncome5, taiEmploymentNew5))
+  val previousEmpIncomeSource4 = Seq(IncomeSource(Some(taxCodeIncome5), taiEmploymentNew5))
   val previousEmpIncomeSourceNew =
-    Seq(IncomeSource(taxCodeIncome4, taiEmploymentNew4.copy(annualAccounts = Seq.empty)), IncomeSource(taxCodeIncome5, taiEmploymentNew5))
+    Seq(IncomeSource(Some(taxCodeIncome4), taiEmploymentNew4.copy(annualAccounts = Seq.empty)), IncomeSource(Some(taxCodeIncome5), taiEmploymentNew5))
 
   val employmentIncomeSourceWithRtiUnavail: Seq[IncomeSource] =
-    Seq(IncomeSource(taxCodeIncome, taiEmployment(rtiStatus = TemporarilyUnavailable)), IncomeSource(taxCodeIncome2, taiEmployment2))
+    Seq(IncomeSource(Some(taxCodeIncome), taiEmployment(rtiStatus = TemporarilyUnavailable)), IncomeSource(Some(taxCodeIncome2), taiEmployment2))
 
   val employmentIncomeSource2: Seq[IncomeSource] =
-    Seq(IncomeSource(taxCodeIncome, taiEmployment4))
+    Seq(IncomeSource(Some(taxCodeIncome), taiEmployment4))
 
   val employmentIncomeSourceNoPayments: Seq[IncomeSource] =
-    Seq(IncomeSource(taxCodeIncome, taiEmployment5))
+    Seq(IncomeSource(Some(taxCodeIncome), taiEmployment5))
 
   val employmentIncomeSourceWelsh: Seq[IncomeSource] =
-    Seq(IncomeSource(taxCodeIncome.copy(taxCode = "C1150L"), taiEmployment()), IncomeSource(taxCodeIncome2, taiEmployment2))
+    Seq(IncomeSource(Some(taxCodeIncome.copy(taxCode = "C1150L")), taiEmployment()), IncomeSource(Some(taxCodeIncome2), taiEmployment2))
 
   val employmentIncomeSourceUK: Seq[IncomeSource] =
-    Seq(IncomeSource(taxCodeIncome.copy(taxCode = "1150L"), taiEmployment()), IncomeSource(taxCodeIncome2, taiEmployment2))
-  val pensionIncomeSource: Seq[IncomeSource] = Seq(IncomeSource(taxCodeIncome3, taiEmployment3))
+    Seq(IncomeSource(Some(taxCodeIncome.copy(taxCode = "1150L")), taiEmployment()), IncomeSource(Some(taxCodeIncome2), taiEmployment2))
+  val pensionIncomeSource: Seq[IncomeSource] = Seq(IncomeSource(Some(taxCodeIncome3), taiEmployment3))
   val pensionIncomeSourceNew: Seq[IncomeSource] = Seq(
-    IncomeSource(taxCodeIncome3, taiEmployment3.copy(name = "Prestige Pensions", employmentType = PensionIncome, sequenceNumber = 3))
+    IncomeSource(Some(taxCodeIncome3), taiEmployment3.copy(name = "Prestige Pensions", employmentType = PensionIncome, sequenceNumber = 3))
   )
 
   val pensionIncomeSourceNoPension: Seq[IncomeSource] = Seq.empty
