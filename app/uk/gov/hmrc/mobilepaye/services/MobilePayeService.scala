@@ -177,7 +177,7 @@ class MobilePayeService @Inject() (taiConnector: TaiConnector,
     val known = ex.getMessage.toLowerCase().contains(NpsTaxAccountNoEmploymentsCurrentYear) ||
       ex.getMessage.toLowerCase().contains(NpsTaxAccountDataAbsentMsg) ||
       ex.getMessage.toLowerCase().contains(NpsTaxAccountNoEmploymentsRecorded)
-    logger.info(s"[HMA-2505] - Tai exception (known: $known) for ${nino.nino} - " + ex.getMessage.toLowerCase())
+    logger.info(s"[HMA-2505] - Tai exception (known: $known) for ${nino.nino} - " + ex)
     known
   }
 
@@ -288,7 +288,7 @@ class MobilePayeService @Inject() (taiConnector: TaiConnector,
   private def getTaxCodeLocation(employments: Seq[IncomeSource]): Option[String] = {
     val latestEmployment: Option[IncomeSource] = employments.headOption
     if (latestEmployment.isDefined) {
-      latestEmployment.map(emp => emp.taxCodeIncome.taxCode.charAt(0).toLower) match {
+      latestEmployment.flatMap(emp => emp.taxCodeIncome.map(_.taxCode.charAt(0).toLower)) match {
         case Some('c') => Some("Welsh")
         case Some('s') => Some("Scottish")
         case _         => Some("rUK")

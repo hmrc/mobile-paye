@@ -44,13 +44,13 @@ object PayeIncome {
     employment: Boolean,
     employmentBenefits: Option[Benefits] = None
   ): PayeIncome = {
-    val empId = incomeSource.taxCodeIncome.employmentId.getOrElse(throw new Exception("Employment ID not found"))
+    val empId: Int = incomeSource.taxCodeIncome.flatMap(_.employmentId).getOrElse(incomeSource.employment.sequenceNumber)
     PayeIncome(
-      name                             = incomeSource.taxCodeIncome.name,
+      name                             = incomeSource.taxCodeIncome.map(_.name).getOrElse(incomeSource.employment.name),
       status                           = incomeSource.employment.employmentStatus,
       payrollNumber                    = incomeSource.employment.payrollNumber,
-      taxCode                          = incomeSource.taxCodeIncome.taxCode,
-      amount                           = incomeSource.taxCodeIncome.amount.setScale(0, RoundingMode.FLOOR),
+      taxCode                          = incomeSource.taxCodeIncome.map(_.taxCode).getOrElse(""),
+      amount                           = incomeSource.taxCodeIncome.map(_.amount.setScale(0, RoundingMode.FLOOR)).getOrElse(0L),
       payeNumber                       = s"${incomeSource.employment.taxDistrictNumber}/${incomeSource.employment.payeNumber}",
       incomeDetailsLink                = getIncomeDetailsLink(incomeSource),
       updateEmployerLink               = Some(s"/check-income-tax/update-remove-employment/decision/$empId"),
@@ -65,7 +65,7 @@ object PayeIncome {
         if (incomeSource.employment.annualAccounts.headOption.map(_.payments).getOrElse(Seq.empty).isEmpty) None
         else incomeSource.employment.annualAccounts.headOption.map(_.payments.sorted(Payment.dateOrdering.reverse)),
       employmentBenefits = employmentBenefits.flatMap(
-        buildEmploymentBenefits(_, incomeSource.taxCodeIncome.employmentId)
+        buildEmploymentBenefits(_, incomeSource.taxCodeIncome.map(_.employmentId).getOrElse(Some(incomeSource.employment.sequenceNumber)))
       ),
       endDate = incomeSource.employment.endDate
     )
@@ -122,12 +122,14 @@ object PayeIncome {
 
   }
 
-  private def getIncomeDetailsLink(incomeSource: IncomeSource): String =
-    if (incomeSource.taxCodeIncome.status.equals(Live))
-      s"/check-income-tax/income-details/${incomeSource.taxCodeIncome.employmentId.getOrElse(throw new Exception("Employment ID not found"))}"
-    else
-      s"/check-income-tax/your-income-calculation-details/${incomeSource.taxCodeIncome.employmentId
-          .getOrElse(throw new Exception("Employment ID not found"))}"
+  private def getIncomeDetailsLink(incomeSource: IncomeSource): String = {
+    incomeSource.taxCodeIncome.map(_.status) match {
+      case Some(status) if status.equals(Live) =>
+        s"/check-income-tax/income-details/${incomeSource.taxCodeIncome.flatMap(_.employmentId).getOrElse(incomeSource.employment.sequenceNumber)}"
+      case _ =>
+        s"/check-income-tax/your-income-calculation-details/${incomeSource.taxCodeIncome.flatMap(_.employmentId).getOrElse(incomeSource.employment.sequenceNumber)}"
+    }
+  }
 
   implicit val format: OFormat[PayeIncome] = Json.format[PayeIncome]
 }
