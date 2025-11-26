@@ -8,7 +8,7 @@ object AppDependencies {
   private val playHmrcVersion = "8.3.0"
   private val domainVersion = "13.0.0"
   private val taxYearVersion = "6.0.0"
-  private val scalaMockVersion = "7.4.0"
+  private val scalaMockVersion = "7.5.2"
   private val hmrcMongoVersion = "2.10.0"
   private val refinedVersion = "0.11.3"
   private val authClientVersion = "4.1.0"
@@ -23,7 +23,7 @@ object AppDependencies {
     "uk.gov.hmrc.mongo" %% "hmrc-mongo-play-30"           % hmrcMongoVersion,
     "eu.timepit"        %% "refined"                      % refinedVersion,
     "uk.gov.hmrc"       %% "internal-auth-client-play-30" % "4.0.0",
-    "com.typesafe.play" %% "play-json"                    % "2.10.7",
+    "com.typesafe.play" %% "play-json"                    % "2.10.8",
     caffeine
   )
 

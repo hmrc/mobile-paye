@@ -146,7 +146,7 @@ class TaiConnector @Inject() (http: HttpClientV2, @Named("tai") serviceUrl: Stri
       }
       .recover {
         case jex: JsonParseException => throw new JsonParseException(s"GET of employments-only/years/$taxYear Failed with ${jex.getMessage}")
-        case _: NotFoundException    => Seq.empty[Employment]
+        case nex: NotFoundException  => throw new NotFoundException(s"GET of employments-only/years/$taxYear Failed with ${nex.getMessage}")
         case _: JsResultException    => Seq.empty[Employment]
         case e                       => throw e
       }

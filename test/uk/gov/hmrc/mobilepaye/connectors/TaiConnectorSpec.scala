@@ -23,6 +23,7 @@ import uk.gov.hmrc.http.*
 import uk.gov.hmrc.mobilepaye.domain.tai.{AnnualAccount, Available, Employment, EmploymentIncome, Live, PensionIncome, TaxCodeChangeDetails, TaxCodeRecord}
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
+import uk.gov.hmrc.mobilepaye.domain.IncomeSource
 
 import java.net.URL
 import java.time.LocalDate
@@ -149,11 +150,7 @@ class TaiConnectorSpec extends BaseSpec {
                        taiEmployment2.copy(annualAccounts = Seq.empty)
                      )}, ${Json.toJson(taiEmploymentNew3.copy(annualAccounts = Seq.empty))}]
              |}
-             |}
-
-
-
-           """.stripMargin)
+             |}""".stripMargin)
       val annualAccountsJson: JsValue =
         Json.parse(s"""{
                       |  "data": [${Json.toJson(annualAccountsNew1)}, ${Json.toJson(annualAccountsNew2)},
@@ -183,36 +180,161 @@ class TaiConnectorSpec extends BaseSpec {
       result shouldBe employmentIncomeSourceNewUpdatedNoTaxCode
     }
 
-    "return an empty Seq[IncomeSource] when receiving when a NotFoundException is thrown for an authorised user" in {
-
-      val anualAccountsjson: JsValue =
+    "return a valid Seq[IncomeSource] with employments even if taxcode api fails with 404 not found" in {
+      val taiEmploymentsOnlyJson: JsValue =
         Json.parse(s"""
              |{
-             |  "data": [${Json.toJson(annualAccountsNew1)}, ${Json.toJson(annualAccountsNew2)}, ${Json.toJson(annualAccountsNew3)}]
-             |
+             |  "data": {
+             |  "employments" : [${Json.toJson(taiEmployment().copy(annualAccounts = Seq.empty))}, ${Json.toJson(
+                       taiEmployment2.copy(annualAccounts = Seq.empty)
+                     )}, ${Json.toJson(taiEmploymentNew3.copy(annualAccounts = Seq.empty))}]
              |}
-
-           """.stripMargin)
-      val incomeTaxCodeJson: JsValue =
-        Json.parse(s"""
-             |{
-             |  "data": [${Json.toJson(taxCodeIncomeNew1)}, ${Json.toJson(taxCodeIncomeNew2)} ]
-             |
              |}""".stripMargin)
+
+      val annualAccountsJson: JsValue =
+        Json.parse(s"""{
+             |  "data": [${Json.toJson(annualAccountsNew1)}, ${Json.toJson(annualAccountsNew2)},
+             |  ${Json.toJson(annualAccountsNew3)}, ${Json
+                       .toJson(annualAccountsNew5)}]
+             |}
+             |""".stripMargin)
 
       mockTaiGet(
         s"employments-only/years/$currentTaxYear",
-        Future.failed(new NotFoundException("Not Found"))
+        Future.successful(taiEmploymentsOnlyJson)
       )
       mockTaiGet(
         s"rti-payments/years/$currentTaxYear",
-        Future.successful(anualAccountsjson)
+        Future.successful(annualAccountsJson)
+      )
+      mockTaiGet(s"tax-account/$currentTaxYear/income/tax-code-incomes", Future.failed(new NotFoundException(s"Tax codes not found")))
+
+      val result =
+        await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear))
+      result shouldBe employmentIncomeSourceNewUpdatedNoTaxCode
+
+    }
+
+    "return a valid Seq[IncomeSource] with employments even if taxcode api fails with 500 internal server error" in {
+      val taiEmploymentsOnlyJson: JsValue =
+        Json.parse(s"""
+             |{
+             |  "data": {
+             |  "employments" : [${Json.toJson(taiEmployment().copy(annualAccounts = Seq.empty))}, ${Json.toJson(
+                       taiEmployment2.copy(annualAccounts = Seq.empty)
+                     )}, ${Json.toJson(taiEmploymentNew3.copy(annualAccounts = Seq.empty))}]
+             |}
+             |}""".stripMargin)
+
+      val annualAccountsJson: JsValue =
+        Json.parse(s"""{
+             |  "data": [${Json.toJson(annualAccountsNew1)}, ${Json.toJson(annualAccountsNew2)},
+             |  ${Json.toJson(annualAccountsNew3)}, ${Json
+                       .toJson(annualAccountsNew5)}]
+             |}
+             |""".stripMargin)
+
+      mockTaiGet(
+        s"employments-only/years/$currentTaxYear",
+        Future.successful(taiEmploymentsOnlyJson)
+      )
+      mockTaiGet(
+        s"rti-payments/years/$currentTaxYear",
+        Future.successful(annualAccountsJson)
+      )
+      mockTaiGet(s"tax-account/$currentTaxYear/income/tax-code-incomes", Future.failed(new InternalServerException("Internal server error")))
+
+      val result =
+        await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear))
+      result shouldBe employmentIncomeSourceNewUpdatedNoTaxCode
+
+    }
+
+    "return  employments even if rti failed with not found exception" in {
+      val taiEmploymentsOnlyJson: JsValue =
+        Json.parse(s"""
+             |{
+             |  "data": {
+             |  "employments" : [${Json.toJson(taiEmployment().copy(annualAccounts = Seq.empty))}, ${Json.toJson(
+                       taiEmployment2.copy(annualAccounts = Seq.empty)
+                     )}, ${Json.toJson(taiEmploymentNew3.copy(annualAccounts = Seq.empty))}]
+             |}
+             |}""".stripMargin)
+
+      val incomeTaxCodeJson: JsValue =
+        Json.parse(s"""
+                      |{
+                      |  "data": [${Json.toJson(taxCodeIncomeNew1)}, ${Json.toJson(taxCodeIncomeNew2)} , ${Json.toJson(taxCodeIncome3)}]
+                      |
+                      |}
+
+                    """.stripMargin)
+
+      mockTaiGet(
+        s"employments-only/years/$currentTaxYear",
+        Future.successful(taiEmploymentsOnlyJson)
+      )
+      mockTaiGet(
+        s"rti-payments/years/$currentTaxYear",
+        Future.failed(new NotFoundException(s"No Annual accounts found"))
       )
       mockTaiGet(s"tax-account/$currentTaxYear/income/tax-code-incomes", Future.successful(incomeTaxCodeJson))
 
       val result =
         await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear))
-      result shouldBe Seq.empty
+      result shouldBe Seq(
+        IncomeSource(Some(taxCodeIncomeNew1), taiEmployment().copy(annualAccounts = Seq.empty)),
+        IncomeSource(Some(taxCodeIncomeNew2), taiEmployment2.copy(annualAccounts = Seq.empty)),
+        IncomeSource(Some(taxCodeIncome3), taiEmploymentNew3.copy(annualAccounts = Seq.empty))
+      )
+    }
+
+    "return  500   if rti failed with Internal server error" in {
+      val taiEmploymentsOnlyJson: JsValue =
+        Json.parse(s"""
+             |{
+             |  "data": {
+             |  "employments" : [${Json.toJson(taiEmployment().copy(annualAccounts = Seq.empty))}, ${Json.toJson(
+                       taiEmployment2.copy(annualAccounts = Seq.empty)
+                     )}, ${Json.toJson(taiEmploymentNew3.copy(annualAccounts = Seq.empty))}]
+             |}
+             |}""".stripMargin)
+
+      val incomeTaxCodeJson: JsValue =
+        Json.parse(s"""
+             |{
+             |  "data": [${Json.toJson(taxCodeIncomeNew1)}, ${Json.toJson(taxCodeIncomeNew2)} , ${Json.toJson(taxCodeIncome3)}]
+             |
+             |}
+
+
+
+           """.stripMargin)
+
+      mockTaiGet(
+        s"employments-only/years/$currentTaxYear",
+        Future.successful(taiEmploymentsOnlyJson)
+      )
+      mockTaiGet(
+        s"rti-payments/years/$currentTaxYear",
+        Future.failed(new InternalServerException(s" Internal server error"))
+      )
+
+      intercept[InternalServerException] {
+        await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear))
+      }
+    }
+
+    "return an Not found exception when receiving when a NotFoundException is thrown for an authorised user" in {
+
+      mockTaiGet(
+        s"employments-only/years/$currentTaxYear",
+        Future.failed(new NotFoundException("Not Found"))
+      )
+
+      intercept[NotFoundException] {
+        await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear))
+      }
     }
 
     "throw UnauthorisedException for valid nino but unauthorized user" in {
@@ -393,10 +515,12 @@ class TaiConnectorSpec extends BaseSpec {
       }
     }
 
-    "return empty List if Not found exception is thrown" in {
+    "return Not found exception if Not found exception is thrown" in {
       mockTaiGet(s"employments-only/years/2025", Future.failed(new NotFoundException("Not Found")))
-      val result = await(connector.getEmploymentsOnly(nino, 2025))
-      result shouldBe Seq.empty[Employment]
+
+      intercept[NotFoundException] {
+        await(connector.getEmploymentsOnly(nino, 2025))
+      }
 
     }
 
