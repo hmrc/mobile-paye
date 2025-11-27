@@ -17,7 +17,7 @@
 package uk.gov.hmrc.mobilepaye.services
 
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, InternalServerException, UnauthorizedException}
+import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, InternalServerException, NotFoundException, UnauthorizedException}
 import uk.gov.hmrc.mobilepaye.connectors.*
 import uk.gov.hmrc.mobilepaye.domain.simpleassessment.MobileSimpleAssessmentResponse
 import uk.gov.hmrc.mobilepaye.domain.tai.*
@@ -523,6 +523,15 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
       result shouldBe MobilePayeSummaryResponse.empty
+    }
+
+    "return Not Found exception when no employments were found" in {
+      mockMatchingTaxCodeAll(Future.failed(new NotFoundException("GET of employments-only/years/ Failed with No data found")))
+
+      intercept[NotFoundException] {
+        await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
+      }
+
     }
 
     "return an empty MobilePayeResponse when an exception is thrown from NPS that contains 'cannot complete a coding calculation without a primary employment'" in {

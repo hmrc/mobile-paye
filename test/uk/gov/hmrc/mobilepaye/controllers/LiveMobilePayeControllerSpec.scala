@@ -289,6 +289,19 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       status(result) shouldBe 404
     }
 
+    "return 404 when handling NotFoundException in paye response" in {
+      mockShutteringResponse(notShuttered)
+      mockAuthorisationGrantAccess(grantAccessWithCL200)
+      mockGetPerson(Future.successful(person))
+      mockGetMobilePayeResponse(
+        Future.failed(new NotFoundException(s"GET of employments-only/years/$currentTaxYear Failed with Employment not found"))
+      )
+
+      val result = controller.getPayeSummary(nino, jId1, currentTaxYear)(fakeRequest)
+
+      status(result) shouldBe 404
+    }
+
     "return 400 when handling BadRequestException" in {
       import scala.util.{Success, Failure}
       mockAuthorisationGrantAccess(grantAccessWithCL200)
