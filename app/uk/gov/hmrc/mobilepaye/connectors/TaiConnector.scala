@@ -126,10 +126,13 @@ class TaiConnector @Inject() (http: HttpClientV2, @Named("tai") serviceUrl: Stri
       employments    <- getEmploymentsOnly(nino, taxYear)
       annualAccounts <- getAnnualAccounts(nino, taxYear)
     } yield {
-      employments.map { employment =>
-        val accounts = annualAccounts.filter(_.sequenceNumber == employment.sequenceNumber)
-        employment.copy(annualAccounts = accounts)
+      if (employments.isEmpty) throw NotFoundException(s"employments-only/$taxYear return Nil")
+      else {
+        employments.map { employment =>
+          val accounts = annualAccounts.filter(_.sequenceNumber == employment.sequenceNumber)
+          employment.copy(annualAccounts = accounts)
 
+        }
       }
     }
   }
