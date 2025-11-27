@@ -307,6 +307,24 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       )
     }
 
+    "return NOT FOUND if the employments-only api bring empty list" in {
+      when(mockFeatureFlagService.get(any()))
+        .thenReturn(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = true)))
+
+      stubForShutteringDisabled()
+      grantAccess(nino)
+      personalDetailsAreFound(nino, person)
+      stubForEmploymentsOnly(
+        nino,
+        employments = Seq.empty
+      )
+      stubForAnnualAccounts(nino, Seq.empty)
+
+      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
+      response.status shouldBe 404
+
+    }
+
     "return GONE when person is deceased" in {
       stubForShutteringDisabled()
       grantAccess(nino)

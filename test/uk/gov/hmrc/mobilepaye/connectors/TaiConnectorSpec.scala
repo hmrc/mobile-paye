@@ -16,11 +16,9 @@
 
 package uk.gov.hmrc.mobilepaye.connectors
 
-import com.fasterxml.jackson.core.JsonParseException
 import play.api.libs.json.{JsResultException, JsValue, Json}
-import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.*
-import uk.gov.hmrc.mobilepaye.domain.tai.{AnnualAccount, Available, Employment, EmploymentIncome, Live, PensionIncome, TaxCodeChangeDetails, TaxCodeRecord}
+import uk.gov.hmrc.mobilepaye.domain.tai.{AnnualAccount, Employment, TaxCodeChangeDetails, TaxCodeRecord}
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import uk.gov.hmrc.mobilepaye.domain.IncomeSource
@@ -287,6 +285,34 @@ class TaiConnectorSpec extends BaseSpec {
         IncomeSource(Some(taxCodeIncomeNew2), taiEmployment2.copy(annualAccounts = Seq.empty)),
         IncomeSource(Some(taxCodeIncome3), taiEmploymentNew3.copy(annualAccounts = Seq.empty))
       )
+    }
+
+    "return  not found exception if employments-only api return empty list" in {
+      val taiEmploymentsOnlyJson: JsValue =
+        Json.parse(s"""
+             |{
+             |  "data": {
+             |  "employments" : []
+             |}
+             |}""".stripMargin)
+      val annualAccountsJson: JsValue =
+        Json.parse(s"""{
+             |  "data": []
+             |}
+             |""".stripMargin)
+
+      mockTaiGet(
+        s"employments-only/years/$currentTaxYear",
+        Future.successful(taiEmploymentsOnlyJson)
+      )
+      mockTaiGet(
+        s"rti-payments/years/$currentTaxYear",
+        Future.successful(annualAccountsJson)
+      )
+      intercept[NotFoundException] {
+        await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear))
+      }
+
     }
 
     "return  500   if rti failed with Internal server error" in {
