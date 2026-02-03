@@ -232,6 +232,13 @@ trait MobilePayeTestData {
     IncomeSource(Some(taxCodeIncome3), taiEmploymentNew3)
   )
 
+  val employmentIncomeSourceSameEmpNameUpdated = Seq(
+    IncomeSource(Some(taxCodeIncomeNew1.copy(employmentId = Some(1))), taiEmployment(seqNo = 1).copy(annualAccounts = Seq.empty)),
+    IncomeSource(Some(taxCodeIncomeNew1.copy(employmentId = Some(2), taxCode = "S1250L")), taiEmployment(seqNo = 2).copy(annualAccounts = Seq.empty, payrollNumber = Some("ABC124"), employmentType = PensionIncome)
+    ),
+    IncomeSource(Some(taxCodeIncomeNew1.copy(employmentId = Some(3), taxCode = "S1350L")), taiEmployment().copy(annualAccounts = Seq.empty, payrollNumber = Some("ABC125"), employmentType = PensionIncome))
+  )
+
   val employmentIncomeSourceNewUpdatedNoTaxCode = Seq(
     IncomeSource(None, taiEmployment()),
     IncomeSource(None, taiEmployment2),
