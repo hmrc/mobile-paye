@@ -232,11 +232,34 @@ trait MobilePayeTestData {
     IncomeSource(Some(taxCodeIncome3), taiEmploymentNew3)
   )
 
+  val employmentSameOnly = Seq(
+    IncomeSource(Some(taxCodeIncomeNew1.copy(employmentId = Some(1))), taiEmployment(seqNo = 1).copy(annualAccounts = Seq.empty)),
+    IncomeSource(
+      Some(taxCodeIncomeNew1.copy(employmentId = Some(2), taxCode = "S1450L")),
+      taiEmployment(seqNo = 2).copy(annualAccounts = Seq.empty, name = "Sainbury", payrollNumber = Some("XYZ123"), payeNumber = "P6789")
+    )
+  )
+  val pensionSameOnly = Seq(
+    IncomeSource(
+      Some(taxCodeIncomeNew1.copy(employmentId = Some(3), taxCode = "S1550L")),
+      taiEmployment(seqNo = 3).copy(annualAccounts = Seq.empty, payrollNumber = Some("ABC124"), employmentType = PensionIncome)
+    ),
+    IncomeSource(
+      Some(taxCodeIncomeNew1.copy(employmentId = Some(4), taxCode = "S1650L")),
+      taiEmployment(seqNo = 4).copy(annualAccounts = Seq.empty, payrollNumber = Some("ABC125"), employmentType = PensionIncome)
+    )
+  )
+
   val employmentIncomeSourceSameEmpNameUpdated = Seq(
     IncomeSource(Some(taxCodeIncomeNew1.copy(employmentId = Some(1))), taiEmployment(seqNo = 1).copy(annualAccounts = Seq.empty)),
-    IncomeSource(Some(taxCodeIncomeNew1.copy(employmentId = Some(2), taxCode = "S1250L")), taiEmployment(seqNo = 2).copy(annualAccounts = Seq.empty, payrollNumber = Some("ABC124"), employmentType = PensionIncome)
+    IncomeSource(
+      Some(taxCodeIncomeNew1.copy(employmentId = Some(2), taxCode = "S1250L")),
+      taiEmployment(seqNo = 2).copy(annualAccounts = Seq.empty, payrollNumber = Some("ABC124"), employmentType = PensionIncome)
     ),
-    IncomeSource(Some(taxCodeIncomeNew1.copy(employmentId = Some(3), taxCode = "S1350L")), taiEmployment().copy(annualAccounts = Seq.empty, payrollNumber = Some("ABC125"), employmentType = PensionIncome))
+    IncomeSource(
+      Some(taxCodeIncomeNew1.copy(employmentId = Some(3), taxCode = "S1350L")),
+      taiEmployment().copy(annualAccounts = Seq.empty, payrollNumber = Some("ABC125"), employmentType = PensionIncome)
+    )
   )
 
   val employmentIncomeSourceNewUpdatedNoTaxCode = Seq(
@@ -276,6 +299,8 @@ trait MobilePayeTestData {
     employmentIncomeSource.map(ic => PayeIncome.fromIncomeSource(ic, employment = true))
 
   val employmentsNew = employmentIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = true))
+
+  val employmentSame = employmentSameOnly.map(ic => PayeIncome.fromIncomeSource(ic, employment = true))
   val previosEmploymentNew = previousEmpIncomeSource.map(ic => PayeIncome.fromIncomeSource(ic, employment = true))
 
   val welshEmployments: Seq[PayeIncome] =
@@ -289,6 +314,8 @@ trait MobilePayeTestData {
 
   val pensionsNew: Seq[PayeIncome] =
     pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false))
+  val pensionsSame: Seq[PayeIncome] =
+    pensionSameOnly.map(ic => PayeIncome.fromIncomeSource(ic, employment = false))
 
   val taxAccountSummary: TaxAccountSummary = TaxAccountSummary(BigDecimal(250), BigDecimal(10000))
   val person: Person = Person(nino, "Carrot", "Smith")
