@@ -114,6 +114,68 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
 
     }
 
+    "return OK and a full valid MobilePayeResponse json with duplciate emp names " in {
+      when(mockFeatureFlagService.get(any()))
+        .thenReturn(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = true)))
+
+      stubForShutteringDisabled()
+      grantAccess(nino)
+      personalDetailsAreFound(nino, person)
+      stubForEmploymentsOnly(
+        nino,
+        employments = Seq(
+          taiEmployment(seqNo = 1).copy(annualAccounts = Seq.empty), // live and EmploymentIncome
+          taiEmployment(seqNo = 2).copy(annualAccounts = Seq.empty,
+                                        name           = "Sainbury",
+                                        payrollNumber  = Some("XYZ123"),
+                                        payeNumber     = "P6789"
+                                       ), // live and EmploymentIncome
+          taiEmployment(seqNo = 3).copy(annualAccounts = Seq.empty, payrollNumber = Some("ABC124"), employmentType = PensionIncome), // pension
+          taiEmployment(seqNo = 4).copy(annualAccounts = Seq.empty, payrollNumber = Some("ABC125"), employmentType = PensionIncome) // pension
+        )
+      )
+      stubForAnnualAccounts(nino, Seq())
+      stubForTaxCodeIncomes(
+        nino,
+        incomes = Seq(
+          taxCodeIncomeNew1.copy(employmentId = Some(1)),
+          taxCodeIncomeNew1.copy(employmentId = Some(2), taxCode = "S1450L"),
+          taxCodeIncomeNew1.copy(employmentId = Some(3), taxCode = "S1550L"),
+          taxCodeIncomeNew1.copy(employmentId = Some(4), taxCode = "S1650L")
+        )
+      )
+      nonTaxCodeIncomeIsFound(nino, nonTaxCodeIncome)
+      taxAccountSummaryIsFound(nino, taxAccountSummary)
+      taxAccountSummaryIsFound(nino, taxAccountSummary, cyPlusone = true)
+      taxCalcWithNoDate(nino, currentTaxYear)
+      stubForBenefits(nino, noBenefits)
+      stubForTaxCodeChangeExists(nino)
+      stubForTaxCodeChange(nino, taxCodeChangeDetails)
+      stubSimpleAssessmentResponse
+
+      val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
+      response.status shouldBe 200
+      response.body[JsValue] shouldBe Json
+        .toJson(
+          fullMobilePayeResponseWithCY1Link
+            .copy(
+              employments      = Some(employmentSame),
+              simpleAssessment = Some(fullMobileSimpleAssessmentResponse),
+              pensions         = Some(pensionsSame),
+              repayment = Some(
+                P800Repayment(
+                  amount          = Some(1000),
+                  paymentStatus   = Some(Refund),
+                  datePaid        = None,
+                  taxYear         = previousTaxYear,
+                  claimRefundLink = Some(s"/tax-you-paid/$previousTaxYear-$currentTaxYear/paid-too-much")
+                )
+              )
+            )
+        )
+
+    }
+
     "return OK and a full valid MobilePayeResponse json with Rti down" in {
       when(mockFeatureFlagService.get(any()))
         .thenReturn(Future.successful(FeatureFlag(OnlinePaymentIntegration, isEnabled = true)))

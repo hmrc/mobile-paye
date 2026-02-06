@@ -18,7 +18,7 @@ package uk.gov.hmrc.mobilepaye.connectors
 
 import play.api.libs.json.{JsResultException, JsValue, Json}
 import uk.gov.hmrc.http.*
-import uk.gov.hmrc.mobilepaye.domain.tai.{AnnualAccount, Employment, TaxCodeChangeDetails, TaxCodeRecord}
+import uk.gov.hmrc.mobilepaye.domain.tai.{AnnualAccount, Employment, PensionIncome, TaxCodeChangeDetails, TaxCodeRecord}
 import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import uk.gov.hmrc.mobilepaye.domain.IncomeSource
@@ -137,6 +137,50 @@ class TaiConnectorSpec extends BaseSpec {
       val result =
         await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear))
       result shouldBe employmentIncomeSourceNewUpdated
+    }
+
+    "return a valid Seq[IncomeSource] when receiving a valid 200 response for an authorised user for Employment with same employment name for pension" in {
+      val taiEmploymentsOnlyJson: JsValue =
+        Json.parse(
+          s"""
+             |{
+             |  "data": {
+             |  "employments" : [${Json.toJson(taiEmployment(seqNo = 1).copy(annualAccounts = Seq.empty))}, 
+             |  ${Json.toJson(
+              taiEmployment(seqNo = 2).copy(annualAccounts = Seq.empty, payrollNumber = Some("ABC124"), employmentType = PensionIncome)
+            )}, ${Json.toJson(taiEmployment().copy(annualAccounts = Seq.empty, payrollNumber = Some("ABC125"), employmentType = PensionIncome))}]
+             |}
+             |}
+           """.stripMargin
+        )
+
+      val annualAccountsJson: JsValue = Json.parse(s"""{
+               |  "data": []
+               |}
+               |""".stripMargin)
+
+      val incomeTaxCodeJson: JsValue =
+        Json.parse(s"""{ "data": [${Json.toJson(taxCodeIncomeNew1.copy(employmentId = Some(1)))},
+                      | ${Json.toJson(taxCodeIncomeNew1.copy(employmentId = Some(2), taxCode = "S1250L"))} ,
+                      | ${Json.toJson(taxCodeIncomeNew1.copy(employmentId = Some(3), taxCode = "S1350L"))}]
+                      |
+                      |}
+
+                    """.stripMargin)
+
+      mockTaiGet(
+        s"employments-only/years/$currentTaxYear",
+        Future.successful(taiEmploymentsOnlyJson)
+      )
+      mockTaiGet(
+        s"rti-payments/years/$currentTaxYear",
+        Future.successful(annualAccountsJson)
+      )
+      mockTaiGet(s"tax-account/$currentTaxYear/income/tax-code-incomes", Future.successful(incomeTaxCodeJson))
+
+      val result =
+        await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear))
+      result shouldBe employmentIncomeSourceSameEmpNameUpdated
     }
 
     "return a valid Seq[IncomeSource] with employments even if no tax code income is present  when receiving a valid 200 response for an authorised user for Employment" in {
