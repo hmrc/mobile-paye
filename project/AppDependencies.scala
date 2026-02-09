@@ -22,7 +22,7 @@ object AppDependencies {
     "uk.gov.hmrc"       %% "tax-year"                     % taxYearVersion,
     "uk.gov.hmrc.mongo" %% "hmrc-mongo-play-30"           % hmrcMongoVersion,
     "eu.timepit"        %% "refined"                      % refinedVersion,
-    "uk.gov.hmrc"       %% "internal-auth-client-play-30" % "4.0.0",
+    "uk.gov.hmrc"       %% "internal-auth-client-play-30" % "4.3.0",
     "com.typesafe.play" %% "play-json"                    % "2.10.8",
     caffeine
   )
