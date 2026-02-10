@@ -40,7 +40,7 @@ class FeatureFlagController @Inject() (
     }
 
   def put(flagName: FeatureFlagName): Action[AnyContent] =
-    auth().async { request =>
+    auth().async(parse.default) { request =>
       request.body.asJson match {
         case Some(JsBoolean(enabled)) =>
           featureFlagService
@@ -52,7 +52,7 @@ class FeatureFlagController @Inject() (
     }
 
   def putAll: Action[AnyContent] =
-    auth().async { request =>
+    auth().async(parse.default) { request =>
       featureFlagService
         .setAll(
           request.body.asJson
