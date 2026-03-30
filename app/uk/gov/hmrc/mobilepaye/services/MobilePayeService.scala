@@ -79,7 +79,7 @@ class MobilePayeService @Inject() (taiConnector: TaiConnector,
       nonTaxCodeIncomes        <- taiConnector.getNonTaxCodeIncome(nino, taxYear)
       taxAccountSummary        <- taiConnector.getTaxAccountSummary(nino, taxYear)
       reconciliations          <- getTaxYearReconciliation(nino)
-      tcComparisonPeriodActive <- cyPlus1InfoCheck(taxCodeIncomesEmployment)
+      tcComparisonPeriodActive <- cyPlus1InfoCheck(taxCodeIncomesEmployment ++ taxCodeIncomesPension)
       cy1InfoAvailable <- if (tcComparisonPeriodActive) taiConnector.getCYPlusOneAccountSummary(nino, taxYear)
                           else Future successful false
       employmentBenefits <- taiConnector.getBenefits(nino, taxYear)
@@ -105,7 +105,7 @@ class MobilePayeService @Inject() (taiConnector: TaiConnector,
                              simpleAssessment
                            )
     } yield {
-      if (cy1InfoAvailable) mobilePayeResponse.copy(taxCodeLocation = getTaxCodeLocation(taxCodeIncomesEmployment))
+      if (cy1InfoAvailable) mobilePayeResponse.copy(taxCodeLocation = getTaxCodeLocation(taxCodeIncomesEmployment ++ taxCodeIncomesPension))
       else mobilePayeResponse.copy(currentYearPlusOneLink           = None)
     }) recover {
       case ex if knownException(ex, nino) => MobilePayeSummaryResponse.empty

@@ -475,6 +475,23 @@ trait MobilePayeTestData {
     taxFreeAmount       = Some(10000),
     estimatedTaxAmount  = Some(250),
     previousTaxYearLink = s"/check-income-tax/income-tax-history",
+    currentYearPlusOneLink = Some("/check-income-tax/income-tax-comparison"),
+    taxCodeLocation     = Some("Scottish")
+  )
+
+  val fullMobilePayeResponseWithCY1LinkOnlyPension: MobilePayeSummaryResponse = MobilePayeSummaryResponse(
+    taxYear = Some(TaxYear.current.currentYear),
+    employments = None,
+    previousEmployments = None,
+    repayment = None,
+    pensions = Some(pensions),
+    otherIncomes = Some(otherIncomes),
+    simpleAssessment = None,
+    taxCodeChange = Some(TaxCodeChange(hasChanged = true, Some(LocalDate.now().minusYears(2)))),
+    taxFreeAmount = Some(10000),
+    estimatedTaxAmount = Some(250),
+    previousTaxYearLink = s"/check-income-tax/income-tax-history",
+    currentYearPlusOneLink = Some("/check-income-tax/income-tax-comparison"),
     taxCodeLocation     = Some("Scottish")
   )
 
