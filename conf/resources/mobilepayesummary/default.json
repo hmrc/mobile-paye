@@ -254,6 +254,7 @@
   "previousTaxYearLink": "/",
   "updateEstimatedIncomeLink": "/",
   "updateEmployerLink": "/",
+  "currentYearPlusOneLink": "/",
   "incomeTaxHistoricPayeUrl": "/",
   "isRTIDown" : false
 }
