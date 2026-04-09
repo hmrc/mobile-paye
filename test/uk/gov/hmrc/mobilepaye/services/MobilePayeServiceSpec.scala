@@ -256,6 +256,42 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
       )
     }
 
+    "return full MobilePayeResponse with tax comparison link during UK active period with only pension income" in {
+      mockMatchingTaxCodeAll(Future.successful(pensionIncomeSourceNew))
+      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
+      mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockCYPlusOneAccountSummary(Future successful true)
+      mockGetBenefits(Future.successful(noBenefits))
+      mockGetTaxCodeChangeExists(Future.successful(true))
+      mockGetTaxCodeChange(Future successful taxCodeChangeDetails)
+      mockP800Summary(None)
+
+
+      val service = new MobilePayeService(
+        mockTaiConnector,
+        mockTaxCalcConnector,
+        p800CacheMongo,
+        mockMobileSimpleAssessmentConnector,
+        mockCitizenDetailsConnector,
+        mockShutteringConnector,
+        inactiveDate,
+        inactiveDate,
+        inactiveDate,
+        inactiveDate,
+        activeStartDate,
+        activeEndDate,
+        true,
+        true,
+        true
+      )
+
+      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
+
+      result shouldBe fullMobilePayeResponseWithCY1LinkOnlyPension.copy(
+      pensions        = Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false)))
+      )
+    }
+
     "return full MobilePayeResponse with tax comparison link during Scottish active period" in {
       mockMatchingTaxCodeAll(Future.successful(employmentIncomeSource ++ pensionIncomeSourceNew))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))

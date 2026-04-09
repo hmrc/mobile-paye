@@ -5,10 +5,10 @@ object AppDependencies {
   import play.sbt.PlayImport.*
 
   private val playBootstrapVersion = "10.7.0"
-  private val playHmrcVersion = "8.3.0"
+  private val playHmrcVersion = "9.0.0"
   private val domainVersion = "13.0.0"
   private val taxYearVersion = "6.0.0"
-  private val scalaMockVersion = "7.5.2"
+  private val scalaMockVersion = "7.5.5"
   private val hmrcMongoVersion = "2.12.0"
   private val refinedVersion = "0.11.3"
   private val authClientVersion = "4.1.0"
