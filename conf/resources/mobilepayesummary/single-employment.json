@@ -29,5 +29,6 @@
   "updateEstimatedIncomeLink": "/",
   "updateEmployerLink": "/",
   "incomeTaxHistoricPayeUrl": "/",
+  "currentYearPlusOneLink": "/check-income-tax/income-tax-comparison",
   "isRTIDown" : false
 }
