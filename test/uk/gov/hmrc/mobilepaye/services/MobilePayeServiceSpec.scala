@@ -266,7 +266,6 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
       mockGetTaxCodeChange(Future successful taxCodeChangeDetails)
       mockP800Summary(None)
 
-
       val service = new MobilePayeService(
         mockTaiConnector,
         mockTaxCalcConnector,
@@ -288,7 +287,7 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
       result shouldBe fullMobilePayeResponseWithCY1LinkOnlyPension.copy(
-      pensions        = Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false)))
+        pensions = Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false)))
       )
     }
 

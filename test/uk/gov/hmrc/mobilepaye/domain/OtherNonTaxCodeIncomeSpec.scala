@@ -21,7 +21,7 @@ import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 class OtherNonTaxCodeIncomeSpec extends BaseSpec {
   "getFormattedIncomeComponentType" should {
     "Split upper camel case into spaced words, and capitalise each letter" in {
-      otherNonTaxCodeIncome.getFormattedIncomeComponentType shouldBe "STATE PENSION"
+      otherNonTaxCodeIncome.getFormattedIncomeComponentType shouldBe "State Pension"
     }
   }
 }
