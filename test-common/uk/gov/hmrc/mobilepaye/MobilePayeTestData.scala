@@ -319,7 +319,7 @@ trait MobilePayeTestData {
 
   val taxAccountSummary: TaxAccountSummary = TaxAccountSummary(BigDecimal(250), BigDecimal(10000))
   val person: Person = Person(nino, "Carrot", "Smith")
-  val otherIncome: OtherIncome = OtherIncome("STATE PENSION", 250.0, None)
+  val otherIncome: OtherIncome = OtherIncome("State Pension", 250.0, None)
 
   def repayment(
     p800Status: P800Status,
@@ -464,35 +464,35 @@ trait MobilePayeTestData {
   )
 
   val fullMobilePayeResponseWithCY1Link: MobilePayeSummaryResponse = MobilePayeSummaryResponse(
-    taxYear             = Some(TaxYear.current.currentYear),
-    employments         = Some(employments),
-    previousEmployments = None,
-    repayment           = None,
-    pensions            = Some(pensions),
-    otherIncomes        = Some(otherIncomes),
-    simpleAssessment    = None,
-    taxCodeChange       = Some(TaxCodeChange(hasChanged = true, Some(LocalDate.now().minusYears(2)))),
-    taxFreeAmount       = Some(10000),
-    estimatedTaxAmount  = Some(250),
-    previousTaxYearLink = s"/check-income-tax/income-tax-history",
+    taxYear                = Some(TaxYear.current.currentYear),
+    employments            = Some(employments),
+    previousEmployments    = None,
+    repayment              = None,
+    pensions               = Some(pensions),
+    otherIncomes           = Some(otherIncomes),
+    simpleAssessment       = None,
+    taxCodeChange          = Some(TaxCodeChange(hasChanged = true, Some(LocalDate.now().minusYears(2)))),
+    taxFreeAmount          = Some(10000),
+    estimatedTaxAmount     = Some(250),
+    previousTaxYearLink    = s"/check-income-tax/income-tax-history",
     currentYearPlusOneLink = Some("/check-income-tax/income-tax-comparison"),
-    taxCodeLocation     = Some("Scottish")
+    taxCodeLocation        = Some("Scottish")
   )
 
   val fullMobilePayeResponseWithCY1LinkOnlyPension: MobilePayeSummaryResponse = MobilePayeSummaryResponse(
-    taxYear = Some(TaxYear.current.currentYear),
-    employments = None,
-    previousEmployments = None,
-    repayment = None,
-    pensions = Some(pensions),
-    otherIncomes = Some(otherIncomes),
-    simpleAssessment = None,
-    taxCodeChange = Some(TaxCodeChange(hasChanged = true, Some(LocalDate.now().minusYears(2)))),
-    taxFreeAmount = Some(10000),
-    estimatedTaxAmount = Some(250),
-    previousTaxYearLink = s"/check-income-tax/income-tax-history",
+    taxYear                = Some(TaxYear.current.currentYear),
+    employments            = None,
+    previousEmployments    = None,
+    repayment              = None,
+    pensions               = Some(pensions),
+    otherIncomes           = Some(otherIncomes),
+    simpleAssessment       = None,
+    taxCodeChange          = Some(TaxCodeChange(hasChanged = true, Some(LocalDate.now().minusYears(2)))),
+    taxFreeAmount          = Some(10000),
+    estimatedTaxAmount     = Some(250),
+    previousTaxYearLink    = s"/check-income-tax/income-tax-history",
     currentYearPlusOneLink = Some("/check-income-tax/income-tax-comparison"),
-    taxCodeLocation     = Some("Scottish")
+    taxCodeLocation        = Some("Scottish")
   )
 
   val fullMobilePayeAudit: MobilePayeSummaryResponseAudit = MobilePayeSummaryResponseAudit(

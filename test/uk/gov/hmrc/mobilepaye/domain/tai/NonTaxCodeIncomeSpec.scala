@@ -37,7 +37,7 @@ class NonTaxCodeIncomeSpec extends AnyWordSpec with Matchers {
     }
 
     "format component type with spaces and upper case" in {
-      untaxed.getFormattedIncomeComponentType mustBe "UNTAXED INTEREST INCOME"
+      untaxed.getFormattedIncomeComponentType mustBe "Untaxed Interest Income"
     }
   }
 
@@ -56,7 +56,7 @@ class NonTaxCodeIncomeSpec extends AnyWordSpec with Matchers {
     }
 
     "format income type" in {
-      other.getFormattedIncomeComponentType mustBe "OTHER INCOME EARNED"
+      other.getFormattedIncomeComponentType mustBe "Other Income Earned"
     }
   }
 

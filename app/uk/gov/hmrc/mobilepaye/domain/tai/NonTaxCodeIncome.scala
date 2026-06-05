@@ -21,7 +21,7 @@ import play.api.libs.json.{Format, Json}
 case class UntaxedInterest(incomeComponentType: NonTaxCodeIncomeComponentType, amount: BigDecimal) {
 
   def getFormattedIncomeComponentType: String =
-    incomeComponentType.toString.replaceAll("(\\p{Ll})(\\p{Lu})", "$1 $2").toUpperCase
+    incomeComponentType.toString.replaceAll("(\\p{Ll})(\\p{Lu})", "$1 $2")
 }
 
 object UntaxedInterest {
@@ -31,7 +31,7 @@ object UntaxedInterest {
 case class OtherNonTaxCodeIncome(incomeComponentType: NonTaxCodeIncomeComponentType, amount: BigDecimal) {
 
   def getFormattedIncomeComponentType: String =
-    incomeComponentType.toString.replaceAll("(\\p{Ll})(\\p{Lu})", "$1 $2").toUpperCase
+    incomeComponentType.toString.replaceAll("(\\p{Ll})(\\p{Lu})", "$1 $2")
 }
 
 object OtherNonTaxCodeIncome {
