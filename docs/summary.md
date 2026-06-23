@@ -248,11 +248,11 @@ Fetch the MobilePayeResponse object.
   ],
   "otherIncomes": [
     {
-      "name": "NON CODED INCOME",
+      "name": "Non Coded Income",
       "amount": 22500
     },
     {
-      "name": "UNTAXED INTEREST INCOME",
+      "name": "Untaxed Interest Income",
       "amount": 9301,
       "incomeDetailsLink": "/"
     }
@@ -471,11 +471,11 @@ Fetch the MobilePayeResponse object.
   "taxYear": 2018,
   "otherIncomes": [
     {
-      "name": "NON CODED INCOME",
+      "name": "Non Coded Income",
       "amount": 22500
     },
     {
-      "name": "UNTAXED INTEREST INCOME",
+      "name": "Untaxed Interest Income",
       "amount": 9301,
       "incomeDetailsLink": "/"
     }

@@ -122,7 +122,7 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
   "getMobilePayeSummaryResponse" should {
     "return full MobilePayeResponse when all data is available" in {
       mockMatchingTaxCodeAll(Future.successful(employmentIncomeSource ++ pensionIncomeSourceNew ++ Seq(incomeSourceCeased)))
-      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
+      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest1))
       mockTaxAccountSummary(Future.successful(taxAccountSummary))
       mockGetBenefits(Future.successful(noBenefits))
       mockGetTaxCodeChangeExists(Future.successful(true))
@@ -136,6 +136,7 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
       result shouldBe fullMobilePayeResponse.copy(
         previousEmployments = Some(Seq(PayeIncome.fromIncomeSource(incomeSourceCeased, true))),
         simpleAssessment    = Some(fullMobileSimpleAssessmentResponse),
+        otherIncomes        = Some(otherIncomes1),
         pensions            = Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false)))
       )
     }

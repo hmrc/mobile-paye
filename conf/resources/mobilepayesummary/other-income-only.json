@@ -2,11 +2,11 @@
   "taxYear": <TAX_YEAR>,
   "otherIncomes": [
     {
-      "name": "NON CODED INCOME",
+      "name": "Non Coded Income",
       "amount": 22500
     },
     {
-      "name": "UNTAXED INTEREST INCOME",
+      "name": "Untaxed Interest Income",
       "amount": 9301,
       "incomeDetailsLink": "/"
     }

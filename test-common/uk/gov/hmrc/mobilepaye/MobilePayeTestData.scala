@@ -64,11 +64,15 @@ trait MobilePayeTestData {
     taxCodeIncome.copy(componentType = PensionIncome, name = "Prestige Pensions", employmentId = Some(5))
 
   val otherNonTaxCodeIncome: OtherNonTaxCodeIncome = OtherNonTaxCodeIncome(StatePension, BigDecimal(250.0))
+  val otherNonTaxCodeIncome1: OtherNonTaxCodeIncome = OtherNonTaxCodeIncome(UntaxedInterestIncome, BigDecimal(250.0))
   val untaxedIncome: Option[UntaxedInterest] = Some(UntaxedInterest(UntaxedInterestIncome, BigDecimal(250.0)))
   val nonTaxCodeIncome: NonTaxCodeIncome = NonTaxCodeIncome(None, Seq(otherNonTaxCodeIncome))
 
   val nonTaxCodeIncomeWithUntaxedInterest: NonTaxCodeIncome =
     NonTaxCodeIncome(untaxedIncome, Seq(otherNonTaxCodeIncome))
+
+  val nonTaxCodeIncomeWithUntaxedInterest1: NonTaxCodeIncome =
+    NonTaxCodeIncome(untaxedIncome, Seq(otherNonTaxCodeIncome1))
   val nonTaxCodeIncomeWithoutUntaxedInterest: NonTaxCodeIncome = NonTaxCodeIncome(None, Seq(otherNonTaxCodeIncome))
 
   val payments: Seq[Payment] = Seq(
@@ -320,6 +324,12 @@ trait MobilePayeTestData {
   val taxAccountSummary: TaxAccountSummary = TaxAccountSummary(BigDecimal(250), BigDecimal(10000))
   val person: Person = Person(nino, "Carrot", "Smith")
   val otherIncome: OtherIncome = OtherIncome("State Pension", 250.0, None)
+  val otherIncome1: OtherIncome = OtherIncome(
+    "Untaxed Interest Income",
+    250.0,
+    Some("/check-income-tax/income/bank-building-society-savings"),
+    Some("/check-income-tax/income/bank-building-society-savings")
+  )
 
   def repayment(
     p800Status: P800Status,
@@ -340,6 +350,7 @@ trait MobilePayeTestData {
   }
 
   val otherIncomes: Seq[OtherIncome] = Seq(otherIncome)
+  val otherIncomes1: Seq[OtherIncome] = Seq(otherIncome1)
 
   val fullMobileSimpleAssessmentResponse: MobileSimpleAssessmentResponse = MobileSimpleAssessmentResponse(
     List(
