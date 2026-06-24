@@ -117,9 +117,9 @@ paths:
                         taxYear: 2018
                         claimRefundLink: /tax-you-paid/2018-2019/paid-too-much
                       otherIncomes:
-                        - name: NON CODED INCOME
+                        - name: Non Coded Income
                           amount: 22500
-                        - name: UNTAXED INTEREST INCOME
+                        - name: Untaxed Interest Income
                           amount: 9301
                           incomeDetailsLink: /check-income-tax/income/bank-building-society-savings
                       taxFreeAmount: 11850
@@ -199,9 +199,9 @@ paths:
                       taxYear: 2018
                       claimRefundLink: /tax-you-paid/2018-2019/paid-too-much
                     otherIncomes:
-                      - name: NON CODED INCOME
+                      - name: Non Coded Income
                         amount: 22500
-                      - name: UNTAXED INTEREST INCOME
+                      - name: Untaxed Interest Income
                         amount: 9301
                         incomeDetailsLink: /check-income-tax/income/bank-building-society-savings
                     taxCodeChange:
@@ -325,9 +325,9 @@ paths:
                           incomeDetailsLink: /check-income-tax/income-details/3
                           yourIncomeCalculationDetailsLink: /
                       otherIncomes:
-                        - name: NON CODED INCOME
+                        - name: Non Coded Income
                           amount: 22500
-                        - name: UNTAXED INTEREST INCOME
+                        - name: Untaxed Interest Income
                           amount: 9301
                           incomeDetailsLink: /check-income-tax/income/bank-building-society-savings
                       taxFreeAmount: 11850
@@ -390,9 +390,9 @@ paths:
                         incomeDetailsLink: /check-income-tax/income-details/3
                         yourIncomeCalculationDetailsLink: /
                     otherIncomes:
-                      - name: NON CODED INCOME
+                      - name: Non Coded Income
                         amount: 22500
-                      - name: UNTAXED INTEREST INCOME
+                      - name: Untaxed Interest Income
                         amount: 9301
                         incomeDetailsLink: /check-income-tax/income/bank-building-society-savings
                     taxFreeAmount: 11850
@@ -747,9 +747,9 @@ components:
           taxYear: 2018
           claimRefundLink: /tax-you-paid/2018-2019/paid-too-much
         otherIncomes:
-          - name: NON CODED INCOME
+          - name: Non Coded Income
             amount: 22500
-          - name: UNTAXED INTEREST INCOME
+          - name: Untaxed Interest Income
             amount: 9301
             incomeDetailsLink: /check-income-tax/income/bank-building-society-savings
         taxCodeChange:
@@ -889,9 +889,9 @@ components:
             incomeDetailsLink: /check-income-tax/income-details/3
             yourIncomeCalculationDetailsLink: /
         otherIncomes:
-          - name: NON CODED INCOME
+          - name: Non Coded Income
             amount: 22500
-          - name: UNTAXED INTEREST INCOME
+          - name: Untaxed Interest Income
             amount: 9301
             incomeDetailsLink: /check-income-tax/income/bank-building-society-savings
         taxFreeAmount: 11850
@@ -913,7 +913,7 @@ components:
         incomeDetailsLink:
           type: string
       example:
-        name: NON CODED INCOME
+        name: Non Coded Income
         amount: 22500
     Payment:
       title: Payment

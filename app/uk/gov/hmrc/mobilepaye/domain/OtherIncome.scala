@@ -27,7 +27,7 @@ object OtherIncome {
     name: String,
     amount: BigDecimal
   ): OtherIncome =
-    if (name == "UNTAXED INTEREST INCOME")
+    if (name.equalsIgnoreCase("Untaxed Interest Income"))
       OtherIncome(name,
                   amount,
                   Some("/check-income-tax/income/bank-building-society-savings"),

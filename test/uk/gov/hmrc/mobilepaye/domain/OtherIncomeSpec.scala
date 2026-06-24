@@ -20,14 +20,14 @@ import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 
 class OtherIncomeSpec extends BaseSpec {
   "OtherIncome.apply" should {
-    "Build the link when given an UNTAXED INTEREST INCOME name" in {
-      val result = OtherIncome.withMaybeLink("UNTAXED INTEREST INCOME", BigDecimal(200.0))
+    "Build the link when given an Untaxed Interest Income name" in {
+      val result = OtherIncome.withMaybeLink("Untaxed Interest Income", BigDecimal(200.0))
 
       result.incomeDetailsLink.get shouldBe "/check-income-tax/income/bank-building-society-savings"
     }
 
-    "Don't build a link when given anything other than UNTAXED INTEREST INCOME name" in {
-      val result = OtherIncome.withMaybeLink("MAXIMUM INTEREST", BigDecimal(200.0))
+    "Don't build a link when given anything other than Untaxed Interest Income name" in {
+      val result = OtherIncome.withMaybeLink("Maximum Interest", BigDecimal(200.0))
 
       result.incomeDetailsLink.isDefined shouldBe false
     }
