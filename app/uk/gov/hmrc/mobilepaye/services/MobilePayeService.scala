@@ -247,7 +247,13 @@ class MobilePayeService @Inject() (taiConnector: TaiConnector,
       taxCodeChange       = taxCodeChange,
       taxFreeAmount       = taxFreeAmount,
       estimatedTaxAmount  = estimatedTaxAmount,
-      isRTIDown           = realTimeStatus.contains(TemporarilyUnavailable)
+      isRTIDown           = realTimeStatus.contains(TemporarilyUnavailable),
+      updateEstimatedIncomeLink =
+        if ((incomeSourceEmployment ++ incomeSourcePension).size > 0)
+          Some(
+            s"/check-income-tax/update-income/start"
+          )
+        else None
     )
   }
 

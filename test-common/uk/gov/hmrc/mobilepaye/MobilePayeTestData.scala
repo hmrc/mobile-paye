@@ -64,7 +64,7 @@ trait MobilePayeTestData {
     taxCodeIncome.copy(componentType = PensionIncome, name = "Prestige Pensions", employmentId = Some(5))
 
   val otherNonTaxCodeIncome: OtherNonTaxCodeIncome = OtherNonTaxCodeIncome(StatePension, BigDecimal(250.0))
-  val otherNonTaxCodeIncome1: OtherNonTaxCodeIncome = OtherNonTaxCodeIncome(UntaxedInterestIncome, BigDecimal(250.0))
+  val otherNonTaxCodeIncome1: OtherNonTaxCodeIncome = OtherNonTaxCodeIncome(UntaxedInterestIncome, BigDecimal(250))
   val untaxedIncome: Option[UntaxedInterest] = Some(UntaxedInterest(UntaxedInterestIncome, BigDecimal(250.0)))
   val nonTaxCodeIncome: NonTaxCodeIncome = NonTaxCodeIncome(None, Seq(otherNonTaxCodeIncome))
 

@@ -134,10 +134,11 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
       result shouldBe fullMobilePayeResponse.copy(
-        previousEmployments = Some(Seq(PayeIncome.fromIncomeSource(incomeSourceCeased, true))),
-        simpleAssessment    = Some(fullMobileSimpleAssessmentResponse),
-        otherIncomes        = Some(otherIncomes1),
-        pensions            = Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false)))
+        previousEmployments       = Some(Seq(PayeIncome.fromIncomeSource(incomeSourceCeased, true))),
+        simpleAssessment          = Some(fullMobileSimpleAssessmentResponse),
+        otherIncomes              = Some(otherIncomes1),
+        pensions                  = Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false))),
+        updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
       )
     }
 
@@ -155,10 +156,11 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
       result shouldBe fullMobilePayeResponse.copy(
-        previousEmployments = Some(Seq(PayeIncome.fromIncomeSource(incomeSourceCeased, true))),
-        simpleAssessment    = Some(fullMobileSimpleAssessmentResponse),
-        pensions            = Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false))),
-        employments         = Some(employmentIncomeSourceNoTax.map(ic => PayeIncome.fromIncomeSource(ic, employment = true)))
+        previousEmployments       = Some(Seq(PayeIncome.fromIncomeSource(incomeSourceCeased, true))),
+        simpleAssessment          = Some(fullMobileSimpleAssessmentResponse),
+        pensions                  = Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false))),
+        employments               = Some(employmentIncomeSourceNoTax.map(ic => PayeIncome.fromIncomeSource(ic, employment = true))),
+        updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
       )
     }
 
@@ -176,10 +178,11 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
       result shouldBe fullMobilePayeResponse.copy(
-        previousEmployments = Some(Seq(PayeIncome.fromIncomeSource(incomeSourceCeased, true))),
-        simpleAssessment    = Some(fullMobileSimpleAssessmentResponse),
-        isRTIDown           = true,
-        pensions            = Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false)))
+        previousEmployments       = Some(Seq(PayeIncome.fromIncomeSource(incomeSourceCeased, true))),
+        simpleAssessment          = Some(fullMobileSimpleAssessmentResponse),
+        isRTIDown                 = true,
+        pensions                  = Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false))),
+        updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
       )
     }
 
@@ -214,9 +217,10 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
       result shouldBe fullMobilePayeResponseWithCY1Link.copy(
-        taxCodeLocation = Some("Welsh"),
-        employments     = Some(welshEmployments),
-        pensions        = Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false)))
+        taxCodeLocation           = Some("Welsh"),
+        employments               = Some(welshEmployments),
+        pensions                  = Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false))),
+        updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
       )
     }
 
@@ -251,9 +255,10 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
       result shouldBe fullMobilePayeResponseWithCY1Link.copy(
-        taxCodeLocation = Some("rUK"),
-        employments     = Some(ukEmployments),
-        pensions        = Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false)))
+        taxCodeLocation           = Some("rUK"),
+        employments               = Some(ukEmployments),
+        pensions                  = Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false))),
+        updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
       )
     }
 
@@ -288,7 +293,8 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
       result shouldBe fullMobilePayeResponseWithCY1LinkOnlyPension.copy(
-        pensions = Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false)))
+        pensions                  = Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false))),
+        updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
       )
     }
 
@@ -322,8 +328,9 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
 
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
-      result shouldBe fullMobilePayeResponseWithCY1Link.copy(pensions =
-        Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false)))
+      result shouldBe fullMobilePayeResponseWithCY1Link.copy(
+        pensions                  = Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false))),
+        updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
       )
     }
 
@@ -356,10 +363,11 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
 
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
-      result shouldBe fullMobilePayeResponse.copy(employments = Some(welshEmployments),
-                                                  pensions =
-                                                    Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false)))
-                                                 )
+      result shouldBe fullMobilePayeResponse.copy(
+        employments               = Some(welshEmployments),
+        pensions                  = Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false))),
+        updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
+      )
     }
 
     "return MobilePayeResponse with no untaxed interest" in {
@@ -373,10 +381,11 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
 
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
-      result shouldBe fullMobilePayeResponse.copy(otherIncomes = Some(Seq(otherIncome)),
-                                                  pensions =
-                                                    Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false)))
-                                                 )
+      result shouldBe fullMobilePayeResponse.copy(
+        otherIncomes              = Some(Seq(otherIncome)),
+        pensions                  = Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false))),
+        updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
+      )
     }
 
     "return MobilePayeResponse with no employments when employment data is missing" in {
@@ -390,10 +399,11 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
 
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
-      result shouldBe fullMobilePayeResponse.copy(employments = None,
-                                                  pensions =
-                                                    Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false)))
-                                                 )
+      result shouldBe fullMobilePayeResponse.copy(
+        employments               = None,
+        pensions                  = Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false))),
+        updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
+      )
     }
 
     "return MobilePayeResponse with no pensions when pension data is missing" in {
@@ -407,7 +417,7 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
 
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
-      result shouldBe fullMobilePayeResponse.copy(pensions = None)
+      result shouldBe fullMobilePayeResponse.copy(pensions = None, updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start"))
     }
 
     "return MobilePayeResponse with no otherIncomes when OtherIncome data is missing" in {
@@ -423,10 +433,11 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
 
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
-      result shouldBe fullMobilePayeResponse.copy(otherIncomes = None,
-                                                  pensions =
-                                                    Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false)))
-                                                 )
+      result shouldBe fullMobilePayeResponse.copy(
+        otherIncomes              = None,
+        pensions                  = Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false))),
+        updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
+      )
     }
 
     "return MobilePayeResponse with correct Payments" in {
@@ -523,10 +534,11 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
 
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
-      result shouldBe fullMobilePayeResponse.copy(taxCodeChange = Some(TaxCodeChange(hasChanged = false)),
-                                                  pensions =
-                                                    Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false)))
-                                                 )
+      result shouldBe fullMobilePayeResponse.copy(
+        taxCodeChange             = Some(TaxCodeChange(hasChanged = false)),
+        pensions                  = Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false))),
+        updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
+      )
     }
 
     "throw UnauthorizedException when receiving UnauthorizedException from taiConnector" in {
@@ -602,10 +614,11 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
       val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
 
       result shouldBe fullMobilePayeResponse.copy(
-        simpleAssessment    = Some(fullMobileSimpleAssessmentResponse),
-        repayment           = None,
-        previousEmployments = Some(Seq(PayeIncome.fromIncomeSource(incomeSourceCeased, true))),
-        pensions            = Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false)))
+        simpleAssessment          = Some(fullMobileSimpleAssessmentResponse),
+        repayment                 = None,
+        previousEmployments       = Some(Seq(PayeIncome.fromIncomeSource(incomeSourceCeased, true))),
+        pensions                  = Some(pensionIncomeSourceNew.map(ic => PayeIncome.fromIncomeSource(ic, employment = false))),
+        updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
       )
     }
 

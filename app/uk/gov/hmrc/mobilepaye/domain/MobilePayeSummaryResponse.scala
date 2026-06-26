@@ -39,7 +39,7 @@ case class MobilePayeSummaryResponse(taxYear: Option[Int],
                                      addMissingBenefitLink: String = "/submissions/new-form/tell-hmrc-about-your-company-benefits/",
                                      addMissingCompanyCarLink: String = "/paye/company-car/do-you-pay-towards-car/",
                                      previousTaxYearLink: String = "/check-income-tax/income-tax-history",
-                                     updateEstimatedIncomeLink: String = "/check-income-tax/update-income/start",
+                                     updateEstimatedIncomeLink: Option[String] = None,
                                      updateEmployerLink: String = "/check-income-tax/update-remove-employment/decision-page",
                                      currentYearPlusOneLink: Option[String] = Some("/check-income-tax/income-tax-comparison"),
                                      taxCodeLocation: Option[String] = None,
@@ -68,7 +68,7 @@ object MobilePayeSummaryResponse {
     addMissingBenefitLink     <- (__ \ "addMissingBenefitLink").read[String]
     addMissingCompanyCarLink  <- (__ \ "addMissingCompanyCarLink").read[String]
     previousTaxYearLink       <- (__ \ "previousTaxYearLink").read[String]
-    updateEstimatedIncomeLink <- (__ \ "updateEstimatedIncomeLink").read[String]
+    updateEstimatedIncomeLink <- (__ \ "updateEstimatedIncomeLink").readNullable[String]
     updateEmployerLink        <- (__ \ "updateEmployerLink").read[String]
     currentYearPlusOneLink    <- (__ \ "currentYearPlusOneLink").readNullable[String]
     taxCodeLocation           <- (__ \ "taxCodeLocation").readNullable[String]
@@ -123,14 +123,14 @@ object MobilePayeSummaryResponse {
         response.estimatedTaxAmountLink.map("estimatedTaxAmountLink" -> JsString(_)),
         response.understandYourTaxCodeLink.map("understandYourTaxCodeLink" -> JsString(_))
       ).flatten ++ Seq(
-        Some("addMissingEmployerLink"    -> JsString(response.addMissingEmployerLink)),
-        Some("addMissingPensionLink"     -> JsString(response.addMissingPensionLink)),
-        Some("addMissingIncomeLink"      -> JsString(response.addMissingIncomeLink)),
-        Some("addMissingBenefitLink"     -> JsString(response.addMissingBenefitLink)),
-        Some("addMissingCompanyCarLink"  -> JsString(response.addMissingCompanyCarLink)),
-        Some("previousTaxYearLink"       -> JsString(response.previousTaxYearLink)),
-        Some("updateEstimatedIncomeLink" -> JsString(response.updateEstimatedIncomeLink)),
-        Some("updateEmployerLink"        -> JsString(response.updateEmployerLink)),
+        Some("addMissingEmployerLink"   -> JsString(response.addMissingEmployerLink)),
+        Some("addMissingPensionLink"    -> JsString(response.addMissingPensionLink)),
+        Some("addMissingIncomeLink"     -> JsString(response.addMissingIncomeLink)),
+        Some("addMissingBenefitLink"    -> JsString(response.addMissingBenefitLink)),
+        Some("addMissingCompanyCarLink" -> JsString(response.addMissingCompanyCarLink)),
+        Some("previousTaxYearLink"      -> JsString(response.previousTaxYearLink)),
+        response.updateEstimatedIncomeLink.map("updateEstimatedIncomeLink" -> JsString(_)),
+        Some("updateEmployerLink" -> JsString(response.updateEmployerLink)),
         response.currentYearPlusOneLink.map("currentYearPlusOneLink" -> JsString(_)),
         response.taxCodeLocation.map("taxCodeLocation" -> JsString(_)),
         Some("incomeTaxHistoricPayeUrl" -> JsString(response.incomeTaxHistoricPayeUrl)),
