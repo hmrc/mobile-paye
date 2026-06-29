@@ -406,6 +406,23 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
       )
     }
 
+    "return MobilePayeResponse with no employments no pension data" in {
+      mockMatchingTaxCodeAll(Future.successful(Seq.empty[IncomeSource] ++ Seq.empty[IncomeSource]))
+      mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
+      mockTaxAccountSummary(Future.successful(taxAccountSummary))
+      mockGetBenefits(Future.successful(noBenefits))
+      mockGetTaxCodeChangeExists(Future.successful(true))
+      mockGetTaxCodeChange(Future successful taxCodeChangeDetails)
+      mockP800Summary()
+
+      val result = await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
+
+      result shouldBe fullMobilePayeResponse.copy(
+        employments = None,
+        pensions    = None
+      )
+    }
+
     "return MobilePayeResponse with no pensions when pension data is missing" in {
       mockMatchingTaxCodeAll(Future.successful(employmentIncomeSource))
       mockNonTaxCodeIncomes(Future.successful(nonTaxCodeIncomeWithUntaxedInterest))
