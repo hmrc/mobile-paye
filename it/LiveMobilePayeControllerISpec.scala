@@ -108,7 +108,8 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
                   taxYear         = previousTaxYear,
                   claimRefundLink = Some(s"/tax-you-paid/$previousTaxYear-$currentTaxYear/paid-too-much")
                 )
-              )
+              ),
+              updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
             )
         )
 
@@ -170,7 +171,8 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
                   taxYear         = previousTaxYear,
                   claimRefundLink = Some(s"/tax-you-paid/$previousTaxYear-$currentTaxYear/paid-too-much")
                 )
-              )
+              ),
+              updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
             )
         )
 
@@ -221,7 +223,8 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
                   claimRefundLink = Some(s"/tax-you-paid/$previousTaxYear-$currentTaxYear/paid-too-much")
                 )
               ),
-              isRTIDown = true
+              isRTIDown                 = true,
+              updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
             )
         )
 
@@ -250,8 +253,13 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
-      response.status        shouldBe 200
-      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse.copy(employments = Some(employmentsNew), pensions = Some(pensionsNew)))
+      response.status shouldBe 200
+      response.body[JsValue] shouldBe Json.toJson(
+        fullMobilePayeResponse.copy(employments               = Some(employmentsNew),
+                                    pensions                  = Some(pensionsNew),
+                                    updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
+                                   )
+      )
 
     }
 
@@ -282,9 +290,10 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       response.body[JsValue] shouldBe Json.toJson(
         fullMobilePayeResponse
           .copy(
-            otherIncomes = Some(Seq(otherIncome)),
-            employments  = Some(employmentsNew),
-            pensions     = Some(pensionsNew)
+            otherIncomes              = Some(Seq(otherIncome)),
+            employments               = Some(employmentsNew),
+            pensions                  = Some(pensionsNew),
+            updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
           )
       )
     }
@@ -310,8 +319,13 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
-      response.status        shouldBe 200
-      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse.copy(employments = None, pensions = Some(pensionsNew)))
+      response.status shouldBe 200
+      response.body[JsValue] shouldBe Json.toJson(
+        fullMobilePayeResponse.copy(employments               = None,
+                                    pensions                  = Some(pensionsNew),
+                                    updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
+                                   )
+      )
     }
 
     "return OK and a valid MobilePayeResponse json without pensions" in {
@@ -336,8 +350,13 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
-      response.status        shouldBe 200
-      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse.copy(pensions = None, employments = Some(employmentsNew)))
+      response.status shouldBe 200
+      response.body[JsValue] shouldBe Json.toJson(
+        fullMobilePayeResponse.copy(pensions                  = None,
+                                    employments               = Some(employmentsNew),
+                                    updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
+                                   )
+      )
     }
 
     "return OK and a valid MobilePayeResponse json without otherIncomes" in {
@@ -365,7 +384,11 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsInt))
       response.status shouldBe 200
       response.body[JsValue] shouldBe Json.toJson(
-        fullMobilePayeResponse.copy(otherIncomes = None, employments = Some(employmentsNew), pensions = Some(pensionsNew))
+        fullMobilePayeResponse.copy(otherIncomes              = None,
+                                    employments               = Some(employmentsNew),
+                                    pensions                  = Some(pensionsNew),
+                                    updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
+                                   )
       )
     }
 
@@ -476,8 +499,13 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status        shouldBe 200
-      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse.copy(employments = Some(employmentsNew), pensions = Some(pensionsNew)))
+      response.status shouldBe 200
+      response.body[JsValue] shouldBe Json.toJson(
+        fullMobilePayeResponse.copy(employments               = Some(employmentsNew),
+                                    pensions                  = Some(pensionsNew),
+                                    updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
+                                   )
+      )
     }
 
     "return OK and a full valid MobilePayeResponse json with Rti down" in {
@@ -506,7 +534,11 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status shouldBe 200
       response.body[JsValue] shouldBe Json.toJson(
-        fullMobilePayeResponse.copy(employments = Some(employmentsNew), pensions = Some(pensionsNew), isRTIDown = true)
+        fullMobilePayeResponse.copy(employments               = Some(employmentsNew),
+                                    pensions                  = Some(pensionsNew),
+                                    isRTIDown                 = true,
+                                    updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
+                                   )
       )
     }
 
@@ -536,7 +568,12 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       response.status shouldBe 200
       response.body[JsValue] shouldBe Json.toJson(
         fullMobilePayeResponse
-          .copy(otherIncomes = Some(Seq(otherIncome)), employments = Some(employmentsNew), pensions = Some(pensionsNew))
+          .copy(
+            otherIncomes              = Some(Seq(otherIncome)),
+            employments               = Some(employmentsNew),
+            pensions                  = Some(pensionsNew),
+            updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
+          )
       )
     }
 
@@ -561,8 +598,13 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status        shouldBe 200
-      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse.copy(employments = None, pensions = Some(pensionsNew)))
+      response.status shouldBe 200
+      response.body[JsValue] shouldBe Json.toJson(
+        fullMobilePayeResponse.copy(employments               = None,
+                                    pensions                  = Some(pensionsNew),
+                                    updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
+                                   )
+      )
     }
 
     "return OK and a valid MobilePayeResponse json without pensions" in {
@@ -587,8 +629,13 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status        shouldBe 200
-      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse.copy(pensions = None, employments = Some(employmentsNew)))
+      response.status shouldBe 200
+      response.body[JsValue] shouldBe Json.toJson(
+        fullMobilePayeResponse.copy(pensions                  = None,
+                                    employments               = Some(employmentsNew),
+                                    updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
+                                   )
+      )
     }
 
     "return OK and a valid MobilePayeResponse json without otherIncomes" in {
@@ -616,7 +663,11 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
       response.status shouldBe 200
       response.body[JsValue] shouldBe Json.toJson(
-        fullMobilePayeResponse.copy(otherIncomes = None, employments = Some(employmentsNew), pensions = Some(pensionsNew))
+        fullMobilePayeResponse.copy(otherIncomes              = None,
+                                    employments               = Some(employmentsNew),
+                                    pensions                  = Some(pensionsNew),
+                                    updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
+                                   )
       )
     }
 
@@ -658,9 +709,10 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
           response.body[JsValue] shouldBe Json.toJson(
             fullMobilePayeResponse
               .copy(
-                repayment   = expectedRepayment,
-                employments = Some(employmentsNew),
-                pensions    = Some(pensionsNew)
+                repayment                 = expectedRepayment,
+                employments               = Some(employmentsNew),
+                pensions                  = Some(pensionsNew),
+                updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
               )
           )
         }
@@ -694,8 +746,13 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
           stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
           val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-          response.status        shouldBe 200
-          response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse.copy(employments = Some(employmentsNew), pensions = Some(pensionsNew)))
+          response.status shouldBe 200
+          response.body[JsValue] shouldBe Json.toJson(
+            fullMobilePayeResponse.copy(employments               = Some(employmentsNew),
+                                        pensions                  = Some(pensionsNew),
+                                        updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
+                                       )
+          )
         }
     }
 
@@ -727,8 +784,13 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
           stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
           val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-          response.status        shouldBe 200
-          response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse.copy(employments = Some(employmentsNew), pensions = Some(pensionsNew)))
+          response.status shouldBe 200
+          response.body[JsValue] shouldBe Json.toJson(
+            fullMobilePayeResponse.copy(employments               = Some(employmentsNew),
+                                        pensions                  = Some(pensionsNew),
+                                        updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
+                                       )
+          )
 
         }
     }
@@ -903,8 +965,13 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status        shouldBe 200
-      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse.copy(employments = Some(employmentsNew), pensions = Some(pensionsNew)))
+      response.status shouldBe 200
+      response.body[JsValue] shouldBe Json.toJson(
+        fullMobilePayeResponse.copy(employments               = Some(employmentsNew),
+                                    pensions                  = Some(pensionsNew),
+                                    updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
+                                   )
+      )
     }
 
     "return OK and no P800 when datePaid is more than 6 weeks ago" in {
@@ -930,8 +997,13 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status        shouldBe 200
-      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse.copy(employments = Some(employmentsNew), pensions = Some(pensionsNew)))
+      response.status shouldBe 200
+      response.body[JsValue] shouldBe Json.toJson(
+        fullMobilePayeResponse.copy(employments               = Some(employmentsNew),
+                                    pensions                  = Some(pensionsNew),
+                                    updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
+                                   )
+      )
     }
 
     "return OK and a P800 when datePaid is less than 6 weeks ago" in {
@@ -1025,8 +1097,13 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status        shouldBe 200
-      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse.copy(employments = Some(employmentsNew), pensions = Some(pensionsNew)))
+      response.status shouldBe 200
+      response.body[JsValue] shouldBe Json.toJson(
+        fullMobilePayeResponse.copy(employments               = Some(employmentsNew),
+                                    pensions                  = Some(pensionsNew),
+                                    updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
+                                   )
+      )
     }
 
     "return OK and no P800 when type is not overpaid" in {
@@ -1052,8 +1129,13 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status        shouldBe 200
-      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse.copy(employments = Some(employmentsNew), pensions = Some(pensionsNew)))
+      response.status shouldBe 200
+      response.body[JsValue] shouldBe Json.toJson(
+        fullMobilePayeResponse.copy(employments               = Some(employmentsNew),
+                                    pensions                  = Some(pensionsNew),
+                                    updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
+                                   )
+      )
     }
 
     "return OK and no P800 when status is sa_user" in {
@@ -1078,8 +1160,13 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status        shouldBe 200
-      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse.copy(pensions = None, employments = Some(employmentsNew)))
+      response.status shouldBe 200
+      response.body[JsValue] shouldBe Json.toJson(
+        fullMobilePayeResponse.copy(pensions                  = None,
+                                    employments               = Some(employmentsNew),
+                                    updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
+                                   )
+      )
     }
 
     "return OK and no P800 when status is unable_to_claim" in {
@@ -1104,8 +1191,13 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
       stubForTaxCodeChange(nino, taxCodeChangeDetails)
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
-      response.status        shouldBe 200
-      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse.copy(pensions = None, employments = Some(employmentsNew)))
+      response.status shouldBe 200
+      response.body[JsValue] shouldBe Json.toJson(
+        fullMobilePayeResponse.copy(pensions                  = None,
+                                    employments               = Some(employmentsNew),
+                                    updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
+                                   )
+      )
     }
 
     "return OK and a P800 with link when status is refund" in {
@@ -1209,8 +1301,13 @@ class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMo
 
       val response = await(getRequestWithAuthHeaders(urlWithCurrentYearAsCurrent))
 
-      response.status        shouldBe 200
-      response.body[JsValue] shouldBe Json.toJson(fullMobilePayeResponse.copy(employments = Some(employmentsNew), pensions = Some(pensionsNew)))
+      response.status shouldBe 200
+      response.body[JsValue] shouldBe Json.toJson(
+        fullMobilePayeResponse.copy(employments               = Some(employmentsNew),
+                                    pensions                  = Some(pensionsNew),
+                                    updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
+                                   )
+      )
 
     }
   }
@@ -1537,7 +1634,10 @@ class LiveMobilePayeControllerp800CacheEnabledISpec extends BaseISpec with Injec
 
       response.status shouldBe 200
       Json.parse(response.body).as[JsValue] shouldBe Json.toJson(
-        fullMobilePayeResponse.copy(employments = Some(employmentsNew), pensions = Some(pensionsNew))
+        fullMobilePayeResponse.copy(employments               = Some(employmentsNew),
+                                    pensions                  = Some(pensionsNew),
+                                    updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
+                                   )
       )
 
       Thread.sleep(2000)
@@ -1549,7 +1649,10 @@ class LiveMobilePayeControllerp800CacheEnabledISpec extends BaseISpec with Injec
       )
       response2.status shouldBe 200
       Json.parse(response.body).as[JsValue] shouldBe Json.toJson(
-        fullMobilePayeResponse.copy(employments = Some(employmentsNew), pensions = Some(pensionsNew))
+        fullMobilePayeResponse.copy(employments               = Some(employmentsNew),
+                                    pensions                  = Some(pensionsNew),
+                                    updateEstimatedIncomeLink = Some("/check-income-tax/update-income/start")
+                                   )
       )
 
       dropCollection()
