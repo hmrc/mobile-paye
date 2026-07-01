@@ -172,6 +172,61 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
         fullMobilePayeResponse.copy(simpleAssessment = Some(fullMobileSimpleAssessmentResponse))
       )
     }
+    "return 200 and full paye summary data for valid authorised nino with missing first name" in {
+
+      mockAuthorisationGrantAccess(grantAccessWithCL200)(mockAuthConnector)
+      mockShutteringResponse(notShuttered)(mockShutteringConnector)
+      mockGetPerson(Future.successful(person.copy(firstName = None)))
+      mockGetMobilePayeResponse(
+        Future.successful(fullMobilePayeResponse.copy(simpleAssessment = Some(fullMobileSimpleAssessmentResponse)))
+      )
+
+      mockAudit(nino, fullMobilePayeAudit.copy(simpleAssessment = Some(fullMobileSimpleAssessmentResponse)), jId1)
+
+      val result = controller.getPayeSummary(nino, jId1, currentTaxYear)(fakeRequest)
+
+      status(result) shouldBe 200
+      contentAsJson(result) shouldBe Json.toJson(
+        fullMobilePayeResponse.copy(simpleAssessment = Some(fullMobileSimpleAssessmentResponse))
+      )
+    }
+
+    "return 200 and full paye summary data for valid authorised nino with missing last name" in {
+
+      mockAuthorisationGrantAccess(grantAccessWithCL200)(mockAuthConnector)
+      mockShutteringResponse(notShuttered)(mockShutteringConnector)
+      mockGetPerson(Future.successful(person.copy(lastName = None)))
+      mockGetMobilePayeResponse(
+        Future.successful(fullMobilePayeResponse.copy(simpleAssessment = Some(fullMobileSimpleAssessmentResponse)))
+      )
+
+      mockAudit(nino, fullMobilePayeAudit.copy(simpleAssessment = Some(fullMobileSimpleAssessmentResponse)), jId1)
+
+      val result = controller.getPayeSummary(nino, jId1, currentTaxYear)(fakeRequest)
+
+      status(result) shouldBe 200
+      contentAsJson(result) shouldBe Json.toJson(
+        fullMobilePayeResponse.copy(simpleAssessment = Some(fullMobileSimpleAssessmentResponse))
+      )
+    }
+    "return 200 and full paye summary data for valid authorised nino with missing first and last name" in {
+
+      mockAuthorisationGrantAccess(grantAccessWithCL200)(mockAuthConnector)
+      mockShutteringResponse(notShuttered)(mockShutteringConnector)
+      mockGetPerson(Future.successful(person.copy(firstName = None, lastName = None)))
+      mockGetMobilePayeResponse(
+        Future.successful(fullMobilePayeResponse.copy(simpleAssessment = Some(fullMobileSimpleAssessmentResponse)))
+      )
+
+      mockAudit(nino, fullMobilePayeAudit.copy(simpleAssessment = Some(fullMobileSimpleAssessmentResponse)), jId1)
+
+      val result = controller.getPayeSummary(nino, jId1, currentTaxYear)(fakeRequest)
+
+      status(result) shouldBe 200
+      contentAsJson(result) shouldBe Json.toJson(
+        fullMobilePayeResponse.copy(simpleAssessment = Some(fullMobileSimpleAssessmentResponse))
+      )
+    }
 
     "return 200 and paye summary data with no employment data for valid authorised nino" in {
       mockShutteringResponse(notShuttered)
