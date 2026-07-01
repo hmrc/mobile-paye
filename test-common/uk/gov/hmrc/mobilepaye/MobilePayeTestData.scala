@@ -322,7 +322,7 @@ trait MobilePayeTestData {
     pensionSameOnly.map(ic => PayeIncome.fromIncomeSource(ic, employment = false))
 
   val taxAccountSummary: TaxAccountSummary = TaxAccountSummary(BigDecimal(250), BigDecimal(10000))
-  val person: Person = Person(nino, "Carrot", "Smith")
+  val person: Person = Person(nino, Some("Carrot"), Some("Smith"))
   val otherIncome: OtherIncome = OtherIncome("State Pension", 250.0, None)
   val otherIncome1: OtherIncome = OtherIncome(
     "Untaxed Interest Income",

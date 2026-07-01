@@ -19,7 +19,7 @@ package uk.gov.hmrc.mobilepaye.domain.citizendetails
 import play.api.libs.json.*
 import uk.gov.hmrc.domain.Nino
 
-case class Person(nino: Nino, firstName: String, lastName: String, deceased: Boolean = false)
+case class Person(nino: Nino, firstName: Option[String], lastName: Option[String], deceased: Boolean = false)
 
 object Person {
   implicit val personFormat: Format[Person] = Json.format[Person]
