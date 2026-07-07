@@ -20,10 +20,10 @@ import com.fasterxml.jackson.core.JsonParseException
 import com.google.inject.name.Named
 import com.google.inject.{Inject, Singleton}
 import play.api.Logger
-import play.api.libs.json.{JsResultException, JsValue}
+import play.api.libs.json.JsValue
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, StringContextOps}
+import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, StringContextOps, UpstreamErrorResponse}
 import uk.gov.hmrc.mobilepaye.domain.*
 import uk.gov.hmrc.mobilepaye.domain.tai.*
 import uk.gov.hmrc.http.HttpReads.Implicits.*
@@ -47,9 +47,10 @@ class TaiConnector @Inject() (http: HttpClientV2, @Named("tai") serviceUrl: Stri
   )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[NonTaxCodeIncome] =
     http
       .get(url"${url(nino, s"tax-account/$taxYear/income")}")
-      .execute[JsValue]
-      .map { json =>
-        (json \ "data" \ "nonTaxCodeIncomes").as[NonTaxCodeIncome]
+      .execute[Either[UpstreamErrorResponse, JsValue]]
+      .map {
+        case Left(e) => throw e
+        case Right(json) => (json \ "data" \ "nonTaxCodeIncomes").as[NonTaxCodeIncome]
       }
 
   def getTaxAccountSummary(
@@ -58,9 +59,10 @@ class TaiConnector @Inject() (http: HttpClientV2, @Named("tai") serviceUrl: Stri
   )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[TaxAccountSummary] =
     http
       .get(url"${url(nino, s"tax-account/$taxYear/summary")}")
-      .execute[JsValue]
-      .map { json =>
-        (json \ "data").as[TaxAccountSummary]
+      .execute[Either[UpstreamErrorResponse, JsValue]]
+      .map {
+        case Left(e) => throw e
+        case Right(json) => (json \ "data").as[TaxAccountSummary]
       }
 
   def getCYPlusOneAccountSummary(
@@ -69,14 +71,17 @@ class TaiConnector @Inject() (http: HttpClientV2, @Named("tai") serviceUrl: Stri
   )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Boolean] =
     http
       .get(url"${url(nino, s"tax-account/${taxYear + 1}/summary")}")
-      .execute[JsValue]
-      .map { json =>
-        (json \ "data").as[TaxAccountSummary]
-        true
-      } recover { case NonFatal(e) =>
-      logger.warn(s"Couldn't retrieve tax summary for $nino with exception:${e.getMessage}")
-      false
-    }
+      .execute[Either[UpstreamErrorResponse, JsValue]]
+      .map {
+        case Left(e) => throw e
+        case Right(json) =>
+          (json \ "data").as[TaxAccountSummary]
+          true
+      } recover {
+        case NonFatal(e) =>
+        logger.warn(s"Couldn't retrieve tax summary for $nino with exception:${e.getMessage}")
+        false
+      }
 
   def getMatchingTaxCodeIncomes(
     nino: Nino,
@@ -99,9 +104,10 @@ class TaiConnector @Inject() (http: HttpClientV2, @Named("tai") serviceUrl: Stri
   )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Benefits] =
     http
       .get(url"${url(nino, s"tax-account/$taxYear/benefits")}")
-      .execute[JsValue]
-      .map { json =>
-        (json \ "data").as[Benefits]
+      .execute[Either[UpstreamErrorResponse, JsValue]]
+      .map {
+        case Left(e) => throw e
+        case Right(json) => (json \ "data").as[Benefits]
       }
 
   def getTaxCodeIncomes(
@@ -110,9 +116,10 @@ class TaiConnector @Inject() (http: HttpClientV2, @Named("tai") serviceUrl: Stri
   )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Seq[TaxCodeIncome]] =
     http
       .get(url"${url(nino, s"tax-account/$taxYear/income/tax-code-incomes")}")
-      .execute[JsValue]
-      .map { json =>
-        (json \ "data").as[Seq[TaxCodeIncome]]
+      .execute[Either[UpstreamErrorResponse, JsValue]]
+      .map {
+        case Left(e) => throw e
+        case Right(json) => (json \ "data").as[Seq[TaxCodeIncome]]
       }
       .recover { case e =>
         Seq.empty[TaxCodeIncome]
@@ -131,7 +138,6 @@ class TaiConnector @Inject() (http: HttpClientV2, @Named("tai") serviceUrl: Stri
         employments.map { employment =>
           val accounts = annualAccounts.filter(_.sequenceNumber == employment.sequenceNumber)
           employment.copy(annualAccounts = accounts)
-
         }
       }
     }
@@ -143,14 +149,13 @@ class TaiConnector @Inject() (http: HttpClientV2, @Named("tai") serviceUrl: Stri
   )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Seq[Employment]] =
     http
       .get(url"${url(nino, s"employments-only/years/$taxYear")}")
-      .execute[JsValue]
-      .map { json =>
-        (json \ "data" \ "employments").as[Seq[Employment]]
+      .execute[Either[UpstreamErrorResponse, JsValue]]
+      .map {
+        case Left(e) => throw e
+        case Right(json) => (json \ "data" \ "employments").as[Seq[Employment]]
       }
       .recover {
         case jex: JsonParseException => throw new JsonParseException(s"GET of employments-only/years/$taxYear Failed with ${jex.getMessage}")
-        case nex: NotFoundException  => throw new NotFoundException(s"GET of employments-only/years/$taxYear Failed with ${nex.getMessage}")
-        case _: JsResultException    => Seq.empty[Employment]
         case e                       => throw e
       }
 
@@ -160,14 +165,14 @@ class TaiConnector @Inject() (http: HttpClientV2, @Named("tai") serviceUrl: Stri
   )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Seq[AnnualAccount]] = {
     http
       .get(url"${url(nino, s"rti-payments/years/$taxYear")}")
-      .execute[JsValue]
-      .map { json =>
-        (json \ "data").as[Seq[AnnualAccount]]
+      .execute[Either[UpstreamErrorResponse, JsValue]]
+      .map {
+        case Left(e) => throw e
+        case Right(json) => (json \ "data").as[Seq[AnnualAccount]]
       }
       .recover {
         case jex: JsonParseException => throw new JsonParseException(s"GET of rti-payments/years/$taxYear Failed with ${jex.getMessage}")
-        case _: NotFoundException    => Seq.empty[AnnualAccount]
-        case _: JsResultException    => Seq.empty[AnnualAccount]
+        case UpstreamErrorResponse(_, 404, _, _) => Seq.empty[AnnualAccount]
         case e                       => throw e
       }
   }
@@ -177,12 +182,15 @@ class TaiConnector @Inject() (http: HttpClientV2, @Named("tai") serviceUrl: Stri
   )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Boolean] =
     http
       .get(url"${url(nino, s"tax-account/tax-code-change/exists")}")
-      .execute[JsValue]
-      .map(_.as[Boolean])
+      .execute[Either[UpstreamErrorResponse, JsValue]]
+      .map {
+        case Left(e) => throw e
+        case Right(json) => json.as[Boolean]
+      }
       .recover {
         case jex: JsonParseException => throw new JsonParseException(s"GET of tax-account/tax-code-change/exists Failed with ${jex.getMessage}")
-        case _: NotFoundException    => false
-        case e                       => throw e
+        case UpstreamErrorResponse(_, 404, _, _)   => false
+        case e                                     => throw e
       }
 
   def getTaxCodesForYear(
@@ -191,13 +199,13 @@ class TaiConnector @Inject() (http: HttpClientV2, @Named("tai") serviceUrl: Stri
   )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Seq[TaxCodeRecord]] =
     http
       .get(url"${url(nino, s"tax-account/$taxYear/tax-code/latest")}")
-      .execute[JsValue]
-      .map { json =>
-        (json \ "data").as[Seq[TaxCodeRecord]]
+      .execute[Either[UpstreamErrorResponse, JsValue]]
+      .map {
+        case Left(e) => throw e
+        case Right(json) => (json \ "data").as[Seq[TaxCodeRecord]]
       }
       .recover {
-        case _: NotFoundException => Seq.empty[TaxCodeRecord]
-        case _: JsResultException => Seq.empty[TaxCodeRecord]
+        case UpstreamErrorResponse(_, 404, _, _) => Seq.empty[TaxCodeRecord]
         case e                    => throw e
       }
 
@@ -206,11 +214,9 @@ class TaiConnector @Inject() (http: HttpClientV2, @Named("tai") serviceUrl: Stri
   )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[TaxCodeChangeDetails] =
     http
       .get(url"${url(nino, s"tax-account/tax-code-change")}")
-      .execute[JsValue]
-      .map { json =>
-        (json \ "data").as[TaxCodeChangeDetails]
-      }
-      .recover { case _: JsResultException =>
-        TaxCodeChangeDetails(Seq.empty[TaxCodeRecord], Seq.empty[TaxCodeRecord])
+      .execute[Either[UpstreamErrorResponse, JsValue]]
+      .map {
+        case Left(e) => throw e
+        case Right(json) => (json \ "data").as[TaxCodeChangeDetails]
       }
 }
