@@ -23,7 +23,7 @@ The service can be run locally from Service Manager, using the following profile
 
 | Profile Details                | Command                                                                                                                                                                                     |
 |--------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| MOBILE_PAYE_ALL                | sm2 --start MOBILE_PAYE_ALL --appendArgs '{"MOBILE_PAYE": ["-DincomeTaxComparisonPeriod.rUK.startDate=2021-01-01T00:00:00", "-DincomeTaxComparisonPeriod.rUK.endDate=2030-01-01T00:00:00", "-Dapplication.router=testOnlyDoNotUseInAppConf.Routes"], "TAI": ["-Dapplication.router=testOnlyDoNotUseInAppConf.Routes"]}'                                                                  |
+| MOBILE_PAYE_ALL                | sm2 --start MOBILE_PAYE_ALL --appendArgs '{"MOBILE_PAYE": ["-DincomeTaxComparisonPeriod.rUK.startDate=2021-01-01T00:00:00", "-DincomeTaxComparisonPeriod.rUK.endDate=2030-01-01T00:00:00", "-Dapplication.router=testOnlyDoNotUseInAppConf.Routes"], "TAI": ["-Dapplication.router=testOnlyDoNotUseInAppConf.Routes"], "PERTAX":["-Dfeatures.single-account-check-enabled=true"]}'                                                                  |
 
 
 ## Run Tests
