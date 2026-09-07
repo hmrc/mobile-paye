@@ -20,15 +20,15 @@ import org.mongodb.scala.model.Filters.equal
 import org.mongodb.scala.model.{IndexModel, IndexOptions}
 import org.mongodb.scala.model.Indexes.ascending
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.{Inject, Named, Singleton}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mobilepaye.config.MobilePayeConfig
-import uk.gov.hmrc.mobilepaye.domain.P800Cache
+import uk.gov.hmrc.mobilepaye.domain.{P800Cache, P800CacheHashNino}
 import uk.gov.hmrc.mobilepaye.errors.MongoDBError
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.serviceResponse.ServiceResponse
-import org.mongodb.scala.{ObservableFuture, SingleObservableFuture}
+import uk.gov.hmrc.crypto.{OnewayCryptoFactory, PlainText, Sha512Crypto}
 
 import java.util.concurrent.TimeUnit
 import scala.concurrent.{ExecutionContext, Future}
@@ -36,12 +36,13 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class P800CacheMongo @Inject() (
   mongo: MongoComponent,
-  appConfig: MobilePayeConfig
+  appConfig: MobilePayeConfig,
+  @Named("encryptionEnabled") encryptionEnabled: Boolean
 )(implicit executionContext: ExecutionContext)
-    extends PlayMongoRepository[P800Cache](
+    extends PlayMongoRepository[P800CacheHashNino](
       collectionName = "p800Cache",
       mongoComponent = mongo,
-      domainFormat   = P800Cache.format,
+      domainFormat   = P800CacheHashNino.format,
       indexes = Seq(
         IndexModel(ascending("createdAt"),
                    IndexOptions()
@@ -54,19 +55,57 @@ class P800CacheMongo @Inject() (
                      .background(false)
                      .name("nino")
                      .unique(true)
-                  )
+                  ),
+        IndexModel(ascending("hashNino"),
+          IndexOptions()
+            .name("hashNinoIdx").
+            unique(true)
+            .sparse(true))
       )
     ) {
 
-  def add(p800Cache: P800Cache): ServiceResponse[P800Cache] =
-    collection
-      .insertOne(p800Cache)
-      .toFuture()
-      .map(_ => Right(p800Cache))
-      .recover { case _ =>
-        Left(MongoDBError("Unexpected error while writing a document."))
-      }
+  private val hasher: Sha512Crypto = OnewayCryptoFactory.sha(appConfig.ninoHashKey)
 
-  def selectByNino(nino: Nino): Future[Seq[P800Cache]] =
-    collection.find(equal("nino", nino.nino)).toFuture()
+  private def hashNino(nino: Nino) = hasher.hash(PlainText(nino.nino)).value
+
+  def add(p800Cache: P800Cache): ServiceResponse[P800CacheHashNino] = {
+    if(encryptionEnabled) {
+      val hashedNino = hashNino(p800Cache.nino)
+      val p800cacheUpdated = P800CacheHashNino(hashNino = Some(hashedNino))
+
+      collection
+        .insertOne(p800cacheUpdated)
+        .toFuture()
+        .map(_ => Right(p800cacheUpdated))
+        .recover { case _ =>
+          Left(MongoDBError("Unexpected error while writing a document."))
+        }
+
+    } else {
+      val p800cacheUpdated = P800CacheHashNino(nino = Some(p800Cache.nino), hashNino = None)
+      collection
+        .insertOne(p800cacheUpdated)
+        .toFuture()
+        .map(_ => Right(p800cacheUpdated))
+        .recover { case _ =>
+          Left(MongoDBError("Unexpected error while writing a document."))
+        }
+    }
+  }
+
+  def selectByNino(nino: Nino): Future[Seq[P800CacheHashNino]] = {
+    if(encryptionEnabled) {
+      val hashedNino: String = hashNino(nino)
+      collection
+        .find(equal("hashNino", hashedNino))
+        .toFuture()
+        .flatMap {
+          case found if found.nonEmpty => Future.successful(found)
+          case _ => collection.find(equal("nino", nino.nino)).toFuture()
+        }
+
+    } else {
+      collection.find(equal("nino", nino.nino)).toFuture()
+    }
+  }
 }
