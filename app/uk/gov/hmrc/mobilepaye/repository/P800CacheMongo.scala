@@ -16,9 +16,10 @@
 
 package uk.gov.hmrc.mobilepaye.repository
 
-import org.mongodb.scala.model.Filters.equal
-import org.mongodb.scala.model.{IndexModel, IndexOptions}
+import org.mongodb.scala.model.Filters.{equal, or}
+import org.mongodb.scala.model.{IndexModel, IndexOptions, UpdateOptions}
 import org.mongodb.scala.model.Indexes.ascending
+import org.mongodb.scala.model.Updates.{combine, set, setOnInsert, unset}
 
 import javax.inject.{Inject, Named, Singleton}
 import uk.gov.hmrc.domain.Nino
@@ -66,10 +67,33 @@ class P800CacheMongo @Inject() (
 
   private val hasher: Sha512Crypto = OnewayCryptoFactory.sha(appConfig.ninoHashKey)
 
-  private def hashNino(nino: Nino) = hasher.hash(PlainText(nino.nino)).value
+  def hashNino(nino: Nino) = hasher.hash(PlainText(nino.nino)).value
 
-  def add(p800Cache: P800Cache): ServiceResponse[P800CacheHashNino] = {
+  def updateOne(p800Cache: P800Cache): Future[Boolean] = {
     if(encryptionEnabled) {
+      collection
+        .updateOne(
+          filter = or(
+            equal("hashNino", hashNino(p800Cache.nino)),
+            equal("nino", p800Cache.nino.nino)
+          ),
+          update = combine(
+            set("hashNino", hashNino(p800Cache.nino)),
+            setOnInsert("createdAt", p800Cache.createdAt),
+            unset("nino")
+          ),
+          options = UpdateOptions().upsert(true)
+        )
+        .toFuture()
+        .map { result =>
+          result.wasAcknowledged() && result.getModifiedCount > 0
+        }
+    } else
+      Future.successful(true)
+  }
+
+  def add(p800Cache: P800Cache, withHash: Boolean = true): ServiceResponse[P800CacheHashNino] = {
+    if(encryptionEnabled && withHash) {
       val hashedNino = hashNino(p800Cache.nino)
       val p800cacheUpdated = P800CacheHashNino(hashNino = Some(hashedNino))
 
@@ -91,6 +115,18 @@ class P800CacheMongo @Inject() (
           Left(MongoDBError("Unexpected error while writing a document."))
         }
     }
+  }
+
+  def deleteMany(nino: Nino): Future[Boolean] = {
+    collection
+      .deleteMany(
+        or(
+          equal("hashNino", hashNino(nino)),
+          equal("nino", nino.nino)
+        )
+      )
+      .toFuture()
+      .map(_.getDeletedCount > 0)
   }
 
   def selectByNino(nino: Nino): Future[Seq[P800CacheHashNino]] = {

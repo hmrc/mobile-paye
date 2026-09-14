@@ -165,6 +165,7 @@ class MobilePayeService @Inject() (taiConnector: TaiConnector,
           taxYearRecs
 
         } else {
+          p800CacheMongo.updateOne(P800Cache(nino))
           Future.successful(None)
         }
       }
