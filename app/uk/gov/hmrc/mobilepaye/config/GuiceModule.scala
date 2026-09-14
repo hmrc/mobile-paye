@@ -21,7 +21,6 @@ import com.google.inject.{AbstractModule, TypeLiteral}
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 
-import uk.gov.hmrc.mobilepaye.controllers.api.ApiAccess
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
@@ -40,7 +39,7 @@ class GuiceModule(environment: Environment, configuration: Configuration) extend
     bind(classOf[AuditConnector]).to(classOf[DefaultAuditConnector])
 
     bindConfigInt("controllers.confidenceLevel")
-    bind(classOf[ApiAccess]).toInstance(ApiAccess("PRIVATE"))
+    bind(classOf[String]).toInstance("CONTROLLED")
 
     bindConfigStringSeq("scopes")
     bind(classOf[String]).annotatedWith(named("tai")).toInstance(servicesConfig.baseUrl("tai"))

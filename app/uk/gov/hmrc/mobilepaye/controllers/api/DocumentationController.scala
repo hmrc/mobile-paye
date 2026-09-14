@@ -17,21 +17,15 @@
 package uk.gov.hmrc.mobilepaye.controllers.api
 
 import controllers.Assets
-
-import javax.inject.{Inject, Singleton}
 import play.api.http.HttpErrorHandler
 import play.api.libs.json.{Json, OWrites}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.mobilepaye.views.txt
 
-case class ApiAccess(`type`: String)
-
-object ApiAccess {
-  implicit val writes: OWrites[ApiAccess] = Json.writes[ApiAccess]
-}
+import javax.inject.{Inject, Singleton}
 
 @Singleton
-class DocumentationController @Inject() (apiAccess: ApiAccess, cc: ControllerComponents, assets: Assets, errorHandler: HttpErrorHandler)
+class DocumentationController @Inject() (apiAccess: String, cc: ControllerComponents, assets: Assets, errorHandler: HttpErrorHandler)
     extends uk.gov.hmrc.api.controllers.DocumentationController(
       cc,
       assets,
