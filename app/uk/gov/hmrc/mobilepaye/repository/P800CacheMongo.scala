@@ -55,13 +55,14 @@ class P800CacheMongo @Inject() (
                    IndexOptions()
                      .background(false)
                      .name("nino")
-                     .unique(true)
+                     .unique(false)
                   ),
         IndexModel(ascending("hashNino"),
-          IndexOptions()
-            .name("hashNinoIdx").
-            unique(true)
-            .sparse(true))
+                   IndexOptions()
+                     .name("hashNinoIdx")
+                     .unique(true)
+                     .sparse(true)
+                  )
       )
     ) {
 
@@ -69,8 +70,9 @@ class P800CacheMongo @Inject() (
 
   def hashNino(nino: Nino) = hasher.hash(PlainText(nino.nino)).value
 
-  def updateOne(p800Cache: P800Cache): Future[Boolean] = {
-    if(encryptionEnabled) {
+  def updateOne(nino: Nino, withHash: Boolean = true): Future[Boolean] = {
+    val p800Cache = P800Cache(nino)
+    if (encryptionEnabled && withHash) {
       collection
         .updateOne(
           filter = or(
@@ -88,22 +90,68 @@ class P800CacheMongo @Inject() (
         .map { result =>
           result.wasAcknowledged() && result.getModifiedCount > 0
         }
-    } else
-      Future.successful(true)
+        .recover { case ex =>
+          println(" db error :: " + ex)
+          false
+
+        }
+    } else {
+      collection
+        .updateOne(
+          filter = or(
+            equal("hashNino", hashNino(p800Cache.nino)),
+            equal("nino", p800Cache.nino.nino)
+          ),
+          update = combine(
+            set("hashNino", hashNino(p800Cache.nino)),
+            set("nino", p800Cache.nino.nino),
+            setOnInsert("createdAt", p800Cache.createdAt),
+            unset("hashNino")
+          ),
+          options = UpdateOptions().upsert(true)
+        )
+        .toFuture()
+        .map { result =>
+          result.wasAcknowledged() && result.getModifiedCount > 0
+        }
+    }
   }
 
   def add(p800Cache: P800Cache, withHash: Boolean = true): ServiceResponse[P800CacheHashNino] = {
-    if(encryptionEnabled && withHash) {
+    if (encryptionEnabled && withHash) {
+      println(" inside if")
       val hashedNino = hashNino(p800Cache.nino)
+      println(" hashedNino :: " + hashedNino)
       val p800cacheUpdated = P800CacheHashNino(hashNino = Some(hashedNino))
-
       collection
-        .insertOne(p800cacheUpdated)
+        .updateOne(
+          filter = or(
+            equal("hashNino", hashNino(p800Cache.nino)),
+            equal("nino", p800Cache.nino.nino)
+          ),
+          update = combine(
+            set("hashNino", hashNino(p800Cache.nino)),
+            setOnInsert("createdAt", p800Cache.createdAt),
+            unset("nino")
+          ),
+          options = UpdateOptions().upsert(true)
+        )
         .toFuture()
-        .map(_ => Right(p800cacheUpdated))
-        .recover { case _ =>
+        .map { result =>
+          Right(p800cacheUpdated)
+        }
+        .recover { case ex =>
+          println(" db error 2 :: " + ex);
           Left(MongoDBError("Unexpected error while writing a document."))
         }
+//      collection
+//        .insertOne(p800cacheUpdated)
+//        .toFuture()
+//        .map(_ => Right(p800cacheUpdated))
+//        .recover { case ex =>
+//          println(" db error 2 :: " + ex);
+//          Left(MongoDBError("Unexpected error while writing a document."))
+//        }
 
     } else {
       val p800cacheUpdated = P800CacheHashNino(nino = Some(p800Cache.nino), hashNino = None)
@@ -127,17 +175,21 @@ class P800CacheMongo @Inject() (
       )
       .toFuture()
       .map(_.getDeletedCount > 0)
+      .recover { case ex =>
+        println(" db error 3 :: " + ex);
+        false
+      }
   }
 
   def selectByNino(nino: Nino): Future[Seq[P800CacheHashNino]] = {
-    if(encryptionEnabled) {
+    if (encryptionEnabled) {
       val hashedNino: String = hashNino(nino)
       collection
         .find(equal("hashNino", hashedNino))
         .toFuture()
         .flatMap {
-          case found if found.nonEmpty => Future.successful(found)
-          case _ => collection.find(equal("nino", nino.nino)).toFuture()
+          case found if found.nonEmpty => println(" found object"); Future.successful(found)
+          case _                       => collection.find(equal("nino", nino.nino)).toFuture()
         }
 
     } else {

@@ -30,9 +30,9 @@ import uk.gov.hmrc.mobilepaye.domain.{P800Cache, P800CacheHashNino}
 import uk.gov.hmrc.serviceResponse.Response
 
 class TestController @Inject() (
-                                 adminRepo: AdminRepository,
-                                 p800CacheRepo: P800CacheMongo,
-                                 val controllerComponents: ControllerComponents
+  adminRepo: AdminRepository,
+  p800CacheRepo: P800CacheMongo,
+  val controllerComponents: ControllerComponents
 )(implicit ec: ExecutionContext)
     extends BackendBaseController {
 
@@ -46,30 +46,35 @@ class TestController @Inject() (
     }
   }
 
-
   def getP800Cache(nino: Nino): Action[AnyContent] = Action.async {
     p800CacheRepo.selectByNino(nino).map {
       case p800cache if p800cache.nonEmpty => Ok(Json.toJson(p800cache))
-      case _ => NotFound
+      case _                               => NotFound
     }
   }
 
-  def addNino(nino:Nino, withHash: Boolean = false) = Action.async {
+  def addNino(nino: Nino, withHash: Boolean = false) = Action.async {
 
+//    p800CacheRepo.updateOne(nino, withHash).map {
+//      case true  => Ok
+//      case false => NotFound
+//    }
     for {
       p800cache <- p800CacheRepo.selectByNino(nino)
-      _ <- if(p800cache.nonEmpty) p800CacheRepo.deleteMany(nino) else Future.successful(())
+      _ = println("p800cache ::" + p800cache)
+      res <- if (p800cache.nonEmpty) p800CacheRepo.deleteMany(nino) else Future.successful(true)
+      _ = println("res ::" + res)
       p800cacheResponse <- p800CacheRepo.add(P800Cache(nino), withHash)
     } yield {
       p800cacheResponse match {
-        case Left(value) => BadRequest
+        case Left(value)  => println(" value is ::" + value); BadRequest
         case Right(value) => Ok(Json.toJson(value))
       }
     }
 
   }
-  
-  def delete(nino:Nino) = Action.async {
+
+  def delete(nino: Nino) = Action.async {
     p800CacheRepo.deleteMany(nino).map {
       case true  => Ok
       case false => NotFound
