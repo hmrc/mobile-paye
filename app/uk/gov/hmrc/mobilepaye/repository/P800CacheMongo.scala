@@ -44,6 +44,7 @@ class P800CacheMongo @Inject() (
       collectionName = "p800Cache",
       mongoComponent = mongo,
       domainFormat   = P800CacheHashNino.format,
+      replaceIndexes = true,
       indexes = Seq(
         IndexModel(ascending("createdAt"),
                    IndexOptions()
@@ -55,7 +56,8 @@ class P800CacheMongo @Inject() (
                    IndexOptions()
                      .background(false)
                      .name("nino")
-                     .unique(false)
+                     .unique(true)
+                     .sparse(true)
                   ),
         IndexModel(ascending("hashNino"),
                    IndexOptions()
@@ -70,58 +72,9 @@ class P800CacheMongo @Inject() (
 
   def hashNino(nino: Nino) = hasher.hash(PlainText(nino.nino)).value
 
-  def updateOne(nino: Nino, withHash: Boolean = true): Future[Boolean] = {
-    val p800Cache = P800Cache(nino)
-    if (encryptionEnabled && withHash) {
-      collection
-        .updateOne(
-          filter = or(
-            equal("hashNino", hashNino(p800Cache.nino)),
-            equal("nino", p800Cache.nino.nino)
-          ),
-          update = combine(
-            set("hashNino", hashNino(p800Cache.nino)),
-            setOnInsert("createdAt", p800Cache.createdAt),
-            unset("nino")
-          ),
-          options = UpdateOptions().upsert(true)
-        )
-        .toFuture()
-        .map { result =>
-          result.wasAcknowledged() && result.getModifiedCount > 0
-        }
-        .recover { case ex =>
-          println(" db error :: " + ex)
-          false
-
-        }
-    } else {
-      collection
-        .updateOne(
-          filter = or(
-            equal("hashNino", hashNino(p800Cache.nino)),
-            equal("nino", p800Cache.nino.nino)
-          ),
-          update = combine(
-            set("hashNino", hashNino(p800Cache.nino)),
-            set("nino", p800Cache.nino.nino),
-            setOnInsert("createdAt", p800Cache.createdAt),
-            unset("hashNino")
-          ),
-          options = UpdateOptions().upsert(true)
-        )
-        .toFuture()
-        .map { result =>
-          result.wasAcknowledged() && result.getModifiedCount > 0
-        }
-    }
-  }
-
   def add(p800Cache: P800Cache, withHash: Boolean = true): ServiceResponse[P800CacheHashNino] = {
     if (encryptionEnabled && withHash) {
-      println(" inside if")
       val hashedNino = hashNino(p800Cache.nino)
-      println(" hashedNino :: " + hashedNino)
       val p800cacheUpdated = P800CacheHashNino(hashNino = Some(hashedNino))
       collection
         .updateOne(
@@ -140,18 +93,9 @@ class P800CacheMongo @Inject() (
         .map { result =>
           Right(p800cacheUpdated)
         }
-        .recover { case ex =>
-          println(" db error 2 :: " + ex);
+        .recover { case _ =>
           Left(MongoDBError("Unexpected error while writing a document."))
         }
-//      collection
-//        .insertOne(p800cacheUpdated)
-//        .toFuture()
-//        .map(_ => Right(p800cacheUpdated))
-//        .recover { case ex =>
-//          println(" db error 2 :: " + ex);
-//          Left(MongoDBError("Unexpected error while writing a document."))
-//        }
 
     } else {
       val p800cacheUpdated = P800CacheHashNino(nino = Some(p800Cache.nino), hashNino = None)
@@ -175,8 +119,7 @@ class P800CacheMongo @Inject() (
       )
       .toFuture()
       .map(_.getDeletedCount > 0)
-      .recover { case ex =>
-        println(" db error 3 :: " + ex);
+      .recover { case _ =>
         false
       }
   }

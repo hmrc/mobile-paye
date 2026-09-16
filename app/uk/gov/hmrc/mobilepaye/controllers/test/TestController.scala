@@ -27,7 +27,7 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.json.Json
 import uk.gov.hmrc.mobilepaye.domain.{P800Cache, P800CacheHashNino}
-import uk.gov.hmrc.serviceResponse.Response
+
 
 class TestController @Inject() (
   adminRepo: AdminRepository,
@@ -54,11 +54,6 @@ class TestController @Inject() (
   }
 
   def addNino(nino: Nino, withHash: Boolean = false) = Action.async {
-
-//    p800CacheRepo.updateOne(nino, withHash).map {
-//      case true  => Ok
-//      case false => NotFound
-//    }
     for {
       p800cache <- p800CacheRepo.selectByNino(nino)
       _ = println("p800cache ::" + p800cache)
