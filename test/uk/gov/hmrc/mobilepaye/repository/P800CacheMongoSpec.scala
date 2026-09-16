@@ -24,7 +24,6 @@ import play.api.Configuration
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mobilepaye.config.MobilePayeConfig
 import uk.gov.hmrc.mobilepaye.domain.{P800Cache, P800CacheHashNino}
-import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 import uk.gov.hmrc.serviceResponse.Response
 
@@ -43,6 +42,7 @@ class P800CacheMongoSpec extends AnyWordSpec with Matchers with ScalaFutures wit
   private lazy val repositoryWithoutEncrypt: P800CacheMongo = new P800CacheMongo(mongoComponent, mobilePayeConfig, encryptionEnabled = false)
   override protected val repository: P800CacheMongo = new P800CacheMongo(mongoComponent, mobilePayeConfig, encryptionEnabled = true)
   val nino: Nino = Nino("CS700100A")
+  val nino1: Nino = Nino("AB000000C")
   "P800CacheMongo" should {
 
     "when encryption is disabled" should {
@@ -86,8 +86,22 @@ class P800CacheMongoSpec extends AnyWordSpec with Matchers with ScalaFutures wit
     }
 
     "when encryption is enabled" should {
-      "add new record with hashNino" in {
+
+      "add new record with hashNino, with no existing records having nino in decrypted state" in {
         repository.collection.drop()
+        val result: Response[P800CacheHashNino] =
+          repository.add(P800Cache(nino)).futureValue
+        result.toOption.get.nino mustBe None
+        result.toOption.get.hashNino.get mustBe repository.hashNino(nino)
+        repository.collection.drop()
+
+      }
+
+      "add new record with hashNino, with existing records having nino in decrypted state" in {
+        repository.collection.drop()
+        val result1 = repositoryWithoutEncrypt.add(P800Cache(nino1)).futureValue
+        result1.toOption.get.nino mustBe Some(nino1)
+        result1.toOption.get.hashNino mustBe None
         val result: Response[P800CacheHashNino] =
           repository.add(P800Cache(nino)).futureValue
         result.toOption.get.nino mustBe None
@@ -105,7 +119,7 @@ class P800CacheMongoSpec extends AnyWordSpec with Matchers with ScalaFutures wit
         result.head.hashNino.get mustBe repository.hashNino(nino)
         repository.collection.drop()
       }
-      
+
       "delete the record with hashNino" in {
         repository.collection.drop()
         repository.add(P800Cache(nino)).futureValue
