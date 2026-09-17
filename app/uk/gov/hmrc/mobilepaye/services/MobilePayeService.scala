@@ -27,8 +27,7 @@ import uk.gov.hmrc.mobilepaye.domain.tai.*
 import uk.gov.hmrc.mobilepaye.domain.types.JourneyId
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status.{NotSupported, Overpaid, Underpaid}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.{P800Summary, TaxYearReconciliation}
-
-import uk.gov.hmrc.mobilepaye.domain.{IncomeSource, MobilePayeSummaryResponse, OtherIncome, P800Cache, P800Repayment, PayeIncome, TaxCodeChange}
+import uk.gov.hmrc.mobilepaye.domain.{IncomeSource, MobilePayeSummaryResponse, OtherIncome, P800Cache, P800CacheHashNino, P800Repayment, PayeIncome, TaxCodeChange}
 import uk.gov.hmrc.mobilepaye.repository.P800CacheMongo
 
 import java.time.{LocalDateTime, ZoneId}
@@ -153,7 +152,7 @@ class MobilePayeService @Inject() (taiConnector: TaiConnector,
 
   private def useCacheForP800Check(
     nino: Nino
-  )(implicit hc: HeaderCarrier, ec: ExecutionContext) =
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[List[TaxYearReconciliation]]] =
     p800CacheMongo
       .selectByNino(nino)
       .flatMap { recordFound =>

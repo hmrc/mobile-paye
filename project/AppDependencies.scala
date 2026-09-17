@@ -9,8 +9,8 @@ object AppDependencies {
   private val domainVersion = "13.0.0"
   private val taxYearVersion = "6.0.0"
   private val scalaMockVersion = "7.5.5"
-  private val hmrcMongoVersion = "2.12.0"
-  private val refinedVersion = "0.11.3"
+  private val hmrcMongoVersion = "2.14.0"
+  private val refinedVersion = "0.11.4"
   private val authClientVersion = "4.1.0"
   private val jsonExtensionsVersion = "0.42.0"
 
