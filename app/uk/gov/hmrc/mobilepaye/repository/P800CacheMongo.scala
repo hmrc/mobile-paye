@@ -131,7 +131,7 @@ class P800CacheMongo @Inject() (
         .find(equal("hashNino", hashedNino))
         .toFuture()
         .flatMap {
-          case found if found.nonEmpty => println(" found object"); Future.successful(found)
+          case found if found.nonEmpty => Future.successful(found)
           case _                       => collection.find(equal("nino", nino.nino)).toFuture()
         }
 

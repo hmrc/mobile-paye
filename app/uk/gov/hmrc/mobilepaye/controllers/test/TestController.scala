@@ -28,7 +28,6 @@ import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.json.Json
 import uk.gov.hmrc.mobilepaye.domain.{P800Cache, P800CacheHashNino}
 
-
 class TestController @Inject() (
   adminRepo: AdminRepository,
   p800CacheRepo: P800CacheMongo,
@@ -55,14 +54,12 @@ class TestController @Inject() (
 
   def addNino(nino: Nino, withHash: Boolean = false) = Action.async {
     for {
-      p800cache <- p800CacheRepo.selectByNino(nino)
-      _ = println("p800cache ::" + p800cache)
-      res <- if (p800cache.nonEmpty) p800CacheRepo.deleteMany(nino) else Future.successful(true)
-      _ = println("res ::" + res)
+      p800cache         <- p800CacheRepo.selectByNino(nino)
+      res               <- if (p800cache.nonEmpty) p800CacheRepo.deleteMany(nino) else Future.successful(true)
       p800cacheResponse <- p800CacheRepo.add(P800Cache(nino), withHash)
     } yield {
       p800cacheResponse match {
-        case Left(value)  => println(" value is ::" + value); BadRequest
+        case Left(value)  => BadRequest
         case Right(value) => Ok(Json.toJson(value))
       }
     }
