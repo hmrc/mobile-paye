@@ -14,13 +14,20 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.mobilepaye.config
-import javax.inject.Inject
-import play.api.Configuration
+package uk.gov.hmrc.mobilepaye.domain
 
-case class MobilePayeConfig @Inject() (configuration: Configuration) {
+import play.api.libs.json.{Format, Json}
+import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
-  val internalAuthResourceType: String = configuration.get[String]("microservice.services.internal-auth.resource-type")
-  val mongoTtl: Long = configuration.get[Long]("mongodb.ttlSecond")
-  val ninoHashKey: String = configuration.get[String]("mongodb.hashKey")
+import java.time.Instant
+
+case class P800CacheHashNino(nino: Option[Nino] = None, hashNino: Option[String], createdAt: Instant = Instant.now())
+
+object P800CacheHashNino {
+
+  implicit val dateFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
+
+  implicit val format: Format[P800CacheHashNino] = Json.format[P800CacheHashNino]
+
 }

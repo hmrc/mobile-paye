@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,9 @@ import java.time.format.DateTimeFormatter
 import java.time.{LocalDateTime, ZoneId}
 import scala.concurrent.{ExecutionContext, Future}
 
-class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P800Cache] with ShutteringMock {
+class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P800CacheHashNino] with ShutteringMock {
 
-  override val repository: P800CacheMongo = new P800CacheMongo(mongoComponent, appConfig)
+  override val repository: P800CacheMongo = new P800CacheMongo(mongoComponent, appConfig, true)
 
   implicit val mockShutteringConnector: ShutteringConnector = mock[ShutteringConnector]
   val mockTaiConnector: TaiConnector = mock[TaiConnector]

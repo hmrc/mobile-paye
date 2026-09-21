@@ -1,3 +1,4 @@
+import org.apache.pekko.util.Timeout
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import play.api.Application
@@ -14,11 +15,11 @@ import stubs.CitizenDetailsStub.*
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.mobilepaye.domain.admin.{FeatureFlag, OnlinePaymentIntegration}
 import uk.gov.hmrc.mobilepaye.config.MobilePayeConfig
-import uk.gov.hmrc.mobilepaye.domain.tai.{AnnualAccount, Available, CarBenefit, Ceased, MedicalInsurance, NotLive, Payment, PensionIncome, TaxCodeChangeDetails, TemporarilyUnavailable}
+import uk.gov.hmrc.mobilepaye.domain.tai.{AnnualAccount, Available, CarBenefit, Ceased, MedicalInsurance, Payment, PensionIncome, TaxCodeChangeDetails, TemporarilyUnavailable}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.P800Status.{Overpaid, Underpaid}
 import uk.gov.hmrc.mobilepaye.domain.taxcalc.RepaymentStatus.*
-import uk.gov.hmrc.mobilepaye.domain.{IncomeTaxYear, MobilePayeSummaryResponse, OtherBenefits, P800Cache, P800Repayment, PayeIncome, Shuttering}
+import uk.gov.hmrc.mobilepaye.domain.{IncomeTaxYear, MobilePayeSummaryResponse, OtherBenefits, P800CacheHashNino, P800Repayment, PayeIncome, Shuttering}
 import uk.gov.hmrc.mobilepaye.repository.P800CacheMongo
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.mongo.test.PlayMongoRepositorySupport
@@ -26,16 +27,18 @@ import uk.gov.hmrc.time.TaxYear
 import utils.BaseISpec
 import play.api.libs.ws.readableAsJson
 
+import scala.concurrent.duration.*
 import scala.language.implicitConversions
 import java.time.LocalDate
 import scala.concurrent.Future
 import scala.util.Random
 
-class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMongoRepositorySupport[P800Cache] {
+class LiveMobilePayeControllerISpec extends BaseISpec with Injecting with PlayMongoRepositorySupport[P800CacheHashNino] {
 
   val appConfig: MobilePayeConfig = MobilePayeConfig(app.configuration)
+  implicit val timeout: Timeout = Timeout(5.seconds)
 
-  override val repository: PlayMongoRepository[P800Cache] = app.injector.instanceOf[P800CacheMongo]
+  override val repository: PlayMongoRepository[P800CacheHashNino] = app.injector.instanceOf[P800CacheMongo]
 
   lazy val urlWithCurrentYearAsInt =
     s"/nino/$nino/tax-year/$currentTaxYear/summary?journeyId=27085215-69a4-4027-8f72-b04b10ec16b0"
@@ -1582,9 +1585,9 @@ class LiveMobilePayeControllerShutteredISpec extends BaseISpec {
 
 }
 
-class LiveMobilePayeControllerp800CacheEnabledISpec extends BaseISpec with Injecting with PlayMongoRepositorySupport[P800Cache] {
+class LiveMobilePayeControllerp800CacheEnabledISpec extends BaseISpec with Injecting with PlayMongoRepositorySupport[P800CacheHashNino] {
 
-  override val repository: PlayMongoRepository[P800Cache] = app.injector.instanceOf[P800CacheMongo]
+  override val repository: PlayMongoRepository[P800CacheHashNino] = app.injector.instanceOf[P800CacheMongo]
 
   override protected def appBuilder: GuiceApplicationBuilder = new GuiceApplicationBuilder().configure(
     config ++

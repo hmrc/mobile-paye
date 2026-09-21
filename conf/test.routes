@@ -1,1 +1,4 @@
-PUT        /setFlag/:flagName/:isEnabled        uk.gov.hmrc.mobilepaye.controllers.test.TestController.setFlag(flagName: FeatureFlagName, isEnabled: Boolean)
+PUT       /setFlag/:flagName/:isEnabled        uk.gov.hmrc.mobilepaye.controllers.test.TestController.setFlag(flagName: FeatureFlagName, isEnabled: Boolean)
+GET       /p800cache/nino/:nino                 uk.gov.hmrc.mobilepaye.controllers.test.TestController.getP800Cache(nino: uk.gov.hmrc.domain.Nino)
+PUT       /p800cache/nino/:nino/withHash/:flag                 uk.gov.hmrc.mobilepaye.controllers.test.TestController.addNino(nino: uk.gov.hmrc.domain.Nino, flag: Boolean)
+DELETE    /p800cache/nino/:nino                  uk.gov.hmrc.mobilepaye.controllers.test.TestController.delete(nino: uk.gov.hmrc.domain.Nino)

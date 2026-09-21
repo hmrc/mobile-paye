@@ -42,6 +42,16 @@ API
 | ```/mobile-paye/nino/:nino/income-tax-history```                 | GET                 | Fetch the Income Tax History (Default 5 years) for a given NINO. [More...](docs/income-tax-history.md)                                   |
 | ```/mobile-paye/nino/:nino/tax-code```                           | GET                 | Get the current tax code for a given NINO. [More...](docs/tax-code.md)                                                                   |
 
+
+Test-only routes to manipulate data in the database
+---
+
+| *Task*                                     | *Supported Methods* | *Description*                                                                                                                                                                           |
+|--------------------------------------------|---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ```/p800cache/nino/:nino```                | GET                 | Fetch the p800 cache data for that nino irrespective of the fact that nino is encrypted or not                                                                                          |
+| ```/p800cache/nino/:nino/withHash/:flag``` | PUT                 | Creates an entry in the DB for the given nino. If withhash flag is false, then entry will go as old record . With flag as true the nino will be entered as encryopted value as ninoHash |
+| ```/mobile-paye/nino/:nino```              | DELETE              | Deletes the given nino from DB  even if it's encryoted.                                                                                                                                 |
+                                                                                                                  
 Shuttered
 ---------
 When the service is shuttered it will return the following JSON
