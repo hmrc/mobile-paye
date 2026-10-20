@@ -39,7 +39,7 @@ class GuiceModule(environment: Environment, configuration: Configuration) extend
     bind(classOf[AuditConnector]).to(classOf[DefaultAuditConnector])
 
     bindConfigInt("controllers.confidenceLevel")
-    bind(classOf[String]).toInstance("CONTROLLED")
+    bind(classOf[String]).toInstance("INTERNAL")
 
     bindConfigStringSeq("scopes")
     bind(classOf[String]).annotatedWith(named("tai")).toInstance(servicesConfig.baseUrl("tai"))
