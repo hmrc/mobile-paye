@@ -16,13 +16,13 @@
 
 package uk.gov.hmrc.mobilepaye.connectors
 
-import org.scalatest.prop.TableDrivenPropertyChecks._
-import play.api.libs.json.{JsResultException, JsValue, Json}
+import org.scalatest.prop.TableDrivenPropertyChecks.*
+import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.*
-import uk.gov.hmrc.mobilepaye.domain.tai.{AnnualAccount, Employment, PensionIncome, TaxCodeChangeDetails, TaxCodeRecord}
-import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import uk.gov.hmrc.mobilepaye.domain.IncomeSource
+import uk.gov.hmrc.mobilepaye.domain.tai.{AnnualAccount, Employment, PensionIncome, TaxCodeChangeDetails}
+import uk.gov.hmrc.mobilepaye.utils.{BaseSpec, RateLimitedException, RateLimiter}
 
 import java.net.URL
 import java.time.LocalDate
@@ -31,8 +31,9 @@ import scala.concurrent.{ExecutionContext, Future}
 class TaiConnectorSpec extends BaseSpec {
   override val mockHttpClient: HttpClientV2 = mock[HttpClientV2]
   override val mockRequestBuilder: RequestBuilder = mock[RequestBuilder]
+  val mockRateLimiter: RateLimiter = mock[RateLimiter]
   val serviceUrl: String = "https://tst-url"
-  val connector: TaiConnector = new TaiConnector(mockHttpClient, serviceUrl)
+  val connector: TaiConnector = new TaiConnector(mockHttpClient, serviceUrl, mockRateLimiter)
 
   def mockTaiGet[T](
     url1: String,
@@ -49,6 +50,16 @@ class TaiConnectorSpec extends BaseSpec {
       .execute[T](using _: HttpReads[T], _: ExecutionContext))
       .expects(*, *)
       .returns(f)
+
+    (() => mockRateLimiter.mayProceed())
+      .expects()
+      .returns(true)
+  }
+
+  def mockRateLimited() = {
+    (() => mockRateLimiter.mayProceed())
+      .expects()
+      .returns(false)
   }
 
   private val upstreamErrorsWithoutNotFound = Table(
@@ -86,6 +97,14 @@ class TaiConnectorSpec extends BaseSpec {
         }
       }
     }
+
+    "throw RateLimitedException when rate limited" in {
+      mockRateLimited()
+      intercept[RateLimitedException] {
+        await(connector.getNonTaxCodeIncome(nino, currentTaxYear))
+      }
+    }
+
   }
 
   "Matching Tax Code Employments - GET employments only, accounts and tax code income" should {
@@ -410,6 +429,13 @@ class TaiConnectorSpec extends BaseSpec {
         }
       }
     }
+
+    "throw RateLimitedException when rate limited" in {
+      mockRateLimited()
+      intercept[RateLimitedException] {
+        await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear))
+      }
+    }
   }
 
   "Tax Account Summary - GET /tai/:nino/tax-account/:year/summary" should {
@@ -439,6 +465,13 @@ class TaiConnectorSpec extends BaseSpec {
 
     }
 
+    "throw RateLimitedException when rate limited" in {
+      mockRateLimited()
+      intercept[RateLimitedException] {
+        await(connector.getTaxAccountSummary(nino, currentTaxYear))
+      }
+    }
+
   }
 
   "Tax Code Change Exists - GET /tai/:nino/tax-account/tax-code-change/exists" should {
@@ -464,6 +497,13 @@ class TaiConnectorSpec extends BaseSpec {
         intercept[UpstreamErrorResponse] {
           await(connector.getTaxCodeChangeExists(nino))
         }
+      }
+    }
+
+    "throw RateLimitedException when rate limited" in {
+      mockRateLimited()
+      intercept[RateLimitedException] {
+        await(connector.getTaxCodeChangeExists(nino))
       }
     }
 
@@ -495,6 +535,12 @@ class TaiConnectorSpec extends BaseSpec {
       }
     }
 
+    "throw RateLimitedException when rate limited" in {
+      mockRateLimited()
+      intercept[RateLimitedException] {
+        await(connector.getTaxCodeChange(nino))
+      }
+    }
   }
 
   "Employments only APi - GET /employments-only/years/:taxYear " should {
@@ -526,6 +572,13 @@ class TaiConnectorSpec extends BaseSpec {
         intercept[UpstreamErrorResponse] {
           await(connector.getEmploymentsOnly(nino, 2025))
         }
+      }
+    }
+
+    "throw RateLimitedException when rate limited" in {
+      mockRateLimited()
+      intercept[RateLimitedException] {
+        await(connector.getEmploymentsOnly(nino, 2025))
       }
     }
 
@@ -564,6 +617,13 @@ class TaiConnectorSpec extends BaseSpec {
         intercept[UpstreamErrorResponse] {
           await(connector.getAnnualAccounts(nino, 2025))
         }
+      }
+    }
+
+    "throw RateLimitedException when rate limited" in {
+      mockRateLimited()
+      intercept[RateLimitedException] {
+        await(connector.getAnnualAccounts(nino, 2025))
       }
     }
 

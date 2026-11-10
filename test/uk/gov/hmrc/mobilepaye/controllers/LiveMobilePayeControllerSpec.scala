@@ -29,7 +29,7 @@ import uk.gov.hmrc.http.*
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 import uk.gov.hmrc.mobilepaye.domain.{IncomeTaxYear, MobilePayePreviousYearSummaryResponse, MobilePayeSummaryResponse, Shuttering}
 import uk.gov.hmrc.mobilepaye.services.{IncomeTaxHistoryService, MobilePayeService, PreviousYearSummaryService}
-import uk.gov.hmrc.mobilepaye.utils.BaseSpec
+import uk.gov.hmrc.mobilepaye.utils.{BaseSpec, RateLimitedException}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import org.bson.json.JsonParseException
 import uk.gov.hmrc.auth.core.authorise.Predicate
@@ -39,7 +39,6 @@ import uk.gov.hmrc.mobilepaye.domain.types.JourneyId
 import uk.gov.hmrc.auth.core.{AuthConnector, ConfidenceLevel}
 import org.scalamock.matchers.MatcherBase
 import uk.gov.hmrc.mobilepaye.connectors.ShutteringConnector
-import uk.gov.hmrc.mobilepaye.domain.admin.*
 import uk.gov.hmrc.mobilepaye.domain.audit.MobilePayeSummaryResponseAudit
 import uk.gov.hmrc.play.audit.http.connector.AuditResult.Success
 
@@ -172,6 +171,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
         fullMobilePayeResponse.copy(simpleAssessment = Some(fullMobileSimpleAssessmentResponse))
       )
     }
+
     "return 200 and full paye summary data for valid authorised nino with missing first name" in {
 
       mockAuthorisationGrantAccess(grantAccessWithCL200)(mockAuthConnector)
@@ -209,6 +209,7 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
         fullMobilePayeResponse.copy(simpleAssessment = Some(fullMobileSimpleAssessmentResponse))
       )
     }
+
     "return 200 and full paye summary data for valid authorised nino with missing first and last name" in {
 
       mockAuthorisationGrantAccess(grantAccessWithCL200)(mockAuthConnector)
@@ -397,6 +398,17 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       (jsonBody \ "title").as[String]      shouldBe "Shuttered"
       (jsonBody \ "message").as[String]    shouldBe "PAYE is currently not available"
     }
+
+    "return 429 when too many requests to Tai" in {
+      mockAuthorisationGrantAccess(grantAccessWithCL200)(mockAuthConnector)
+      mockShutteringResponse(notShuttered)(mockShutteringConnector)
+      mockGetPerson(Future.successful(person))
+      mockGetMobilePayeResponse(Future.failed(RateLimitedException()))
+
+      val result = controller.getPayeSummary(nino, jId1, currentTaxYear)(fakeRequest)
+
+      status(result) shouldBe 429
+    }
   }
 
   "getPreviousYearPayeSummary" should {
@@ -566,6 +578,18 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       (jsonBody \ "title").as[String]      shouldBe "Shuttered"
       (jsonBody \ "message").as[String]    shouldBe "PAYE is currently not available"
     }
+
+    "return 429 when too many requests to Tai" in {
+      mockAuthorisationGrantAccess(grantAccessWithCL200)
+      mockShutteringResponse(notShuttered)
+      mockGetMobilePayePreviousYearResponse(Future.failed(RateLimitedException()))
+
+      val result = controller.getPreviousYearPayeSummary(nino, jId1, previousTaxYear)(
+        fakeRequest
+      )
+
+      status(result) shouldBe 429
+    }
   }
 
   "getIncomeTaxHistory" should {
@@ -633,6 +657,16 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       (jsonBody \ "shuttered").as[Boolean] shouldBe true
       (jsonBody \ "title").as[String]      shouldBe "Shuttered"
       (jsonBody \ "message").as[String]    shouldBe "PAYE is currently not available"
+    }
+
+    "return 429 when too many requests to Tai" in {
+      mockAuthorisationGrantAccess(grantAccessWithCL200)
+      mockShutteringResponse(notShuttered)
+      mockGetIncomeTaxHistoryYearsList(Future.failed(RateLimitedException()))
+
+      val result = controller.getTaxIncomeHistory(nino, jId1)(fakeRequest)
+
+      status(result) shouldBe 429
     }
   }
 
@@ -711,6 +745,16 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       (jsonBody \ "shuttered").as[Boolean] shouldBe true
       (jsonBody \ "title").as[String]      shouldBe "Shuttered"
       (jsonBody \ "message").as[String]    shouldBe "PAYE is currently not available"
+    }
+
+    "return 429 when too many requests to Tai" in {
+      mockAuthorisationGrantAccess(grantAccessWithCL200)
+      mockShutteringResponse(notShuttered)
+      mockGetCurrentTaxCode(Future.failed(RateLimitedException()))
+
+      val result = controller.getTaxCode(nino, jId1)(fakeRequest)
+
+      status(result) shouldBe 429
     }
   }
 }
