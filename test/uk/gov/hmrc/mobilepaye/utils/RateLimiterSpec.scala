@@ -24,7 +24,7 @@ class RateLimiterSpec extends BaseSpec {
       rateLimiter shouldBe NoOpRateLimiter
     }
 
-    "create real instance when disabled" in {
+    "create real instance when enabled" in {
       val rateLimiter = RateLimiter(true, 100)
       rateLimiter shouldBe a [ThrottlingRateLimiter]
     }
