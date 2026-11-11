@@ -16,13 +16,13 @@
 
 package uk.gov.hmrc.mobilepaye.connectors
 
-import org.scalatest.prop.TableDrivenPropertyChecks._
-import play.api.libs.json.{JsResultException, JsValue, Json}
+import org.scalatest.prop.TableDrivenPropertyChecks.*
+import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.*
-import uk.gov.hmrc.mobilepaye.domain.tai.{AnnualAccount, Employment, PensionIncome, TaxCodeChangeDetails, TaxCodeRecord}
-import uk.gov.hmrc.mobilepaye.utils.BaseSpec
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import uk.gov.hmrc.mobilepaye.domain.IncomeSource
+import uk.gov.hmrc.mobilepaye.domain.tai.{AnnualAccount, Employment, PensionIncome, TaxCodeChangeDetails}
+import uk.gov.hmrc.mobilepaye.utils.{BaseSpec, RateLimitedException, RateLimiter}
 
 import java.net.URL
 import java.time.LocalDate
@@ -31,10 +31,11 @@ import scala.concurrent.{ExecutionContext, Future}
 class TaiConnectorSpec extends BaseSpec {
   override val mockHttpClient: HttpClientV2 = mock[HttpClientV2]
   override val mockRequestBuilder: RequestBuilder = mock[RequestBuilder]
+  val mockRateLimiter: RateLimiter = mock[RateLimiter]
   val serviceUrl: String = "https://tst-url"
-  val connector: TaiConnector = new TaiConnector(mockHttpClient, serviceUrl)
+  val connector: TaiConnector = new TaiConnector(mockHttpClient, serviceUrl, mockRateLimiter)
 
-  def mockTaiGet[T](
+  private def mockTaiGet[T](
     url1: String,
     f: Future[T]
   ) = {
@@ -49,6 +50,16 @@ class TaiConnectorSpec extends BaseSpec {
       .execute[T](using _: HttpReads[T], _: ExecutionContext))
       .expects(*, *)
       .returns(f)
+
+    (() => mockRateLimiter.mayProceed())
+      .expects()
+      .returns(true)
+  }
+
+  private def mockRateLimited() = {
+    (() => mockRateLimiter.mayProceed())
+      .expects()
+      .returns(false)
   }
 
   private val upstreamErrorsWithoutNotFound = Table(
@@ -57,8 +68,8 @@ class TaiConnectorSpec extends BaseSpec {
     UpstreamErrorResponse("Forbidden", 403),
     UpstreamErrorResponse("Internal Server Error", 500)
   )
-
-  private val upstreamErrors = upstreamErrorsWithoutNotFound ++ Seq(UpstreamErrorResponse("Not Found", 404))
+  private val notFoundUpstreamError = UpstreamErrorResponse("Not Found", 404)
+  private val upstreamErrors = upstreamErrorsWithoutNotFound ++ Seq(notFoundUpstreamError)
 
   "Non Tax Code Incomes - GET /tai/:nino/tax-account/:year/income" should {
     "return a valid NonTaxCodeIncome when receiving a valid 200 response for an authorised user" in {
@@ -86,6 +97,14 @@ class TaiConnectorSpec extends BaseSpec {
         }
       }
     }
+
+    "throw RateLimitedException when rate limited" in {
+      mockRateLimited()
+      intercept[RateLimitedException] {
+        await(connector.getNonTaxCodeIncome(nino, currentTaxYear))
+      }
+    }
+
   }
 
   "Matching Tax Code Employments - GET employments only, accounts and tax code income" should {
@@ -255,7 +274,7 @@ class TaiConnectorSpec extends BaseSpec {
       )
       mockTaiGet(
         s"tax-account/$currentTaxYear/income/tax-code-incomes",
-        Future.successful(Left(UpstreamErrorResponse(s"Tax codes not found", 404)))
+        Future.successful(Left(notFoundUpstreamError))
       )
 
       val result =
@@ -328,7 +347,7 @@ class TaiConnectorSpec extends BaseSpec {
       )
       mockTaiGet(
         s"rti-payments/years/$currentTaxYear",
-        Future.successful(Left(UpstreamErrorResponse(s"No Annual accounts found", 404)))
+        Future.successful(Left(notFoundUpstreamError))
       )
       mockTaiGet(
         s"tax-account/$currentTaxYear/income/tax-code-incomes",
@@ -410,6 +429,13 @@ class TaiConnectorSpec extends BaseSpec {
         }
       }
     }
+
+    "throw RateLimitedException when rate limited" in {
+      mockRateLimited()
+      intercept[RateLimitedException] {
+        await(connector.getMatchingTaxCodeIncomes(nino, currentTaxYear))
+      }
+    }
   }
 
   "Tax Account Summary - GET /tai/:nino/tax-account/:year/summary" should {
@@ -439,6 +465,53 @@ class TaiConnectorSpec extends BaseSpec {
 
     }
 
+    "throw RateLimitedException when rate limited" in {
+      mockRateLimited()
+      intercept[RateLimitedException] {
+        await(connector.getTaxAccountSummary(nino, currentTaxYear))
+      }
+    }
+
+  }
+
+  "Tax Account Summary - GET /tai/:nino/tax-account/:year/summary - check if current year + 1 exists" should {
+    "return true when receiving a valid 200 response for an authorised user" in {
+      val taiTaxAccountSummaryJson: JsValue =
+        Json.parse(
+          s"""
+             |{
+             |  "data": ${Json.toJson(taxAccountSummary)}
+             |}
+              """.stripMargin)
+
+      mockTaiGet(s"tax-account/${currentTaxYear + 1}/summary", Future.successful(Right(taiTaxAccountSummaryJson)))
+
+      val result = await(connector.getCYPlusOneAccountSummary(nino, currentTaxYear))
+      result shouldBe true
+    }
+
+    "return false when receiving a non-200 response" in {
+      forEvery(upstreamErrorsWithoutNotFound) { error =>
+        mockTaiGet(s"tax-account/${currentTaxYear + 1}/summary", Future.successful(Left(error)))
+
+        val result = await(connector.getCYPlusOneAccountSummary(nino, currentTaxYear))
+        result shouldBe false
+      }
+    }
+
+    "return false on async failure" in {
+      mockTaiGet(s"tax-account/${currentTaxYear + 1}/summary", Future.failed(new RuntimeException("error")))
+
+      val result = await(connector.getCYPlusOneAccountSummary(nino, currentTaxYear))
+      result shouldBe false
+    }
+
+    "throw RateLimitedException when rate limited" in {
+      mockRateLimited()
+      intercept[RateLimitedException] {
+        await(connector.getCYPlusOneAccountSummary(nino, currentTaxYear))
+      }
+    }
   }
 
   "Tax Code Change Exists - GET /tai/:nino/tax-account/tax-code-change/exists" should {
@@ -451,7 +524,7 @@ class TaiConnectorSpec extends BaseSpec {
     }
 
     "return false when receiving a 404 not found response" in {
-      mockTaiGet(s"tax-account/tax-code-change/exists", Future.successful(Left(UpstreamErrorResponse(s"Not found", 404))))
+      mockTaiGet(s"tax-account/tax-code-change/exists", Future.successful(Left(notFoundUpstreamError)))
 
       val result = await(connector.getTaxCodeChangeExists(nino))
       result shouldBe false
@@ -464,6 +537,13 @@ class TaiConnectorSpec extends BaseSpec {
         intercept[UpstreamErrorResponse] {
           await(connector.getTaxCodeChangeExists(nino))
         }
+      }
+    }
+
+    "throw RateLimitedException when rate limited" in {
+      mockRateLimited()
+      intercept[RateLimitedException] {
+        await(connector.getTaxCodeChangeExists(nino))
       }
     }
 
@@ -495,9 +575,15 @@ class TaiConnectorSpec extends BaseSpec {
       }
     }
 
+    "throw RateLimitedException when rate limited" in {
+      mockRateLimited()
+      intercept[RateLimitedException] {
+        await(connector.getTaxCodeChange(nino))
+      }
+    }
   }
 
-  "Employments only APi - GET /employments-only/years/:taxYear " should {
+  "Employments only API - GET /tai/:nino/employments-only/years/:taxYear " should {
 
     "return 200 and a valid response" in {
 
@@ -529,9 +615,16 @@ class TaiConnectorSpec extends BaseSpec {
       }
     }
 
+    "throw RateLimitedException when rate limited" in {
+      mockRateLimited()
+      intercept[RateLimitedException] {
+        await(connector.getEmploymentsOnly(nino, 2025))
+      }
+    }
+
   }
 
-  "Annual Accounts APi- GET rti-payments/years/:taxYear" should {
+  "Annual Accounts API - GET /tai/:nino/rti-payments/years/:taxYear" should {
 
     "return 200 and a valid response" in {
 
@@ -552,7 +645,7 @@ class TaiConnectorSpec extends BaseSpec {
     }
 
     "return empty List if Not found exception is thrown" in {
-      mockTaiGet(s"rti-payments/years/2025", Future.successful(Left(UpstreamErrorResponse(s"Not found", 404))))
+      mockTaiGet(s"rti-payments/years/2025", Future.successful(Left(notFoundUpstreamError)))
       val result = await(connector.getAnnualAccounts(nino, 2025))
       result shouldBe Seq.empty[AnnualAccount]
     }
@@ -567,5 +660,127 @@ class TaiConnectorSpec extends BaseSpec {
       }
     }
 
+    "throw RateLimitedException when rate limited" in {
+      mockRateLimited()
+      intercept[RateLimitedException] {
+        await(connector.getAnnualAccounts(nino, 2025))
+      }
+    }
+
+  }
+
+  "Benefits API - GET /tai/:nino/tax-account/:taxYear/benefits" should {
+    "return valid Benefits when receiving a valid 200 response for an authorised user" in {
+      val taiBenefits: JsValue =
+        Json.parse(
+          s"""
+             |{
+             |  "data": ${Json.toJson(allBenefits)}
+             |}
+              """.stripMargin)
+
+      mockTaiGet(s"tax-account/$currentTaxYear/benefits", Future.successful(Right(taiBenefits)))
+
+      val result = await(connector.getBenefits(nino, currentTaxYear))
+      result shouldBe allBenefits
+    }
+
+    "propagate UpstreamErrorResponse" in {
+      forEvery(upstreamErrors) { error =>
+        mockTaiGet(s"tax-account/$currentTaxYear/benefits", Future.successful(Left(error)))
+
+        intercept[UpstreamErrorResponse] {
+          await(connector.getBenefits(nino, currentTaxYear))
+        }
+      }
+    }
+
+    "throw RateLimitedException when rate limited" in {
+      mockRateLimited()
+      intercept[RateLimitedException] {
+        await(connector.getBenefits(nino, currentTaxYear))
+      }
+    }
+  }
+
+  "Tax Code Incomes API - GET /tai/:nino/tax-account/:taxYear/income/tax-code-incomes" should {
+    "return valid TaxCodeIncomes when receiving a valid 200 response for an authorised user" in {
+      val taiTaxCodeIncomes: JsValue =
+        Json.parse(
+          s"""
+             |{
+             |  "data": ${Json.toJson(Seq(taxCodeIncome, taxCodeIncome2))}
+             |}
+                  """.stripMargin)
+
+      mockTaiGet(s"tax-account/$currentTaxYear/income/tax-code-incomes", Future.successful(Right(taiTaxCodeIncomes)))
+
+      val result = await(connector.getTaxCodeIncomes(nino, currentTaxYear))
+      result shouldBe Seq(taxCodeIncome, taxCodeIncome2)
+    }
+
+    "return an empty sequence for all UpstreamErrorResponse" in {
+      forEvery(upstreamErrors) { error =>
+        mockTaiGet(s"tax-account/$currentTaxYear/income/tax-code-incomes", Future.successful(Left(error)))
+
+        val result = await(connector.getTaxCodeIncomes(nino, currentTaxYear))
+        result shouldBe Seq.empty
+      }
+    }
+
+    "return an empty sequence on async failure" in {
+      mockTaiGet(s"tax-account/$currentTaxYear/income/tax-code-incomes", Future.failed(new RuntimeException("error")))
+
+      val result = await(connector.getTaxCodeIncomes(nino, currentTaxYear))
+      result shouldBe Seq.empty
+    }
+
+    "throw RateLimitedException when rate limited" in {
+      mockRateLimited()
+      intercept[RateLimitedException] {
+        await(connector.getTaxCodeIncomes(nino, currentTaxYear))
+      }
+    }
+  }
+
+  "Tax Codes API - GET /tai/:nino/tax-account/:taxYear/tax-code/latest" should {
+    "return valid TaxCodeRecords when receiving a valid 200 response for an authorised user" in {
+      val taiTaxCodeRecords: JsValue =
+        Json.parse(
+          s"""
+             |{
+             |  "data": ${Json.toJson(taxCodeData)}
+             |}
+          """.stripMargin)
+
+      mockTaiGet(s"tax-account/$currentTaxYear/tax-code/latest", Future.successful(Right(taiTaxCodeRecords)))
+
+      val result = await(connector.getTaxCodesForYear(nino, currentTaxYear))
+      result shouldBe taxCodeData
+    }
+
+    "return an empty sequence for 404 UpstreamErrorResponse" in {
+      mockTaiGet(s"tax-account/$currentTaxYear/tax-code/latest", Future.successful(Left(notFoundUpstreamError)))
+
+      val result = await(connector.getTaxCodesForYear(nino, currentTaxYear))
+      result shouldBe Seq.empty
+    }
+
+    "propagate non-404 UpstreamErrorResponse" in {
+      forEvery(upstreamErrorsWithoutNotFound) { error =>
+        mockTaiGet(s"tax-account/$currentTaxYear/tax-code/latest", Future.successful(Left(error)))
+
+        intercept[UpstreamErrorResponse] {
+          await(connector.getTaxCodesForYear(nino, currentTaxYear))
+        }
+      }
+    }
+
+    "throw RateLimitedException when rate limited" in {
+      mockRateLimited()
+      intercept[RateLimitedException] {
+        await(connector.getTaxCodesForYear(nino, currentTaxYear))
+      }
+    }
   }
 }

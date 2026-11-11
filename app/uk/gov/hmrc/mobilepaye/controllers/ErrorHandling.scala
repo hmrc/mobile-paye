@@ -22,6 +22,7 @@ import play.api.{Logger, mvc}
 import uk.gov.hmrc.api.controllers.*
 import uk.gov.hmrc.auth.core.AuthorisationException
 import uk.gov.hmrc.http.*
+import uk.gov.hmrc.mobilepaye.utils.RateLimitedException
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendBaseController
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -85,6 +86,10 @@ trait ErrorHandling {
       case _: AuthorisationException =>
         log("Unauthorised! Failure to authorise account or grant access")
         Unauthorized(toJson[ErrorResponse](ErrorUnauthorizedUpstream))
+        
+      case _:RateLimitedException =>
+        log("Request is rate limited")
+        Status(ErrorTooManyRequests.httpStatusCode)(toJson[ErrorResponse](ErrorTooManyRequests))
 
       case e: Exception =>
         logger.warn(s"Native Error - $app Internal server error: ${e.getMessage}", e)

@@ -22,19 +22,23 @@ import com.google.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, StringContextOps, UpstreamErrorResponse}
 import uk.gov.hmrc.mobilepaye.domain.*
 import uk.gov.hmrc.mobilepaye.domain.tai.*
-import uk.gov.hmrc.http.HttpReads.Implicits.*
+import uk.gov.hmrc.mobilepaye.utils.Throttle.withThrottle
+import uk.gov.hmrc.mobilepaye.utils.{RateLimiter, Throttle}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
 @Singleton
-class TaiConnector @Inject() (http: HttpClientV2, @Named("tai") serviceUrl: String) {
+class TaiConnector @Inject() (http: HttpClientV2, @Named("tai") serviceUrl: String, @Named("tai-rate-limiter") rateLimiter: RateLimiter) {
 
   val logger: Logger = Logger(this.getClass)
+
+  given givenRateLimiter: RateLimiter = rateLimiter
 
   private def url(
     nino: Nino,
@@ -44,44 +48,51 @@ class TaiConnector @Inject() (http: HttpClientV2, @Named("tai") serviceUrl: Stri
   def getNonTaxCodeIncome(
     nino: Nino,
     taxYear: Int
-  )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[NonTaxCodeIncome] =
-    http
-      .get(url"${url(nino, s"tax-account/$taxYear/income")}")
-      .execute[Either[UpstreamErrorResponse, JsValue]]
-      .map {
-        case Left(e) => throw e
-        case Right(json) => (json \ "data" \ "nonTaxCodeIncomes").as[NonTaxCodeIncome]
-      }
+  )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[NonTaxCodeIncome] = {
+    withThrottle {
+      http
+        .get(url"${url(nino, s"tax-account/$taxYear/income")}")
+        .execute[Either[UpstreamErrorResponse, JsValue]]
+        .map {
+          case Left(e) => throw e
+          case Right(json) => (json \ "data" \ "nonTaxCodeIncomes").as[NonTaxCodeIncome]
+        }
+    }
+  }
 
   def getTaxAccountSummary(
     nino: Nino,
     taxYear: Int
   )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[TaxAccountSummary] =
-    http
-      .get(url"${url(nino, s"tax-account/$taxYear/summary")}")
-      .execute[Either[UpstreamErrorResponse, JsValue]]
-      .map {
-        case Left(e) => throw e
-        case Right(json) => (json \ "data").as[TaxAccountSummary]
-      }
+    withThrottle {
+      http
+        .get(url"${url(nino, s"tax-account/$taxYear/summary")}")
+        .execute[Either[UpstreamErrorResponse, JsValue]]
+        .map {
+          case Left(e) => throw e
+          case Right(json) => (json \ "data").as[TaxAccountSummary]
+        }
+    }
 
   def getCYPlusOneAccountSummary(
     nino: Nino,
     taxYear: Int
   )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Boolean] =
-    http
-      .get(url"${url(nino, s"tax-account/${taxYear + 1}/summary")}")
-      .execute[Either[UpstreamErrorResponse, JsValue]]
-      .map {
-        case Left(e) => throw e
-        case Right(json) =>
-          (json \ "data").as[TaxAccountSummary]
-          true
-      } recover {
+    withThrottle {
+      http
+        .get(url"${url(nino, s"tax-account/${taxYear + 1}/summary")}")
+        .execute[Either[UpstreamErrorResponse, JsValue]]
+        .map {
+          case Left(e) => throw e
+          case Right(json) =>
+            (json \ "data").as[TaxAccountSummary]
+            true
+        } recover {
         case NonFatal(e) =>
-        logger.warn(s"Couldn't retrieve tax summary for $nino with exception:${e.getMessage}")
-        false
+          logger.warn(s"Couldn't retrieve tax summary for $nino with exception:${e.getMessage}")
+          false
       }
+    }
 
   def getMatchingTaxCodeIncomes(
     nino: Nino,
@@ -102,28 +113,32 @@ class TaiConnector @Inject() (http: HttpClientV2, @Named("tai") serviceUrl: Stri
     nino: Nino,
     taxYear: Int
   )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Benefits] =
-    http
-      .get(url"${url(nino, s"tax-account/$taxYear/benefits")}")
-      .execute[Either[UpstreamErrorResponse, JsValue]]
-      .map {
-        case Left(e) => throw e
-        case Right(json) => (json \ "data").as[Benefits]
-      }
+    withThrottle {
+      http
+        .get(url"${url(nino, s"tax-account/$taxYear/benefits")}")
+        .execute[Either[UpstreamErrorResponse, JsValue]]
+        .map {
+          case Left(e) => throw e
+          case Right(json) => (json \ "data").as[Benefits]
+        }
+    }
 
   def getTaxCodeIncomes(
     nino: Nino,
     taxYear: Int
   )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Seq[TaxCodeIncome]] =
-    http
-      .get(url"${url(nino, s"tax-account/$taxYear/income/tax-code-incomes")}")
-      .execute[Either[UpstreamErrorResponse, JsValue]]
-      .map {
-        case Left(e) => throw e
-        case Right(json) => (json \ "data").as[Seq[TaxCodeIncome]]
-      }
-      .recover { case e =>
-        Seq.empty[TaxCodeIncome]
-      }
+    withThrottle {
+      http
+        .get(url"${url(nino, s"tax-account/$taxYear/income/tax-code-incomes")}")
+        .execute[Either[UpstreamErrorResponse, JsValue]]
+        .map {
+          case Left(e) => throw e
+          case Right(json) => (json \ "data").as[Seq[TaxCodeIncome]]
+        }
+        .recover { case e =>
+          Seq.empty[TaxCodeIncome]
+        }
+    }
 
   def getEmployments(
     nino: Nino,
@@ -147,76 +162,86 @@ class TaiConnector @Inject() (http: HttpClientV2, @Named("tai") serviceUrl: Stri
     nino: Nino,
     taxYear: Int
   )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Seq[Employment]] =
-    http
-      .get(url"${url(nino, s"employments-only/years/$taxYear")}")
-      .execute[Either[UpstreamErrorResponse, JsValue]]
-      .map {
-        case Left(e) => throw e
-        case Right(json) => (json \ "data" \ "employments").as[Seq[Employment]]
-      }
-      .recover {
-        case jex: JsonParseException => throw new JsonParseException(s"GET of employments-only/years/$taxYear Failed with ${jex.getMessage}")
-        case e                       => throw e
-      }
+    withThrottle {
+      http
+        .get(url"${url(nino, s"employments-only/years/$taxYear")}")
+        .execute[Either[UpstreamErrorResponse, JsValue]]
+        .map {
+          case Left(e) => throw e
+          case Right(json) => (json \ "data" \ "employments").as[Seq[Employment]]
+        }
+        .recover {
+          case jex: JsonParseException => throw new JsonParseException(s"GET of employments-only/years/$taxYear Failed with ${jex.getMessage}")
+          case e => throw e
+        }
+    }
 
   def getAnnualAccounts(
     nino: Nino,
     taxYear: Int
   )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Seq[AnnualAccount]] = {
-    http
-      .get(url"${url(nino, s"rti-payments/years/$taxYear")}")
-      .execute[Either[UpstreamErrorResponse, JsValue]]
-      .map {
-        case Left(e) => throw e
-        case Right(json) => (json \ "data").as[Seq[AnnualAccount]]
-      }
-      .recover {
-        case jex: JsonParseException => throw new JsonParseException(s"GET of rti-payments/years/$taxYear Failed with ${jex.getMessage}")
-        case UpstreamErrorResponse(_, 404, _, _) => Seq.empty[AnnualAccount]
-        case e                       => throw e
-      }
+    withThrottle {
+      http
+        .get(url"${url(nino, s"rti-payments/years/$taxYear")}")
+        .execute[Either[UpstreamErrorResponse, JsValue]]
+        .map {
+          case Left(e) => throw e
+          case Right(json) => (json \ "data").as[Seq[AnnualAccount]]
+        }
+        .recover {
+          case jex: JsonParseException => throw new JsonParseException(s"GET of rti-payments/years/$taxYear Failed with ${jex.getMessage}")
+          case UpstreamErrorResponse(_, 404, _, _) => Seq.empty[AnnualAccount]
+          case e => throw e
+        }
+    }
   }
 
   def getTaxCodeChangeExists(
     nino: Nino
   )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Boolean] =
-    http
-      .get(url"${url(nino, s"tax-account/tax-code-change/exists")}")
-      .execute[Either[UpstreamErrorResponse, JsValue]]
-      .map {
-        case Left(e) => throw e
-        case Right(json) => json.as[Boolean]
-      }
-      .recover {
-        case jex: JsonParseException => throw new JsonParseException(s"GET of tax-account/tax-code-change/exists Failed with ${jex.getMessage}")
-        case UpstreamErrorResponse(_, 404, _, _)   => false
-        case e                                     => throw e
-      }
+    withThrottle {
+      http
+        .get(url"${url(nino, s"tax-account/tax-code-change/exists")}")
+        .execute[Either[UpstreamErrorResponse, JsValue]]
+        .map {
+          case Left(e) => throw e
+          case Right(json) => json.as[Boolean]
+        }
+        .recover {
+          case jex: JsonParseException => throw new JsonParseException(s"GET of tax-account/tax-code-change/exists Failed with ${jex.getMessage}")
+          case UpstreamErrorResponse(_, 404, _, _) => false
+          case e => throw e
+        }
+    }
 
   def getTaxCodesForYear(
     nino: Nino,
     taxYear: Int
   )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[Seq[TaxCodeRecord]] =
-    http
-      .get(url"${url(nino, s"tax-account/$taxYear/tax-code/latest")}")
-      .execute[Either[UpstreamErrorResponse, JsValue]]
-      .map {
-        case Left(e) => throw e
-        case Right(json) => (json \ "data").as[Seq[TaxCodeRecord]]
-      }
-      .recover {
-        case UpstreamErrorResponse(_, 404, _, _) => Seq.empty[TaxCodeRecord]
-        case e                    => throw e
-      }
+    withThrottle {
+      http
+        .get(url"${url(nino, s"tax-account/$taxYear/tax-code/latest")}")
+        .execute[Either[UpstreamErrorResponse, JsValue]]
+        .map {
+          case Left(e) => throw e
+          case Right(json) => (json \ "data").as[Seq[TaxCodeRecord]]
+        }
+        .recover {
+          case UpstreamErrorResponse(_, 404, _, _) => Seq.empty[TaxCodeRecord]
+          case e => throw e
+        }
+    }
 
   def getTaxCodeChange(
     nino: Nino
   )(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[TaxCodeChangeDetails] =
-    http
-      .get(url"${url(nino, s"tax-account/tax-code-change")}")
-      .execute[Either[UpstreamErrorResponse, JsValue]]
-      .map {
-        case Left(e) => throw e
-        case Right(json) => (json \ "data").as[TaxCodeChangeDetails]
-      }
+    withThrottle {
+      http
+        .get(url"${url(nino, s"tax-account/tax-code-change")}")
+        .execute[Either[UpstreamErrorResponse, JsValue]]
+        .map {
+          case Left(e) => throw e
+          case Right(json) => (json \ "data").as[TaxCodeChangeDetails]
+        }
+    }
 }

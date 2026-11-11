@@ -20,10 +20,9 @@ import com.google.inject.name.Names.named
 import com.google.inject.{AbstractModule, TypeLiteral}
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
-
+import uk.gov.hmrc.mobilepaye.utils.RateLimiter
 import uk.gov.hmrc.play.bootstrap.auth.DefaultAuthConnector
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-
 import uk.gov.hmrc.play.audit.DefaultAuditConnector
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
@@ -75,6 +74,9 @@ class GuiceModule(environment: Environment, configuration: Configuration) extend
     bind(classOf[Boolean])
       .annotatedWith(named("previousEmploymentsEnabled"))
       .toInstance(servicesConfig.getBoolean("previousEmploymentsEnabled"))
+    bind(classOf[RateLimiter])
+      .annotatedWith(named("tai-rate-limiter"))
+      .toProvider(() => RateLimiter(enabled = configuration.get[Boolean]("rate-limiting.tai.enabled"), maxTps = configuration.get[Double]("rate-limiting.tai.max-tps")))
   }
 
   private def bindConfigStringSeq(path: String): Unit = {
