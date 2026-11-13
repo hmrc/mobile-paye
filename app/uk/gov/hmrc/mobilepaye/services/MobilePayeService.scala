@@ -56,6 +56,13 @@ class MobilePayeService @Inject() (taiConnector: TaiConnector,
   private val NpsTaxAccountNoEmploymentsCurrentYear = "no employments recorded for current tax year"
   private val NpsTaxAccountDataAbsentMsg = "cannot complete a coding calculation without a primary employment"
   private val NpsTaxAccountNoEmploymentsRecorded = "no employments recorded for this individual"
+
+  private val knownExceptions = Seq(
+    NpsTaxAccountNoEmploymentsCurrentYear,
+    NpsTaxAccountDataAbsentMsg,
+    NpsTaxAccountNoEmploymentsRecorded
+  )
+
   val logger: Logger = Logger(this.getClass)
 
   def getMobilePayeSummaryResponse(
@@ -173,9 +180,10 @@ class MobilePayeService @Inject() (taiConnector: TaiConnector,
     ex: Throwable,
     nino: Nino
   ): Boolean = {
-    val known = ex.getMessage.toLowerCase().contains(NpsTaxAccountNoEmploymentsCurrentYear) ||
-      ex.getMessage.toLowerCase().contains(NpsTaxAccountDataAbsentMsg) ||
-      ex.getMessage.toLowerCase().contains(NpsTaxAccountNoEmploymentsRecorded)
+
+    val known = Option(ex.getMessage)
+      .map(_.toLowerCase())
+      .exists(knownExceptions.contains)
     logger.info(s"[HMA-2505] - Tai exception (known: $known) for ${nino.nino} - " + ex)
     known
   }
