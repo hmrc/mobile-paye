@@ -26,7 +26,7 @@ import uk.gov.hmrc.mobilepaye.domain.types.JourneyId
 import uk.gov.hmrc.mobilepaye.domain.{CarBenefit, MedicalInsurance, *}
 import uk.gov.hmrc.mobilepaye.mocks.ShutteringMock
 import uk.gov.hmrc.mobilepaye.repository.P800CacheMongo
-import uk.gov.hmrc.mobilepaye.utils.{BaseSpec, PlayMongoRepositorySupport}
+import uk.gov.hmrc.mobilepaye.utils.{BaseSpec, PlayMongoRepositorySupport, RateLimitedException}
 
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDateTime, ZoneId}
@@ -578,6 +578,14 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
       mockMatchingTaxCodeAll(Future.failed(new InternalServerException("Internal Server Error")))
 
       intercept[InternalServerException] {
+        await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
+      }
+    }
+
+    "throw RateLimitedException when receiving RateLimitedException from taiConnector" in {
+      mockMatchingTaxCodeAll(Future.failed(RateLimitedException()))
+
+      intercept[RateLimitedException] {
         await(service.getMobilePayeSummaryResponse(nino, currentTaxYear, journeyId))
       }
     }

@@ -21,7 +21,7 @@ import com.google.common.util.concurrent.RateLimiter as GoogleRateLimiter
 import java.time.Duration
 import scala.concurrent.Future
 
-case class RateLimitedException() extends RuntimeException
+case class RateLimitedException() extends RuntimeException("Request is rate limited")
 
 trait RateLimiter {
   def mayProceed(): Boolean
