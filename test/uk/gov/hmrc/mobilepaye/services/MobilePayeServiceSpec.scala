@@ -681,6 +681,14 @@ class MobilePayeServiceSpec extends BaseSpec with PlayMongoRepositorySupport[P80
 
       result shouldBe None
     }
+
+    "propagate RateLimitedException when received from taiConnector" in {
+      mockGetTaxCodeChange(Future.failed(RateLimitedException()))
+
+      intercept[RateLimitedException] {
+        await(service.getCurrentTaxCode(nino))
+      }
+    }
   }
 
 }
