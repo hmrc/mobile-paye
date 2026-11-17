@@ -56,7 +56,9 @@ class PreviousYearSummaryService @Inject() (taiConnector: TaiConnector,
       } yield {
         buildMobilePayePreviousYearResponse(taxYear, allEmploymentData, nonTaxCodeIncomes, taxAccountSummary, employmentBenefits, taxCodes)
       }) recover {
-        case ex: RateLimitedException => throw ex
+        case ex: RateLimitedException =>
+          logger.warn(s"Error retrieving previous PAYE summary info.  Tai request was rate limited.")
+          throw ex
         case ex =>
           logger.warn(s"Error retrieving previous PAYE summary info: ${ex.printStackTrace()}")
           throw new NotFoundException(ex.getMessage)

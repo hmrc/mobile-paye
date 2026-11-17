@@ -47,10 +47,12 @@ class IncomeTaxHistoryService @Inject() (taiConnector: TaiConnector,
 
     val incomeTaxYearList: Future[List[IncomeTaxYear]] = taxYears traverse (taxYear => {
       getIncomeTaxYear(nino, taxYear).recover {
-        case e: RateLimitedException => throw e
+        case e: RateLimitedException =>
+          logger.warn(s"Couldn't get taxYear info for $taxYear.  Tai request was rate limited.")
+          throw e
         case e: Exception =>
-        logger.info(s"Couldn't get taxYear info for $taxYear due to: \n$e")
-        IncomeTaxYear(taxYear, None)
+          logger.info(s"Couldn't get taxYear info for $taxYear due to: \n$e")
+          IncomeTaxYear(taxYear, None)
       }
     })
     incomeTaxYearList.map { list =>
