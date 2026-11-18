@@ -51,7 +51,7 @@ class ShutteringConnectorSpec extends BaseSpec {
       .returns(f)
   }
 
-  "getTaxReconciliations" should {
+  "getShutteringStatus" should {
     "Assume unshuttered for InternalServerException response" in {
       mockShutteringGet(Future.successful(new InternalServerException("")))
       connector.getShutteringStatus(jid) onComplete {
