@@ -21,7 +21,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.mobilepaye.connectors.TaiConnector
 import uk.gov.hmrc.mobilepaye.domain.tai.*
 import uk.gov.hmrc.mobilepaye.domain.IncomeTaxYear
-import uk.gov.hmrc.mobilepaye.utils.BaseSpec
+import uk.gov.hmrc.mobilepaye.utils.{BaseSpec, RateLimitedException}
 import uk.gov.hmrc.time.TaxYear
 
 import java.time.LocalDate
@@ -148,6 +148,19 @@ class IncomeTaxHistoryServiceSpec extends BaseSpec {
 
     }
 
+    "propagate RateLimitedException when received from taiConnector" in {
+      //we use the mock connector directly here because the implementation will
+      //not wait for the Future to complete before starting the next request, so we
+      //can't say how many times it will be called
+      (mockTaiConnector.getTaxCodeIncomes(_: Nino, _: Int)(_: HeaderCarrier, _: ExecutionContext))
+        .expects(*, *, *, *)
+        .atLeastOnce()
+        .returning(Future.failed(RateLimitedException()))
+
+      intercept[RateLimitedException] {
+        await(service.getIncomeTaxHistoryYearsList(nino))
+      }
+    }
   }
 
 }

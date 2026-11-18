@@ -23,6 +23,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.mobilepaye.connectors.TaiConnector
 import uk.gov.hmrc.mobilepaye.domain.{MobilePayePreviousYearSummaryResponse, OtherIncome, PayeIncome}
 import uk.gov.hmrc.mobilepaye.domain.tai.{BankOrBuildingSocietyInterest, Benefits, Employment, EmploymentIncome, Live, NonTaxCodeIncome, PensionIncome, TaxAccountSummary, TaxCodeRecord}
+import uk.gov.hmrc.mobilepaye.utils.RateLimitedException
 import uk.gov.hmrc.time.TaxYear
 
 import javax.inject.Named
@@ -54,9 +55,13 @@ class PreviousYearSummaryService @Inject() (taiConnector: TaiConnector,
         taxCodes           <- taiConnector.getTaxCodesForYear(nino, taxYear)
       } yield {
         buildMobilePayePreviousYearResponse(taxYear, allEmploymentData, nonTaxCodeIncomes, taxAccountSummary, employmentBenefits, taxCodes)
-      }) recover { case ex =>
-        logger.warn(s"Error retrieving previous PAYE summary info: ${ex.printStackTrace()}")
-        throw new NotFoundException(ex.getMessage)
+      }) recover {
+        case ex: RateLimitedException =>
+          logger.warn(s"Error retrieving previous PAYE summary info.  Tai request was rate limited.")
+          throw ex
+        case ex =>
+          logger.warn(s"Error retrieving previous PAYE summary info: ${ex.printStackTrace()}")
+          throw new NotFoundException(ex.getMessage)
       }
 
   private def buildMobilePayePreviousYearResponse(

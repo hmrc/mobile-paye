@@ -20,7 +20,7 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException, NotFoundException}
 import uk.gov.hmrc.mobilepaye.connectors.{TaiConnector, TaxCalcConnector}
 import uk.gov.hmrc.mobilepaye.domain.tai.{Benefits, Ceased, Employment, NonTaxCodeIncome, PensionIncome, TaxAccountSummary, TaxCodeRecord}
-import uk.gov.hmrc.mobilepaye.utils.BaseSpec
+import uk.gov.hmrc.mobilepaye.utils.{BaseSpec, RateLimitedException}
 import uk.gov.hmrc.time.TaxYear
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -149,6 +149,14 @@ class PreviousYearSummaryServiceSpec extends BaseSpec {
 
       intercept[NotFoundException] {
         await(service.getMobilePayePreviousYearSummaryResponse(nino, currentTaxYear - 6))
+      }
+    }
+
+    "propagate RateLimitedException when received from taiConnector" in {
+      mockEmployments(Future.failed(RateLimitedException()))
+
+      intercept[RateLimitedException] {
+        await(service.getMobilePayePreviousYearSummaryResponse(nino, previousTaxYear))
       }
     }
 

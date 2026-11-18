@@ -23,6 +23,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mobilepaye.connectors.TaiConnector
 import uk.gov.hmrc.mobilepaye.domain.{HistoricTaxCodeIncome, IncomeTaxYear}
 import uk.gov.hmrc.mobilepaye.domain.tai.{Employment, Payment, PensionIncome, TaxCodeIncome}
+import uk.gov.hmrc.mobilepaye.utils.RateLimitedException
 import uk.gov.hmrc.mongo.play.json.Codecs.logger
 import uk.gov.hmrc.time.TaxYear
 
@@ -45,9 +46,13 @@ class IncomeTaxHistoryService @Inject() (taiConnector: TaiConnector,
         .toList
 
     val incomeTaxYearList: Future[List[IncomeTaxYear]] = taxYears traverse (taxYear => {
-      getIncomeTaxYear(nino, taxYear).recover { case e: Exception =>
-        logger.info(s"Couldn't get taxYear info for $taxYear due to: \n$e")
-        IncomeTaxYear(taxYear, None)
+      getIncomeTaxYear(nino, taxYear).recover {
+        case e: RateLimitedException =>
+          logger.warn(s"Couldn't get taxYear info for $taxYear.  Tai request was rate limited.")
+          throw e
+        case e: Exception =>
+          logger.info(s"Couldn't get taxYear info for $taxYear due to: \n$e")
+          IncomeTaxYear(taxYear, None)
       }
     })
     incomeTaxYearList.map { list =>
