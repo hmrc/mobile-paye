@@ -63,6 +63,20 @@ class EnumUtilsSpec extends AnyWordSpec with Matchers {
 
       parsed mustBe JsSuccess(TestEnum.Gamma)
     }
+
+    "format should read and write enumeration values" in {
+
+      implicit val enumFormat: Format[TestEnum.Value] =
+        EnumUtils.format(TestEnum)
+
+      // Test Writes
+      val writtenJson = Json.toJson(TestEnum.Alpha)
+      writtenJson mustBe JsString("Alpha")
+
+      // Test Reads
+      val readValue = Json.fromJson[TestEnum.Value](JsString("Beta"))
+      readValue mustBe JsSuccess(TestEnum.Beta)
+    }
   }
 
   "InvalidEnumException" should {

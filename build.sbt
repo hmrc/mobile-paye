@@ -46,7 +46,7 @@ lazy val microservice = Project(appName, file("."))
       "-Xlint",
       "-Wconf:cat=w-flag-value-discard&msg=discarded non-Unit value of type org\\.scalatest\\.Assertion:s"
     ),
-    coverageMinimumStmtTotal := 87.85,
+    coverageMinimumStmtTotal := 91.6,
     coverageFailOnMinimum := true,
     coverageHighlighting := true,
     coverageExcludedPackages := "<empty>;com.kenshoo.play.metrics.*;.*definition.*;prod.*;testOnlyDoNotUseInAppConf.*;app.*;.*BuildInfo.*;.*Routes.*;.*javascript.*;.*Reverse.* " +

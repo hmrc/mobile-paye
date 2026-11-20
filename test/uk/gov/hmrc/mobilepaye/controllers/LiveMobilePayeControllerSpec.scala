@@ -21,7 +21,7 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import play.api.libs.json.JsValue
-import uk.gov.hmrc.auth.core.ConfidenceLevel.{L200, L50}
+import uk.gov.hmrc.auth.core.ConfidenceLevel.{L200, L250, L50}
 import uk.gov.hmrc.auth.core.syntax.retrieved.*
 import uk.gov.hmrc.auth.core.MissingBearerToken
 import uk.gov.hmrc.domain.Nino
@@ -78,6 +78,15 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       .authorise(_: Predicate, _: Retrieval[GrantAccess])(_: HeaderCarrier, _: ExecutionContext))
       .expects(*, *, *, *)
       .returning(Future successful response)
+  }
+
+  def mockAuthorisationException(
+    response: GrantAccessException
+  )(implicit authConnector: AuthConnector) = {
+    (authConnector
+      .authorise(_: Predicate, _: Retrieval[GrantAccess])(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *, *, *)
+      .returning(Future failed response)
   }
 
   def dataEventWith(
@@ -318,6 +327,42 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       status(result) shouldBe 401
     }
 
+    "return 401 when nino not found" in {
+      mockAuthorisationGrantAccess(None and L250)
+
+      val result = controller.getPayeSummary(nino, jId1, currentTaxYear)(fakeRequest)
+
+      status(result) shouldBe 401
+    }
+
+    "return 401 when nino is empty found" in {
+      mockAuthorisationGrantAccess(Some("") and L250)
+
+      val result = controller.getPayeSummary(nino, jId1, currentTaxYear)(fakeRequest)
+
+      status(result) shouldBe 401
+    }
+
+    "return 401 when handling 401 Upstream4xxResponse" in {
+      mockShutteringResponse(notShuttered)
+      mockAuthorisationGrantAccess(grantAccessWithCL200)
+      mockGetPerson(Future.failed(UpstreamErrorResponse("Upstream Exception", 401, 401)))
+
+      val result = controller.getPayeSummary(nino, jId1, currentTaxYear)(fakeRequest)
+
+      status(result) shouldBe 401
+    }
+
+    "return 401 when handling AuthorisationException" in {
+      mockShutteringResponse(notShuttered)
+      mockAuthorisationGrantAccess(grantAccessWithCL200)
+      mockGetPerson(Future.failed(new MissingBearerToken))
+
+      val result = controller.getPayeSummary(nino, jId1, currentTaxYear)(fakeRequest)
+
+      status(result) shouldBe 401
+    }
+
     "return 406 for missing accept header" in {
       val result =
         controller.getPayeSummary(nino, jId1, currentTaxYear)(FakeRequest("GET", "/"))
@@ -365,26 +410,6 @@ class LiveMobilePayeControllerSpec extends BaseSpec {
       mockGetPerson(Future.failed(new BadRequestException("Bad Request Exception")))
       val result = controller.getPayeSummary(nino, jId1, currentTaxYear)(fakeRequest)
       status(result) shouldBe 400
-    }
-
-    "return 401 when handling 401 Upstream4xxResponse" in {
-      mockShutteringResponse(notShuttered)
-      mockAuthorisationGrantAccess(grantAccessWithCL200)
-      mockGetPerson(Future.failed(UpstreamErrorResponse("Upstream Exception", 401, 401)))
-
-      val result = controller.getPayeSummary(nino, jId1, currentTaxYear)(fakeRequest)
-
-      status(result) shouldBe 401
-    }
-
-    "return 401 when handling AuthorisationException" in {
-      mockShutteringResponse(notShuttered)
-      mockAuthorisationGrantAccess(grantAccessWithCL200)
-      mockGetPerson(Future.failed(new MissingBearerToken))
-
-      val result = controller.getPayeSummary(nino, jId1, currentTaxYear)(fakeRequest)
-
-      status(result) shouldBe 401
     }
 
     "return 521 when shuttered" in {
